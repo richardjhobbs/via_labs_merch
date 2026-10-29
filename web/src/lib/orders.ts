@@ -1,5 +1,9 @@
 // Reads for the workspace, under the signed-in person's RLS.
 import { supabaseServer } from './supabase/server';
+import type { SupabaseClient } from '@supabase/supabase-js';
+
+// Agents and job workers pass the service-role client; screens use the person's RLS client.
+type Client = SupabaseClient<any, 'merch', any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 import { orderHealth, slipException, type MilestoneRow, type Health } from './core/path';
 
 export type OrderRow = {
@@ -14,16 +18,16 @@ export type OrderWithHealth = OrderRow & { health: Health };
 
 const SELECT = 'id, po, style, description, category, composition, qty, sizes, colours, fob, currency, incoterm, pol, pod, instore_date, season, status, source, customer:parties!orders_customer_id_fkey(id, name, short), factory:parties!orders_factory_id_fkey(id, name, short, country), mill:parties!orders_mill_id_fkey(id, name, short), fibre:parties!orders_fibre_id_fkey(id, name, short), milestones(id, key, plan_date, expected_date, actual_date, forecast_date, owner_kind, note)';
 
-export async function listOrders(tenantId: string, opts: { status?: string } = {}): Promise<OrderWithHealth[]> {
-  const sb = await supabaseServer();
+export async function listOrders(tenantId: string, opts: { status?: string } = {}, client?: Client): Promise<OrderWithHealth[]> {
+  const sb = client || await supabaseServer();
   let q = sb.from('orders').select(SELECT).eq('tenant_id', tenantId).order('po');
   if (opts.status) q = q.eq('status', opts.status);
   const { data } = await q;
   return ((data || []) as unknown as OrderRow[]).map((o) => ({ ...o, health: orderHealth(o.milestones) }));
 }
 
-export async function getOrder(tenantId: string, po: string): Promise<OrderWithHealth | null> {
-  const sb = await supabaseServer();
+export async function getOrder(tenantId: string, po: string, client?: Client): Promise<OrderWithHealth | null> {
+  const sb = client || await supabaseServer();
   const { data } = await sb.from('orders').select(SELECT).eq('tenant_id', tenantId).eq('po', po).maybeSingle();
   if (!data) return null;
   const o = data as unknown as OrderRow;

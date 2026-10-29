@@ -68,6 +68,6 @@ export function slipException(po: string, qty: number, fob: number, h: Health) {
   for (const k of ['pp', 'cut', 'exf'] as const) if (p[k] && p[k].slip > 0 && k !== root.key) chain.push({ cls: '', t: `${LABELS[k]} ${isoOf(p[k].plan)} → ${isoOf(p[k].f)}` });
   chain.push({ cls: 'risk', t: `ETD ${isoOf(p.etd.plan)} at risk, ${h.etdSlip} day${h.etdSlip > 1 ? 's' : ''} short` });
   chain.push({ cls: 'cost', t: `Airfreight exposure USD ${air.toLocaleString('en-GB')}` });
-  return { id: 'EX-' + po, sev: h.etdSlip >= 3 ? 'crit' : 'warn', kind: 'Delay', po, title: `${LABELS[root.key]} ${root.owner === 'customer' ? 'late on the customer side' : 'slipped'} on ${po}`, chain,
+  return { id: 'EX-' + po, sev: h.etdSlip >= 3 ? 'crit' : 'warn', kind: 'Delay', po, exposure: air, title: `${LABELS[root.key]} ${root.owner === 'customer' ? 'late on the customer side' : 'slipped'} on ${po}`, chain,
     opts: [['Hold ETD, require recovery plan', 'Factory absorbs recovery; no cost to the customer'], ['Split shipment: 2/3 sea, 1/3 air', `Margin takes about USD ${Math.round(air / 1.6).toLocaleString('en-GB')}`], ['Ask the customer for an ETD extension', `Late-delivery chargeback risk 2% = USD ${Math.round(qty * fob * 0.02).toLocaleString('en-GB')}`]] };
 }

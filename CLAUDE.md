@@ -15,6 +15,11 @@ VIA Merch, the live product at merch.getvia.xyz: agents for merchandising teams 
 - Jobs run from `/api/jobs/drain`, called every minute by `merch.tick()` (pg_cron + pg_net) with the `x-merch-jobs` secret. Keep each drain under 55 s.
 - UI strings go through `messages/*.json` (English first, German complete; others fall back to English).
 - Hosting is Vercel Hobby and Supabase free until Richard confirms the design; do not add Pro-only features.
+- Functions and the middleware are pinned to `sin1` (`web/vercel.json`, `runtime: 'nodejs'` in `src/middleware.ts`) because the database is in ap-southeast-1. Keep page data loads in one `Promise.all`; `me()` is wrapped in React `cache()`.
+- Models go through `src/lib/llm.ts` only: Claude Sonnet (`claude-sonnet-5-5`) for the agent loop and drafting, Haiku for extraction, DeepSeek for translation when its key is set. Every call records tokens and cost with `recordUsage()`.
+- Agents: tools in `src/lib/agents/tools.ts` (service role, scoped to one tenant), the loop in `run.ts` (tool runner, logged to `agent_runs`), the inbound pipeline in `inbound.ts`. Inbound runs never get `request_approval`. Ledger actors are `Agent (for Person)` in chat and the agent name alone for inbound.
+- Connectors are manifests in `src/lib/connectors/catalog.ts`; logos in `web/public/brands` (simple-icons SVGs or the vendor favicon); the Connections page renders the catalogue, so a new channel is a manifest entry.
+- The VIA wordmark is `web/public/via-logo.png` via `src/components/logo.tsx`; never type "VIA" as a text logo.
 
 ## Env vars
 
