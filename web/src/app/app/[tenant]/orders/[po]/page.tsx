@@ -4,6 +4,7 @@ import { getTranslations } from 'next-intl/server';
 import { requireTenant } from '@/lib/tenant';
 import { getOrder, exceptionsOf } from '@/lib/orders';
 import { LABELS, MILESTONES, isoOf } from '@/lib/core/path';
+import { OrderFile } from '@/components/order-file';
 import { MsCell, HealthPill } from '@/components/milestones';
 import { setMilestone } from '../actions';
 
@@ -46,6 +47,7 @@ export default async function OrderDetail({ params, searchParams }: { params: Pr
           <div className="card small"><h3>{t('sizes')}</h3><div className="mt-2 flex gap-3 flex-wrap">{Object.entries(o.sizes || {}).map(([s, n]) => <span key={s}><b>{s}</b> {n}</span>)}</div><div className="mt-2">{o.colours.map((c) => <span key={c} className="pill mr-1">{c}</span>)}</div></div>
         </div>
       </div>
+      <OrderFile slug={slug} tenantId={tenant.id} orderId={o.id} po={o.po} tz={tenant.tz} />
     </div>
   );
 }

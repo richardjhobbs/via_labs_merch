@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { supabaseAdmin } from '@/lib/supabase/server';
 import { listOrders, getOrder, exceptionsOf } from '@/lib/orders';
 import { LABELS, MILESTONES, isoOf, type MilestoneKey } from '@/lib/core/path';
+import { orderFile, orderSummary } from '@/lib/threads';
 
 export type AgentCtx = {
   tenantId: string; agentId: string | null; agentName: string;
@@ -201,6 +202,18 @@ export function toolsFor(ctx: AgentCtx) {
     }),
   });
 
+  const get_order_file = betaZodTool({
+    name: 'get_order_file',
+    description: 'The order file for one PO: every conversation with the factory, mill, forwarder, lab and each function at the customer (design, buying, logistics, compliance), with who said what and when, plus the cached summary. Use for "where are we with everyone on 48812", "what did the customer say about fit", "has logistics confirmed the booking".',
+    inputSchema: z.object({ po: z.string() }),
+    run: wrap('get_order_file', async ({ po }) => {
+      const { data: o } = await sb.from('orders').select('id').eq('tenant_id', T).eq('po', po.trim()).maybeSingle();
+      if (!o) return { error: `No PO ${po}` };
+      const [file, sum] = await Promise.all([orderFile(T, o.id), orderSummary(T, o.id)]);
+      return { po, summary: sum.summary, threads: file.map((t) => ({ party: t.party?.name, kind: t.party?.kind, subject: t.subject, channel: t.channel, messages: t.messages.slice(-12) })) };
+    }),
+  });
+
   const get_team = betaZodTool({
     name: 'get_team',
     description: 'For managers: the team, each person\'s customers, open POs, off-plan POs, exceptions and drafts waiting for them, plus the agent\'s activity today. Use for "how is the team doing", "who is overloaded", "what is waiting for X".',
@@ -225,7 +238,7 @@ export function toolsFor(ctx: AgentCtx) {
     run: wrap('navigate', async (a) => { ctx.nav = { screen: a.screen, id: a.id }; return { ok: true }; }),
   });
 
-  const all = [get_briefing, search_orders, get_order, get_exceptions, get_party, get_messages, get_ledger, get_gates, queue_draft, request_approval, set_milestone, navigate, get_team];
+  const all = [get_briefing, search_orders, get_order, get_exceptions, get_party, get_messages, get_ledger, get_gates, queue_draft, request_approval, set_milestone, navigate, get_team, get_order_file];
   const forRole = ['owner', 'manager'].includes(ctx.role || '') || ctx.trigger !== 'chat' ? all : all.filter((t) => t.name !== 'get_team');
   // inbound runs may capture a reported date (L1 record) and draft; they never approve
   return ctx.trigger === 'inbound' ? forRole.filter((t) => !['request_approval', 'navigate', 'get_team'].includes(t.name)) : forRole;

@@ -6,6 +6,7 @@ import { supabaseAdmin } from '@/lib/supabase/server';
 import { requireAdmin } from '@/lib/tenant';
 import { sendMail } from '@/lib/mail';
 import { loadSample } from '@/lib/sample/load';
+import { loadSampleThreads } from '@/lib/sample/threads-load';
 
 const Tenant = z.object({ name: z.string().min(2).max(80), slug: z.string().regex(/^[a-z0-9-]{3,40}$/), kind: z.enum(['buying_office', 'brand', 'factory', 'trading', 'retailer']), plan: z.enum(['retainer', 'trial', 'per_user']), locale: z.string().max(5), tz: z.string().max(60), owner_email: z.string().email() });
 const ROLES = ['owner', 'manager', 'merchandiser', 'qc', 'compliance', 'logistics', 'viewer'] as const;
@@ -101,6 +102,14 @@ export async function updateRequest(form: FormData) {
   if (!['new', 'contacted', 'provisioned', 'declined'].includes(status)) return;
   await supabaseAdmin().from('access_requests').update({ status }).eq('id', id);
   revalidatePath('/admin/requests');
+}
+
+export async function loadSampleThreadsAction(form: FormData) {
+  const me = await requireAdmin();
+  const id = String(form.get('tenant_id'));
+  const r = await loadSampleThreads(id, me.user.email || '');
+  revalidatePath(`/admin/tenants/${id}`);
+  redirect(`/admin/tenants/${id}` + (r.ok ? '?sent=' + encodeURIComponent(`sample conversations: ${r.threads} threads, ${r.messages} messages`) : '?error=' + encodeURIComponent(r.error || 'failed')));
 }
 
 export async function loadSampleAction(form: FormData) {

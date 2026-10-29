@@ -14,7 +14,8 @@
     "connections": "Connections",
     "settings": "Settings",
     "admin": "VIA admin",
-    "signout": "Sign out"
+    "signout": "Sign out",
+    "threads": "Conversations"
   },
   "landing": {
     "kicker": "For buying offices, brands, factories and trading companies",
@@ -120,7 +121,8 @@
     "note": "Reason (optional)",
     "decided": "Decided today",
     "approvedNote": "Approved drafts go out when the channel is connected; until then VIA Labs sends them with you.",
-    "source": "In reply to"
+    "source": "In reply to",
+    "openThread": "Open the conversation"
   },
   "admin": {
     "title": "VIA admin",
@@ -349,5 +351,47 @@
   "viewas": {
     "label": "View as",
     "self": "Myself (VIA admin)"
+  },
+  "threads": {
+    "title": "Conversations",
+    "sub": "Every chain with a customer or supplier, grouped by order. The agent keeps a summary on each so nobody reads back through it.",
+    "side": {
+      "all": "All",
+      "customers": "Customers",
+      "suppliers": "Suppliers"
+    },
+    "party": "With",
+    "po": "PO",
+    "subject": "Topic",
+    "last": "Last message",
+    "customer": "Customer",
+    "kind": {
+      "factory": "Factory",
+      "mill": "Mill",
+      "fibre": "Fibre",
+      "forwarder": "Forwarder",
+      "carrier": "Carrier",
+      "lab": "Testing lab",
+      "auditor": "Auditor",
+      "other": "Other"
+    },
+    "conversation": "Conversation",
+    "messages": "messages",
+    "replyWaiting": "reply waiting for approval",
+    "ours": "last word ours",
+    "none": "No conversations yet. They start when a channel is connected or a message arrives.",
+    "whereWeAre": "Where we are",
+    "refresh": "Refresh summary",
+    "noSummaryYet": "The agent will summarise this once the key is set.",
+    "draftsHere": "Drafts waiting on this conversation",
+    "openQueue": "Open the queue",
+    "original": "Original",
+    "awaitingChannel": "approved, goes out when the channel is connected",
+    "us": "Us",
+    "orderFile": "Order file",
+    "fileCount": "{threads} conversations · {messages} messages · {parties} parties",
+    "noConversations": "No conversations on this order yet.",
+    "draftWaiting": "{n} draft waiting",
+    "openThread": "Open"
   }
 }

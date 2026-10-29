@@ -14,7 +14,8 @@
     "connections": "Verbindungen",
     "settings": "Einstellungen",
     "admin": "VIA-Verwaltung",
-    "signout": "Abmelden"
+    "signout": "Abmelden",
+    "threads": "Unterhaltungen"
   },
   "landing": {
     "kicker": "Für Einkaufsbüros, Marken, Fabriken und Handelshäuser",
@@ -120,7 +121,8 @@
     "note": "Grund (optional)",
     "decided": "Heute entschieden",
     "approvedNote": "Freigegebene Entwürfe gehen raus, sobald der Kanal verbunden ist; bis dahin sendet VIA Labs sie mit Ihnen.",
-    "source": "Als Antwort auf"
+    "source": "Als Antwort auf",
+    "openThread": "Unterhaltung öffnen"
   },
   "admin": {
     "title": "VIA-Verwaltung",
@@ -349,5 +351,47 @@
   "viewas": {
     "label": "Ansicht als",
     "self": "Ich selbst (VIA-Admin)"
+  },
+  "threads": {
+    "title": "Unterhaltungen",
+    "sub": "Jede Kette mit einem Kunden oder Lieferanten, nach Auftrag gruppiert. Der Agent hält zu jeder eine Zusammenfassung bereit, damit niemand zurücklesen muss.",
+    "side": {
+      "all": "Alle",
+      "customers": "Kunden",
+      "suppliers": "Lieferanten"
+    },
+    "party": "Mit",
+    "po": "PO",
+    "subject": "Thema",
+    "last": "Letzte Nachricht",
+    "customer": "Kunde",
+    "kind": {
+      "factory": "Fabrik",
+      "mill": "Weberei",
+      "fibre": "Faser",
+      "forwarder": "Spediteur",
+      "carrier": "Reederei",
+      "lab": "Prüflabor",
+      "auditor": "Auditor",
+      "other": "Sonstige"
+    },
+    "conversation": "Unterhaltung",
+    "messages": "Nachrichten",
+    "replyWaiting": "Antwort wartet auf Freigabe",
+    "ours": "letztes Wort von uns",
+    "none": "Noch keine Unterhaltungen. Sie beginnen, sobald ein Kanal verbunden ist oder eine Nachricht eingeht.",
+    "whereWeAre": "Wo wir stehen",
+    "refresh": "Zusammenfassung aktualisieren",
+    "noSummaryYet": "Der Agent fasst zusammen, sobald der Schlüssel gesetzt ist.",
+    "draftsHere": "Entwürfe zu dieser Unterhaltung",
+    "openQueue": "Freigaben öffnen",
+    "original": "Original",
+    "awaitingChannel": "freigegeben, geht raus, sobald der Kanal verbunden ist",
+    "us": "Wir",
+    "orderFile": "Auftragsakte",
+    "fileCount": "{threads} Unterhaltungen · {messages} Nachrichten · {parties} Parteien",
+    "noConversations": "Noch keine Unterhaltungen zu diesem Auftrag.",
+    "draftWaiting": "{n} Entwurf wartet",
+    "openThread": "Öffnen"
   }
 }

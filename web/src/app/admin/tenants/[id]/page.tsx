@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { supabaseAdmin } from '@/lib/supabase/server';
-import { inviteMember, resendInvite, loadSampleAction, setMemberScope } from '../../actions';
+import { inviteMember, resendInvite, loadSampleAction, loadSampleThreadsAction, setMemberScope } from '../../actions';
 import { InboundSim } from '@/app/app/[tenant]/agents/panels';
 
 const ROLES = ['owner', 'manager', 'merchandiser', 'qc', 'compliance', 'logistics', 'viewer'] as const;
@@ -25,7 +25,7 @@ export default async function TenantAdmin({ params, searchParams }: { params: Pr
   const emailOf = (uid: string) => users?.users.find((u) => u.id === uid)?.email || uid;
   return (
     <div>
-      <div className="flex items-baseline gap-3"><h1>{tenant.name}</h1><span className="pill">{tenant.kind.replace('_', ' ')}</span><span className="pill">{tenant.plan}</span><span className="muted small mono">{tenant.slug}</span><form action={loadSampleAction} className="ml-auto"><input type="hidden" name="tenant_id" value={id} /><button className="btn sm" title="Loads the Meridian sample world: 5 customers, 17 suppliers, 38 POs. Only into an empty company.">Load sample data</button></form><Link className="btn sm" href={`/app/${tenant.slug}`}>Open workspace →</Link></div>
+      <div className="flex items-baseline gap-3"><h1>{tenant.name}</h1><span className="pill">{tenant.kind.replace('_', ' ')}</span><span className="pill">{tenant.plan}</span><span className="muted small mono">{tenant.slug}</span><form action={loadSampleAction} className="ml-auto"><input type="hidden" name="tenant_id" value={id} /><button className="btn sm" title="Loads the Meridian sample world: 5 customers, 17 suppliers, 38 POs. Only into an empty company.">Load sample data</button></form><form action={loadSampleThreadsAction}><input type="hidden" name="tenant_id" value={id} /><button className="btn sm" title="Loads the sample order files: conversations with factories, mills, forwarder, lab and each customer function.">Load sample conversations</button></form><Link className="btn sm" href={`/app/${tenant.slug}`}>Open workspace →</Link></div>
       {error && <div className="notice crit mt-3">{error}</div>}
       {sent && <div className="notice mt-3">Invite emailed to {sent}.</div>}
       <div className="grid gap-6 mt-5" style={{ gridTemplateColumns: 'minmax(0,1fr) 320px' }}>

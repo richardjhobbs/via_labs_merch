@@ -5,14 +5,16 @@ import { z } from 'zod';
 import { supabaseAdmin } from '@/lib/supabase/server';
 import { extract, recordUsage, LANG_NAMES } from '@/lib/llm';
 import { runAgent } from './run';
+import { findOrCreateThread, threadMessages } from '@/lib/threads';
 
 export type InboundInput = { tenantId: string; channelKind: string; channelId?: string | null; from: string; senderName?: string | null; partyId?: string | null; subject?: string | null; text: string; externalId?: string | null; raw?: unknown };
 
 // Store the message and put it on the inbound queue (the minute worker drains it).
 export async function ingestInbound(m: InboundInput, opts: { enqueue?: boolean } = {}) {
   const sb = supabaseAdmin();
-  const { data: thread } = await sb.from('threads').insert({ tenant_id: m.tenantId, channel_id: m.channelId || null, party_id: m.partyId || null, subject: m.subject || null, external_id: m.externalId || null, last_message_at: new Date().toISOString() }).select('id').single();
-  const { data: msg, error } = await sb.from('messages').insert({ tenant_id: m.tenantId, thread_id: thread?.id || null, channel_id: m.channelId || null, direction: 'in', party_id: m.partyId || null, external_id: m.externalId || null, from_addr: m.from, sender_name: m.senderName || null, text: m.text, raw: { channel: m.channelKind, subject: m.subject || null, ...(typeof m.raw === 'object' && m.raw ? m.raw : {}) } }).select('id').single();
+  const threadId = await findOrCreateThread(sb, m.tenantId, m.partyId || null, null, m.channelKind, m.subject || null);
+  await sb.from('threads').update({ last_message_at: new Date().toISOString() }).eq('id', threadId);
+  const { data: msg, error } = await sb.from('messages').insert({ tenant_id: m.tenantId, thread_id: threadId, channel_id: m.channelId || null, direction: 'in', party_id: m.partyId || null, external_id: m.externalId || null, from_addr: m.from, sender_name: m.senderName || null, text: m.text, raw: { channel: m.channelKind, subject: m.subject || null, ...(typeof m.raw === 'object' && m.raw ? m.raw : {}) } }).select('id').single();
   if (error || !msg) throw new Error(error?.message || 'message insert failed');
   await recordUsage(m.tenantId, { messagesIn: 1 });
   if (opts.enqueue !== false) await sb.rpc('q_send', { p_queue: 'merch_inbound', p_msg: { message_id: msg.id, tenant_id: m.tenantId } });
@@ -48,7 +50,18 @@ export async function processInbound(messageId: string) {
   const po = parsed?.po_numbers.map((x) => x.replace(/^PO\s*#?/i, '').trim()).find((x) => (orders || []).some((o) => o.po === x)) || null;
   const orderId = po ? (orders || []).find((o) => o.po === po)!.id : null;
   await sb.from('messages').update({ lang: parsed?.lang || null, text_en: parsed?.text_en || null, stream: parsed?.stream || null, parsed: parsed || null, party_id: partyId, order_id: orderId, processed_at: new Date().toISOString() }).eq('id', messageId);
-  if (m.thread_id) await sb.from('threads').update({ party_id: partyId, order_id: orderId }).eq('id', m.thread_id);
+  // once the party and PO are known, the message belongs in that order file's thread for the party
+  let threadId = m.thread_id as string | null;
+  if (partyId) {
+    const home = await findOrCreateThread(sb, T, partyId, orderId, (m.raw as { channel?: string })?.channel || null, (m.raw as { subject?: string })?.subject || null);
+    if (home !== threadId) {
+      await sb.from('messages').update({ thread_id: home }).eq('id', messageId);
+      if (threadId) { const { count } = await sb.from('messages').select('id', { count: 'exact', head: true }).eq('thread_id', threadId); if (!count) await sb.from('threads').delete().eq('id', threadId); }
+      threadId = home;
+    }
+    await sb.from('threads').update({ party_id: partyId, order_id: orderId, last_message_at: new Date().toISOString() }).eq('id', threadId);
+  }
+  const history = threadId ? (await threadMessages(sb, threadId)).filter((x) => x.id !== messageId).slice(-8) : [];
   const party = (parties || []).find((p) => p.id === partyId);
   await sb.rpc('ledger_append', { p_tenant: T, p_channel: (m.raw as { channel?: string })?.channel || 'Inbound', p_actor: party?.name || m.sender_name || m.from_addr || 'Unknown sender', p_actor_user: null, p_counterparty: null, p_stream: parsed?.stream || null, p_order: orderId, p_what: `Inbound: ${(parsed?.text_en || m.text).slice(0, 140)}`, p_gate: 'Logged', p_gated: false, p_ref: { message_id: messageId } });
 
@@ -58,7 +71,7 @@ export async function processInbound(messageId: string) {
 2. Queue one reply with queue_draft on stream "${parsed?.stream || 'General enquiries'}" to the sender${party ? ` (${party.name})` : ''}, in ${LANG_NAMES[parsed?.lang || 'en'] || 'their language'} with body_en, answering their asks from the record. If something needs a decision by a person (price, quantity, promised date, claim), say so in the draft's impact and do not promise it.
 3. Reply here with two lines: what you recorded, and the draft ref.
 
-Message from ${m.sender_name || m.from_addr || 'unknown'}${party ? ` at ${party.name}` : ''} via ${(m.raw as { channel?: string })?.channel || 'channel'}:
+${history.length ? `Earlier in this conversation (oldest first):\n${history.map((h) => `${h.received_at.slice(0, 10)} ${h.direction === 'in' ? (h.sender_name || 'them') : 'us'}: ${(h.text_en || h.text).slice(0, 400)}`).join('\n')}\n\n` : ''}Message from ${m.sender_name || m.from_addr || 'unknown'}${party ? ` at ${party.name}` : ''} via ${(m.raw as { channel?: string })?.channel || 'channel'}:
 ---
 ${m.text}
 ---
