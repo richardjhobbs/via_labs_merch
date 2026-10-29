@@ -46,7 +46,8 @@
       "factory": "Fabrik",
       "trading": "Handelshaus",
       "retailer": "Händler"
-    }
+    },
+    "worksWith": "Funktioniert mit"
   },
   "login": {
     "title": "Anmelden",
@@ -193,5 +194,21 @@
     "country": "Land",
     "city": "Stadt",
     "save": "Speichern"
+  },
+  "connections": {
+    "title": "Verbindungen",
+    "sub": "VIA arbeitet auf den Kanälen und Systemen, die Sie bereits nutzen. Verbinden Sie, was Ihr Team heute verwendet; alles andere ist eine Anfrage entfernt.",
+    "available": "Kanäle",
+    "availableNote": "Worauf die Agenten lesen und senden",
+    "connected": "Verbunden",
+    "howTo": "So verbinden",
+    "docs": "Dokumentation des Anbieters",
+    "connect": "Verbinden",
+    "wiredSoon": "Das Verbinden geht mit dem Kanal-Build live; bis dahin richtet VIA Labs es mit Ihnen ein.",
+    "catalogue": "Systeme auf Anfrage",
+    "catalogueNote": "Für jedes System unten gibt es einen bekannten Weg. Fragen Sie an, und VIA Labs baut und testet den Konnektor im Rahmen Ihres Retainers.",
+    "needs": "Benötigt",
+    "request": "Anfragen",
+    "trademark": "Produktnamen und Logos gehören ihren Eigentümern und dienen der Kennzeichnung der Systeme, mit denen VIA verbindet; sie bedeuten keine Empfehlung."
   }
 }

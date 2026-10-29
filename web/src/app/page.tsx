@@ -1,8 +1,11 @@
+import { Logo } from '@/components/logo';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { currentUser } from '@/lib/supabase/server';
 import { RequestAccessForm } from './request-access-form';
 import { LangSwitch } from '@/components/lang-switch';
+import { BrandIcon } from '@/components/brand-icon';
+import { CONNECTORS } from '@/lib/connectors/catalog';
 
 export default async function Landing() {
   const t = await getTranslations();
@@ -10,7 +13,7 @@ export default async function Landing() {
   return (
     <main className="min-h-screen" style={{ background: 'var(--paper)' }}>
       <header className="flex items-center justify-between px-6 py-4 max-w-5xl mx-auto">
-        <div className="flex items-center gap-3"><span className="font-semibold tracking-wide" style={{ fontSize: 18 }}>VIA</span><span className="muted small">Merch · {t('app.by')}</span></div>
+        <div className="flex items-center gap-3"><Logo h={24} sub={`Merch · ${t('app.by')}`} /></div>
         <div className="flex items-center gap-3"><LangSwitch /><Link className="btn sm" href={user ? '/app' : '/login'}>{user ? t('nav.day') : t('landing.login')}</Link></div>
       </header>
       <section className="max-w-5xl mx-auto px-6 py-14 grid gap-10 md:grid-cols-[1.2fr_1fr]">
@@ -32,6 +35,14 @@ export default async function Landing() {
           <h2 style={{ fontSize: 18 }}>{t('landing.request.title')}</h2>
           <p className="muted small mt-1 mb-4">{t('landing.request.intro')}</p>
           <RequestAccessForm />
+        </div>
+      </section>
+      <section className="max-w-5xl mx-auto px-6 pb-10">
+        <div className="small font-medium muted" style={{ letterSpacing: '.08em', textTransform: 'uppercase', fontSize: 11 }}>{t('landing.worksWith')}</div>
+        <div className="flex flex-wrap gap-2 mt-3">
+          {CONNECTORS.filter((c) => c.logo).map((c) => (
+            <span key={c.id} className="inline-flex items-center gap-2 pr-3" style={{ border: '1px solid var(--line)', borderRadius: 999, background: '#fff', padding: 3 }}><BrandIcon name={c.name} logo={c.logo} size={24} /><span className="small">{c.name}</span></span>
+          ))}
         </div>
       </section>
       <footer className="max-w-5xl mx-auto px-6 py-8 muted small">© VIA Labs Pte Ltd · getvia.xyz</footer>

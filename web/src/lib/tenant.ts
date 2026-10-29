@@ -1,11 +1,13 @@
 // Who is signed in, which tenants they belong to, and whether they run the VIA admin console.
+import { cache } from 'react';
 import { redirect } from 'next/navigation';
 import { supabaseServer } from './supabase/server';
 
 export type Role = 'owner' | 'manager' | 'merchandiser' | 'qc' | 'compliance' | 'logistics' | 'viewer';
 export type Membership = { id: string; tenant_id: string; role: Role; display_name: string | null; initials: string | null; title: string | null; locale: string | null; tenants: { id: string; slug: string; name: string; kind: string; locale: string; tz: string; currency: string } };
 
-export async function me() {
+// cache(): layout and page both call this; one lookup per request.
+export const me = cache(async function me() {
   const sb = await supabaseServer();
   const { data: { user } } = await sb.auth.getUser();
   if (!user) return null;
@@ -14,7 +16,7 @@ export async function me() {
     sb.from('platform_admins').select('user_id').eq('user_id', user.id).maybeSingle(),
   ]);
   return { user, memberships: (memberships || []) as unknown as Membership[], isAdmin: !!admin };
-}
+});
 
 export async function requireMe() {
   const m = await me();

@@ -46,7 +46,8 @@
       "factory": "Factory",
       "trading": "Trading company",
       "retailer": "Retailer"
-    }
+    },
+    "worksWith": "Works with"
   },
   "login": {
     "title": "Sign in",
@@ -193,5 +194,21 @@
     "country": "Country",
     "city": "City",
     "save": "Save"
+  },
+  "connections": {
+    "title": "Connections",
+    "sub": "VIA works on the channels and systems you already use. Connect what your team uses today; everything else is a request away and a short build on our side.",
+    "available": "Channels",
+    "availableNote": "What the agents read and send on",
+    "connected": "Connected",
+    "howTo": "How to connect",
+    "docs": "Vendor documentation",
+    "connect": "Connect",
+    "wiredSoon": "Connecting goes live with the channels build; VIA Labs connects it with you until then.",
+    "catalogue": "Systems on request",
+    "catalogueNote": "Every system below has a known route in. Ask for one and VIA Labs builds and tests the connector as part of your retainer.",
+    "needs": "Needs",
+    "request": "Request this",
+    "trademark": "Product names and logos belong to their owners and are shown to identify the systems VIA connects to; they do not imply endorsement."
   }
 }

@@ -1,6 +1,8 @@
 // Refreshes the Supabase session on every request and enforces the idle rule:
 // a session that has not been seen for IDLE_MINUTES is signed out, and the
 // person asks for a new code. Public routes pass through.
+// Latency note: functions and this middleware are pinned to sin1 (vercel.json) because the
+// database is in ap-southeast-1; from iad1 every query cost a 230 ms round trip.
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
@@ -61,4 +63,5 @@ function redirectToLogin(req: NextRequest, next: string, reason?: string) {
   return NextResponse.redirect(url);
 }
 
-export const config = { matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|svg|ico|txt|xml)).*)'] };
+// Node runtime so the middleware runs in the function region (sin1, next to the database) instead of at the edge.
+export const config = { runtime: 'nodejs', matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|svg|ico|txt|xml)).*)'] };

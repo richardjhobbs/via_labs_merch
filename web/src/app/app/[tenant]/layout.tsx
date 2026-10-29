@@ -1,3 +1,4 @@
+import { Logo } from '@/components/logo';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { requireTenant } from '@/lib/tenant';
@@ -15,7 +16,7 @@ export default async function TenantLayout({ children, params }: { children: Rea
   return (
     <div className="min-h-screen grid" style={{ gridTemplateColumns: '220px minmax(0,1fr)' }}>
       <aside className="rail flex flex-col p-3 gap-1" style={{ borderRight: '1px solid var(--line)', background: '#fff' }}>
-        <div className="flex items-center gap-2 px-2 py-2 mb-2"><span className="font-semibold" style={{ fontSize: 17 }}>VIA</span><span className="muted small">Merch</span></div>
+        <div className="flex items-center gap-2 px-2 py-2 mb-2"><Logo h={20} sub="Merch" /></div>
         <div className="px-2 pb-2"><b className="small">{tenant.name}</b><div className="muted small">{tenant.kind.replace('_', ' ')}</div></div>
         <Rail base={`/app/${slug}`} items={items} />
         <div className="mt-auto px-2 pt-3 small" style={{ borderTop: '1px solid var(--line2)' }}>
