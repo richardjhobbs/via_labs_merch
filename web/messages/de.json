@@ -1,6 +1,21 @@
 {
-  "app": { "name": "VIA Merch", "tagline": "Ein Agent für jeden Merchandiser.", "by": "VIA Labs" },
-  "nav": { "day": "Mein Tag", "orders": "Aufträge & T&A", "parties": "Kunden & Lieferanten", "queue": "Freigaben", "ledger": "Protokoll & Autonomie", "agents": "Agenten", "connections": "Verbindungen", "settings": "Einstellungen", "admin": "VIA-Verwaltung", "signout": "Abmelden" },
+  "app": {
+    "name": "VIA Merch",
+    "tagline": "Ein Agent für jeden Merchandiser.",
+    "by": "VIA Labs"
+  },
+  "nav": {
+    "day": "Mein Tag",
+    "orders": "Aufträge & T&A",
+    "parties": "Kunden & Lieferanten",
+    "queue": "Freigaben",
+    "ledger": "Protokoll & Autonomie",
+    "agents": "Agenten",
+    "connections": "Verbindungen",
+    "settings": "Einstellungen",
+    "admin": "VIA-Verwaltung",
+    "signout": "Abmelden"
+  },
   "landing": {
     "kicker": "Für Einkaufsbüros, Marken, Fabriken und Handelshäuser",
     "lede": "VIA Merch gibt jedem Merchandiser einen Agenten, der die täglichen Nachfragen, Statusberichte und Antworten entwirft, in der Sprache und im Format jedes Kunden. Der Merchandiser gibt frei, bevor etwas gesendet wird.",
@@ -10,16 +25,95 @@
       "ledger": "Jede Nachricht und jede Entscheidung signiert in einem Protokoll, das die Leitung prüfen kann.",
       "a2a": "Wenn ein Kunde oder Lieferant ebenfalls VIA nutzt, sprechen die Agenten miteinander."
     },
-    "cta": "Zugang anfragen", "login": "Anmelden", "demo": "Demo ansehen",
-    "request": { "title": "Zugang anfragen", "intro": "VIA Labs richtet jedes Unternehmen persönlich ein und betreibt die Agenten gemeinsam mit Ihnen. Sagen Sie uns, wer Sie sind, und wir melden uns.", "company": "Unternehmen", "kind": "Sie sind", "name": "Ihr Name", "email": "Geschäftliche E-Mail", "country": "Land", "message": "Was kostet Ihr Merchandising-Team heute die meiste Zeit?", "send": "Anfrage senden", "sent": "Vielen Dank. Wir antworten per E-Mail innerhalb von zwei Werktagen." },
-    "kinds": { "buying_office": "Einkaufsbüro", "brand": "Marke", "factory": "Fabrik", "trading": "Handelshaus", "retailer": "Händler" }
+    "cta": "Zugang anfragen",
+    "login": "Anmelden",
+    "demo": "Demo ansehen",
+    "request": {
+      "title": "Zugang anfragen",
+      "intro": "VIA Labs richtet jedes Unternehmen persönlich ein und betreibt die Agenten gemeinsam mit Ihnen. Sagen Sie uns, wer Sie sind, und wir melden uns.",
+      "company": "Unternehmen",
+      "kind": "Sie sind",
+      "name": "Ihr Name",
+      "email": "Geschäftliche E-Mail",
+      "country": "Land",
+      "message": "Was kostet Ihr Merchandising-Team heute die meiste Zeit?",
+      "send": "Anfrage senden",
+      "sent": "Vielen Dank. Wir antworten per E-Mail innerhalb von zwei Werktagen."
+    },
+    "kinds": {
+      "buying_office": "Einkaufsbüro",
+      "brand": "Marke",
+      "factory": "Fabrik",
+      "trading": "Handelshaus",
+      "retailer": "Händler"
+    }
   },
   "login": {
-    "title": "Anmelden", "intro": "Geben Sie Ihre geschäftliche E-Mail ein. Wir senden einen 6-stelligen Code und einen Link; beides meldet Sie an.", "email": "E-Mail", "send": "Code senden", "code": "6-stelliger Code", "verify": "Anmelden", "resend": "Neuen Code senden", "sentTo": "Code gesendet an {email}", "idle": "Sie wurden nach 2 Stunden ohne Aktivität abgemeldet.", "ended": "Diese Sitzung ist beendet. Bitte erneut anmelden.", "noAccount": "Für diese E-Mail gibt es noch keinen Zugang zu VIA Merch. Bitten Sie Ihre Leitung um eine Einladung oder fragen Sie Zugang an.", "error": "Der Code hat nicht funktioniert. Versuchen Sie es erneut oder fordern Sie einen neuen an."
+    "title": "Anmelden",
+    "intro": "Geben Sie Ihre geschäftliche E-Mail ein. Wir senden einen Anmeldecode und einen Link; beides meldet Sie an.",
+    "email": "E-Mail",
+    "send": "Code senden",
+    "code": "Anmeldecode",
+    "verify": "Anmelden",
+    "resend": "Neuen Code senden",
+    "sentTo": "Code gesendet an {email}",
+    "idle": "Sie wurden nach 2 Stunden ohne Aktivität abgemeldet.",
+    "ended": "Diese Sitzung ist beendet. Bitte erneut anmelden.",
+    "noAccount": "Für diese E-Mail gibt es noch keinen Zugang zu VIA Merch. Bitten Sie Ihre Leitung um eine Einladung oder fragen Sie Zugang an.",
+    "error": "Der Code hat nicht funktioniert. Versuchen Sie es erneut oder fordern Sie einen neuen an."
   },
-  "day": { "greeting": "Guten {period}, {name}", "morning": "Morgen", "afternoon": "Tag", "evening": "Abend", "waiting": "warten auf Sie", "exceptions": "offene Abweichungen", "offplan": "Aufträge außer Plan", "approved": "heute freigegeben", "empty": "Nichts wartet auf Sie.", "noOrders": "Noch keine Aufträge. Importieren Sie eine Tabelle oder verbinden Sie einen Kanal." },
-  "queue": { "approve": "Freigeben und senden", "edit": "Bearbeiten", "reject": "Ablehnen", "escalate": "Eskalieren", "reason": "Grund (erforderlich)", "source": "Quelle", "impact": "Auswirkung" },
-  "admin": { "title": "VIA-Verwaltung", "tenants": "Mandanten", "requests": "Zugangsanfragen", "newTenant": "Neuer Mandant", "name": "Name", "slug": "Kürzel", "kind": "Art", "plan": "Tarif", "members": "Mitglieder", "invite": "Per E-Mail einladen", "role": "Rolle", "send": "Einladung senden", "pending": "Offene Einladungen", "created": "Erstellt" },
-  "roles": { "owner": "Inhaber", "manager": "Leitung", "merchandiser": "Merchandiser", "qc": "QC", "compliance": "Compliance", "logistics": "Logistik", "viewer": "Leser" },
-  "common": { "save": "Speichern", "cancel": "Abbrechen", "language": "Sprache", "loading": "Lädt", "none": "Keine", "demoData": "Demodaten" }
+  "day": {
+    "greeting": "Guten {period}, {name}",
+    "morning": "Morgen",
+    "afternoon": "Tag",
+    "evening": "Abend",
+    "waiting": "warten auf Sie",
+    "exceptions": "offene Abweichungen",
+    "offplan": "Aufträge außer Plan",
+    "approved": "heute freigegeben",
+    "empty": "Nichts wartet auf Sie.",
+    "noOrders": "Noch keine Aufträge. Importieren Sie eine Tabelle oder verbinden Sie einen Kanal."
+  },
+  "queue": {
+    "approve": "Freigeben und senden",
+    "edit": "Bearbeiten",
+    "reject": "Ablehnen",
+    "escalate": "Eskalieren",
+    "reason": "Grund (erforderlich)",
+    "source": "Quelle",
+    "impact": "Auswirkung"
+  },
+  "admin": {
+    "title": "VIA-Verwaltung",
+    "tenants": "Mandanten",
+    "requests": "Zugangsanfragen",
+    "newTenant": "Neuer Mandant",
+    "name": "Name",
+    "slug": "Kürzel",
+    "kind": "Art",
+    "plan": "Tarif",
+    "members": "Mitglieder",
+    "invite": "Per E-Mail einladen",
+    "role": "Rolle",
+    "send": "Einladung senden",
+    "pending": "Offene Einladungen",
+    "created": "Erstellt"
+  },
+  "roles": {
+    "owner": "Inhaber",
+    "manager": "Leitung",
+    "merchandiser": "Merchandiser",
+    "qc": "QC",
+    "compliance": "Compliance",
+    "logistics": "Logistik",
+    "viewer": "Leser"
+  },
+  "common": {
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "language": "Sprache",
+    "loading": "Lädt",
+    "none": "Keine",
+    "demoData": "Demodaten"
+  }
 }

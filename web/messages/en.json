@@ -1,6 +1,21 @@
 {
-  "app": { "name": "VIA Merch", "tagline": "An agent for every merchandiser.", "by": "VIA Labs" },
-  "nav": { "day": "My day", "orders": "Orders & T&A", "parties": "Customers & suppliers", "queue": "Approval queue", "ledger": "Ledger & autonomy", "agents": "Agents", "connections": "Connections", "settings": "Settings", "admin": "VIA admin", "signout": "Sign out" },
+  "app": {
+    "name": "VIA Merch",
+    "tagline": "An agent for every merchandiser.",
+    "by": "VIA Labs"
+  },
+  "nav": {
+    "day": "My day",
+    "orders": "Orders & T&A",
+    "parties": "Customers & suppliers",
+    "queue": "Approval queue",
+    "ledger": "Ledger & autonomy",
+    "agents": "Agents",
+    "connections": "Connections",
+    "settings": "Settings",
+    "admin": "VIA admin",
+    "signout": "Sign out"
+  },
   "landing": {
     "kicker": "For buying offices, brands, factories and trading companies",
     "lede": "VIA Merch gives each merchandiser an agent that drafts the chasers, status updates and replies they send every day, in each customer's language and format. The merchandiser approves before anything is sent.",
@@ -10,16 +25,95 @@
       "ledger": "Every message and decision signed in a ledger a manager can review.",
       "a2a": "When a customer or supplier also runs VIA, the agents talk to each other."
     },
-    "cta": "Request access", "login": "Sign in", "demo": "See the demo",
-    "request": { "title": "Request access", "intro": "VIA Labs sets each company up by hand and runs the agents with you. Tell us who you are and we will be in touch.", "company": "Company", "kind": "You are a", "name": "Your name", "email": "Work email", "country": "Country", "message": "What takes your merchandising team's time today?", "send": "Send request", "sent": "Thank you. We will reply by email within two working days." },
-    "kinds": { "buying_office": "Buying office", "brand": "Brand", "factory": "Factory", "trading": "Trading company", "retailer": "Retailer" }
+    "cta": "Request access",
+    "login": "Sign in",
+    "demo": "See the demo",
+    "request": {
+      "title": "Request access",
+      "intro": "VIA Labs sets each company up by hand and runs the agents with you. Tell us who you are and we will be in touch.",
+      "company": "Company",
+      "kind": "You are a",
+      "name": "Your name",
+      "email": "Work email",
+      "country": "Country",
+      "message": "What takes your merchandising team's time today?",
+      "send": "Send request",
+      "sent": "Thank you. We will reply by email within two working days."
+    },
+    "kinds": {
+      "buying_office": "Buying office",
+      "brand": "Brand",
+      "factory": "Factory",
+      "trading": "Trading company",
+      "retailer": "Retailer"
+    }
   },
   "login": {
-    "title": "Sign in", "intro": "Enter your work email. We send a 6-digit code and a link; either one signs you in.", "email": "Email", "send": "Send code", "code": "6-digit code", "verify": "Sign in", "resend": "Send a new code", "sentTo": "Code sent to {email}", "idle": "You were signed out after 2 hours without activity.", "ended": "That session has ended. Sign in again.", "noAccount": "This email has no VIA Merch access yet. Ask your manager for an invite, or request access.", "error": "That code did not work. Try again or request a new one."
+    "title": "Sign in",
+    "intro": "Enter your work email. We send a sign-in code and a link; either one signs you in.",
+    "email": "Email",
+    "send": "Send code",
+    "code": "Sign-in code",
+    "verify": "Sign in",
+    "resend": "Send a new code",
+    "sentTo": "Code sent to {email}",
+    "idle": "You were signed out after 2 hours without activity.",
+    "ended": "That session has ended. Sign in again.",
+    "noAccount": "This email has no VIA Merch access yet. Ask your manager for an invite, or request access.",
+    "error": "That code did not work. Try again or request a new one."
   },
-  "day": { "greeting": "Good {period}, {name}", "morning": "morning", "afternoon": "afternoon", "evening": "evening", "waiting": "waiting for you", "exceptions": "open exceptions", "offplan": "POs off plan", "approved": "approved today", "empty": "Nothing waiting for you.", "noOrders": "No orders yet. Import a spreadsheet or connect a channel to begin." },
-  "queue": { "approve": "Approve and send", "edit": "Edit", "reject": "Reject", "escalate": "Escalate", "reason": "Reason (required)", "source": "Source", "impact": "Impact" },
-  "admin": { "title": "VIA admin", "tenants": "Tenants", "requests": "Access requests", "newTenant": "New tenant", "name": "Name", "slug": "Slug", "kind": "Kind", "plan": "Plan", "members": "Members", "invite": "Invite by email", "role": "Role", "send": "Send invite", "pending": "Pending invites", "created": "Created" },
-  "roles": { "owner": "Owner", "manager": "Manager", "merchandiser": "Merchandiser", "qc": "QC", "compliance": "Compliance", "logistics": "Logistics", "viewer": "Viewer" },
-  "common": { "save": "Save", "cancel": "Cancel", "language": "Language", "loading": "Loading", "none": "None", "demoData": "Demo data" }
+  "day": {
+    "greeting": "Good {period}, {name}",
+    "morning": "morning",
+    "afternoon": "afternoon",
+    "evening": "evening",
+    "waiting": "waiting for you",
+    "exceptions": "open exceptions",
+    "offplan": "POs off plan",
+    "approved": "approved today",
+    "empty": "Nothing waiting for you.",
+    "noOrders": "No orders yet. Import a spreadsheet or connect a channel to begin."
+  },
+  "queue": {
+    "approve": "Approve and send",
+    "edit": "Edit",
+    "reject": "Reject",
+    "escalate": "Escalate",
+    "reason": "Reason (required)",
+    "source": "Source",
+    "impact": "Impact"
+  },
+  "admin": {
+    "title": "VIA admin",
+    "tenants": "Tenants",
+    "requests": "Access requests",
+    "newTenant": "New tenant",
+    "name": "Name",
+    "slug": "Slug",
+    "kind": "Kind",
+    "plan": "Plan",
+    "members": "Members",
+    "invite": "Invite by email",
+    "role": "Role",
+    "send": "Send invite",
+    "pending": "Pending invites",
+    "created": "Created"
+  },
+  "roles": {
+    "owner": "Owner",
+    "manager": "Manager",
+    "merchandiser": "Merchandiser",
+    "qc": "QC",
+    "compliance": "Compliance",
+    "logistics": "Logistics",
+    "viewer": "Viewer"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "language": "Language",
+    "loading": "Loading",
+    "none": "None",
+    "demoData": "Demo data"
+  }
 }

@@ -40,7 +40,7 @@ export function LoginForm({ next }: { next: string }) {
   return (
     <form onSubmit={verify}>
       <div className="notice mb-3">{t('sentTo', { email })}</div>
-      <label className="f"><span>{t('code')}</span><input className="input mono" inputMode="numeric" pattern="[0-9]{6}" autoFocus required value={code} onChange={(e) => setCode(e.target.value)} style={{ fontSize: 20, letterSpacing: '.3em' }} /></label>
+      <label className="f"><span>{t('code')}</span><input className="input mono" inputMode="numeric" pattern="[0-9]{6,10}" autoFocus required value={code} onChange={(e) => setCode(e.target.value)} style={{ fontSize: 20, letterSpacing: '.3em' }} /></label>
       {err && <div className="notice crit mb-3">{err}</div>}
       <button className="btn primary w-full justify-center" disabled={busy}>{t('verify')}</button>
       <button type="button" className="btn w-full justify-center mt-2" onClick={() => { setSent(false); setCode(''); }}>{t('resend')}</button>
