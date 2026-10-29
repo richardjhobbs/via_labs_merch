@@ -26,10 +26,6 @@ export default async function Landing() {
               <li key={k} className="flex gap-3"><span style={{ color: 'var(--accent)', fontWeight: 600 }}>→</span><span style={{ color: 'var(--fg2)' }}>{t(`landing.points.${k}`)}</span></li>
             ))}
           </ul>
-          <div className="mt-8 flex gap-3 flex-wrap">
-            <a className="btn primary" href="#request">{t('landing.cta')}</a>
-            <a className="btn" href="https://www.getvia.xyz/merch" target="_blank" rel="noopener">{t('landing.demo')}</a>
-          </div>
         </div>
         <div id="request" className="card">
           <h2 style={{ fontSize: 18 }}>{t('landing.request.title')}</h2>

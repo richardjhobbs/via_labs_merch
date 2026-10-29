@@ -18,8 +18,9 @@ export function RequestAccessForm() {
         <label className="f"><span>{t('request.country')}</span><input className="input" name="country" maxLength={60} /></label>
       </div>
       <label className="f"><span>{t('request.email')}</span><input className="input" name="email" type="email" required maxLength={120} /></label>
+      <label className="f"><span>{t('request.url')}</span><input className="input" name="url" type="url" inputMode="url" placeholder="https://" maxLength={200} /></label>
       <label className="f"><span>{t('request.message')}</span><textarea className="input" name="message" rows={3} maxLength={1000} /></label>
-      <input type="text" name="website" tabIndex={-1} autoComplete="off" style={{ position: 'absolute', left: -9999 }} aria-hidden />
+      <input type="text" name="fax" tabIndex={-1} autoComplete="off" style={{ position: 'absolute', left: -9999 }} aria-hidden />
       {state.error && <div className="notice crit mb-3">{state.error}</div>}
       <button className="btn primary" disabled={pending}>{t('request.send')}</button>
     </form>
