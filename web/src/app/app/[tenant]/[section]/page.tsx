@@ -1,9 +1,9 @@
-// Placeholder for sections that land in week 2 and 3 (orders, parties, queue, ledger, agents, connections, settings).
+// Placeholder for sections that land in build step 3 (queue, ledger, agents, connections, settings).
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { requireTenant } from '@/lib/tenant';
 
-const SECTIONS = ['orders', 'parties', 'queue', 'ledger', 'agents', 'connections', 'settings'] as const;
+const SECTIONS = ['queue', 'ledger', 'agents', 'connections', 'settings'] as const;
 
 export default async function Section({ params }: { params: Promise<{ tenant: string; section: string }> }) {
   const { tenant: slug, section } = await params;
