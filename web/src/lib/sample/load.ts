@@ -10,8 +10,9 @@ export async function loadSample(tenantId: string, byUser: string, byEmail: stri
   if (count) return { ok: false, error: 'This company already has orders; sample data is only loaded into an empty company.' };
   const T = today();
 
-  const brandRows = SAMPLE_BRANDS.map((b) => ({ tenant_id: tenantId, kind: 'brand', name: b.name, short: b.name, country: b.country, lang: b.lang, channel_pref: b.channel, policy: b.policy, meta: { code: b.code, segment: b.segment, sample: true } }));
-  const supRows = SAMPLE_SUPPLIERS.map((s) => ({ tenant_id: tenantId, kind: s.tier === 1 ? 'factory' : s.tier === 2 ? 'mill' : 'fibre', name: s.name, short: s.short, country: s.country, city: s.city, tier: s.tier, lang: s.lang, channel_pref: s.channel, score: s.score, meta: { code: s.code, type: s.type, verified: !('unverified' in s), sample: true } }));
+  // Bulk inserts send null for any key a row lacks (not the column default), so both shapes carry the same keys.
+  const brandRows = SAMPLE_BRANDS.map((b) => ({ tenant_id: tenantId, kind: 'brand', name: b.name, short: b.name, country: b.country, city: null, tier: null, lang: b.lang, channel_pref: b.channel, policy: b.policy, score: {}, meta: { code: b.code, segment: b.segment, sample: true } }));
+  const supRows = SAMPLE_SUPPLIERS.map((s) => ({ tenant_id: tenantId, kind: s.tier === 1 ? 'factory' : s.tier === 2 ? 'mill' : 'fibre', name: s.name, short: s.short, country: s.country, city: s.city, tier: s.tier, lang: s.lang, channel_pref: s.channel, policy: {}, score: s.score, meta: { code: s.code, type: s.type, verified: !('unverified' in s), sample: true } }));
   const { data: parties, error: pe } = await sb.from('parties').insert([...brandRows, ...supRows]).select('id, meta');
   if (pe || !parties) return { ok: false, error: pe?.message || 'parties failed' };
   const idOf = Object.fromEntries(parties.map((p) => [(p.meta as { code: string }).code, p.id]));
