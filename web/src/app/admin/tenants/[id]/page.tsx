@@ -2,12 +2,12 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { supabaseAdmin } from '@/lib/supabase/server';
-import { inviteMember } from '../../actions';
+import { inviteMember, resendInvite } from '../../actions';
 
 const ROLES = ['owner', 'manager', 'merchandiser', 'qc', 'compliance', 'logistics', 'viewer'] as const;
 
-export default async function TenantAdmin({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ error?: string }> }) {
-  const { id } = await params; const { error } = await searchParams;
+export default async function TenantAdmin({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ error?: string; sent?: string }> }) {
+  const { id } = await params; const { error, sent } = await searchParams;
   const t = await getTranslations();
   const sb = supabaseAdmin();
   const { data: tenant } = await sb.from('tenants').select('*').eq('id', id).maybeSingle();
@@ -24,6 +24,7 @@ export default async function TenantAdmin({ params, searchParams }: { params: Pr
     <div>
       <div className="flex items-baseline gap-3"><h1>{tenant.name}</h1><span className="pill">{tenant.kind.replace('_', ' ')}</span><span className="pill">{tenant.plan}</span><span className="muted small mono">{tenant.slug}</span><Link className="btn sm ml-auto" href={`/app/${tenant.slug}`}>Open workspace →</Link></div>
       {error && <div className="notice crit mt-3">{error}</div>}
+      {sent && <div className="notice mt-3">Invite emailed to {sent}.</div>}
       <div className="grid gap-6 mt-5" style={{ gridTemplateColumns: 'minmax(0,1fr) 320px' }}>
         <div className="grid gap-5">
           <div className="card tw" style={{ padding: 0 }}><div className="p-4 pb-2"><h2>{t('admin.members')}</h2></div>
@@ -32,9 +33,9 @@ export default async function TenantAdmin({ params, searchParams }: { params: Pr
               {!members?.length && <tr><td colSpan={4} className="muted">{t('common.none')}</td></tr>}
             </tbody></table></div>
           <div className="card tw" style={{ padding: 0 }}><div className="p-4 pb-2"><h2>{t('admin.pending')}</h2></div>
-            <table className="t"><thead><tr><th>Email</th><th>{t('admin.role')}</th><th>Sent</th><th>Expires</th></tr></thead><tbody>
-              {(invites || []).map((i) => <tr key={i.id}><td>{i.email}<div className="muted small">{i.display_name}</div></td><td><span className="pill">{t(`roles.${i.role}`)}</span></td><td className="muted">{new Date(i.created_at).toLocaleDateString('en-GB')}</td><td className="muted">{new Date(i.expires_at).toLocaleDateString('en-GB')}</td></tr>)}
-              {!invites?.length && <tr><td colSpan={4} className="muted">{t('common.none')}</td></tr>}
+            <table className="t"><thead><tr><th>Email</th><th>{t('admin.role')}</th><th>Sent</th><th>Expires</th><th></th></tr></thead><tbody>
+              {(invites || []).map((i) => <tr key={i.id}><td>{i.email}<div className="muted small">{i.display_name}</div></td><td><span className="pill">{t(`roles.${i.role}`)}</span></td><td className="muted">{new Date(i.created_at).toLocaleDateString('en-GB')}</td><td className="muted">{new Date(i.expires_at).toLocaleDateString('en-GB')}</td><td><form action={resendInvite}><input type="hidden" name="id" value={i.id} /><button className="btn sm">Resend</button></form></td></tr>)}
+              {!invites?.length && <tr><td colSpan={5} className="muted">{t('common.none')}</td></tr>}
             </tbody></table></div>
           <div className="card tw" style={{ padding: 0 }}><div className="p-4 pb-2"><h2>Autonomy by stream</h2></div>
             <table className="t"><thead><tr><th>Stream</th><th>Level</th><th>Cap</th></tr></thead><tbody>

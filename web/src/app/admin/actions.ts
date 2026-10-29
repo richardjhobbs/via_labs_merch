@@ -26,8 +26,20 @@ export async function createTenant(form: FormData) {
   await sb.from('gates').insert(GATES.map(([stream, level, locked]) => ({ tenant_id: t.id, stream, level, locked, set_by: me.user.id })));
   await sb.from('agents').insert({ tenant_id: t.id, name: 'Mira', scope_kind: 'tenant', languages: [d.locale, 'en'] });
   await sb.rpc('ledger_append', { p_tenant: t.id, p_channel: 'Console', p_actor: `VIA admin (${me.user.email})`, p_actor_user: me.user.id, p_counterparty: null, p_stream: 'Setup', p_order: null, p_what: `Tenant created: ${d.name} (${d.kind}, ${d.plan})`, p_gate: 'ADMIN', p_gated: true, p_ref: {} });
-  await inviteUser(t.id, d.owner_email, 'owner', null, me.user.id, me.user.email || '');
-  redirect(`/admin/tenants/${t.id}`);
+  const mailError = await inviteUser(t.id, d.owner_email, 'owner', null, me.user.id, me.user.email || '');
+  redirect(`/admin/tenants/${t.id}` + (mailError ? '?error=' + encodeURIComponent(mailError) : ''));
+}
+
+// Re-send a pending invite (new 14-day expiry, same token).
+export async function resendInvite(form: FormData) {
+  const me = await requireAdmin();
+  const id = String(form.get('id')), sb = supabaseAdmin();
+  const { data: inv } = await sb.from('invites').select('id, tenant_id, email, role, token, tenants(name)').eq('id', id).is('accepted_at', null).maybeSingle();
+  if (!inv) return;
+  await sb.from('invites').update({ expires_at: new Date(Date.now() + 14 * 864e5).toISOString() }).eq('id', id);
+  const err = await mailInvite(inv.email, (inv.tenants as unknown as { name: string })?.name, inv.role, inv.token, me.user.email || '');
+  revalidatePath(`/admin/tenants/${inv.tenant_id}`);
+  redirect(`/admin/tenants/${inv.tenant_id}` + (err ? '?error=' + encodeURIComponent(err) : '?sent=' + encodeURIComponent(inv.email)));
 }
 
 export async function inviteMember(form: FormData) {
@@ -35,9 +47,9 @@ export async function inviteMember(form: FormData) {
   const tenantId = String(form.get('tenant_id')), email = String(form.get('email') || '').trim().toLowerCase(), role = String(form.get('role')) as (typeof ROLES)[number];
   const name = String(form.get('display_name') || '').trim() || null;
   if (!z.string().email().safeParse(email).success || !ROLES.includes(role)) redirect(`/admin/tenants/${tenantId}?error=invalid`);
-  await inviteUser(tenantId, email, role, name, me.user.id, me.user.email || '');
+  const mailError = await inviteUser(tenantId, email, role, name, me.user.id, me.user.email || '');
   revalidatePath(`/admin/tenants/${tenantId}`);
-  redirect(`/admin/tenants/${tenantId}`);
+  redirect(`/admin/tenants/${tenantId}` + (mailError ? '?error=' + encodeURIComponent(mailError) : '?sent=' + encodeURIComponent(email)));
 }
 
 // Creates the auth user if needed (so OTP sign-in works for invited people only),
@@ -48,9 +60,22 @@ async function inviteUser(tenantId: string, email: string, role: string, display
   const { data: inv } = await sb.from('invites').insert({ tenant_id: tenantId, email, role, display_name: displayName, invited_by: by }).select('token').single();
   // ensure an auth user exists; ignore "already registered"
   await sb.auth.admin.createUser({ email, email_confirm: true }).catch(() => null);
-  const url = `${process.env.NEXT_PUBLIC_APP_URL}/invite/${inv?.token}`;
-  await sendMail({ to: email, subject: `You're invited to ${tenant?.name} on VIA Merch`, text: `${byEmail} has invited you to ${tenant?.name} on VIA Merch as ${role}.\n\nOpen this link to accept and sign in:\n${url}\n\nYou sign in with a code sent to this email; there is no password. Sessions end after 2 hours without activity.\n\nVIA Labs · getvia.xyz` }).catch((e) => console.error('[invite mail]', e));
-  await sb.rpc('ledger_append', { p_tenant: tenantId, p_channel: 'Email', p_actor: `VIA admin (${byEmail})`, p_actor_user: by, p_counterparty: email, p_stream: 'Setup', p_order: null, p_what: `Invited ${email} as ${role}`, p_gate: 'ADMIN', p_gated: true, p_ref: {} });
+  const mailError = await mailInvite(email, tenant?.name || 'VIA Merch', role, inv?.token || '', byEmail);
+  await sb.rpc('ledger_append', { p_tenant: tenantId, p_channel: 'Email', p_actor: `VIA admin (${byEmail})`, p_actor_user: by, p_counterparty: email, p_stream: 'Setup', p_order: null, p_what: `Invited ${email} as ${role}${mailError ? ' (email failed: ' + mailError.slice(0, 80) + ')' : ''}`, p_gate: 'ADMIN', p_gated: true, p_ref: {} });
+  return mailError;
+}
+
+// Returns an error message when the email could not be sent, so the console can show it.
+async function mailInvite(email: string, tenantName: string, role: string, token: string, byEmail: string): Promise<string | null> {
+  const url = `${process.env.NEXT_PUBLIC_APP_URL}/invite/${token}`;
+  try {
+    const r = await sendMail({ to: email, subject: `You're invited to ${tenantName} on VIA Merch`, text: `${byEmail} has invited you to ${tenantName} on VIA Merch as ${role}.\n\nOpen this link to accept and sign in:\n${url}\n\nYou sign in with a code sent to this email; there is no password. Sessions end after 2 hours without activity.\n\nVIA Labs · getvia.xyz` });
+    if ((r as { skipped?: boolean }).skipped) return 'Invite recorded but no email sent: RESEND_API_KEY is not set in the Vercel project.';
+    return null;
+  } catch (e) {
+    const m = e instanceof Error ? e.message : String(e);
+    return `Invite recorded but the email failed: ${m}. Check MAIL_FROM is on a domain verified in Resend.`;
+  }
 }
 
 export async function updateRequest(form: FormData) {
