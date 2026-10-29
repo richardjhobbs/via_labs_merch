@@ -1,6 +1,8 @@
 // The agent loop: Claude Sonnet with the company's tools, logged to agent_runs and usage_daily.
 import type Anthropic from '@anthropic-ai/sdk';
-import { anthropic, MODEL, costOf, recordUsage } from '@/lib/llm';
+import { anthropic, MODEL, SMALL_MODEL, costOf, recordUsage } from '@/lib/llm';
+
+const ALLOWED = [MODEL, SMALL_MODEL];
 import { supabaseAdmin } from '@/lib/supabase/server';
 import { toolsFor, type AgentCtx, type DraftRef } from './tools';
 import { LANG_NAMES } from '@/lib/llm';
@@ -56,11 +58,10 @@ Rules:
   let tokensIn = 0, tokensOut = 0, text = '', error: string | undefined;
   try {
     const runner = client.beta.messages.toolRunner({
-      model: (agent?.model && agent.model.startsWith('claude-')) ? agent.model : MODEL,
+      // Testing phase: Sonnet or Haiku only (no server-side fallback, which could route to Opus).
+      model: ALLOWED.includes(agent?.model || '') ? agent!.model : MODEL,
       max_tokens: 4096,
       output_config: { effort: 'medium' },
-      betas: ['server-side-fallback-2026-07-01'],
-      fallbacks: 'default',
       system,
       tools: toolsFor(ctx),
       messages: input.messages,
@@ -77,8 +78,9 @@ Rules:
   } catch (e) {
     error = e instanceof Error ? e.message : String(e);
   }
-  const cost = costOf(MODEL, tokensIn, tokensOut);
-  const { data: run } = await sb.from('agent_runs').insert({ tenant_id: tenant.id, agent_id: ctx.agentId, user_id: ctx.userId, trigger: input.trigger, model: MODEL, input: { messages: input.messages.slice(-2) }, tools_called: ctx.calls, output: text || null, tokens_in: tokensIn, tokens_out: tokensOut, cost_usd: cost, ms: Date.now() - t0, error: error || null }).select('id').single();
+  const model = ALLOWED.includes(agent?.model || '') ? agent!.model : MODEL;
+  const cost = costOf(model, tokensIn, tokensOut);
+  const { data: run } = await sb.from('agent_runs').insert({ tenant_id: tenant.id, agent_id: ctx.agentId, user_id: ctx.userId, trigger: input.trigger, model, input: { messages: input.messages.slice(-2) }, tools_called: ctx.calls, output: text || null, tokens_in: tokensIn, tokens_out: tokensOut, cost_usd: cost, ms: Date.now() - t0, error: error || null }).select('id').single();
   await recordUsage(tenant.id, { runs: 1, tokensIn, tokensOut, cost });
   return { text, calls: ctx.calls, drafts: ctx.drafts, nav: ctx.nav, runId: run?.id || null, usage: { tokensIn, tokensOut, cost }, error };
 }
