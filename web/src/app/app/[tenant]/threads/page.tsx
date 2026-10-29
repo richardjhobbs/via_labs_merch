@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { requireTenant, scopeOf } from '@/lib/tenant';
 import { supabaseServer } from '@/lib/supabase/server';
+import { RowLink } from '@/components/row-link';
 
 export default async function Threads({ params, searchParams }: { params: Promise<{ tenant: string }>; searchParams: Promise<{ side?: string }> }) {
   const { tenant: slug } = await params; const q = await searchParams;
@@ -30,13 +31,13 @@ export default async function Threads({ params, searchParams }: { params: Promis
       <div className="card tw mt-4" style={{ padding: 0 }}>
         <table className="t"><thead><tr><th>{t('party')}</th><th>{t('po')}</th><th>{t('subject')}</th><th>{t('last')}</th><th></th></tr></thead><tbody>
           {rows.map((th) => { const p = th.parties as unknown as { name: string; kind: string } | null, o = th.orders as unknown as { po: string } | null, last = lastOf.get(th.id); return (
-            <tr key={th.id} className="click">
+            <RowLink key={th.id} href={`/app/${slug}/threads/${th.id}`}>
               <td><Link href={`/app/${slug}/threads/${th.id}`} className="font-medium">{p?.name || '—'}</Link><div className="muted small">{CUSTOMER.includes(p?.kind || '') ? t('customer') : t(`kind.${p?.kind || 'other'}`, { default: p?.kind || '' })} · {th.kind}</div></td>
               <td>{o?.po && <Link className="mono small" href={`/app/${slug}/orders/${encodeURIComponent(o.po)}`}>{o.po}</Link>}</td>
               <td className="small">{th.subject || t('conversation')}<div className="muted">{countOf.get(th.id) || 0} {t('messages')}</div></td>
               <td className="small" style={{ maxWidth: 420 }}>{last && <><span className="muted">{last.direction === 'in' ? '← ' : '→ '}{last.sender_name} · {new Date(last.received_at).toLocaleDateString('en-GB', { timeZone: tenant.tz, day: '2-digit', month: 'short' })}</span><div>{(last.text_en || last.text).slice(0, 110)}{(last.text_en || last.text).length > 110 ? '…' : ''}</div></>}</td>
               <td>{last?.direction === 'in' && waiting(th) ? <span className="pill warn">{t('replyWaiting')}</span> : last?.direction === 'out' && last.text ? <span className="pill ok">{t('ours')}</span> : null}</td>
-            </tr>); })}
+            </RowLink>); })}
           {!rows.length && <tr><td colSpan={5} className="muted">{t('none')}</td></tr>}
         </tbody></table>
       </div>
