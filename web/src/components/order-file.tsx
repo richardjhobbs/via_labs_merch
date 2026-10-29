@@ -6,6 +6,7 @@ import { supabaseServer } from '@/lib/supabase/server';
 import { orderSummary } from '@/lib/threads';
 import { refreshOrderSummary } from '@/app/app/[tenant]/threads/actions';
 import { Chain } from './chain';
+import { PendingDraftCard } from './pending-draft';
 
 export async function OrderFile({ slug, tenantId, orderId, po, tz }: { slug: string; tenantId: string; orderId: string; po: string; tz: string }) {
   const t = await getTranslations('threads');
@@ -13,7 +14,7 @@ export async function OrderFile({ slug, tenantId, orderId, po, tz }: { slug: str
   const [{ data: threads }, { data: msgs }, { data: drafts }, sum] = await Promise.all([
     sb.from('threads').select('id, subject, kind, last_message_at, summary, party_id, parties(name, kind, lang)').eq('tenant_id', tenantId).eq('order_id', orderId).order('last_message_at', { ascending: false }),
     sb.from('messages').select('id, thread_id, direction, sender_name, lang, text, text_en, stream, received_at, sent_at, contacts(role)').eq('tenant_id', tenantId).eq('order_id', orderId).order('received_at'),
-    sb.from('drafts').select('id, seq, title, source_message_id, party_id').eq('tenant_id', tenantId).eq('order_id', orderId).in('status', ['queued', 'escalated']),
+    sb.from('drafts').select('id, seq, title, body, body_en, lang, stream, gate_level, impact, priority, source_message_id, party_id').eq('tenant_id', tenantId).eq('order_id', orderId).in('status', ['queued', 'escalated']),
     orderSummary(tenantId, orderId),
   ]);
   const byThread = new Map<string, typeof msgs>();
@@ -45,7 +46,9 @@ export async function OrderFile({ slug, tenantId, orderId, po, tz }: { slug: str
                     {last && <span className="muted small" style={{ flexBasis: '100%' }}>{last.direction === 'in' ? '← ' : '→ '}{last.sender_name}{(last.contacts as unknown as { role: string } | null)?.role ? ` (${(last.contacts as unknown as { role: string }).role})` : ''} · {new Date(last.received_at).toLocaleDateString('en-GB', { timeZone: tz, day: '2-digit', month: 'short' })}: {(last.text_en || last.text).slice(0, 120)}{(last.text_en || last.text).length > 120 ? '…' : ''}</span>}
                     {!!open.length && <span className="pill warn">{t('draftWaiting', { n: open.length })}</span>}
                   </summary>
-                  <div className="mt-3"><Chain messages={list.map((m) => ({ id: m.id, direction: m.direction as 'in' | 'out', sender_name: m.sender_name, role: (m.contacts as unknown as { role: string } | null)?.role || null, lang: m.lang, text: m.text, text_en: m.text_en, stream: m.stream, received_at: m.received_at, sent_at: m.sent_at }))} tz={tz} labels={{ original: t('original'), awaiting: t('awaitingChannel'), us: t('us') }} /></div>
+                  <div className="mt-3"><Chain messages={list.map((m) => ({ id: m.id, direction: m.direction as 'in' | 'out', sender_name: m.sender_name, role: (m.contacts as unknown as { role: string } | null)?.role || null, lang: m.lang, text: m.text, text_en: m.text_en, stream: m.stream, received_at: m.received_at, sent_at: m.sent_at }))} tz={tz} labels={{ original: t('original'), awaiting: t('awaitingChannel'), us: t('us') }} />
+                    {open.map((d) => <div key={d.id} className="grid mt-3"><PendingDraftCard slug={slug} back={`/app/${slug}/orders/${encodeURIComponent(po)}`} d={d} labels={{ waiting: t('pendingReply'), approve: t('approve'), hold: t('hold'), reject: t('reject'), impact: t('impact'), english: t('english') }} /></div>)}
+                  </div>
                   <div className="mt-2 flex gap-2 flex-wrap"><Link className="btn sm" href={`/app/${slug}/threads/${th.id}`}>{t('openThread')}</Link>{!!open.length && <Link className="btn sm" href={`/app/${slug}/queue`}>{t('openQueue')}</Link>}</div>
                 </details>); })}
             </div>

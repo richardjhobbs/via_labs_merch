@@ -16,7 +16,7 @@ export default async function MyDay({ params, searchParams }: { params: Promise<
   const sb = await supabaseServer();
   const scope = scopeOf(membership), manager = ['owner', 'manager'].includes(membership.role);
   const [{ data: queuedRows }, { count: approvedToday }, orders, { data: scopeNames }] = await Promise.all([
-    sb.from('drafts').select('id, seq, priority, stream, title, impact, body, lang, gate_level, created_at, party_id, orders(po, customer_id), parties(name)').eq('tenant_id', tenant.id).in('status', ['queued', 'escalated']).order('priority').order('seq'),
+    sb.from('drafts').select('id, seq, priority, stream, title, impact, body, lang, gate_level, created_at, party_id, orders(po, customer_id), parties(name), source:messages!drafts_source_message_id_fkey(thread_id)').eq('tenant_id', tenant.id).in('status', ['queued', 'escalated']).order('priority').order('seq'),
     sb.from('drafts').select('id', { count: 'exact', head: true }).eq('tenant_id', tenant.id).eq('status', 'sent').gte('decided_at', new Date(new Date().setHours(0, 0, 0, 0)).toISOString()),
     listOrders(tenant.id, { status: 'open', customers: scope }),
     scope ? sb.from('parties').select('name').in('id', scope) : Promise.resolve({ data: null }),
@@ -54,7 +54,7 @@ export default async function MyDay({ params, searchParams }: { params: Promise<
                 {d.impact && <div className="muted mt-1">{d.impact}</div>}
                 <details className="mt-1"><summary className="muted" style={{ cursor: 'pointer' }}>{t('showMessage')}</summary><pre className="mt-1 p-2" style={{ whiteSpace: 'pre-wrap', background: 'var(--paper)', borderRadius: 8, fontFamily: 'inherit' }}>{d.body}</pre></details>
                 <form action={approveDraft} className="flex gap-2 mt-2 flex-wrap"><input type="hidden" name="tenant" value={slug} /><input type="hidden" name="id" value={d.id} /><input type="hidden" name="back" value={`/app/${slug}`} />
-                  <button className="btn primary sm">{t('approve')}</button><Link className="btn sm" href={`/app/${slug}/queue`}>{t('hold')}</Link><button className="btn sm" formAction={rejectDraft}>{t('reject')}</button></form>
+                  <button className="btn primary sm">{t('approve')}</button><Link className="btn sm" href={`/app/${slug}/queue`}>{t('hold')}</Link><button className="btn sm" formAction={rejectDraft}>{t('reject')}</button>{(d.source as unknown as { thread_id: string | null } | null)?.thread_id && <Link className="btn sm" href={`/app/${slug}/threads/${(d.source as unknown as { thread_id: string }).thread_id}`}>{t('conversation')}</Link>}</form>
               </div>); })}
             {queued > 6 && <Link className="small" href={`/app/${slug}/queue`}>{t('more', { n: queued - 6 })}</Link>}
           </div>

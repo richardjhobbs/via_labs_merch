@@ -102,7 +102,8 @@
     "hold": "Zurückstellen",
     "reject": "Ablehnen",
     "more": "und {n} weitere in den Freigaben",
-    "decided": "Entschieden und protokolliert."
+    "decided": "Entschieden und protokolliert.",
+    "conversation": "Unterhaltung"
   },
   "queue": {
     "title": "Freigaben",
@@ -392,6 +393,14 @@
     "fileCount": "{threads} Unterhaltungen · {messages} Nachrichten · {parties} Parteien",
     "noConversations": "Noch keine Unterhaltungen zu diesem Auftrag.",
     "draftWaiting": "{n} Entwurf wartet",
-    "openThread": "Öffnen"
+    "openThread": "Öffnen",
+    "pendingReply": "Antwort vom Agenten entworfen, wartet auf Freigabe",
+    "approve": "Freigeben",
+    "hold": "Zurückstellen",
+    "reject": "Ablehnen",
+    "impact": "Warum es wichtig ist",
+    "english": "Englisch",
+    "theirs": "letztes Wort von ihnen",
+    "openOrderFile": "Auftragsakte öffnen"
   }
 }

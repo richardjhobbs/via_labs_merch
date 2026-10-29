@@ -102,7 +102,8 @@
     "hold": "Hold",
     "reject": "Reject",
     "more": "and {n} more in the queue",
-    "decided": "Decided and logged."
+    "decided": "Decided and logged.",
+    "conversation": "Conversation"
   },
   "queue": {
     "title": "Approval queue",
@@ -392,6 +393,14 @@
     "fileCount": "{threads} conversations · {messages} messages · {parties} parties",
     "noConversations": "No conversations on this order yet.",
     "draftWaiting": "{n} draft waiting",
-    "openThread": "Open"
+    "openThread": "Open",
+    "pendingReply": "Reply drafted by the agent, waiting for approval",
+    "approve": "Approve",
+    "hold": "Hold",
+    "reject": "Reject",
+    "impact": "Why it matters",
+    "english": "English",
+    "theirs": "last word theirs",
+    "openOrderFile": "Open the order file"
   }
 }
