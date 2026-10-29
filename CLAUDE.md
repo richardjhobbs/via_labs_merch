@@ -22,6 +22,10 @@ VIA Merch, the live product at merch.getvia.xyz: agents for merchandising teams 
 - Connectors are manifests in `src/lib/connectors/catalog.ts`; logos in `web/public/brands` (simple-icons SVGs or the vendor favicon); the Connections page renders the catalogue, so a new channel is a manifest entry.
 - The VIA wordmark is `web/public/via-logo.png` via `src/components/logo.tsx`; never type "VIA" as a text logo.
 
+## Roadmap notes
+
+- Historic sync is a paid add-on (plan file, section "Add-on: historic sync"): import a customer's past POs, PLM approvals, QC reports, claims and price history under `source = 'historic'` so the agent cross-references them on new orders. Not in Stage 1; do not build it unprompted.
+
 ## Env vars
 
 See `web/.env.example`. Secrets live only in the Vercel project `via-labs-merch`.
