@@ -1,7 +1,8 @@
 // My day: the approval queue and the numbers that matter for this person.
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
-import { requireTenant } from '@/lib/tenant';
+import { requireTenant, scopeOf } from '@/lib/tenant';
+import { Team } from './team';
 import { supabaseServer } from '@/lib/supabase/server';
 import { listOrders, exceptionsOf } from '@/lib/orders';
 import { HealthPill } from '@/components/milestones';
@@ -11,17 +12,21 @@ export default async function MyDay({ params }: { params: Promise<{ tenant: stri
   const { tenant, membership } = await requireTenant(slug);
   const t = await getTranslations('day');
   const sb = await supabaseServer();
-  const [{ count: queued }, { count: approvedToday }, orders] = await Promise.all([
-    sb.from('drafts').select('id', { count: 'exact', head: true }).eq('tenant_id', tenant.id).eq('status', 'queued'),
+  const scope = scopeOf(membership), manager = ['owner', 'manager'].includes(membership.role);
+  const [{ data: queuedRows }, { count: approvedToday }, orders, { data: scopeNames }] = await Promise.all([
+    sb.from('drafts').select('id, party_id, orders(customer_id)').eq('tenant_id', tenant.id).in('status', ['queued', 'escalated']),
     sb.from('drafts').select('id', { count: 'exact', head: true }).eq('tenant_id', tenant.id).eq('status', 'sent').gte('decided_at', new Date(new Date().setHours(0, 0, 0, 0)).toISOString()),
-    listOrders(tenant.id, { status: 'open' }),
+    listOrders(tenant.id, { status: 'open', customers: scope }),
+    scope ? sb.from('parties').select('name').in('id', scope) : Promise.resolve({ data: null }),
   ]);
+  const queued = (queuedRows || []).filter((d) => !scope || (d.party_id && scope.includes(d.party_id)) || scope.includes((d.orders as unknown as { customer_id: string } | null)?.customer_id || '')).length;
   const ex = exceptionsOf(orders), off = orders.filter((o) => o.health.state !== 'green');
   const h = Number(new Date().toLocaleString('en-GB', { hour: 'numeric', hour12: false, timeZone: tenant.tz }));
   const period = h < 12 ? t('morning') : h < 18 ? t('afternoon') : t('evening');
   return (
     <div className="max-w-5xl">
       <h1>{t('greeting', { period, name: (membership.display_name || '').split(' ')[0] || '' })}</h1>
+      <p className="muted small mt-1">{scope ? t('yourCustomers', { names: (scopeNames || []).map((p) => p.name).join(', ') }) : t('allCustomersNote')}</p>
       <div className="grid gap-3 mt-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))' }}>
         <div className={`kpi ${queued ? 'warn' : 'ok'}`}><div className="n">{queued ?? 0}</div><div className="l">{t('waiting')}</div></div>
         <div className={`kpi ${ex.length ? 'crit' : 'ok'}`}><div className="n">{ex.length}</div><div className="l">{t('exceptions')}</div></div>
@@ -38,6 +43,7 @@ export default async function MyDay({ params }: { params: Promise<{ tenant: stri
       {!!off.length && <div className="card mt-4 tw" style={{ padding: 0 }}><div className="p-4 pb-2"><h2>{t('offplanTitle')}</h2></div><table className="t"><thead><tr><th>PO</th><th>{t('style')}</th><th>{t('customer')}</th><th>{t('factory')}</th><th>{t('health')}</th></tr></thead><tbody>
         {off.slice(0, 10).map((o) => <tr key={o.id}><td><Link className="mono" href={`/app/${slug}/orders/${encodeURIComponent(o.po)}`}>{o.po}</Link></td><td>{o.style} <span className="muted small">{o.description}</span></td><td>{o.customer?.name}</td><td>{o.factory?.short || o.factory?.name}</td><td><HealthPill h={o.health} /></td></tr>)}
       </tbody></table></div>}
+      {manager && <Team tenantId={tenant.id} />}
       {!orders.length && <div className="notice mt-4">{t('noOrders')} <Link href={`/app/${slug}/orders/import`}>{t('importLink')}</Link></div>}
     </div>
   );

@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { supabaseAdmin } from '@/lib/supabase/server';
-import { inviteMember, resendInvite, loadSampleAction } from '../../actions';
+import { inviteMember, resendInvite, loadSampleAction, setMemberScope } from '../../actions';
 
 const ROLES = ['owner', 'manager', 'merchandiser', 'qc', 'compliance', 'logistics', 'viewer'] as const;
 
@@ -12,8 +12,9 @@ export default async function TenantAdmin({ params, searchParams }: { params: Pr
   const sb = supabaseAdmin();
   const { data: tenant } = await sb.from('tenants').select('*').eq('id', id).maybeSingle();
   if (!tenant) notFound();
-  const [{ data: members }, { data: invites }, { data: gates }, { data: ledger }] = await Promise.all([
-    sb.from('memberships').select('id, role, display_name, title, user_id, created_at').eq('tenant_id', id).order('created_at'),
+  const [{ data: members }, { data: customers }, { data: invites }, { data: gates }, { data: ledger }] = await Promise.all([
+    sb.from('memberships').select('id, role, display_name, title, user_id, created_at, scopes').eq('tenant_id', id).order('created_at'),
+    sb.from('parties').select('id, name').eq('tenant_id', id).in('kind', ['brand', 'retailer', 'store', 'buying_office', 'trading']).order('name'),
     sb.from('invites').select('id, email, role, display_name, created_at, expires_at').eq('tenant_id', id).is('accepted_at', null).order('created_at', { ascending: false }),
     sb.from('gates').select('stream, level, locked').eq('tenant_id', id).order('stream'),
     sb.from('ledger').select('id, at, actor, what, gate').eq('tenant_id', id).order('id', { ascending: false }).limit(20),
@@ -28,8 +29,13 @@ export default async function TenantAdmin({ params, searchParams }: { params: Pr
       <div className="grid gap-6 mt-5" style={{ gridTemplateColumns: 'minmax(0,1fr) 320px' }}>
         <div className="grid gap-5">
           <div className="card tw" style={{ padding: 0 }}><div className="p-4 pb-2"><h2>{t('admin.members')}</h2></div>
-            <table className="t"><thead><tr><th>Email</th><th>{t('admin.name')}</th><th>{t('admin.role')}</th><th>Since</th></tr></thead><tbody>
-              {(members || []).map((m) => <tr key={m.id}><td>{emailOf(m.user_id)}</td><td>{m.display_name}<div className="muted small">{m.title}</div></td><td><span className="pill">{t(`roles.${m.role}`)}</span></td><td className="muted">{new Date(m.created_at).toLocaleDateString('en-GB')}</td></tr>)}
+            <table className="t"><thead><tr><th>Email</th><th>{t('admin.name')}</th><th>{t('admin.role')}</th><th>{t('admin.scope')}</th></tr></thead><tbody>
+              {(members || []).map((m) => { const sc = ((m.scopes as { parties?: string[] })?.parties) || []; return (<tr key={m.id}><td>{emailOf(m.user_id)}<div className="muted small">{new Date(m.created_at).toLocaleDateString('en-GB')}</div></td><td>{m.display_name}</td><td><span className="pill">{t(`roles.${m.role}`)}</span></td><td>
+                <form action={setMemberScope} className="grid gap-1"><input type="hidden" name="tenant_id" value={id} /><input type="hidden" name="id" value={m.id} />
+                  <input className="input sm" name="title" defaultValue={m.title || ''} placeholder={t('admin.jobTitle')} />
+                  <select className="input sm" name="parties" multiple defaultValue={sc} size={Math.min(5, Math.max(2, (customers || []).length))} title={t('admin.scopeHint')}>{(customers || []).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select>
+                  <div className="flex items-center gap-2"><button className="btn sm">{t('admin.saveScope')}</button><span className="muted small">{sc.length ? '' : t('admin.allCustomers')}</span></div>
+                </form></td></tr>); })}
               {!members?.length && <tr><td colSpan={4} className="muted">{t('common.none')}</td></tr>}
             </tbody></table></div>
           <div className="card tw" style={{ padding: 0 }}><div className="p-4 pb-2"><h2>{t('admin.pending')}</h2></div>

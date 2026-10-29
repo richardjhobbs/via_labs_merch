@@ -69,7 +69,7 @@
     "morning": "morning",
     "afternoon": "afternoon",
     "evening": "evening",
-    "waiting": "waiting for you",
+    "waiting": "Waiting",
     "exceptions": "open exceptions",
     "offplan": "POs off plan",
     "approved": "approved today",
@@ -83,7 +83,16 @@
     "customer": "Customer",
     "factory": "Factory",
     "health": "Health",
-    "importLink": "Import a spreadsheet"
+    "importLink": "Import a spreadsheet",
+    "team": "Your team",
+    "person": "Person",
+    "customers": "Customers",
+    "openPos": "Open POs",
+    "offplanCol": "Off plan",
+    "allCustomers": "all customers",
+    "agentToday": "Agent today: {runs} runs · {msgs} messages in · USD {cost}",
+    "yourCustomers": "Your customers: {names}",
+    "allCustomersNote": "You see every customer and the whole team."
   },
   "queue": {
     "title": "Approval queue",
@@ -118,7 +127,12 @@
     "role": "Role",
     "send": "Send invite",
     "pending": "Pending invites",
-    "created": "Created"
+    "created": "Created",
+    "scope": "Title and customers",
+    "jobTitle": "Job title",
+    "scopeHint": "Hold Ctrl or Cmd to pick several. None selected = all customers.",
+    "saveScope": "Save",
+    "allCustomers": "all customers"
   },
   "roles": {
     "owner": "Owner",
@@ -301,5 +315,9 @@
     "s_ledger": "What did the agent do today?",
     "s_any1": "Chase the factory for the fabric date",
     "s_any2": "Draft a WIP note to a customer"
+  },
+  "viewas": {
+    "label": "View as",
+    "self": "Myself (VIA admin)"
   }
 }

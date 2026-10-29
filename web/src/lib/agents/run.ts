@@ -8,6 +8,7 @@ import { LANG_NAMES } from '@/lib/llm';
 export type RunInput = {
   tenantId: string; trigger: AgentCtx['trigger'];
   userId?: string | null; userName?: string | null; userEmail?: string | null; userLang?: string;
+  role?: string | null; scope?: string[] | null;
   messages: Anthropic.Beta.BetaMessageParam[];
   sourceMessageId?: string | null;
   extraSystem?: string;
@@ -21,11 +22,11 @@ export async function runAgent(input: RunInput): Promise<RunResult> {
   const [{ data: tenant }, { data: agent }, { data: parties }, { data: gates }] = await Promise.all([
     sb.from('tenants').select('id, name, kind, locale, tz, currency').eq('id', input.tenantId).single(),
     sb.from('agents').select('id, name, model, languages, prompt_overrides').eq('tenant_id', input.tenantId).eq('scope_kind', 'tenant').eq('enabled', true).limit(1).maybeSingle(),
-    sb.from('parties').select('name, short, kind, country, lang, channel_pref, tier, meta').eq('tenant_id', input.tenantId).order('kind').order('name'),
+    sb.from('parties').select('id, name, short, kind, country, lang, channel_pref, tier, meta').eq('tenant_id', input.tenantId).order('kind').order('name'),
     sb.from('gates').select('stream, level, locked').eq('tenant_id', input.tenantId).order('stream'),
   ]);
   if (!tenant) throw new Error('tenant not found');
-  const ctx: AgentCtx = { tenantId: tenant.id, agentId: agent?.id || null, agentName: agent?.name || 'Mira', trigger: input.trigger, userId: input.userId || null, userName: input.userName || null, userEmail: input.userEmail || null, sourceMessageId: input.sourceMessageId || null, calls: [], drafts: [], nav: null };
+  const ctx: AgentCtx = { tenantId: tenant.id, agentId: agent?.id || null, agentName: agent?.name || 'Mira', trigger: input.trigger, userId: input.userId || null, userName: input.userName || null, userEmail: input.userEmail || null, sourceMessageId: input.sourceMessageId || null, role: input.role || null, scope: input.scope || null, calls: [], drafts: [], nav: null };
 
   const customers = (parties || []).filter((p) => ['brand', 'retailer', 'store', 'buying_office', 'trading'].includes(p.kind)).map((p) => `${(p.meta as { code?: string })?.code || p.short || p.name}=${p.name} (${p.kind}, ${p.country || '?'}, writes in ${p.lang})`).join('; ');
   const suppliers = (parties || []).filter((p) => ['factory', 'mill', 'fibre', 'forwarder', 'carrier', 'lab', 'auditor'].includes(p.kind)).map((p) => `${(p.meta as { code?: string })?.code || p.short || p.name}=${p.name} (T${p.tier ?? '?'} ${p.kind}, ${p.country || '?'}, ${p.channel_pref || 'email'}, ${p.lang})`).join('; ');
@@ -48,7 +49,7 @@ Rules:
 - Be brief and concrete: short sentences, dates, PO numbers, ${tenant.currency || 'USD'}. One recommendation. British English. No markdown headings; at most 4 bullets.
 - VIA sits on top of the company's existing tools (email, WhatsApp, spreadsheets, ERP, PLM, portals, forwarders) and replaces none of them.
 - Costing: margin means the exporter's margin on FOB. Retail is a reference price only.${agent?.prompt_overrides ? `\n${agent.prompt_overrides}` : ''}` },
-    { type: 'text', text: `Today is ${today} (${tenant.tz}).${input.userName ? ` You are talking with ${input.userName}${input.userLang ? `, whose interface language is ${LANG_NAMES[input.userLang] || input.userLang}` : ''}.` : ''}${input.extraSystem ? `\n${input.extraSystem}` : ''}` },
+    { type: 'text', text: `Today is ${today} (${tenant.tz}).${input.userName ? ` You are talking with ${input.userName}${input.role ? ` (${input.role})` : ''}${input.userLang ? `, whose interface language is ${LANG_NAMES[input.userLang] || input.userLang}` : ''}.${input.scope ? ` They handle these customers only: ${(parties || []).filter((p) => input.scope!.includes((p as unknown as { id?: string }).id || '')).map((p) => p.name).join(', ') || 'see tools'}; the tools are already limited to them.` : ['owner', 'manager'].includes(input.role || '') ? ' They manage the whole team: use get_team for team questions.' : ''}` : ''}${input.extraSystem ? `\n${input.extraSystem}` : ''}` },
   ];
 
   const client = anthropic();

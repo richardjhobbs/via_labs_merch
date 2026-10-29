@@ -1,15 +1,15 @@
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
-import { requireTenant } from '@/lib/tenant';
+import { requireTenant, scopeOf } from '@/lib/tenant';
 import { listOrders } from '@/lib/orders';
 import { LABELS, MILESTONES, isoOf } from '@/lib/core/path';
 import { MsCell, HealthPill } from '@/components/milestones';
 
 export default async function Orders({ params, searchParams }: { params: Promise<{ tenant: string }>; searchParams: Promise<{ customer?: string; factory?: string; off?: string }> }) {
   const { tenant: slug } = await params; const f = await searchParams;
-  const { tenant } = await requireTenant(slug);
+  const { tenant, membership } = await requireTenant(slug);
   const t = await getTranslations('orders');
-  let all = await listOrders(tenant.id);
+  let all = await listOrders(tenant.id, { customers: scopeOf(membership) });
   const customers = [...new Map(all.map((o) => [o.customer?.id, o.customer])).values()].filter(Boolean) as { id: string; name: string }[];
   const factories = [...new Map(all.map((o) => [o.factory?.id, o.factory])).values()].filter(Boolean) as { id: string; name: string }[];
   if (f.customer) all = all.filter((o) => o.customer?.id === f.customer);

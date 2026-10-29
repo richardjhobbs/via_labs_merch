@@ -1,20 +1,22 @@
 // Approval queue: drafts the agents prepared, waiting for a person.
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
-import { requireTenant } from '@/lib/tenant';
+import { requireTenant, scopeOf } from '@/lib/tenant';
 import { supabaseServer } from '@/lib/supabase/server';
 import { approveDraft, rejectDraft } from './actions';
 
 export default async function Queue({ params, searchParams }: { params: Promise<{ tenant: string }>; searchParams: Promise<{ saved?: string; error?: string }> }) {
   const { tenant: slug } = await params; const q = await searchParams;
-  const { tenant } = await requireTenant(slug);
+  const { tenant, membership } = await requireTenant(slug);
+  const scope = scopeOf(membership);
   const t = await getTranslations('queue');
   const sb = await supabaseServer();
   const since = new Date(new Date().setHours(0, 0, 0, 0)).toISOString();
-  const [{ data: drafts }, { data: decided }] = await Promise.all([
-    sb.from('drafts').select('id, seq, priority, stream, title, impact, body, body_en, lang, gate_level, status, created_at, orders(po), parties(name, short, channel_pref), source:messages!drafts_source_message_id_fkey(sender_name, from_addr, text_en, text)').eq('tenant_id', tenant.id).in('status', ['queued', 'escalated']).order('priority').order('seq'),
+  const [{ data: draftsAll }, { data: decided }] = await Promise.all([
+    sb.from('drafts').select('id, seq, priority, stream, title, impact, body, body_en, lang, gate_level, status, created_at, party_id, orders(po, customer_id), parties(name, short, channel_pref), source:messages!drafts_source_message_id_fkey(sender_name, from_addr, text_en, text)').eq('tenant_id', tenant.id).in('status', ['queued', 'escalated']).order('priority').order('seq'),
     sb.from('drafts').select('id, seq, title, status, decided_at, decision_note, orders(po)').eq('tenant_id', tenant.id).in('status', ['approved', 'sent', 'rejected']).gte('decided_at', since).order('decided_at', { ascending: false }).limit(20),
   ]);
+  const drafts = (draftsAll || []).filter((d) => !scope || (d.parties && scope.includes(d.party_id as string)) || scope.includes((d.orders as unknown as { customer_id: string } | null)?.customer_id || ''));
   const P = ['', 'crit', 'warn', ''];
   return (
     <div className="max-w-5xl">
@@ -25,7 +27,7 @@ export default async function Queue({ params, searchParams }: { params: Promise<
       <div className="grid gap-4 mt-6">
         {!drafts?.length && <div className="card muted">{t('empty')}</div>}
         {(drafts || []).map((d) => {
-          const po = (d.orders as unknown as { po: string } | null)?.po, party = d.parties as unknown as { name: string; short: string | null; channel_pref: string | null } | null, src = d.source as unknown as { sender_name: string | null; from_addr: string | null; text_en: string | null; text: string } | null;
+          const po = (d.orders as unknown as { po: string; customer_id: string } | null)?.po, party = d.parties as unknown as { name: string; short: string | null; channel_pref: string | null } | null, src = d.source as unknown as { sender_name: string | null; from_addr: string | null; text_en: string | null; text: string } | null;
           return (
             <div key={d.id} className="card" style={{ borderLeft: `3px solid ${d.priority === 1 ? 'var(--crit)' : d.priority === 2 ? '#c9a24a' : 'var(--line)'}` }}>
               <div className="flex items-center gap-2 flex-wrap">

@@ -1,5 +1,5 @@
 // Agents: the company's agents, a conversation with the Ops agent, and the inbound simulator.
-import { getLocale, getTranslations } from 'next-intl/server';
+import { getTranslations } from 'next-intl/server';
 import { requireTenant } from '@/lib/tenant';
 import { supabaseServer } from '@/lib/supabase/server';
 import { hasLlm } from '@/lib/llm';
@@ -11,7 +11,6 @@ export default async function Agents({ params }: { params: Promise<{ tenant: str
   const { tenant: slug } = await params;
   const { tenant } = await requireTenant(slug);
   const t = await getTranslations('agents');
-  const locale = await getLocale();
   const sb = await supabaseServer();
   const [{ data: agents }, { data: parties }, { data: runs }] = await Promise.all([
     sb.from('agents').select('id, name, scope_kind, scope_stream, model, languages, enabled, parties(name)').eq('tenant_id', tenant.id).order('created_at'),

@@ -11,6 +11,7 @@ export type AgentCtx = {
   tenantId: string; agentId: string | null; agentName: string;
   trigger: 'chat' | 'inbound' | 'schedule' | 'partner';
   userId: string | null; userName: string | null; userEmail: string | null;
+  role: string | null; scope: string[] | null;   // customers this person handles; null = all
   sourceMessageId?: string | null;
   calls: { name: string; input: unknown; ok: boolean; ms: number }[];
   drafts: DraftRef[];              // drafts created in this run
@@ -57,7 +58,7 @@ export function toolsFor(ctx: AgentCtx) {
     run: wrap('get_briefing', async () => {
       const [{ data: drafts }, orders] = await Promise.all([
         sb.from('drafts').select('id, seq, priority, stream, title, impact, gate_level, created_at, orders(po), parties(name)').eq('tenant_id', T).in('status', ['queued', 'escalated']).order('priority').order('seq').limit(12),
-        listOrders(T, { status: 'open' }, sb),
+        listOrders(T, { status: 'open', customers: ctx.scope }, sb),
       ]);
       const ex = exceptionsOf(orders);
       return { today: isoOf(Math.floor(Date.now() / 864e5)), open_drafts: (drafts || []).map((x) => ({ id: x.id, ref: `Q-${x.seq}`, priority: x.priority, stream: x.stream, po: (x.orders as unknown as { po: string } | null)?.po, party: (x.parties as unknown as { name: string } | null)?.name, title: x.title, impact: x.impact, autonomy: `L${x.gate_level}` })), exceptions: ex.slice(0, 6).map((e) => ({ severity: e.sev, po: e.po, title: e.title, exposure_usd: e.exposure })), off_plan_pos: orders.filter((o) => o.health.state === 'red').map((o) => o.po), counts: { open_pos: orders.length, off_plan: orders.filter((o) => o.health.state !== 'green').length } };
@@ -69,7 +70,7 @@ export function toolsFor(ctx: AgentCtx) {
     description: 'List POs with customer, factory, qty, plan and forecast ETD and health (red/amber/green). Filter by free text, customer, factory, or off_plan only.',
     inputSchema: z.object({ query: z.string().optional().describe('PO, style or description text'), customer: z.string().optional().describe('customer name or code'), factory: z.string().optional().describe('factory name or code'), off_plan: z.boolean().optional() }),
     run: wrap('search_orders', async (a) => {
-      let L = await listOrders(T, {}, sb);
+      let L = await listOrders(T, { customers: ctx.scope }, sb);
       const q = (a.query || '').toLowerCase();
       if (q) L = L.filter((o) => `${o.po} ${o.style || ''} ${o.description || ''}`.toLowerCase().includes(q));
       if (a.customer) { const p = await partyByRef(T, a.customer); L = L.filter((o) => o.customer?.id === p?.id || o.customer?.name.toLowerCase().includes(a.customer!.toLowerCase())); }
@@ -97,7 +98,7 @@ export function toolsFor(ctx: AgentCtx) {
     name: 'get_exceptions',
     description: 'Open exception chains computed from live dates: cause, downstream effect, cost exposure (airfreight) and decision options.',
     inputSchema: z.object({}),
-    run: wrap('get_exceptions', async () => exceptionsOf(await listOrders(T, { status: 'open' }, sb)).map((e) => ({ severity: e.sev, po: e.po, title: e.title, exposure_usd: e.exposure, chain: e.chain.map((c) => c.t), options: e.opts.map((o) => ({ option: o[0], consequence: o[1] })) }))),
+    run: wrap('get_exceptions', async () => exceptionsOf(await listOrders(T, { status: 'open', customers: ctx.scope }, sb)).map((e) => ({ severity: e.sev, po: e.po, title: e.title, exposure_usd: e.exposure, chain: e.chain.map((c) => c.t), options: e.opts.map((o) => ({ option: o[0], consequence: o[1] })) }))),
   });
 
   const get_party = betaZodTool({
@@ -200,6 +201,23 @@ export function toolsFor(ctx: AgentCtx) {
     }),
   });
 
+  const get_team = betaZodTool({
+    name: 'get_team',
+    description: 'For managers: the team, each person\'s customers, open POs, off-plan POs, exceptions and drafts waiting for them, plus the agent\'s activity today. Use for "how is the team doing", "who is overloaded", "what is waiting for X".',
+    inputSchema: z.object({}),
+    run: wrap('get_team', async () => {
+      const [{ data: members }, { data: drafts }, { data: parties }, orders, { data: usage }] = await Promise.all([
+        sb.from('memberships').select('id, role, display_name, title, scopes').eq('tenant_id', T),
+        sb.from('drafts').select('id, party_id, orders(customer_id)').eq('tenant_id', T).in('status', ['queued', 'escalated']),
+        sb.from('parties').select('id, name').eq('tenant_id', T),
+        listOrders(T, { status: 'open' }, sb),
+        sb.from('usage_daily').select('agent_runs, messages_in, cost_usd').eq('tenant_id', T).eq('day', isoOf(Math.floor(Date.now() / 864e5))).maybeSingle(),
+      ]);
+      const nameOf = (id: string) => parties?.find((p) => p.id === id)?.name || id;
+      return { agent_today: usage, team: (members || []).map((m) => { const sc = ['owner', 'manager'].includes(m.role) ? null : ((m.scopes as { parties?: string[] })?.parties || null); const mine = sc?.length ? orders.filter((o) => o.customer && sc.includes(o.customer.id)) : orders; const q = (drafts || []).filter((d) => !sc?.length || (d.party_id && sc.includes(d.party_id)) || sc.includes((d.orders as unknown as { customer_id: string } | null)?.customer_id || '')); return { name: m.display_name, role: m.role, title: m.title, customers: sc?.length ? sc.map(nameOf) : 'all', open_pos: mine.length, off_plan: mine.filter((o) => o.health.state !== 'green').length, exceptions: exceptionsOf(mine).length, drafts_waiting: q.length, off_plan_pos: mine.filter((o) => o.health.state === 'red').map((o) => o.po) }; }) };
+    }),
+  });
+
   const navigate = betaZodTool({
     name: 'navigate',
     description: 'Show a screen to the person so the workspace follows the conversation: day, orders, order (with id = PO), parties, queue, ledger, agents, connections. Call it alongside your answer when the person asks to see or open something.',
@@ -207,7 +225,8 @@ export function toolsFor(ctx: AgentCtx) {
     run: wrap('navigate', async (a) => { ctx.nav = { screen: a.screen, id: a.id }; return { ok: true }; }),
   });
 
-  const all = [get_briefing, search_orders, get_order, get_exceptions, get_party, get_messages, get_ledger, get_gates, queue_draft, request_approval, set_milestone, navigate];
+  const all = [get_briefing, search_orders, get_order, get_exceptions, get_party, get_messages, get_ledger, get_gates, queue_draft, request_approval, set_milestone, navigate, get_team];
+  const forRole = ['owner', 'manager'].includes(ctx.role || '') || ctx.trigger !== 'chat' ? all : all.filter((t) => t.name !== 'get_team');
   // inbound runs may capture a reported date (L1 record) and draft; they never approve
-  return ctx.trigger === 'inbound' ? all.filter((t) => !['request_approval', 'navigate'].includes(t.name)) : all;
+  return ctx.trigger === 'inbound' ? forRole.filter((t) => !['request_approval', 'navigate', 'get_team'].includes(t.name)) : forRole;
 }

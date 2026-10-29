@@ -69,7 +69,7 @@
     "morning": "Morgen",
     "afternoon": "Tag",
     "evening": "Abend",
-    "waiting": "warten auf Sie",
+    "waiting": "Wartend",
     "exceptions": "offene Abweichungen",
     "offplan": "Aufträge außer Plan",
     "approved": "heute freigegeben",
@@ -83,7 +83,16 @@
     "customer": "Kunde",
     "factory": "Fabrik",
     "health": "Status",
-    "importLink": "Tabelle importieren"
+    "importLink": "Tabelle importieren",
+    "team": "Ihr Team",
+    "person": "Person",
+    "customers": "Kunden",
+    "openPos": "Offene POs",
+    "offplanCol": "Außer Plan",
+    "allCustomers": "alle Kunden",
+    "agentToday": "Agent heute: {runs} Läufe · {msgs} Nachrichten · USD {cost}",
+    "yourCustomers": "Ihre Kunden: {names}",
+    "allCustomersNote": "Sie sehen alle Kunden und das ganze Team."
   },
   "queue": {
     "title": "Freigaben",
@@ -118,7 +127,12 @@
     "role": "Rolle",
     "send": "Einladung senden",
     "pending": "Offene Einladungen",
-    "created": "Erstellt"
+    "created": "Erstellt",
+    "scope": "Titel und Kunden",
+    "jobTitle": "Jobtitel",
+    "scopeHint": "Strg oder Cmd halten für mehrere. Keine Auswahl = alle Kunden.",
+    "saveScope": "Speichern",
+    "allCustomers": "alle Kunden"
   },
   "roles": {
     "owner": "Inhaber",
@@ -301,5 +315,9 @@
     "s_ledger": "Was hat der Agent heute getan?",
     "s_any1": "Die Fabrik wegen des Stofftermins anmahnen",
     "s_any2": "WIP-Notiz an einen Kunden entwerfen"
+  },
+  "viewas": {
+    "label": "Ansicht als",
+    "self": "Ich selbst (VIA-Admin)"
   }
 }

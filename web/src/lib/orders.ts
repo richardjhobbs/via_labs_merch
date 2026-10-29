@@ -18,12 +18,13 @@ export type OrderWithHealth = OrderRow & { health: Health };
 
 const SELECT = 'id, po, style, description, category, composition, qty, sizes, colours, fob, currency, incoterm, pol, pod, instore_date, season, status, source, customer:parties!orders_customer_id_fkey(id, name, short), factory:parties!orders_factory_id_fkey(id, name, short, country), mill:parties!orders_mill_id_fkey(id, name, short), fibre:parties!orders_fibre_id_fkey(id, name, short), milestones(id, key, plan_date, expected_date, actual_date, forecast_date, owner_kind, note)';
 
-export async function listOrders(tenantId: string, opts: { status?: string } = {}, client?: Client): Promise<OrderWithHealth[]> {
+export async function listOrders(tenantId: string, opts: { status?: string; customers?: string[] | null } = {}, client?: Client): Promise<OrderWithHealth[]> {
   const sb = client || await supabaseServer();
   let q = sb.from('orders').select(SELECT).eq('tenant_id', tenantId).order('po');
   if (opts.status) q = q.eq('status', opts.status);
   const { data } = await q;
-  return ((data || []) as unknown as OrderRow[]).map((o) => ({ ...o, health: orderHealth(o.milestones) }));
+  const rows = ((data || []) as unknown as OrderRow[]).filter((o) => !opts.customers || (o.customer && opts.customers.includes(o.customer.id)));
+  return rows.map((o) => ({ ...o, health: orderHealth(o.milestones) }));
 }
 
 export async function getOrder(tenantId: string, po: string, client?: Client): Promise<OrderWithHealth | null> {

@@ -79,6 +79,22 @@ async function mailInvite(email: string, tenantName: string, role: string, token
   }
 }
 
+// A member's job title and the customers they handle (empty = all). Owners and managers always see all.
+export async function setMemberScope(form: FormData) {
+  const me = await requireAdmin();
+  const tenantId = String(form.get('tenant_id')), id = String(form.get('id')), title = String(form.get('title') || '').trim() || null;
+  const parties = form.getAll('parties').map(String).filter((x) => /^[0-9a-f-]{36}$/i.test(x));
+  const sb = supabaseAdmin();
+  const { data: m } = await sb.from('memberships').select('display_name').eq('id', id).eq('tenant_id', tenantId).maybeSingle();
+  if (!m) redirect(`/admin/tenants/${tenantId}?error=missing`);
+  const { error } = await sb.from('memberships').update({ title, scopes: { parties } }).eq('id', id);
+  if (error) redirect(`/admin/tenants/${tenantId}?error=${encodeURIComponent(error.message)}`);
+  const { data: names } = parties.length ? await sb.from('parties').select('name').in('id', parties) : { data: [] };
+  await sb.rpc('ledger_append', { p_tenant: tenantId, p_channel: 'Console', p_actor: `VIA admin (${me.user.email})`, p_actor_user: me.user.id, p_counterparty: m.display_name, p_stream: 'Setup', p_order: null, p_what: `${m.display_name}: ${title ? title + '; ' : ''}customers ${parties.length ? (names || []).map((n) => n.name).join(', ') : 'all'}`, p_gate: 'ADMIN', p_gated: true, p_ref: { membership_id: id, parties } });
+  revalidatePath(`/admin/tenants/${tenantId}`);
+  redirect(`/admin/tenants/${tenantId}?sent=${encodeURIComponent('scope saved')}`);
+}
+
 export async function updateRequest(form: FormData) {
   await requireAdmin();
   const id = String(form.get('id')), status = String(form.get('status'));
