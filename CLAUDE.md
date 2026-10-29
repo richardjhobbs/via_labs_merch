@@ -22,4 +22,4 @@ See `web/.env.example`. Secrets live only in the Vercel project `via-labs-merch`
 
 ## Notion build log
 
-Update after every meaningful deploy: page "Build Log - VIA Merch (Phase 1+)" under "Build Logs - All Repos (Index)" (id `3b4dbc7b67f28185b446cf4c84895f47`). Entries are `## Phase N - Title (D Month YYYY)` with **What was built** / **What failed** / **Key learning** / **Key files** / **Verified**, appended at the end before the `*Last updated:*` footer. Phase numbers never reset.
+Update after every meaningful deploy: page "Build Log - VIA Merch (Phase 1+)" (id `408dbc7b67f28125bcd0c38ce332029f`) under "Build Logs - All Repos (Index)" (id `3b4dbc7b67f28185b446cf4c84895f47`). Entries are `## Phase N - Title (D Month YYYY)` with **What was built** / **What failed** / **Key learning** / **Key files** / **Verified**, appended at the end before the `*Last updated:*` footer. Phase numbers never reset.
