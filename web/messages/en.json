@@ -85,9 +85,9 @@
   },
   "admin": {
     "title": "VIA admin",
-    "tenants": "Tenants",
+    "tenants": "Companies",
     "requests": "Access requests",
-    "newTenant": "New tenant",
+    "newTenant": "New company",
     "name": "Name",
     "slug": "Slug",
     "kind": "Kind",

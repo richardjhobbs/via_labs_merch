@@ -85,9 +85,9 @@
   },
   "admin": {
     "title": "VIA-Verwaltung",
-    "tenants": "Mandanten",
+    "tenants": "Unternehmen",
     "requests": "Zugangsanfragen",
-    "newTenant": "Neuer Mandant",
+    "newTenant": "Neues Unternehmen",
     "name": "Name",
     "slug": "Kürzel",
     "kind": "Art",
