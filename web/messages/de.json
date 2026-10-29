@@ -51,7 +51,7 @@
   },
   "login": {
     "title": "Anmelden",
-    "intro": "Geben Sie Ihre geschäftliche E-Mail ein. Wir senden einen Anmeldecode und einen Link; beides meldet Sie an.",
+    "intro": "Geben Sie Ihre geschäftliche E-Mail ein. Wir senden einen 8-stelligen Anmeldecode; geben Sie ihn hier ein.",
     "email": "E-Mail",
     "send": "Code senden",
     "code": "Anmeldecode",
@@ -61,7 +61,8 @@
     "idle": "Sie wurden nach 2 Stunden ohne Aktivität abgemeldet.",
     "ended": "Diese Sitzung ist beendet. Bitte erneut anmelden.",
     "noAccount": "Für diese E-Mail gibt es noch keinen Zugang zu VIA Merch. Bitten Sie Ihre Leitung um eine Einladung oder fragen Sie Zugang an.",
-    "error": "Der Code hat nicht funktioniert. Versuchen Sie es erneut oder fordern Sie einen neuen an."
+    "error": "Der Code hat nicht funktioniert. Jeder Code gilt einmal und eine Stunde lang; fordern Sie einen neuen an.",
+    "link": "Dieser Link wurde bereits verwendet oder ist abgelaufen. Fordern Sie einen neuen Code an."
   },
   "day": {
     "greeting": "Guten {period}, {name}",

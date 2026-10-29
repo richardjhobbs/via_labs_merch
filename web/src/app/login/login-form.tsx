@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { supabaseBrowser } from '@/lib/supabase/client';
@@ -13,11 +13,16 @@ export function LoginForm({ next }: { next: string }) {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
   const sb = supabaseBrowser();
+  // Stale cookies from a session that was ended server-side would otherwise make the browser client
+  // try to refresh a revoked token on every load.
+  useEffect(() => { sb.auth.getSession().then(({ data }) => { if (data.session) sb.auth.signOut({ scope: 'local' }); }); }, [sb]);
 
   async function send(e: React.FormEvent) {
     e.preventDefault(); setBusy(true); setErr('');
-    // shouldCreateUser:false keeps sign-in invite-only; invites create the user first
-    const { error } = await sb.auth.signInWithOtp({ email, options: { shouldCreateUser: false, emailRedirectTo: `${location.origin}/auth/callback?next=${encodeURIComponent(next)}` } });
+    // shouldCreateUser:false keeps sign-in invite-only; invites create the user first.
+    // Code only: a magic link and the code are the same one-time token, so a link opened in another
+    // tab would consume the code the person is about to type.
+    const { error } = await sb.auth.signInWithOtp({ email, options: { shouldCreateUser: false } });
     setBusy(false);
     if (error) { setErr(/signups not allowed|not found|user not/i.test(error.message) ? t('noAccount') : error.message); return; }
     setSent(true);

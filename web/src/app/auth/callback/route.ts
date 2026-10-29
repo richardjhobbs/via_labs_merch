@@ -14,6 +14,6 @@ export async function GET(req: NextRequest) {
   else if (code) ok = !(await sb.auth.exchangeCodeForSession(code)).error;
   const dest = url.clone(); dest.search = '';
   dest.pathname = ok ? (next.startsWith('/') ? next : '/app') : '/login';
-  if (!ok) dest.searchParams.set('reason', 'ended');
+  if (!ok) dest.searchParams.set('reason', 'link');
   return NextResponse.redirect(dest);
 }

@@ -15,6 +15,7 @@ export default async function Login({ searchParams }: { searchParams: Promise<{ 
         <h1 style={{ fontSize: 20 }}>{t('title')}</h1>
         {reason === 'idle' && <div className="notice warn mt-3">{t('idle')}</div>}
         {reason === 'ended' && <div className="notice warn mt-3">{t('ended')}</div>}
+        {reason === 'link' && <div className="notice warn mt-3">{t('link')}</div>}
         <p className="muted small mt-2 mb-4">{t('intro')}</p>
         <LoginForm next={next} />
       </div>

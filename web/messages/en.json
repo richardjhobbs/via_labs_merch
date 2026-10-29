@@ -51,7 +51,7 @@
   },
   "login": {
     "title": "Sign in",
-    "intro": "Enter your work email. We send a sign-in code and a link; either one signs you in.",
+    "intro": "Enter your work email. We send an 8-digit sign-in code; type it here.",
     "email": "Email",
     "send": "Send code",
     "code": "Sign-in code",
@@ -61,7 +61,8 @@
     "idle": "You were signed out after 2 hours without activity.",
     "ended": "That session has ended. Sign in again.",
     "noAccount": "This email has no VIA Merch access yet. Ask your manager for an invite, or request access.",
-    "error": "That code did not work. Try again or request a new one."
+    "error": "That code did not work. Each code works once and expires after an hour; request a new one.",
+    "link": "That link was already used or has expired. Request a new code."
   },
   "day": {
     "greeting": "Good {period}, {name}",
