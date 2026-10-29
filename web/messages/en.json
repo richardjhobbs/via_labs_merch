@@ -38,7 +38,8 @@
       "country": "Country",
       "message": "What takes your merchandising team's time today?",
       "send": "Send request",
-      "sent": "Thank you. We will reply by email within two working days."
+      "sent": "Thank you. We will reply by email within two working days.",
+      "url": "Company website"
     },
     "kinds": {
       "buying_office": "Buying office",

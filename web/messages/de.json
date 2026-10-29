@@ -38,7 +38,8 @@
       "country": "Land",
       "message": "Was kostet Ihr Merchandising-Team heute die meiste Zeit?",
       "send": "Anfrage senden",
-      "sent": "Vielen Dank. Wir antworten per E-Mail innerhalb von zwei Werktagen."
+      "sent": "Vielen Dank. Wir antworten per E-Mail innerhalb von zwei Werktagen.",
+      "url": "Website des Unternehmens"
     },
     "kinds": {
       "buying_office": "Einkaufsbüro",
