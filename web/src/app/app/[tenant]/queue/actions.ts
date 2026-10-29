@@ -10,8 +10,10 @@ export async function rejectDraft(form: FormData) { return decide(form, 'rejecte
 
 async function decide(form: FormData, status: 'approved' | 'rejected') {
   const slug = String(form.get('tenant')), id = String(form.get('id')), body = String(form.get('body') || ''), note = String(form.get('note') || '').trim();
+  const back = String(form.get('back') || '');
   const me = await requireTenant(slug);
   const r = await decideDraft(me, id, status, { body, note });
   revalidatePath(`/app/${slug}/queue`); revalidatePath(`/app/${slug}`);
-  redirect(`/app/${slug}/queue?` + (r.ok ? 'saved=1' : 'error=' + encodeURIComponent(r.error || 'failed')));
+  const dest = back.startsWith(`/app/${slug}`) ? back : `/app/${slug}/queue`;
+  redirect(dest + (dest.includes('?') ? '&' : '?') + (r.ok ? 'saved=1' : 'error=' + encodeURIComponent(r.error || 'failed')));
 }

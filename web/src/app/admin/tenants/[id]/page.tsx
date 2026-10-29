@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { supabaseAdmin } from '@/lib/supabase/server';
 import { inviteMember, resendInvite, loadSampleAction, setMemberScope } from '../../actions';
+import { InboundSim } from '@/app/app/[tenant]/agents/panels';
 
 const ROLES = ['owner', 'manager', 'merchandiser', 'qc', 'compliance', 'logistics', 'viewer'] as const;
 
@@ -12,9 +13,10 @@ export default async function TenantAdmin({ params, searchParams }: { params: Pr
   const sb = supabaseAdmin();
   const { data: tenant } = await sb.from('tenants').select('*').eq('id', id).maybeSingle();
   if (!tenant) notFound();
-  const [{ data: members }, { data: customers }, { data: invites }, { data: gates }, { data: ledger }] = await Promise.all([
+  const [{ data: members }, { data: customers }, { data: customersAll }, { data: invites }, { data: gates }, { data: ledger }] = await Promise.all([
     sb.from('memberships').select('id, role, display_name, title, user_id, created_at, scopes').eq('tenant_id', id).order('created_at'),
     sb.from('parties').select('id, name').eq('tenant_id', id).in('kind', ['brand', 'retailer', 'store', 'buying_office', 'trading']).order('name'),
+    sb.from('parties').select('id, name, kind').eq('tenant_id', id).order('kind').order('name'),
     sb.from('invites').select('id, email, role, display_name, created_at, expires_at').eq('tenant_id', id).is('accepted_at', null).order('created_at', { ascending: false }),
     sb.from('gates').select('stream, level, locked').eq('tenant_id', id).order('stream'),
     sb.from('ledger').select('id, at, actor, what, gate').eq('tenant_id', id).order('id', { ascending: false }).limit(20),
@@ -28,6 +30,7 @@ export default async function TenantAdmin({ params, searchParams }: { params: Pr
       {sent && <div className="notice mt-3">Invite emailed to {sent}.</div>}
       <div className="grid gap-6 mt-5" style={{ gridTemplateColumns: 'minmax(0,1fr) 320px' }}>
         <div className="grid gap-5">
+          <InboundSim slug={tenant.slug} live={!!process.env.ANTHROPIC_API_KEY} parties={(customersAll || []).map((p) => ({ id: p.id, name: p.name, kind: p.kind }))} labels={{ title: 'Test: inject an inbound message', sub: 'VIA staff only. Runs the inbound pipeline on a pasted message as if it had arrived on a channel: logged, linked to the party and PO, dates captured, reply queued for the company.', from: 'From (name)', party: 'Customer or supplier', channel: 'Channel', subject: 'Subject', text: 'Message', run: 'Run the pipeline', result: 'Result', openQueue: 'Open the company queue', thinking: 'Working...' }} />
           <div className="card tw" style={{ padding: 0 }}><div className="p-4 pb-2"><h2>{t('admin.members')}</h2></div>
             <table className="t"><thead><tr><th>Email</th><th>{t('admin.name')}</th><th>{t('admin.role')}</th><th>{t('admin.scope')}</th></tr></thead><tbody>
               {(members || []).map((m) => { const sc = ((m.scopes as { parties?: string[] })?.parties) || []; return (<tr key={m.id}><td>{emailOf(m.user_id)}<div className="muted small">{new Date(m.created_at).toLocaleDateString('en-GB')}</div></td><td>{m.display_name}</td><td><span className="pill">{t(`roles.${m.role}`)}</span></td><td>

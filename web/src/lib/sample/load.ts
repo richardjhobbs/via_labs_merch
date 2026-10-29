@@ -3,6 +3,7 @@
 import { supabaseAdmin } from '@/lib/supabase/server';
 import { MILESTONES, GAP, TRANSIT, OWNERS, isoOf, today, type MilestoneKey } from '@/lib/core/path';
 import { SAMPLE_BRANDS, SAMPLE_SUPPLIERS, SAMPLE_LINES, SAMPLE_STORY, POL, POD } from './meridian';
+import { seedSampleInbound } from '@/lib/agents/proactive';
 
 export async function loadSample(tenantId: string, byUser: string, byEmail: string) {
   const sb = supabaseAdmin();
@@ -48,5 +49,7 @@ export async function loadSample(tenantId: string, byUser: string, byEmail: stri
   const { error: me } = await sb.from('milestones').insert(ms);
   if (me) return { ok: false, error: me.message };
   await sb.rpc('ledger_append', { p_tenant: tenantId, p_channel: 'Console', p_actor: `VIA admin (${byEmail})`, p_actor_user: byUser, p_counterparty: null, p_stream: 'Setup', p_order: null, p_what: `Sample data loaded: ${brandRows.length} customers, ${supRows.length} suppliers, ${orders.length} POs`, p_gate: 'ADMIN', p_gated: true, p_ref: {} });
+  // Messages start arriving and the agent gets its first pass; both run from the minute tick.
+  try { await seedSampleInbound(tenantId); } catch { /* the loader succeeded; the agent side is best effort */ }
   return { ok: true, orders: orders.length };
 }
