@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { supabaseBrowser } from '@/lib/supabase/client';
 
-export function LoginForm({ next }: { next: string }) {
+export function LoginForm({ next, reason }: { next: string; reason?: string }) {
   const t = useTranslations('login');
   const router = useRouter();
   const [email, setEmail] = useState('');
@@ -15,7 +15,9 @@ export function LoginForm({ next }: { next: string }) {
   const sb = supabaseBrowser();
   // Stale cookies from a session that was ended server-side would otherwise make the browser client
   // try to refresh a revoked token on every load.
-  useEffect(() => { sb.auth.getSession().then(({ data }) => { if (data.session) sb.auth.signOut({ scope: 'local' }); }); }, [sb]);
+  // Only when the server sent us here after ending a session (idle/ended): clear the stale cookies once,
+  // before any code is entered. Never after a verify, or it would wipe the session just created.
+  useEffect(() => { if (!reason || sent) return; sb.auth.getSession().then(({ data }) => { if (data.session) sb.auth.signOut({ scope: 'local' }); }); }, [sb, reason, sent]);
 
   async function send(e: React.FormEvent) {
     e.preventDefault(); setBusy(true); setErr('');
@@ -32,7 +34,7 @@ export function LoginForm({ next }: { next: string }) {
     const { error } = await sb.auth.verifyOtp({ email, token: code.trim(), type: 'email' });
     setBusy(false);
     if (error) { setErr(t('error')); return; }
-    router.replace(next.startsWith('/') ? next : '/app'); router.refresh();
+    window.location.assign(next.startsWith('/') ? next : '/app');
   }
 
   if (!sent) return (
