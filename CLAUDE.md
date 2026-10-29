@@ -10,6 +10,7 @@ VIA Merch, the live product at merch.getvia.xyz: agents for merchandising teams 
 
 ## Rules
 
+- Read `docs/merchandiser-records.md` (founder, 29 Oct 2026): manual merchandiser work (samples, measurements, spec adherence, inspections, third-party inputs) is a first-class, versioned, ledger-backed record, linked to PO and milestone, with any input route. Design samples, QC, documents and ledger features against it.
 - Sign-in is a code or magic link on every visit; sessions are browser-session cookies and end after 2 hours idle (`src/middleware.ts`, `merch.sessions`). Do not add "remember me".
 - Nothing the agent drafts is sent without the stream's gate allowing it; price, claims and order confirmation are capped at L1.
 - Jobs run from `/api/jobs/drain`, called every minute by `merch.tick()` (pg_cron + pg_net) with the `x-merch-jobs` secret. Keep each drain under 55 s.
