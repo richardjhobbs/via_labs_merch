@@ -19,7 +19,10 @@ export async function createTenant(form: FormData) {
   if (!p.success) redirect('/admin?error=' + encodeURIComponent('Check the form'));
   const d = p.data, sb = supabaseAdmin();
   const { data: t, error } = await sb.from('tenants').insert({ name: d.name, slug: d.slug, kind: d.kind, plan: d.plan, locale: d.locale, tz: d.tz }).select('id').single();
-  if (error || !t) redirect('/admin?error=' + encodeURIComponent(error?.message || 'failed'));
+  if (error || !t) {
+    const msg = /invalid api key|jwt/i.test(error?.message || '') ? 'Supabase rejected SUPABASE_SERVICE_ROLE_KEY in the Vercel project. Paste the service_role key from Supabase → Settings → API Keys and redeploy.' : (error?.message || 'failed');
+    redirect('/admin?error=' + encodeURIComponent(msg));
+  }
   await sb.from('gates').insert(GATES.map(([stream, level, locked]) => ({ tenant_id: t.id, stream, level, locked, set_by: me.user.id })));
   await sb.from('agents').insert({ tenant_id: t.id, name: 'Mira', scope_kind: 'tenant', languages: [d.locale, 'en'] });
   await sb.rpc('ledger_append', { p_tenant: t.id, p_channel: 'Console', p_actor: `VIA admin (${me.user.email})`, p_actor_user: me.user.id, p_counterparty: null, p_stream: 'Setup', p_order: null, p_what: `Tenant created: ${d.name} (${d.kind}, ${d.plan})`, p_gate: 'ADMIN', p_gated: true, p_ref: {} });
