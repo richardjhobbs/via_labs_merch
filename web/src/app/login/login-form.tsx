@@ -31,10 +31,12 @@ export function LoginForm({ next, reason }: { next: string; reason?: string }) {
   }
   async function verify(e: React.FormEvent) {
     e.preventDefault(); setBusy(true); setErr('');
-    const { error } = await sb.auth.verifyOtp({ email, token: code.trim(), type: 'email' });
+    // Server-side verify: the session cookies come back as Set-Cookie headers, which every browser honours.
+    const r = await fetch('/auth/verify', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email, token: code.trim(), next }) });
+    const j = await r.json().catch(() => ({ ok: false }));
     setBusy(false);
-    if (error) { setErr(t('error')); return; }
-    window.location.assign(next.startsWith('/') ? next : '/app');
+    if (!r.ok || !j.ok) { setErr(t('error')); return; }
+    window.location.assign(j.next || '/app');
   }
 
   if (!sent) return (
