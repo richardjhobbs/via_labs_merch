@@ -43,8 +43,10 @@ export async function loadSampleThreads(tenantId: string, byEmail: string) {
   const { data: loose } = await sb.from('messages').select('id, thread_id, party_id, order_id').eq('tenant_id', tenantId).contains('raw', { sample: true });
   for (const m of loose || []) {
     if (!m.party_id || !m.order_id) continue;
-    const { data: home } = await sb.from('threads').select('id').eq('tenant_id', tenantId).eq('party_id', m.party_id).eq('order_id', m.order_id).neq('id', m.thread_id).order('last_message_at', { ascending: false }).limit(1).maybeSingle();
-    if (home) { await sb.from('messages').update({ thread_id: home.id }).eq('id', m.id); await sb.from('threads').update({ last_message_at: new Date().toISOString() }).eq('id', home.id); await sb.from('threads').delete().eq('id', m.thread_id); }
+    let q = sb.from('threads').select('id').eq('tenant_id', tenantId).eq('party_id', m.party_id).eq('order_id', m.order_id).order('last_message_at', { ascending: false }).limit(1);
+    if (m.thread_id) q = q.neq('id', m.thread_id);
+    const { data: home } = await q.maybeSingle();
+    if (home) { await sb.from('messages').update({ thread_id: home.id }).eq('id', m.id); await sb.from('threads').update({ last_message_at: new Date().toISOString() }).eq('id', home.id); if (m.thread_id) await sb.from('threads').delete().eq('id', m.thread_id); }
   }
   await sb.rpc('ledger_append', { p_tenant: tenantId, p_channel: 'Console', p_actor: `VIA admin (${byEmail})`, p_actor_user: null, p_counterparty: null, p_stream: 'Setup', p_order: null, p_what: `Sample conversations loaded: ${threads} threads, ${messages} messages`, p_gate: 'ADMIN', p_gated: true, p_ref: {} });
   return { ok: true, threads, messages, day: isoOf(T) };

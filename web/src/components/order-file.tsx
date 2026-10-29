@@ -39,7 +39,7 @@ export async function OrderFile({ slug, tenantId, orderId, po, tz }: { slug: str
           <div key={g.party.name}>
             <div className="flex items-center gap-2 flex-wrap"><span className={`pill ${CUSTOMER.includes(g.party.kind) ? 'agent' : ''}`}>{CUSTOMER.includes(g.party.kind) ? t('customer') : t(`kind.${g.party.kind}`, { default: g.party.kind })}</span><b>{g.party.name}</b><span className="muted small">{g.party.lang}</span></div>
             <div className="grid gap-2 mt-2">
-              {g.threads.map((th) => { const list = byThread.get(th.id) || []; const last = list[list.length - 1]; const open = (drafts || []).filter((d) => list.some((m) => m.id === d.source_message_id) || (d.party_id === th.party_id && !d.source_message_id)); return (
+              {g.threads.map((th) => { const list = byThread.get(th.id) || []; const last = list[list.length - 1]; const open = (drafts || []).filter((d) => d.party_id === th.party_id || list.some((m) => m.id === d.source_message_id)); return (
                 <details key={th.id} className="p-3" style={{ border: '1px solid var(--line)', borderRadius: 10, background: '#fff' }}>
                   <summary className="flex items-center gap-2 flex-wrap" style={{ cursor: 'pointer', listStyle: 'none' }}>
                     <span className="font-medium small">{th.subject || t('conversation')}</span><span className="pill">{th.kind || '—'}</span><span className="muted small">{list.length} {t('messages')}</span>

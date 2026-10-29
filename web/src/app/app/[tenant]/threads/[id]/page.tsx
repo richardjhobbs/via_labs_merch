@@ -24,7 +24,7 @@ export default async function Thread({ params }: { params: Promise<{ tenant: str
   ]);
   const p = th.parties as unknown as { name: string; kind: string; lang: string; channel_pref: string | null } | null, o = th.orders as unknown as { po: string; style: string; description: string } | null;
   // drafts that answer a message in this chain, or were raised for this party on this PO
-  const open = (drafts || []).filter((d) => (msgs || []).some((m) => m.id === d.source_message_id) || (!d.source_message_id && d.order_id === th.order_id));
+  const open = (drafts || []).filter((d) => d.order_id === th.order_id || (msgs || []).some((m) => m.id === d.source_message_id));
   const labels = { waiting: t('pendingReply'), approve: t('approve'), hold: t('hold'), reject: t('reject'), impact: t('impact'), english: t('english') };
   return (
     <div className="max-w-5xl">
