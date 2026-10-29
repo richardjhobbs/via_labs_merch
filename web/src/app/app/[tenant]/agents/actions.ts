@@ -1,21 +1,8 @@
 'use server';
 import { requireTenant } from '@/lib/tenant';
-import { runAgent } from '@/lib/agents/run';
 import { ingestInbound, processInbound } from '@/lib/agents/inbound';
 import { hasLlm } from '@/lib/llm';
 import { supabaseAdmin } from '@/lib/supabase/server';
-
-export type ChatTurn = { role: 'user' | 'assistant'; text: string };
-export type AskResult = { text: string; calls: { name: string; ok: boolean; ms: number }[]; drafts: number; error?: string };
-
-// Chat with the company's agent. The person's identity goes into the prompt and the ledger actor.
-export async function askAgent(slug: string, history: ChatTurn[], question: string, lang: string): Promise<AskResult> {
-  const { tenant, membership, user } = await requireTenant(slug);
-  if (!hasLlm()) return { text: '', calls: [], drafts: 0, error: 'ANTHROPIC_API_KEY is not set in the Vercel project.' };
-  const messages = [...history.slice(-12).map((h) => ({ role: h.role, content: h.text })), { role: 'user' as const, content: question }];
-  const r = await runAgent({ tenantId: tenant.id, trigger: 'chat', userId: user.id, userName: membership.display_name || user.email, userEmail: user.email, userLang: lang, messages });
-  return { text: r.text, calls: r.calls.map((c) => ({ name: c.name, ok: c.ok, ms: c.ms })), drafts: r.drafts.length, error: r.error };
-}
 
 export type SimResult = { ok: boolean; summary?: string; drafts?: number; partyId?: string | null; orderId?: string | null; stream?: string; error?: string };
 

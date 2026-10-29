@@ -2,7 +2,7 @@
 import type Anthropic from '@anthropic-ai/sdk';
 import { anthropic, MODEL, costOf, recordUsage } from '@/lib/llm';
 import { supabaseAdmin } from '@/lib/supabase/server';
-import { toolsFor, type AgentCtx } from './tools';
+import { toolsFor, type AgentCtx, type DraftRef } from './tools';
 import { LANG_NAMES } from '@/lib/llm';
 
 export type RunInput = {
@@ -13,7 +13,7 @@ export type RunInput = {
   extraSystem?: string;
 };
 
-export type RunResult = { text: string; calls: AgentCtx['calls']; drafts: string[]; runId: string | null; usage: { tokensIn: number; tokensOut: number; cost: number }; error?: string };
+export type RunResult = { text: string; calls: AgentCtx['calls']; drafts: DraftRef[]; nav: AgentCtx['nav']; runId: string | null; usage: { tokensIn: number; tokensOut: number; cost: number }; error?: string };
 
 export async function runAgent(input: RunInput): Promise<RunResult> {
   const sb = supabaseAdmin();
@@ -25,7 +25,7 @@ export async function runAgent(input: RunInput): Promise<RunResult> {
     sb.from('gates').select('stream, level, locked').eq('tenant_id', input.tenantId).order('stream'),
   ]);
   if (!tenant) throw new Error('tenant not found');
-  const ctx: AgentCtx = { tenantId: tenant.id, agentId: agent?.id || null, agentName: agent?.name || 'Mira', trigger: input.trigger, userId: input.userId || null, userName: input.userName || null, userEmail: input.userEmail || null, sourceMessageId: input.sourceMessageId || null, calls: [], drafts: [] };
+  const ctx: AgentCtx = { tenantId: tenant.id, agentId: agent?.id || null, agentName: agent?.name || 'Mira', trigger: input.trigger, userId: input.userId || null, userName: input.userName || null, userEmail: input.userEmail || null, sourceMessageId: input.sourceMessageId || null, calls: [], drafts: [], nav: null };
 
   const customers = (parties || []).filter((p) => ['brand', 'retailer', 'store', 'buying_office', 'trading'].includes(p.kind)).map((p) => `${(p.meta as { code?: string })?.code || p.short || p.name}=${p.name} (${p.kind}, ${p.country || '?'}, writes in ${p.lang})`).join('; ');
   const suppliers = (parties || []).filter((p) => ['factory', 'mill', 'fibre', 'forwarder', 'carrier', 'lab', 'auditor'].includes(p.kind)).map((p) => `${(p.meta as { code?: string })?.code || p.short || p.name}=${p.name} (T${p.tier ?? '?'} ${p.kind}, ${p.country || '?'}, ${p.channel_pref || 'email'}, ${p.lang})`).join('; ');
@@ -79,5 +79,5 @@ Rules:
   const cost = costOf(MODEL, tokensIn, tokensOut);
   const { data: run } = await sb.from('agent_runs').insert({ tenant_id: tenant.id, agent_id: ctx.agentId, user_id: ctx.userId, trigger: input.trigger, model: MODEL, input: { messages: input.messages.slice(-2) }, tools_called: ctx.calls, output: text || null, tokens_in: tokensIn, tokens_out: tokensOut, cost_usd: cost, ms: Date.now() - t0, error: error || null }).select('id').single();
   await recordUsage(tenant.id, { runs: 1, tokensIn, tokensOut, cost });
-  return { text, calls: ctx.calls, drafts: ctx.drafts, runId: run?.id || null, usage: { tokensIn, tokensOut, cost }, error };
+  return { text, calls: ctx.calls, drafts: ctx.drafts, nav: ctx.nav, runId: run?.id || null, usage: { tokensIn, tokensOut, cost }, error };
 }

@@ -13,8 +13,10 @@ export type AgentCtx = {
   userId: string | null; userName: string | null; userEmail: string | null;
   sourceMessageId?: string | null;
   calls: { name: string; input: unknown; ok: boolean; ms: number }[];
-  drafts: string[];                // draft ids created in this run
+  drafts: DraftRef[];              // drafts created in this run
+  nav: { screen: string; id?: string } | null;  // last navigate call, for the assistant panel
 };
+export type DraftRef = { id: string; seq: number; title: string; stream: string; gate_level: number; party: string | null; po: string | null };
 
 const STREAMS = ['General enquiries', 'RFQ and quotes', 'Tech pack forwarding', 'Approvals', 'Order confirmation', 'WIP reports', 'Amendments', 'Price clarification', 'Production status', 'QC', 'Compliance and CSR', 'Logistics', 'Claims', 'Material sourcing'] as const;
 
@@ -158,7 +160,7 @@ export function toolsFor(ctx: AgentCtx) {
       const { data: contact } = p ? await sb.from('contacts').select('id').eq('party_id', p.id).order('is_primary', { ascending: false }).limit(1).maybeSingle() : { data: null };
       const { data: dr, error } = await sb.from('drafts').insert({ tenant_id: T, agent_id: ctx.agentId, role: 'merchandiser', priority: a.priority || 2, stream: a.stream, order_id: o?.id || null, party_id: p?.id || null, contact_id: contact?.id || null, source_message_id: ctx.sourceMessageId || null, title: a.title, impact: a.impact || null, body: a.body, body_en: a.body_en || null, lang: a.lang || p?.lang || 'en', gate_level: g.level }).select('id, seq').single();
       if (error || !dr) throw new Error(error?.message || 'draft failed');
-      ctx.drafts.push(dr.id);
+      ctx.drafts.push({ id: dr.id, seq: dr.seq, title: a.title, stream: a.stream, gate_level: g.level, party: p?.name || null, po: a.po || null });
       await sb.rpc('ledger_append', { p_tenant: T, p_channel: p?.channel_pref || 'Draft', p_actor: actorOf(ctx), p_actor_user: ctx.userId, p_counterparty: p?.name || a.party, p_stream: a.stream, p_order: o?.id || null, p_what: `Draft Q-${dr.seq}: ${a.title}`, p_gate: `L${g.level}${g.locked != null ? ' · capped' : ''}`, p_gated: true, p_ref: { draft_id: dr.id } });
       return { id: dr.id, ref: `Q-${dr.seq}`, queued: true, autonomy: `L${g.level}`, note: g.level >= 2 && g.locked == null ? 'Routine stream at L2: request_approval may send it.' : 'A person must approve before it is sent.' };
     }),
@@ -198,7 +200,14 @@ export function toolsFor(ctx: AgentCtx) {
     }),
   });
 
-  const all = [get_briefing, search_orders, get_order, get_exceptions, get_party, get_messages, get_ledger, get_gates, queue_draft, request_approval, set_milestone];
+  const navigate = betaZodTool({
+    name: 'navigate',
+    description: 'Show a screen to the person so the workspace follows the conversation: day, orders, order (with id = PO), parties, queue, ledger, agents, connections. Call it alongside your answer when the person asks to see or open something.',
+    inputSchema: z.object({ screen: z.enum(['day', 'orders', 'order', 'parties', 'queue', 'ledger', 'agents', 'connections']), id: z.string().optional().describe('PO number for screen=order') }),
+    run: wrap('navigate', async (a) => { ctx.nav = { screen: a.screen, id: a.id }; return { ok: true }; }),
+  });
+
+  const all = [get_briefing, search_orders, get_order, get_exceptions, get_party, get_messages, get_ledger, get_gates, queue_draft, request_approval, set_milestone, navigate];
   // inbound runs may capture a reported date (L1 record) and draft; they never approve
-  return ctx.trigger === 'inbound' ? all.filter((t) => t.name !== 'request_approval') : all;
+  return ctx.trigger === 'inbound' ? all.filter((t) => !['request_approval', 'navigate'].includes(t.name)) : all;
 }

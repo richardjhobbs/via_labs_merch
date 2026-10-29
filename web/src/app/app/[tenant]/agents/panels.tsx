@@ -1,44 +1,9 @@
 'use client';
 import { useState, useTransition } from 'react';
 import Link from 'next/link';
-import { askAgent, simulateInbound, type ChatTurn, type SimResult } from './actions';
+import { simulateInbound, type SimResult } from './actions';
 
 type L = Record<string, string>;
-
-export function AgentChat({ slug, lang, agentName, live, labels }: { slug: string; lang: string; agentName: string; live: boolean; labels: L }) {
-  const [turns, setTurns] = useState<(ChatTurn & { calls?: { name: string; ok: boolean; ms: number }[]; drafts?: number; error?: string })[]>([]);
-  const [q, setQ] = useState('');
-  const [pending, start] = useTransition();
-  const submit = () => {
-    const question = q.trim(); if (!question || pending) return;
-    const history = turns.map(({ role, text }) => ({ role, text }));
-    setTurns((t) => [...t, { role: 'user', text: question }]); setQ('');
-    start(async () => {
-      const r = await askAgent(slug, history, question, lang);
-      setTurns((t) => [...t, { role: 'assistant', text: r.text || (r.error ? `(${r.error})` : ''), calls: r.calls, drafts: r.drafts, error: r.error }]);
-    });
-  };
-  return (
-    <div className="card">
-      <div className="flex items-center gap-2"><span className="pill agent">{agentName.slice(0, 1)}</span><span className="font-medium">{labels.chat} · {agentName}</span>{!!turns.length && <button className="btn sm ml-auto" onClick={() => setTurns([])}>{labels.clear}</button>}</div>
-      <div className="grid gap-3 mt-3" style={{ maxHeight: 420, overflowY: 'auto' }}>
-        {turns.map((m, i) => (
-          <div key={i} className={m.role === 'user' ? 'ml-auto' : ''} style={{ maxWidth: '85%' }}>
-            <div className="small muted mb-1">{m.role === 'user' ? labels.you : agentName}</div>
-            <div className="p-3" style={{ background: m.role === 'user' ? 'var(--accent-soft)' : 'var(--paper)', borderRadius: 10, whiteSpace: 'pre-wrap', fontSize: 14, color: m.error ? 'var(--crit)' : 'inherit' }}>{m.text}</div>
-            {m.role === 'assistant' && !!m.calls?.length && <div className="small muted mt-1 mono" style={{ fontSize: 11 }}>{labels.tools}: {m.calls.map((c) => `${c.name}${c.ok ? '' : '✗'}`).join(', ')}</div>}
-            {m.role === 'assistant' && !!m.drafts && <Link className="btn sm mt-2" href={`/app/${slug}/queue`}>{labels.drafted} → {labels.openQueue}</Link>}
-          </div>
-        ))}
-        {pending && <div className="small muted">{labels.thinking}</div>}
-      </div>
-      <form className="flex gap-2 mt-3" onSubmit={(e) => { e.preventDefault(); submit(); }}>
-        <input className="input flex-1" value={q} onChange={(e) => setQ(e.target.value)} placeholder={labels.placeholder} disabled={!live || pending} />
-        <button className="btn primary" disabled={!live || pending || !q.trim()}>{labels.send}</button>
-      </form>
-    </div>
-  );
-}
 
 export function InboundSim({ slug, live, parties, labels }: { slug: string; live: boolean; parties: { id: string; name: string; kind: string }[]; labels: L }) {
   const [f, setF] = useState({ from: '', partyId: '', channel: 'email', subject: '', text: '' });

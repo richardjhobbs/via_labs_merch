@@ -275,5 +275,31 @@
     "chat": "Conversation",
     "clear": "Clear",
     "you": "You"
+  },
+  "assistant": {
+    "title": "Ask",
+    "placeholder": "Ask about any PO, customer or supplier, or dictate a message",
+    "send": "Send",
+    "working": "Reading the record...",
+    "used": "used",
+    "approve": "Approve",
+    "hold": "Hold",
+    "reject": "Reject",
+    "approved": "Approved and logged",
+    "rejected": "Rejected and logged",
+    "inQueue": "in the queue",
+    "open": "Ask {name}",
+    "close": "Close",
+    "clear": "New conversation",
+    "you": "You",
+    "noKey": "The agent is not switched on yet (ANTHROPIC_API_KEY).",
+    "s_day": "What needs me today?",
+    "s_orders": "Which POs are off plan, and why?",
+    "s_order": "Where is this PO against plan?",
+    "s_parties": "Which suppliers have late milestones?",
+    "s_queue": "Summarise what is waiting for me",
+    "s_ledger": "What did the agent do today?",
+    "s_any1": "Chase the factory for the fabric date",
+    "s_any2": "Draft a WIP note to a customer"
   }
 }

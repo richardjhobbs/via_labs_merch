@@ -275,5 +275,31 @@
     "chat": "Unterhaltung",
     "clear": "Leeren",
     "you": "Sie"
+  },
+  "assistant": {
+    "title": "Fragen",
+    "placeholder": "Fragen Sie zu einer PO, einem Kunden oder Lieferanten, oder diktieren Sie eine Nachricht",
+    "send": "Senden",
+    "working": "Liest den Datensatz...",
+    "used": "genutzt",
+    "approve": "Freigeben",
+    "hold": "Zurückstellen",
+    "reject": "Ablehnen",
+    "approved": "Freigegeben und protokolliert",
+    "rejected": "Abgelehnt und protokolliert",
+    "inQueue": "in den Freigaben",
+    "open": "{name} fragen",
+    "close": "Schließen",
+    "clear": "Neue Unterhaltung",
+    "you": "Sie",
+    "noKey": "Der Agent ist noch nicht eingeschaltet (ANTHROPIC_API_KEY).",
+    "s_day": "Was braucht mich heute?",
+    "s_orders": "Welche POs sind außer Plan, und warum?",
+    "s_order": "Wo steht diese PO gegenüber dem Plan?",
+    "s_parties": "Welche Lieferanten haben verspätete Meilensteine?",
+    "s_queue": "Fasse zusammen, was auf mich wartet",
+    "s_ledger": "Was hat der Agent heute getan?",
+    "s_any1": "Die Fabrik wegen des Stofftermins anmahnen",
+    "s_any2": "WIP-Notiz an einen Kunden entwerfen"
   }
 }

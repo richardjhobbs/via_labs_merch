@@ -3,7 +3,7 @@ import { getLocale, getTranslations } from 'next-intl/server';
 import { requireTenant } from '@/lib/tenant';
 import { supabaseServer } from '@/lib/supabase/server';
 import { hasLlm } from '@/lib/llm';
-import { AgentChat, InboundSim } from './panels';
+import { InboundSim } from './panels';
 
 const TOOLS = ['get_briefing', 'search_orders', 'get_order', 'get_exceptions', 'get_party', 'get_messages', 'get_ledger', 'get_gates', 'queue_draft', 'request_approval', 'set_milestone'];
 
@@ -26,7 +26,6 @@ export default async function Agents({ params }: { params: Promise<{ tenant: str
       {!live && <div className="notice warn mt-4">{t('noKey')}</div>}
       <div className="grid gap-6 mt-6 lg:grid-cols-[1fr_340px]">
         <div className="grid gap-6">
-          <AgentChat slug={slug} lang={locale} agentName={agents?.[0]?.name || 'Mira'} live={live} labels={{ chat: t('chat'), placeholder: t('placeholder'), send: t('send'), thinking: t('thinking'), tools: t('tools'), drafted: t('drafted'), openQueue: t('openQueue'), clear: t('clear'), you: t('you') }} />
           <InboundSim slug={slug} live={live} parties={(parties || []).map((p) => ({ id: p.id, name: p.name, kind: p.kind }))} labels={{ title: t('simulate'), sub: t('simulateSub'), from: t('from'), party: t('party'), channel: t('channel'), subject: t('subject'), text: t('text'), run: t('run'), result: t('result'), openQueue: t('openQueue'), thinking: t('thinking') }} />
         </div>
         <div className="grid gap-4" style={{ alignContent: 'start' }}>
