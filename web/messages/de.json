@@ -49,7 +49,11 @@
       "trading": "Handelshaus",
       "retailer": "Händler"
     },
-    "worksWith": "Funktioniert mit"
+    "worksWith": "Funktioniert mit",
+    "video": {
+      "title": "Eine Minute im Produkt",
+      "note": "Anmelden, den Agenten fragen, freigeben und das Ledger sehen. Beispieldaten; die Firmennamen sind fiktiv."
+    }
   },
   "login": {
     "title": "Anmelden",

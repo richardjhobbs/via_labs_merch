@@ -33,6 +33,19 @@ export default async function Landing() {
           <RequestAccessForm />
         </div>
       </section>
+      <section className="max-w-5xl mx-auto px-6 pb-12">
+        <div className="small font-medium muted" style={{ letterSpacing: '.08em', textTransform: 'uppercase', fontSize: 11 }}>{t('landing.video.title')}</div>
+        <video
+          className="mt-3 w-full"
+          style={{ display: 'block', borderRadius: 12, border: '1px solid var(--line)', background: '#0a4a3a', aspectRatio: '16 / 9' }}
+          controls
+          playsInline
+          preload="metadata"
+          poster="/video/via-merch-intro.jpg"
+          src="/video/via-merch-intro.mp4"
+        />
+        <p className="muted small mt-2">{t('landing.video.note')}</p>
+      </section>
       <section className="max-w-5xl mx-auto px-6 pb-10">
         <div className="small font-medium muted" style={{ letterSpacing: '.08em', textTransform: 'uppercase', fontSize: 11 }}>{t('landing.worksWith')}</div>
         <div className="flex flex-wrap gap-2 mt-3">

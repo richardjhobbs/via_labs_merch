@@ -49,7 +49,11 @@
       "trading": "Trading company",
       "retailer": "Retailer"
     },
-    "worksWith": "Works with"
+    "worksWith": "Works with",
+    "video": {
+      "title": "One minute in the product",
+      "note": "Sign in, ask the agent, approve, and see the ledger. Sample data; the company names are fictional."
+    }
   },
   "login": {
     "title": "Sign in",
