@@ -64,4 +64,4 @@ function redirectToLogin(req: NextRequest, next: string, reason?: string) {
 }
 
 // Node runtime so the middleware runs in the function region (sin1, next to the database) instead of at the edge.
-export const config = { runtime: 'nodejs', matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|svg|ico|txt|xml)).*)'] };
+export const config = { runtime: 'nodejs', matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|webp|svg|ico|txt|xml|mp4|webm|vtt)).*)'] };
