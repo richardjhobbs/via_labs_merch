@@ -148,7 +148,12 @@
     "jobTitle": "Jobtitel",
     "scopeHint": "Strg oder Cmd halten für mehrere. Keine Auswahl = alle Kunden.",
     "saveScope": "Speichern",
-    "allCustomers": "alle Kunden"
+    "allCustomers": "alle Kunden",
+    "saved": "Gespeichert.",
+    "createCompany": "Unternehmen anlegen",
+    "fromRequest": "Aus der Zugangsanfrage von {name} ({company}). Beim Speichern wird die Anfrage als bereitgestellt markiert und mit dem Unternehmen verknüpft.",
+    "company": "Unternehmen",
+    "linked": "Unternehmen angelegt"
   },
   "roles": {
     "owner": "Inhaber",

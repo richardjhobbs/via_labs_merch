@@ -29,6 +29,9 @@ export async function createTenant(form: FormData) {
   await sb.from('agents').insert({ tenant_id: t.id, name: 'Mira', scope_kind: 'tenant', languages: [d.locale, 'en'] });
   await sb.rpc('ledger_append', { p_tenant: t.id, p_channel: 'Console', p_actor: `VIA admin (${me.user.email})`, p_actor_user: me.user.id, p_counterparty: null, p_stream: 'Setup', p_order: null, p_what: `Tenant created: ${d.name} (${d.kind}, ${d.plan})`, p_gate: 'ADMIN', p_gated: true, p_ref: {} });
   const mailError = await inviteUser(t.id, d.owner_email, 'owner', null, me.user.id, me.user.email || '');
+  // Created from an access request: close the request and link it to the company.
+  const reqId = String(form.get('request_id') || '');
+  if (/^[0-9a-f-]{36}$/i.test(reqId)) await sb.from('access_requests').update({ status: 'provisioned', tenant_id: t.id }).eq('id', reqId);
   redirect(`/admin/tenants/${t.id}` + (mailError ? '?error=' + encodeURIComponent(mailError) : ''));
 }
 
@@ -102,8 +105,9 @@ export async function updateRequest(form: FormData) {
   await requireAdmin();
   const id = String(form.get('id')), status = String(form.get('status'));
   if (!['new', 'contacted', 'provisioned', 'declined'].includes(status)) return;
-  await supabaseAdmin().from('access_requests').update({ status }).eq('id', id);
+  const { error } = await supabaseAdmin().from('access_requests').update({ status }).eq('id', id);
   revalidatePath('/admin/requests');
+  redirect('/admin/requests?' + (error ? 'error=' + encodeURIComponent(error.message) : 'saved=' + id));
 }
 
 export async function loadSampleThreadsAction(form: FormData) {

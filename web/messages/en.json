@@ -148,7 +148,12 @@
     "jobTitle": "Job title",
     "scopeHint": "Hold Ctrl or Cmd to pick several. None selected = all customers.",
     "saveScope": "Save",
-    "allCustomers": "all customers"
+    "allCustomers": "all customers",
+    "saved": "Saved.",
+    "createCompany": "Create company",
+    "fromRequest": "From the access request by {name} ({company}). Saving marks the request provisioned and links it to the company.",
+    "company": "Company",
+    "linked": "company created"
   },
   "roles": {
     "owner": "Owner",

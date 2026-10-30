@@ -5,10 +5,15 @@ import { createTenant } from './actions';
 
 const KINDS = ['buying_office', 'brand', 'factory', 'trading', 'retailer'];
 
-export default async function AdminHome({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
+const slugify = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
+
+export default async function AdminHome({ searchParams }: { searchParams: Promise<{ error?: string; from?: string }> }) {
   const t = await getTranslations();
-  const { error } = await searchParams;
+  const { error, from } = await searchParams;
   const sb = supabaseAdmin();
+  // ?from=<access request id>: prefill the form from the request; createTenant then marks it provisioned.
+  const { data: req } = /^[0-9a-f-]{36}$/i.test(from || '') ? await sb.from('access_requests').select('id, company, kind, name, email').eq('id', from!).maybeSingle() : { data: null };
+  const pre = req ? { name: req.company, slug: slugify(req.company), kind: req.kind || 'buying_office', email: req.email } : null;
   const { data: tenants } = await sb.from('tenants').select('id, slug, name, kind, plan, created_at, memberships(count), invites(count)').order('created_at', { ascending: false });
   const { count: newRequests } = await sb.from('access_requests').select('id', { count: 'exact', head: true }).eq('status', 'new');
   return (
@@ -26,12 +31,14 @@ export default async function AdminHome({ searchParams }: { searchParams: Promis
       <form action={createTenant} className="card self-start min-w-0">
         <h2>{t('admin.newTenant')}</h2>
         {error && <div className="notice crit mt-2">{error}</div>}
-        <label className="f mt-3"><span>{t('admin.name')}</span><input className="input" name="name" required /></label>
-        <label className="f"><span>{t('admin.slug')}</span><input className="input mono" name="slug" pattern="[a-z0-9-]{3,40}" required placeholder="meridian" /></label>
-        <label className="f"><span>{t('admin.kind')}</span><select className="input" name="kind">{KINDS.map((k) => <option key={k} value={k}>{t(`landing.kinds.${k}` as never)}</option>)}</select></label>
+        {pre && req && <div className="notice mt-2">{t('admin.fromRequest', { name: req.name, company: req.company })}</div>}
+        {pre && <input type="hidden" name="request_id" value={req!.id} />}
+        <label className="f mt-3"><span>{t('admin.name')}</span><input className="input" name="name" required defaultValue={pre?.name} /></label>
+        <label className="f"><span>{t('admin.slug')}</span><input className="input mono" name="slug" pattern="[a-z0-9-]{3,40}" required placeholder="meridian" defaultValue={pre?.slug} /></label>
+        <label className="f"><span>{t('admin.kind')}</span><select className="input" name="kind" defaultValue={pre?.kind}>{KINDS.map((k) => <option key={k} value={k}>{t(`landing.kinds.${k}` as never)}</option>)}</select></label>
         <label className="f"><span>{t('admin.plan')}</span><select className="input" name="plan"><option value="retainer">Retainer</option><option value="trial">Trial</option><option value="per_user">Per user</option></select></label>
         <div className="grid grid-cols-2 gap-3"><label className="f"><span>Locale</span><select className="input" name="locale"><option value="en">en</option><option value="de">de</option><option value="bn">bn</option><option value="zh">zh</option><option value="vi">vi</option><option value="es">es</option></select></label><label className="f"><span>Timezone</span><input className="input" name="tz" defaultValue="Asia/Hong_Kong" /></label></div>
-        <label className="f"><span>Owner email (invited)</span><input className="input" name="owner_email" type="email" required /></label>
+        <label className="f"><span>Owner email (invited)</span><input className="input" name="owner_email" type="email" required defaultValue={pre?.email} /></label>
         <button className="btn primary">{t('common.save')}</button>
       </form>
     </div>
