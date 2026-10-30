@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   title: 'VIA Merch',
   description: 'An agent for every merchandiser. VIA Labs.',
   robots: { index: false, follow: false },
-  icons: { icon: [{ url: '/favicon.ico' }, { url: '/icon-32.png', sizes: '32x32', type: 'image/png' }], apple: '/icon-180.png' },
+  icons: { icon: [{ url: '/favicon.ico' }, { url: '/favicon.svg', type: 'image/svg+xml' }, { url: '/icon-32.png', sizes: '32x32', type: 'image/png' }, { url: '/icon-512.png', sizes: '512x512', type: 'image/png' }], apple: '/icon-180.png' },
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

@@ -13,7 +13,7 @@ export default async function Landing() {
   return (
     <main className="min-h-screen" style={{ background: 'var(--paper)' }}>
       <header className="flex items-center justify-between px-6 py-4 max-w-5xl mx-auto">
-        <div className="flex items-center gap-3"><Logo h={24} sub={`Merch · ${t('app.by')}`} /></div>
+        <div className="flex items-center gap-3"><Logo merch h={52} sub={t('app.by')} /></div>
         <div className="flex items-center gap-3"><LangSwitch /><Link className="btn sm" href={user ? '/app' : '/login'}>{user ? t('nav.day') : t('landing.login')}</Link></div>
       </header>
       <section className="max-w-5xl mx-auto px-6 py-14 grid gap-10 md:grid-cols-[1.2fr_1fr]">
