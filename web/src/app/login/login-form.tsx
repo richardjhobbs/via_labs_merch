@@ -4,12 +4,12 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { supabaseBrowser } from '@/lib/supabase/client';
 
-export function LoginForm({ next, reason }: { next: string; reason?: string }) {
+export function LoginForm({ next, reason, prefill }: { next: string; reason?: string; prefill?: { email: string; code: string } }) {
   const t = useTranslations('login');
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [code, setCode] = useState('');
-  const [sent, setSent] = useState(false);
+  const [email, setEmail] = useState(prefill?.email ?? '');
+  const [code, setCode] = useState(prefill?.code ?? '');
+  const [sent, setSent] = useState(!!prefill);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
   const sb = supabaseBrowser();

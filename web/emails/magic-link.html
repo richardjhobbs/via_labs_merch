@@ -1,17 +1,18 @@
 <!-- Supabase Auth → Emails → Magic Link. Subject: Your VIA Merch sign-in code: {{ .Token }} -->
-<!-- Variables Supabase fills in: {{ .Token }} (8-digit code), {{ .Email }}. Code only: no link, so a link opened elsewhere cannot consume the code. -->
+<!-- Variables Supabase fills in: {{ .Token }} (8-digit code), {{ .Email }}. The button opens OUR sign-in page with the
+     code prefilled; nothing is verified until the person presses Sign in, so a mail scanner that opens the link cannot
+     consume the code (which is why {{ .ConfirmationURL }} is deliberately not used). -->
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f4f6f5;padding:32px 16px;font-family:Inter,-apple-system,Segoe UI,Helvetica,Arial,sans-serif;color:#15201c;">
   <tr><td align="center">
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:520px;background:#ffffff;border:1px solid #e3e8e5;border-radius:12px;">
       <tr><td style="padding:28px 32px 0 32px;">
-        <img src="https://merch.getvia.xyz/via-logo.png" alt="VIA" height="22" style="height:22px;width:auto;display:block;">
-        <div style="font-size:12px;color:#6b7772;margin-top:6px;letter-spacing:.06em;text-transform:uppercase;">Merch</div>
+        <img src="https://merch.getvia.xyz/via-merch-black.png" alt="VIA Merch" width="88" height="56" style="height:56px;width:auto;display:block;">
       </td></tr>
       <tr><td style="padding:24px 32px 0 32px;">
         <div style="font-size:20px;font-weight:600;letter-spacing:-.01em;">Your sign-in code</div>
-        <p style="margin:12px 0 0 0;font-size:15px;line-height:1.55;color:#3d4944;">Enter this code on the sign-in page. It works once and expires in 60 minutes.</p>
+        <p style="margin:12px 0 0 0;font-size:15px;line-height:1.55;color:#3d4944;">Press the button to open the sign-in page with this code filled in, or type it yourself. It works once and expires in 60 minutes.</p>
         <div style="margin:20px 0 0 0;padding:16px 20px;background:#f4f6f5;border:1px solid #e3e8e5;border-radius:10px;font-family:'JetBrains Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:30px;letter-spacing:.18em;font-weight:600;text-align:center;color:#0a4a3a;">{{ .Token }}</div>
-        
+        <div style="margin:20px 0 0 0;text-align:center;"><a href="https://merch.getvia.xyz/login?email={{ .Email }}&amp;code={{ .Token }}" style="display:inline-block;background:#0a4a3a;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:12px 22px;border-radius:8px;">Open VIA Merch and sign in</a></div>
       </td></tr>
       <tr><td style="padding:24px 32px 28px 32px;">
         <p style="margin:0;font-size:12.5px;line-height:1.55;color:#6b7772;">You are receiving this because someone entered {{ .Email }} at merch.getvia.xyz. If that was not you, ignore this email; nothing happens without the code. Sessions end after 2 hours without activity.</p>

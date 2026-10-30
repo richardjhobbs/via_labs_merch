@@ -4,8 +4,10 @@ import { redirect } from 'next/navigation';
 import { currentUser } from '@/lib/supabase/server';
 import { LoginForm } from './login-form';
 
-export default async function Login({ searchParams }: { searchParams: Promise<{ next?: string; reason?: string }> }) {
-  const { next = '/app', reason } = await searchParams;
+export default async function Login({ searchParams }: { searchParams: Promise<{ next?: string; reason?: string; email?: string; code?: string }> }) {
+  const { next = '/app', reason, email = '', code = '' } = await searchParams;
+  // From the sign-in email's button: the code is prefilled, never submitted on its own.
+  const prefill = /^[0-9]{6,10}$/.test(code) && /@/.test(email) ? { email: email.trim().toLowerCase(), code } : undefined;
   if (await currentUser()) redirect(next.startsWith('/') ? next : '/app');
   const t = await getTranslations('login');
   return (
@@ -17,7 +19,7 @@ export default async function Login({ searchParams }: { searchParams: Promise<{ 
         {reason === 'ended' && <div className="notice warn mt-3">{t('ended')}</div>}
         {reason === 'link' && <div className="notice warn mt-3">{t('link')}</div>}
         <p className="muted small mt-2 mb-4">{t('intro')}</p>
-        <LoginForm next={next} reason={reason} />
+        <LoginForm next={next} reason={reason} prefill={prefill} />
       </div>
     </main>
   );

@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { supabaseAdmin } from '@/lib/supabase/server';
 import { requireAdmin } from '@/lib/tenant';
-import { sendMail } from '@/lib/mail';
+import { sendMail, brandedHtml } from '@/lib/mail';
 import { loadSample } from '@/lib/sample/load';
 import { loadSampleThreads } from '@/lib/sample/threads-load';
 
@@ -71,7 +71,9 @@ async function inviteUser(tenantId: string, email: string, role: string, display
 async function mailInvite(email: string, tenantName: string, role: string, token: string, byEmail: string): Promise<string | null> {
   const url = `${process.env.NEXT_PUBLIC_APP_URL}/invite/${token}`;
   try {
-    const r = await sendMail({ to: email, subject: `You're invited to ${tenantName} on VIA Merch`, text: `${byEmail} has invited you to ${tenantName} on VIA Merch as ${role}.\n\nOpen this link to accept and sign in:\n${url}\n\nYou sign in with a code sent to this email; there is no password. Sessions end after 2 hours without activity.\n\nVIA Labs · getvia.xyz` });
+    const r = await sendMail({ to: email, subject: `You're invited to ${tenantName} on VIA Merch`,
+      text: `${byEmail} has invited you to ${tenantName} on VIA Merch as ${role}.\n\nOpen this link to accept and sign in:\n${url}\n\nYou sign in with a code sent to this email; there is no password. Sessions end after 2 hours without activity.\n\nVIA Labs · getvia.xyz`,
+      html: brandedHtml({ title: `You're invited to ${tenantName}`, paragraphs: [`${byEmail} has invited you to ${tenantName} on VIA Merch as ${role}.`, 'Accept the invitation and sign in with the button below.'], cta: { label: 'Accept and sign in', url }, footnote: 'You sign in with a code sent to this email; there is no password. Sessions end after 2 hours without activity.' }) });
     if ((r as { skipped?: boolean }).skipped) return 'Invite recorded but no email sent: RESEND_API_KEY is not set in the Vercel project.';
     return null;
   } catch (e) {

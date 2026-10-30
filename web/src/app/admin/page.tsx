@@ -12,7 +12,7 @@ export default async function AdminHome({ searchParams }: { searchParams: Promis
   const { data: tenants } = await sb.from('tenants').select('id, slug, name, kind, plan, created_at, memberships(count), invites(count)').order('created_at', { ascending: false });
   const { count: newRequests } = await sb.from('access_requests').select('id', { count: 'exact', head: true }).eq('status', 'new');
   return (
-    <div className="grid gap-6" style={{ gridTemplateColumns: 'minmax(0,1fr) 320px' }}>
+    <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_320px]">
       <div>
         <h1>{t('admin.tenants')}</h1>
         {!!newRequests && <Link href="/admin/requests" className="notice block mt-3">{newRequests} {t('admin.requests').toLowerCase()}</Link>}
@@ -23,7 +23,7 @@ export default async function AdminHome({ searchParams }: { searchParams: Promis
             ))}{!tenants?.length && <tr><td colSpan={6} className="muted">{t('common.none')}</td></tr>}</tbody></table>
         </div>
       </div>
-      <form action={createTenant} className="card self-start">
+      <form action={createTenant} className="card self-start min-w-0">
         <h2>{t('admin.newTenant')}</h2>
         {error && <div className="notice crit mt-2">{error}</div>}
         <label className="f mt-3"><span>{t('admin.name')}</span><input className="input" name="name" required /></label>
