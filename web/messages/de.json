@@ -153,7 +153,8 @@
     "createCompany": "Unternehmen anlegen",
     "fromRequest": "Aus der Zugangsanfrage von {name} ({company}). Beim Speichern wird die Anfrage als bereitgestellt markiert und mit dem Unternehmen verknüpft.",
     "company": "Unternehmen",
-    "linked": "Unternehmen angelegt"
+    "linked": "Unternehmen angelegt",
+    "closed": "Bereitgestellt oder abgelehnt"
   },
   "roles": {
     "owner": "Inhaber",

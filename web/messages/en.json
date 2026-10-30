@@ -153,7 +153,8 @@
     "createCompany": "Create company",
     "fromRequest": "From the access request by {name} ({company}). Saving marks the request provisioned and links it to the company.",
     "company": "Company",
-    "linked": "company created"
+    "linked": "company created",
+    "closed": "Provisioned or declined"
   },
   "roles": {
     "owner": "Owner",
