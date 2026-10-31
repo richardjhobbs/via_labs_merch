@@ -7,6 +7,7 @@ import { requireAdmin } from '@/lib/tenant';
 import { sendMail, brandedHtml } from '@/lib/mail';
 import { loadSample } from '@/lib/sample/load';
 import { loadSampleThreads } from '@/lib/sample/threads-load';
+import { SUPPORT_HOURS } from '@/lib/support';
 
 const Tenant = z.object({ name: z.string().min(2).max(80), slug: z.string().regex(/^[a-z0-9-]{3,40}$/), kind: z.enum(['buying_office', 'brand', 'factory', 'trading', 'retailer']), plan: z.enum(['retainer', 'trial', 'per_user']), locale: z.string().max(5), tz: z.string().max(60), owner_email: z.string().email() });
 const ROLES = ['owner', 'manager', 'merchandiser', 'qc', 'compliance', 'logistics', 'viewer'] as const;
@@ -134,4 +135,42 @@ export async function loadSampleAction(form: FormData) {
   const r = await loadSample(id, me.user.id, me.user.email || '');
   revalidatePath(`/admin/tenants/${id}`);
   redirect(`/admin/tenants/${id}` + (r.ok ? '?sent=' + encodeURIComponent(`sample data: ${r.orders} POs`) : '?error=' + encodeURIComponent(r.error || 'failed')));
+}
+
+// VIA staff ask a company for support access. Owners and managers get an email and decide in Settings.
+export async function requestSupport(form: FormData) {
+  const me = await requireAdmin();
+  const tenantId = String(form.get('tenant_id')), reason = String(form.get('reason') || '').trim().slice(0, 300);
+  if (reason.length < 8) redirect(`/admin/tenants/${tenantId}?error=${encodeURIComponent('Give the company a reason of at least a few words.')}`);
+  const sb = supabaseAdmin();
+  const { data: tenant } = await sb.from('tenants').select('id, slug, name').eq('id', tenantId).maybeSingle();
+  if (!tenant) redirect('/admin');
+  const { data: open } = await sb.from('support_access').select('id').eq('tenant_id', tenantId).eq('status', 'requested').maybeSingle();
+  if (open) redirect(`/admin/tenants/${tenantId}?error=${encodeURIComponent('A request is already waiting for this company.')}`);
+  const { data: row, error } = await sb.from('support_access').insert({ tenant_id: tenantId, reason, requested_by: me.user.id, requested_by_email: me.user.email }).select('id').single();
+  if (error || !row) redirect(`/admin/tenants/${tenantId}?error=${encodeURIComponent(error?.message || 'failed')}`);
+  await sb.rpc('ledger_append', { p_tenant: tenantId, p_channel: 'Console', p_actor: `VIA Labs (${me.user.email})`, p_actor_user: me.user.id, p_counterparty: null, p_stream: 'Setup', p_order: null, p_what: `VIA Labs asked for support access (${SUPPORT_HOURS} hours): ${reason}`, p_gate: 'ADMIN', p_gated: true, p_ref: { support_access: row.id } });
+  // email every owner and manager
+  const { data: deciders } = await sb.from('memberships').select('user_id').eq('tenant_id', tenantId).in('role', ['owner', 'manager']);
+  const url = `${process.env.NEXT_PUBLIC_APP_URL}/app/${tenant.slug}/settings`;
+  for (const d of deciders || []) {
+    const { data: u } = await sb.auth.admin.getUserById(d.user_id);
+    const to = u?.user?.email; if (!to) continue;
+    await sendMail({ to, subject: `VIA Labs asks for support access to ${tenant.name}`,
+      text: `VIA Labs asks for support access to ${tenant.name}.\n\nReason: ${reason}\n\nAccess lasts ${SUPPORT_HOURS} hours from the moment you grant it, is limited to VIA Labs staff, can be revoked at any time, and the grant and every opening are written to your ledger. Until you grant it, nobody at VIA Labs can read your orders, customers, suppliers, conversations or ledger.\n\nDecide here: ${url}`,
+      html: brandedHtml({ title: `VIA Labs asks for support access to ${tenant.name}`, paragraphs: [`Reason: ${reason}`, `Access lasts ${SUPPORT_HOURS} hours from the moment you grant it, is limited to VIA Labs staff, can be revoked at any time, and the grant and every opening are written to your ledger. Until you grant it, nobody at VIA Labs can read your orders, customers, suppliers, conversations or ledger.`], cta: { label: 'Decide in Settings', url }, footnote: 'Only an owner or manager of your company can grant access. Declining has no effect on the service.' }) }).catch(() => {});
+  }
+  revalidatePath(`/admin/tenants/${tenantId}`);
+  redirect(`/admin/tenants/${tenantId}?sent=${encodeURIComponent('support request')}`);
+}
+
+// VIA staff end their own access early.
+export async function endSupport(form: FormData) {
+  const me = await requireAdmin();
+  const id = String(form.get('id')), tenantId = String(form.get('tenant_id'));
+  const sb = supabaseAdmin();
+  await sb.from('support_access').update({ status: 'revoked', ended_by: 'VIA Labs', ended_at: new Date().toISOString() }).eq('id', id).eq('tenant_id', tenantId).in('status', ['requested', 'granted']);
+  await sb.rpc('ledger_append', { p_tenant: tenantId, p_channel: 'Console', p_actor: `VIA Labs (${me.user.email})`, p_actor_user: me.user.id, p_counterparty: null, p_stream: 'Setup', p_order: null, p_what: 'VIA Labs ended its support access', p_gate: 'ADMIN', p_gated: true, p_ref: { support_access: id } });
+  revalidatePath(`/admin/tenants/${tenantId}`);
+  redirect(`/admin/tenants/${tenantId}`);
 }

@@ -53,6 +53,15 @@
     "video": {
       "title": "Eine Minute im Produkt",
       "note": "Anmelden, den Agenten fragen, freigeben und das Ledger sehen. Beispieldaten; die Firmennamen sind fiktiv."
+    },
+    "trust": {
+      "kicker": "Vertraulichkeit",
+      "title": "Wer Ihre Daten sehen kann",
+      "p1": "Ihre Aufträge, Kunden, Lieferanten und Gespräche gehören Ihnen. Datenbankregeln trennen jedes Unternehmen; niemand in einem anderen Unternehmen kann sie lesen.",
+      "p2": "Auch niemand bei VIA Labs, es sei denn, ein Inhaber oder Manager Ihres Unternehmens gewährt Support-Zugang: 72 Stunden, jederzeit widerrufbar, im Ledger festgehalten.",
+      "p3": "Nutzt ein Kunde oder Lieferant ebenfalls VIA Merch, sieht dessen Agent nur die Datensätze, die Sie über einen freigegebenen Stream teilen, nie Ihre anderen Beziehungen.",
+      "link": "Vertraulichkeitserklärung lesen",
+      "footer": "Vertraulichkeit"
     }
   },
   "login": {
@@ -154,7 +163,14 @@
     "fromRequest": "Aus der Zugangsanfrage von {name} ({company}). Beim Speichern wird die Anfrage als bereitgestellt markiert und mit dem Unternehmen verknüpft.",
     "company": "Unternehmen",
     "linked": "Unternehmen angelegt",
-    "closed": "Bereitgestellt oder abgelehnt"
+    "closed": "Bereitgestellt oder abgelehnt",
+    "support": "Support-Zugang",
+    "supportNone": "Kein Zugang. Dieses Unternehmen hat keinen Support-Zugang gewährt; Kunden, Lieferanten, Gespräche und Ledger sind hier verborgen, der Arbeitsbereich lässt sich nicht öffnen. Zugang mit Begründung anfragen; ein Inhaber oder Manager entscheidet.",
+    "supportPending": "Angefragt; ein Inhaber oder Manager entscheidet. Sie wurden per E-Mail informiert.",
+    "supportActive": "Gewährt von {who}, bis {when}. Alles, was Sie im Arbeitsbereich tun, steht in dessen Ledger.",
+    "request": "Zugang anfragen",
+    "reason": "Grund (das Unternehmen sieht ihn)",
+    "end": "Zugang jetzt beenden"
   },
   "roles": {
     "owner": "Inhaber",
@@ -412,5 +428,78 @@
     "english": "Englisch",
     "theirs": "letztes Wort von ihnen",
     "openOrderFile": "Auftragsakte öffnen"
+  },
+  "settings": {
+    "support": "VIA-Support-Zugang",
+    "supportSub": "Mitarbeiter von VIA Labs können Ihre Aufträge, Kunden, Lieferanten, Gespräche und das Ledger nicht öffnen, es sei denn, Sie gewähren hier Zugang. Ein Zugang gilt {hours} Stunden, kann jederzeit widerrufen werden, und Gewährung wie jedes Öffnen werden in Ihr Ledger geschrieben.",
+    "pending": "VIA Labs bittet um Zugang",
+    "reason": "Grund",
+    "requestedBy": "Angefragt von",
+    "grant": "{hours} Stunden gewähren",
+    "decline": "Ablehnen",
+    "active": "Zugang gewährt bis {when}",
+    "opened": "Erstmals geöffnet {when}",
+    "revoke": "Jetzt widerrufen",
+    "none": "Keine offene Anfrage. VIA Labs hat keinen Zugang zu Ihren Daten.",
+    "history": "Verlauf",
+    "until": "bis",
+    "onlyManagers": "Nur ein Inhaber oder Manager kann Zugang gewähren oder widerrufen.",
+    "decided": "Gespeichert und ins Ledger geschrieben.",
+    "data": "Wer Ihre Daten sehen kann",
+    "dataLink": "Vollständige Erklärung lesen",
+    "pendingNotice": "VIA Labs bittet um Support-Zugang: {reason}. Entscheiden Sie in den Einstellungen.",
+    "stActive": "gewährt, aktiv",
+    "stExpired": "gewährt, abgelaufen",
+    "st_requested": "angefragt",
+    "st_declined": "abgelehnt",
+    "st_revoked": "widerrufen",
+    "d1": "Die Daten jedes Unternehmens sind durch Datenbankregeln getrennt. Personen und Agenten anderer Unternehmen können sie nicht lesen.",
+    "d2": "VIA Labs kann sie ohne den obigen Support-Zugang nicht lesen. Automatische Verarbeitung (die Agenten, der kritische Pfad) läuft als Software, jede Aktion steht im Ledger.",
+    "d3": "Ein Kunde oder Lieferant, der ebenfalls VIA Merch nutzt, sieht nur die Datensätze, die Sie über einen freigegebenen Stream teilen.",
+    "d4": "Sie können jederzeit alles als xlsx, csv oder json exportieren und beim Ausscheiden die Löschung verlangen."
+  },
+  "trust": {
+    "kicker": "Vertraulichkeitserklärung",
+    "signIn": "Anmelden",
+    "title": "Wer Ihre Daten sehen kann, und wer nicht",
+    "intro": "Merchandising lebt von Beziehungen: welche Fabrik was fertigt, zu welchem Preis, für welchen Kunden. VIA Merch ist so gebaut, dass das in Ihrem Unternehmen bleibt. Jede Aussage unten ist im Produkt durchgesetzt, nicht nur versprochen.",
+    "isolation": {
+      "title": "Jedes Unternehmen ist getrennt",
+      "body": "Jeder Datensatz trägt die Kennung Ihres Unternehmens, und die Datenbank gibt ihn niemandem sonst heraus. Personen in einem anderen Unternehmen und dessen Agenten können Ihre Aufträge, Kunden, Lieferanten, Gespräche, Entwürfe und Ihr Ledger nicht lesen. Das ist eine Datenbankregel bei jeder Abfrage, kein Filter im Bildschirm."
+    },
+    "staff": {
+      "title": "VIA Labs sieht nichts in Ihren Datensätzen",
+      "body": "Unsere Mitarbeiter sehen, was zum Betrieb nötig ist: Name und Tarif Ihres Unternehmens, wer Mitglied ist, welche Autonomiestufen gesetzt sind, wie viele Agentenläufe und Nachrichten es gab und was sie gekostet haben. Sie können Ihre Aufträge, Parteien, Gespräche, Entwürfe und das Ledger nicht öffnen. Dieselbe Datenbankregel, die andere Unternehmen fernhält, hält auch uns fern."
+    },
+    "support": {
+      "title": "Support-Zugang gewähren Sie, für 72 Stunden, nachvollziehbar",
+      "body": "Wenn wir zur Einrichtung oder Fehlersuche hineinsehen müssen, fragen wir. Ein Inhaber oder Manager Ihres Unternehmens sieht Anfrage und Grund in den Einstellungen und per E-Mail und gewährt oder lehnt ab. Ein Zugang gilt 72 Stunden, kann jederzeit widerrufen werden, und Anfrage, Gewährung, erstes Öffnen und Widerruf werden in Ihr Ledger geschrieben. Ohne Zugang zeigt unsere Konsole nicht einmal Ihre Kundennamen."
+    },
+    "agents": {
+      "title": "Die Agenten sind Software, jede Aktion wird protokolliert",
+      "body": "Ihr Agent liest Ihre Kanäle und arbeitet an Ihren Datensätzen als Software auf unserer Infrastruktur. Er entwirft; eine Person in Ihrem Unternehmen gibt alles frei, was Geld, Ware oder Termine bindet. Preisklärung, Reklamationen und Auftragsbestätigung kann ein Agent nie allein senden. Jede Agentenaktion ist eine signierte, nur anfügbare Zeile in Ihrem Ledger, die Ihre Manager lesen und exportieren können."
+    },
+    "partners": {
+      "title": "Ein Partner mit VIA Merch sieht nur, was Sie teilen",
+      "body": "Nutzt ein Kunde oder Lieferant ebenfalls VIA Merch, können Ihr Agent und seiner Status, Termine, Nachweise und Buchungen austauschen. Er sieht nur die Datensätze der Aufträge, die Sie mit ihm teilen, über einen Stream, dessen Autonomiestufe Sie festlegen, und nichts über Ihre anderen Kunden, Lieferanten oder Preise."
+    },
+    "models": {
+      "title": "Modellanbieter verarbeiten Text nur für die Antwort",
+      "body": "Die Agenten laufen auf den Claude-Modellen von Anthropic über dessen API. Nach diesen Bedingungen wird Ihr Text zur Erzeugung der Antwort genutzt und nicht zum Training von Modellen. Kein anderer Modellanbieter ist derzeit beteiligt; ändert sich das, ändert sich zuerst diese Seite."
+    },
+    "infra": {
+      "title": "Wo Ihre Daten liegen",
+      "body": "Verwaltetes Postgres (Supabase) und Anwendungsserver (Vercel) in Singapur, verschlüsselt bei Übertragung und Speicherung. Geheimnisse liegen im Tresor des Hosting-Anbieters, nicht im Code. VIA Labs Pte. Ltd. ist ein Unternehmen in Singapur."
+    },
+    "signin": {
+      "title": "Anmeldung und Sitzungen",
+      "body": "Es gibt keine Passwörter, die abhandenkommen könnten. Man meldet sich mit einem Einmalcode an die Arbeits-E-Mail an, der einmal gilt und nach einer Stunde verfällt. Sitzungen enden nach zwei Stunden ohne Aktivität. Zugang gibt es auf Einladung Ihres Inhabers oder Managers; VIA Labs lädt den ersten Inhaber ein und sonst niemanden ohne Ihr Zutun."
+    },
+    "yours": {
+      "title": "Ihre Daten bleiben Ihre",
+      "body": "Exportieren Sie Aufträge, Parteien, Gespräche und Ledger jederzeit als xlsx, csv oder json. Beim Ausscheiden löschen wir auf Wunsch die Daten Ihres Unternehmens und bestätigen das schriftlich."
+    },
+    "updated": "Stand 31. Oktober 2026.",
+    "contact": "Fragen:"
   }
 }

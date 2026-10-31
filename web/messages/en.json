@@ -53,6 +53,15 @@
     "video": {
       "title": "One minute in the product",
       "note": "Sign in, ask the agent, approve, and see the ledger. Sample data; the company names are fictional."
+    },
+    "trust": {
+      "kicker": "Confidentiality",
+      "title": "Who can see your data",
+      "p1": "Your orders, customers, suppliers and conversations are yours. Database policy isolates each company; nobody at another company can read them.",
+      "p2": "Nobody at VIA Labs can read them either, unless an owner or manager at your company grants support access: 72 hours, revocable, on your ledger.",
+      "p3": "When a customer or supplier also runs VIA Merch, their agent sees only the records you share through a gated stream, never your other relationships.",
+      "link": "Read the confidentiality statement",
+      "footer": "Confidentiality"
     }
   },
   "login": {
@@ -154,7 +163,14 @@
     "fromRequest": "From the access request by {name} ({company}). Saving marks the request provisioned and links it to the company.",
     "company": "Company",
     "linked": "company created",
-    "closed": "Provisioned or declined"
+    "closed": "Provisioned or declined",
+    "support": "Support access",
+    "supportNone": "No access. This company has not granted support access, so its customers, suppliers, conversations and ledger are hidden here and the workspace cannot be opened. Ask for access with a reason; an owner or manager decides.",
+    "supportPending": "Requested; waiting for an owner or manager to decide. They have been emailed.",
+    "supportActive": "Granted by {who}, until {when}. Everything you do in the workspace is on their ledger.",
+    "request": "Request access",
+    "reason": "Reason (the company sees this)",
+    "end": "End access now"
   },
   "roles": {
     "owner": "Owner",
@@ -412,5 +428,78 @@
     "english": "English",
     "theirs": "last word theirs",
     "openOrderFile": "Open the order file"
+  },
+  "settings": {
+    "support": "VIA support access",
+    "supportSub": "VIA Labs staff cannot open your orders, customers, suppliers, conversations or ledger unless you grant access here. A grant lasts {hours} hours, can be revoked at any time, and the grant and every opening are written to your ledger.",
+    "pending": "VIA Labs asks for access",
+    "reason": "Reason",
+    "requestedBy": "Requested by",
+    "grant": "Grant {hours} hours",
+    "decline": "Decline",
+    "active": "Access granted until {when}",
+    "opened": "First opened {when}",
+    "revoke": "Revoke now",
+    "none": "No request open. VIA Labs has no access to your records.",
+    "history": "History",
+    "until": "until",
+    "onlyManagers": "Only an owner or manager can grant or revoke access.",
+    "decided": "Saved and written to the ledger.",
+    "data": "Who can see your data",
+    "dataLink": "Read the full statement",
+    "pendingNotice": "VIA Labs asks for support access: {reason}. Decide in Settings.",
+    "stActive": "granted, active",
+    "stExpired": "granted, expired",
+    "st_requested": "requested",
+    "st_declined": "declined",
+    "st_revoked": "revoked",
+    "d1": "Each company's records are isolated by database policy. Another company's people and agents cannot read them.",
+    "d2": "VIA Labs staff cannot read them without the support access above. Automated processing (the agents, the critical path) runs as software, with every action on the ledger.",
+    "d3": "A customer or supplier that also runs VIA Merch sees only the records you share through a gated stream.",
+    "d4": "You can export everything as xlsx, csv or json at any time, and ask for deletion when you leave."
+  },
+  "trust": {
+    "kicker": "Confidentiality statement",
+    "signIn": "Sign in",
+    "title": "Who can see your data, and who cannot",
+    "intro": "Merchandising runs on relationships: which factory makes what, at what price, for which customer. VIA Merch is built so that this stays inside your company. Every statement below is enforced in the product, not only promised.",
+    "isolation": {
+      "title": "Each company is isolated",
+      "body": "Every record carries your company's identity and the database refuses to return it to anyone else. People at another company, and that company's agents, cannot read your orders, customers, suppliers, conversations, drafts or ledger. This is a database rule, applied on every query, not a filter in the screen."
+    },
+    "staff": {
+      "title": "VIA Labs staff see nothing inside your records",
+      "body": "Our people can see what is needed to run the service: your company's name and plan, who its members are, which autonomy levels are set, how many agent runs and messages there were, and what they cost. They cannot open your orders, parties, conversations, drafts or ledger. The same database rule that keeps other companies out keeps us out."
+    },
+    "support": {
+      "title": "Support access is granted by you, for 72 hours, on the record",
+      "body": "When we need to look inside, for set-up or troubleshooting, we ask. An owner or manager at your company sees the request and the reason in Settings and by email, and grants or declines. A grant lasts 72 hours, can be revoked at any moment, and the request, the grant, the first opening and the revocation are written to your ledger. Without a grant, our console does not even show your customer names."
+    },
+    "agents": {
+      "title": "The agents are software, and every action is logged",
+      "body": "Your agent reads your channels and works your records as software on our infrastructure. It drafts; a person at your company approves anything that commits money, stock or dates. Price clarification, claims and order confirmation can never be sent by an agent alone. Every agent action is a signed, append-only row on your ledger, which your managers can read and export."
+    },
+    "partners": {
+      "title": "A partner who also runs VIA Merch sees only what you share",
+      "body": "When a customer or supplier also runs VIA Merch, your agent and theirs can exchange status, dates, trace records and bookings. They see only the records of the orders you share with them, through a stream whose autonomy level you set, and nothing about your other customers, suppliers or prices."
+    },
+    "models": {
+      "title": "Model providers process text to produce an answer, nothing more",
+      "body": "The agents run on Anthropic's Claude models through Anthropic's API. Under those terms your text is used to produce the response and is not used to train models. No other model provider is in the path today; if that changes, this page changes first."
+    },
+    "infra": {
+      "title": "Where your data lives",
+      "body": "Managed Postgres (Supabase) and application servers (Vercel) in Singapore, encrypted in transit and at rest. Secrets live in the hosting provider's vault, not in code. VIA Labs Pte. Ltd. is a Singapore company."
+    },
+    "signin": {
+      "title": "Sign-in and sessions",
+      "body": "There are no passwords to leak. People sign in with a one-time code sent to their work email, which works once and expires in an hour. Sessions end after two hours without activity. Access is by invitation from your owner or manager; VIA Labs can invite the first owner and nobody else without your say."
+    },
+    "yours": {
+      "title": "Your data stays yours",
+      "body": "Export your orders, parties, conversations and ledger as xlsx, csv or json at any time. When you leave, ask and we delete your company's records, and confirm in writing when it is done."
+    },
+    "updated": "Last updated 31 October 2026.",
+    "contact": "Questions:"
   }
 }

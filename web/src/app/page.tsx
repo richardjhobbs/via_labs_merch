@@ -54,7 +54,15 @@ export default async function Landing() {
           ))}
         </div>
       </section>
-      <footer className="max-w-5xl mx-auto px-6 py-8 muted small">© VIA Labs Pte Ltd · getvia.xyz</footer>
+      <section className="max-w-5xl mx-auto px-6 pb-12">
+        <div className="small font-medium muted" style={{ letterSpacing: '.08em', textTransform: 'uppercase', fontSize: 11 }}>{t('landing.trust.kicker')}</div>
+        <h2 className="mt-2" style={{ fontSize: 22, letterSpacing: '-0.01em' }}>{t('landing.trust.title')}</h2>
+        <ul className="mt-4 grid gap-3 md:grid-cols-3">
+          {(['p1', 'p2', 'p3'] as const).map((k) => <li key={k} className="card small" style={{ color: 'var(--fg2)' }}>{t(`landing.trust.${k}`)}</li>)}
+        </ul>
+        <Link href="/trust" className="btn sm mt-4">{t('landing.trust.link')}</Link>
+      </section>
+      <footer className="max-w-5xl mx-auto px-6 py-8 muted small">© VIA Labs Pte Ltd · getvia.xyz · <Link href="/trust">{t('landing.trust.footer')}</Link></footer>
     </main>
   );
 }

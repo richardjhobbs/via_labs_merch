@@ -7,7 +7,7 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 const IDLE_MINUTES = 120;
-const PUBLIC = [/^\/$/, /^\/login/, /^\/auth\//, /^\/invite\//, /^\/request-access/, /^\/api\/(webhooks|jobs|mcp|health)/, /^\/legal/];
+const PUBLIC = [/^\/$/, /^\/login/, /^\/auth\//, /^\/invite\//, /^\/request-access/, /^\/trust/, /^\/api\/(webhooks|jobs|mcp|health)/, /^\/legal/];
 
 export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;

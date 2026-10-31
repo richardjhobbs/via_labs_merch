@@ -18,6 +18,8 @@ export default async function TenantLayout({ children, params }: { children: Rea
   const sb = await supabaseServer();
   const { data: team } = isAdmin ? await sb.from('memberships').select('id, display_name, role').eq('tenant_id', tenant.id).order('role') : { data: null };
   const { data: agent } = await sb.from('agents').select('name').eq('tenant_id', tenant.id).eq('scope_kind', 'tenant').limit(1).maybeSingle();
+  const canDecide = ['owner', 'manager'].includes(membership.role);
+  const { data: pendingSupport } = canDecide ? await sb.from('support_access').select('id, reason').eq('tenant_id', tenant.id).eq('status', 'requested').limit(1).maybeSingle() : { data: null };
   const A = { title: t('assistant.title'), placeholder: t('assistant.placeholder'), send: t('assistant.send'), working: t('assistant.working'), used: t('assistant.used'), approve: t('assistant.approve'), hold: t('assistant.hold'), reject: t('assistant.reject'), approved: t('assistant.approved'), rejected: t('assistant.rejected'), inQueue: t('assistant.inQueue'), open: t('assistant.open'), close: t('assistant.close'), clear: t('assistant.clear'), you: t('assistant.you'), noKey: t('assistant.noKey'), s_day: t('assistant.s_day'), s_orders: t('assistant.s_orders'), s_order: t('assistant.s_order'), s_parties: t('assistant.s_parties'), s_queue: t('assistant.s_queue'), s_ledger: t('assistant.s_ledger'), s_any1: t('assistant.s_any1'), s_any2: t('assistant.s_any2') };
   const items = [
     ['', t('nav.day')], ['queue', t('nav.queue')], ['orders', t('nav.orders')], ['threads', t('nav.threads')], ['parties', t('nav.parties')],
@@ -36,7 +38,10 @@ export default async function TenantLayout({ children, params }: { children: Rea
           <div className="flex items-center gap-2 mt-2"><LangSwitch compact /><form action="/auth/signout" method="post"><button className="btn sm">{t('nav.signout')}</button></form></div>
         </div>
       </aside>
-      <main className="p-6" style={{ background: 'var(--paper)' }}>{children}</main>
+      <main className="p-6" style={{ background: 'var(--paper)' }}>
+        {pendingSupport && <Link href={`/app/${slug}/settings`} className="notice warn block mb-4 no-underline">{t('settings.pendingNotice', { reason: pendingSupport.reason })}</Link>}
+        {children}
+      </main>
       <Assistant slug={slug} agentName={agent?.name || 'Mira'} lang={locale} live={hasLlm()} labels={A} />
     </div>
   );
