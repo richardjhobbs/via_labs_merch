@@ -57,6 +57,7 @@ export const CONNECTORS: Connector[] = [
   { id: 'bamboorose', name: 'Bamboo Rose', category: 'plm', logo: '/brands/bamboorose.png', status: 'request', auth: 'Vendor contact', use: 'Styles, POs and supplier records.', steps: ['Vendor-gated; VIA requests access with you.'] },
   { id: 'backbone', name: 'Backbone PLM', category: 'plm', logo: '/brands/backbone.png', status: 'request', auth: 'Vendor contact', use: 'Tech packs and styles.', steps: ['Vendor-gated; VIA requests access with you.'] },
   { id: 'wfx', name: 'WFX', vendor: 'World Fashion Exchange', category: 'plm', logo: '/brands/wfx.png', status: 'request', auth: 'Vendor contact', use: 'PLM and ERP for apparel.', steps: ['Vendor-gated; VIA requests access with you.'] },
+  { id: 'topo', name: 'Topo', vendor: 'Sourcing and supply chain', category: 'plm', logo: '/brands/topo.png', status: 'request', auth: 'Vendor contact', use: 'Sourcing, sampling, orders, production, quality and compliance records in; WIP and milestone status back.', steps: ['Vendor-gated; VIA requests access with you.'], docs: 'https://topo.cc/' },
   { id: 'delogue', name: 'Delogue PLM', category: 'plm', logo: '/brands/delogue.png', status: 'request', auth: 'API key', use: 'Styles and supplier conversations.', steps: ['Generate an API key in Delogue settings; paste it here.'] },
 
   // ---- ERP
