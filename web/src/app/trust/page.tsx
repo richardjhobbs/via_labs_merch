@@ -26,7 +26,7 @@ export default async function Trust() {
             </section>
           ))}
         </div>
-        <p className="muted small mt-10">{t('updated')} · {t('contact')} <a href="mailto:richard@getvia.xyz">richard@getvia.xyz</a></p>
+        <p className="muted small mt-10">{t('updated')} · {t('contact')} <a href="mailto:contact@getvia.xyz">contact@getvia.xyz</a></p>
       </article>
       <footer className="max-w-3xl mx-auto px-6 py-8 muted small">© VIA Labs Pte Ltd · getvia.xyz</footer>
     </main>

@@ -12,7 +12,7 @@ export function brandedHtml({ title, paragraphs, cta, footnote }: { title: strin
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:520px;background:#ffffff;border:1px solid #e3e8e5;border-radius:12px;">
       <tr><td style="padding:28px 32px 0 32px;"><img src="${APP}/via-merch-black.png" alt="VIA Merch" width="88" height="56" style="height:56px;width:auto;display:block;"></td></tr>
       <tr><td style="padding:24px 32px 0 32px;"><div style="font-size:20px;font-weight:600;letter-spacing:-.01em;">${esc(title)}</div>${ps}${button}</td></tr>
-      <tr><td style="padding:24px 32px 28px 32px;">${footnote ? `<p style="margin:0 0 12px 0;font-size:12.5px;line-height:1.55;color:#6b7772;">${esc(footnote)}</p>` : ''}<p style="margin:0;font-size:12.5px;color:#6b7772;">VIA Labs Pte. Ltd. · <a href="https://getvia.xyz" style="color:#0a4a3a;">getvia.xyz</a> · <a href="mailto:richard@getvia.xyz" style="color:#0a4a3a;">richard@getvia.xyz</a></p></td></tr>
+      <tr><td style="padding:24px 32px 28px 32px;">${footnote ? `<p style="margin:0 0 12px 0;font-size:12.5px;line-height:1.55;color:#6b7772;">${esc(footnote)}</p>` : ''}<p style="margin:0;font-size:12.5px;color:#6b7772;">VIA Labs Pte. Ltd. · <a href="https://getvia.xyz" style="color:#0a4a3a;">getvia.xyz</a> · <a href="mailto:contact@getvia.xyz" style="color:#0a4a3a;">contact@getvia.xyz</a></p></td></tr>
     </table>
   </td></tr>
 </table>`;
