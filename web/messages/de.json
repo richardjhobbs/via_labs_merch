@@ -62,6 +62,16 @@
       "p3": "Nutzt ein Kunde oder Lieferant ebenfalls VIA Merch, sieht dessen Agent nur die Datensätze, die Sie über einen freigegebenen Stream teilen, nie Ihre anderen Beziehungen.",
       "link": "Vertraulichkeitserklärung lesen",
       "footer": "Vertraulichkeit"
+    },
+    "agents": {
+      "kicker": "Multi-Agent",
+      "title": "Ein Agent pro Merchandiser, ein Sub-Agent pro Auftrag",
+      "personal": "Jeder Merchandiser bekommt einen persönlichen Agenten. Nur dieser Agent spricht mit ihm und legt ihm genau die Entscheidungen vor, die er treffen muss.",
+      "sub": "Der persönliche Agent führt für jeden Kunden und jeden Auftrag einen eigenen Sub-Agenten. Jeder verfolgt Chat, E-Mail, ERP und Spediteurmeldungen seines Auftrags, sodass kein Auftrag einen anderen verdrängt.",
+      "top": "Manager sehen alle Merchandiser und alle Aufträge in einer Ansicht, in einem Ledger.",
+      "l1": "Persönlicher Agent",
+      "l2": "Sub-Agent pro Auftrag",
+      "l3": "Gesamtansicht"
     }
   },
   "login": {

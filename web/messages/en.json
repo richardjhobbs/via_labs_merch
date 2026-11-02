@@ -62,6 +62,16 @@
       "p3": "When a customer or supplier also runs VIA Merch, their agent sees only the records you share through a gated stream, never your other relationships.",
       "link": "Read the confidentiality statement",
       "footer": "Confidentiality"
+    },
+    "agents": {
+      "kicker": "Multi-agent",
+      "title": "One agent per merchandiser, one sub-agent per order",
+      "personal": "Each merchandiser gets a personal agent. It is the only agent that talks to them, and it brings them just the decisions that need them.",
+      "sub": "The personal agent runs a separate sub-agent for each customer and order. Each one follows its own order's chat, email, ERP and forwarder updates, so no order crowds out another.",
+      "top": "Managers see every merchandiser and every order in one view, on one ledger.",
+      "l1": "Personal agent",
+      "l2": "Sub-agent per order",
+      "l3": "Top view"
     }
   },
   "login": {

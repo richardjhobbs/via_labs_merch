@@ -34,6 +34,18 @@ export default async function Landing() {
         </div>
       </section>
       <section className="max-w-5xl mx-auto px-6 pb-12">
+        <div className="small font-medium" style={{ color: 'var(--accent)', letterSpacing: '.08em', textTransform: 'uppercase', fontSize: 11 }}>{t('landing.agents.kicker')}</div>
+        <h2 className="mt-2" style={{ fontSize: 22, letterSpacing: '-0.01em' }}>{t('landing.agents.title')}</h2>
+        <ol className="mt-4 grid gap-3 md:grid-cols-3">
+          {([['l1', 'personal'], ['l2', 'sub'], ['l3', 'top']] as const).map(([l, k], i) => (
+            <li key={k} className="card small" style={{ color: 'var(--fg2)', borderColor: i === 0 ? 'var(--accent)' : undefined }}>
+              <div className="font-medium" style={{ color: 'var(--accent)', marginBottom: 6 }}>{t(`landing.agents.${l}`)}</div>
+              {t(`landing.agents.${k}`)}
+            </li>
+          ))}
+        </ol>
+      </section>
+      <section className="max-w-5xl mx-auto px-6 pb-12">
         <div className="small font-medium muted" style={{ letterSpacing: '.08em', textTransform: 'uppercase', fontSize: 11 }}>{t('landing.video.title')}</div>
         <video
           className="mt-3 w-full"
