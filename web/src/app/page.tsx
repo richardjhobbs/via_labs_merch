@@ -4,8 +4,7 @@ import { getTranslations } from 'next-intl/server';
 import { currentUser } from '@/lib/supabase/server';
 import { RequestAccessForm } from './request-access-form';
 import { LangSwitch } from '@/components/lang-switch';
-import { BrandIcon } from '@/components/brand-icon';
-import { CONNECTORS } from '@/lib/connectors/catalog';
+import { Switchboard, ConnectorBanner } from '@/components/switchboard';
 
 export default async function Landing() {
   const t = await getTranslations();
@@ -58,13 +57,13 @@ export default async function Landing() {
         />
         <p className="muted small mt-2">{t('landing.video.note')}</p>
       </section>
-      <section className="max-w-5xl mx-auto px-6 pb-10">
-        <div className="small font-medium muted" style={{ letterSpacing: '.08em', textTransform: 'uppercase', fontSize: 11 }}>{t('landing.worksWith')}</div>
-        <div className="flex flex-wrap gap-2 mt-3">
-          {CONNECTORS.filter((c) => c.logo).map((c) => (
-            <span key={c.id} className="inline-flex items-center gap-2 pr-3" style={{ border: '1px solid var(--line)', borderRadius: 999, background: '#fff', padding: 3 }}><BrandIcon name={c.name} logo={c.logo} size={24} /><span className="small">{c.name}</span></span>
-          ))}
-        </div>
+      <section className="max-w-5xl mx-auto px-6 pb-12">
+        <div className="small font-medium" style={{ color: 'var(--accent)', letterSpacing: '.08em', textTransform: 'uppercase', fontSize: 11 }}>{t('landing.worksWith')}</div>
+        <h2 className="mt-2" style={{ fontSize: 22, letterSpacing: '-0.01em' }}>{t('switchboard.title')}</h2>
+        <p className="mt-2 mb-4" style={{ color: 'var(--fg2)', maxWidth: '62ch' }}>{t('switchboard.lede')}</p>
+        <Switchboard />
+        <ConnectorBanner label={t('landing.worksWith')} />
+        <p className="muted small mt-2">{t('switchboard.note')}</p>
       </section>
       <section className="max-w-5xl mx-auto px-6 pb-12">
         <div className="small font-medium muted" style={{ letterSpacing: '.08em', textTransform: 'uppercase', fontSize: 11 }}>{t('landing.trust.kicker')}</div>

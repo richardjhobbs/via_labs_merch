@@ -512,5 +512,71 @@
     },
     "updated": "Last updated 31 October 2026.",
     "contact": "Questions:"
+  },
+  "switchboard": {
+    "title": "Sits on top of the tools you already use.",
+    "lede": "Mira is the operator. She patches what arrives in one tool through to where it has to go next, and asks you before anything goes out. Every connection stays on the board, so you can see it all.",
+    "note": "Hover or tap a socket to see what Mira does there; click one to watch it in use. Scenes are examples. The full list of connectors scrolls underneath.",
+    "aria": "Switchboard: Mira connecting the tools a production team uses",
+    "banks": {
+      "email": "Email & files",
+      "chat": "Chat",
+      "product": "Product",
+      "erp": "ERP",
+      "quality": "Quality & compliance",
+      "logistics": "Logistics"
+    },
+    "events": {
+      "e1": "A factory sends a lab-dip photo on WhatsApp. Mira files it against the style in the brand’s PLM.",
+      "e2": "The brand emails a revised PO. Mira updates the shared WIP sheet and flags the new ex-factory date.",
+      "e3": "The factory confirms ex-factory on WeCom. Mira checks the booking: the vessel rolled, ETA four days later.",
+      "e4": "A final inspection fails in Topo. Mira drafts the email to the brand with three options.",
+      "e5": "A tech pack PDF arrives. Mira reads the specs into the style record in the ERP.",
+      "e6": "A PO is approved in SAP Business One. Mira sends it to the factory on WhatsApp, in Bangla.",
+      "e7": "A factory audit in Sedex expires before shipment. Mira drafts the reminder in Outlook.",
+      "e8": "A factory in Vietnam asks for an inline QC slot on Zalo. Mira books it in Inspectorio."
+    },
+    "status": {
+      "reading": "Reading",
+      "drafting": "Drafting",
+      "filed": "You approved · filed",
+      "updated": "You approved · updated",
+      "saved": "You approved · saved",
+      "sent": "You approved · sent",
+      "booked": "You approved · booked",
+      "checked": "Checked · ETA on the PO",
+      "wait": "Waiting for you",
+      "control": "Under control"
+    },
+    "hold": "All eight connections stay live on the board. Mira keeps each one moving and stops at you before anything is sent.",
+    "live": "CONNECTIONS LIVE",
+    "connections": "connections",
+    "count": "{n} of {total} connections on the board",
+    "liveToday": "Live today",
+    "onRequest": "On request, one-day connector build",
+    "hint": "Hover or tap a socket",
+    "hintBody": "See what Mira reads in each tool and what she is allowed to write. Click one to watch it in use.",
+    "pause": "Pause",
+    "play": "Play",
+    "next": "Next",
+    "clear": "Clear board",
+    "tools": {
+      "gmail": "Reads POs, approvals and questions in the mail and its attachments. Drafts replies; sends only after you approve.",
+      "m365": "Reads Outlook mail and SharePoint files. Drafts replies; sends only after you approve.",
+      "sheets": "Reads WIP reports and shared order sheets. Updates rows after you approve.",
+      "upload": "Reads tech packs, POs, invoices and photos you drop in. Files go onto the order record.",
+      "whatsapp": "Reads messages, photos and voice notes from factories. Replies in the factory’s language after you approve.",
+      "wecom": "Reads factory chat, including bridged WeChat. Sends chasers and replies after you approve.",
+      "zalo": "Reads messages from factories in Vietnam. Replies after you approve.",
+      "telegram": "Reads factory and partner chats. Replies after you approve.",
+      "centric": "Reads styles, specs and sample approvals. Writes sample status and WIP after you approve.",
+      "topo": "Reads sourcing, sampling, order, production, quality and compliance records. Writes WIP and milestone status after you approve.",
+      "odoo": "Reads POs, stock and costings. Writes PO updates after you approve.",
+      "sapb1": "Reads POs, stock and costings. Writes PO updates after you approve.",
+      "inspectorio": "Reads inline and final QC results. Requests bookings after you approve.",
+      "sedex": "Reads audit status and expiry dates. Read only.",
+      "maersk": "Reads bookings, vessels and ETAs. Tracking only.",
+      "kn": "Reads bookings and shipping documents. Requests bookings after you approve."
+    }
   }
 }

@@ -512,5 +512,71 @@
     },
     "updated": "Stand 31. Oktober 2026.",
     "contact": "Fragen:"
+  },
+  "switchboard": {
+    "title": "Setzt auf den Tools auf, die Sie schon nutzen.",
+    "lede": "Mira ist die Vermittlung. Sie stellt durch, was in einem Tool ankommt, dorthin, wo es als Nächstes hin muss, und fragt Sie, bevor etwas hinausgeht. Jede Verbindung bleibt auf dem Board, Sie sehen also alles.",
+    "note": "Fahren Sie über eine Buchse oder tippen Sie darauf, um zu sehen, was Mira dort tut; ein Klick zeigt es in Aktion. Die Szenen sind Beispiele. Darunter läuft die vollständige Liste der Konnektoren.",
+    "aria": "Vermittlungsschrank: Mira verbindet die Tools eines Produktionsteams",
+    "banks": {
+      "email": "E-Mail & Dateien",
+      "chat": "Chat",
+      "product": "Produkt",
+      "erp": "ERP",
+      "quality": "Qualität & Compliance",
+      "logistics": "Logistik"
+    },
+    "events": {
+      "e1": "Eine Fabrik schickt ein Lab-Dip-Foto per WhatsApp. Mira legt es beim Style im PLM der Marke ab.",
+      "e2": "Die Marke schickt per E-Mail eine geänderte Bestellung. Mira aktualisiert die gemeinsame WIP-Tabelle und markiert das neue Ex-Factory-Datum.",
+      "e3": "Die Fabrik bestätigt Ex-Factory über WeCom. Mira prüft die Buchung: Das Schiff wurde umgebucht, ETA vier Tage später.",
+      "e4": "Eine Endkontrolle in Topo fällt durch. Mira entwirft die E-Mail an die Marke mit drei Optionen.",
+      "e5": "Ein Tech Pack als PDF kommt an. Mira übernimmt die Spezifikationen in den Style-Datensatz im ERP.",
+      "e6": "Eine Bestellung wird in SAP Business One freigegeben. Mira schickt sie per WhatsApp an die Fabrik, auf Bangla.",
+      "e7": "Ein Fabrik-Audit in Sedex läuft vor der Verschiffung ab. Mira entwirft die Erinnerung in Outlook.",
+      "e8": "Eine Fabrik in Vietnam bittet über Zalo um einen Termin für die Zwischenkontrolle. Mira bucht ihn in Inspectorio."
+    },
+    "status": {
+      "reading": "Liest",
+      "drafting": "Entwirft",
+      "filed": "Freigegeben · abgelegt",
+      "updated": "Freigegeben · aktualisiert",
+      "saved": "Freigegeben · gespeichert",
+      "sent": "Freigegeben · gesendet",
+      "booked": "Freigegeben · gebucht",
+      "checked": "Geprüft · ETA in der Bestellung",
+      "wait": "Wartet auf Sie",
+      "control": "Alles im Griff"
+    },
+    "hold": "Alle acht Verbindungen bleiben auf dem Board aktiv. Mira hält jede in Bewegung und stoppt bei Ihnen, bevor etwas gesendet wird.",
+    "live": "VERBINDUNGEN AKTIV",
+    "connections": "Verbindungen",
+    "count": "{n} von {total} Verbindungen auf dem Board",
+    "liveToday": "Heute verfügbar",
+    "onRequest": "Auf Anfrage, Konnektor in einem Tag gebaut",
+    "hint": "Über eine Buchse fahren oder tippen",
+    "hintBody": "Sehen Sie, was Mira in jedem Tool liest und was sie schreiben darf. Ein Klick zeigt es in Aktion.",
+    "pause": "Pause",
+    "play": "Abspielen",
+    "next": "Weiter",
+    "clear": "Board leeren",
+    "tools": {
+      "gmail": "Liest Bestellungen, Freigaben und Fragen in E-Mails und Anhängen. Entwirft Antworten; sendet erst nach Ihrer Freigabe.",
+      "m365": "Liest Outlook-Mails und SharePoint-Dateien. Entwirft Antworten; sendet erst nach Ihrer Freigabe.",
+      "sheets": "Liest WIP-Berichte und gemeinsame Auftragstabellen. Aktualisiert Zeilen nach Ihrer Freigabe.",
+      "upload": "Liest Tech Packs, Bestellungen, Rechnungen und Fotos, die Sie hochladen. Die Dateien kommen zum Auftrag.",
+      "whatsapp": "Liest Nachrichten, Fotos und Sprachnachrichten von Fabriken. Antwortet nach Ihrer Freigabe in der Sprache der Fabrik.",
+      "wecom": "Liest Fabrik-Chats, auch verbundenes WeChat. Sendet Nachfragen und Antworten nach Ihrer Freigabe.",
+      "zalo": "Liest Nachrichten von Fabriken in Vietnam. Antwortet nach Ihrer Freigabe.",
+      "telegram": "Liest Chats mit Fabriken und Partnern. Antwortet nach Ihrer Freigabe.",
+      "centric": "Liest Styles, Spezifikationen und Musterfreigaben. Schreibt Musterstatus und WIP nach Ihrer Freigabe.",
+      "topo": "Liest Sourcing-, Muster-, Auftrags-, Produktions-, Qualitäts- und Compliance-Daten. Schreibt WIP- und Meilensteinstatus nach Ihrer Freigabe.",
+      "odoo": "Liest Bestellungen, Bestand und Kalkulationen. Schreibt Bestelländerungen nach Ihrer Freigabe.",
+      "sapb1": "Liest Bestellungen, Bestand und Kalkulationen. Schreibt Bestelländerungen nach Ihrer Freigabe.",
+      "inspectorio": "Liest Ergebnisse von Zwischen- und Endkontrollen. Fragt Termine nach Ihrer Freigabe an.",
+      "sedex": "Liest Audit-Status und Ablaufdaten. Nur lesend.",
+      "maersk": "Liest Buchungen, Schiffe und ETAs. Nur Sendungsverfolgung.",
+      "kn": "Liest Buchungen und Versanddokumente. Fragt Buchungen nach Ihrer Freigabe an."
+    }
   }
 }
