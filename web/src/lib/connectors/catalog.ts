@@ -4,7 +4,7 @@
 // Logos live in /public/brands (simple-icons SVGs or the company's own favicon).
 
 export type ConnectorStatus = 'stage1' | 'request' | 'via';
-export type ConnectorCategory = 'email' | 'chat' | 'files' | 'wholesale' | 'plm' | 'erp' | 'qc' | 'compliance' | 'logistics' | 'commerce' | 'agent';
+export type ConnectorCategory = 'email' | 'chat' | 'files' | 'wholesale' | 'plm' | 'design' | 'erp' | 'qc' | 'compliance' | 'logistics' | 'commerce' | 'agent';
 
 export type Connector = {
   id: string;
@@ -20,7 +20,7 @@ export type Connector = {
 };
 
 export const CATEGORIES: Record<ConnectorCategory, string> = {
-  email: 'Email', chat: 'Chat', files: 'Sheets and files', wholesale: 'Wholesale platforms', plm: 'PLM', erp: 'ERP', qc: 'Quality control', compliance: 'Compliance and traceability', logistics: 'Carriers and forwarders', commerce: 'Commerce', agent: 'Agent to agent',
+  email: 'Email', chat: 'Chat', files: 'Sheets and files', wholesale: 'Wholesale platforms', plm: 'PLM', design: '3D design, patterns and cutting', erp: 'ERP', qc: 'Quality control', compliance: 'Compliance and traceability', logistics: 'Carriers and forwarders', commerce: 'Commerce', agent: 'Agent to agent',
 };
 
 export const CONNECTORS: Connector[] = [
@@ -59,6 +59,17 @@ export const CONNECTORS: Connector[] = [
   { id: 'wfx', name: 'WFX', vendor: 'World Fashion Exchange', category: 'plm', logo: '/brands/wfx.png', status: 'request', auth: 'Vendor contact', use: 'PLM and ERP for apparel.', steps: ['Vendor-gated; VIA requests access with you.'] },
   { id: 'topo', name: 'Topo', vendor: 'Sourcing and supply chain', category: 'plm', logo: '/brands/topo.png', status: 'request', auth: 'Vendor contact', use: 'Sourcing, sampling, orders, production, quality and compliance records in; WIP and milestone status back.', steps: ['Vendor-gated; VIA requests access with you.'], docs: 'https://topo.cc/' },
   { id: 'delogue', name: 'Delogue PLM', category: 'plm', logo: '/brands/delogue.png', status: 'request', auth: 'API key', use: 'Styles and supplier conversations.', steps: ['Generate an API key in Delogue settings; paste it here.'] },
+
+  // ---- 3D design, patterns and cutting (vendor-gated: access is arranged with the first client, then one-step)
+  { id: 'browzwear', name: 'Browzwear', vendor: 'VStitcher', category: 'design', logo: '/brands/browzwear.png', status: 'request', auth: 'Developer access granted by Browzwear; a VIA plug-in in VStitcher', use: '3D samples, colourways and approvals sent to the order as they happen.', steps: ['Set up with the vendor once you are a client: VIA requests access with you and builds the connector.', 'After the first build it becomes a one-step connection for every later customer.'], docs: 'https://browzwear.com/api' },
+  { id: 'clo3d', name: 'CLO 3D', vendor: 'CLO and CLO-SET', category: 'design', logo: '/brands/clo3d.png', status: 'request', auth: 'CLO SDK; a VIA plug-in in CLO', use: '3D samples, fabrics and colourways sent to the order; CLO-SET styles linked to POs.', steps: ['Set up with the vendor once you are a client: VIA requests access with you and builds the connector.', 'After the first build it becomes a one-step connection for every later customer.'], docs: 'https://developer.clo3d.com/' },
+  { id: 'optitex', name: 'Optitex', vendor: 'PDS and Marker', category: 'design', logo: null, status: 'request', auth: 'Optitex API user, granted by the vendor', use: 'Patterns, measurement charts and marker efficiency on the order.', steps: ['Set up with the vendor once you are a client: VIA requests access with you and builds the connector.', 'After the first build it becomes a one-step connection for every later customer.'], docs: 'https://optitex.com/' },
+  { id: 'lectra', name: 'Lectra', vendor: 'Kubix Link, Modaris, Valia', category: 'design', logo: '/brands/lectra.png', status: 'request', auth: 'Partner access arranged with Lectra', use: 'Styles from Kubix Link, patterns from Modaris, cutting status from Valia, on the order record.', steps: ['Set up with the vendor once you are a client: VIA requests access with you and builds the connector.', 'After the first build it becomes a one-step connection for every later customer.'], docs: 'https://www.lectra.com/' },
+  { id: 'accumark', name: 'Gerber AccuMark', vendor: 'Lectra', category: 'design', logo: '/brands/lectra.png', status: 'request', auth: 'Partner access arranged with Lectra, or exported files', use: 'Markers, models and cut orders linked to the PO.', steps: ['Set up with the vendor once you are a client: VIA requests access with you and builds the connector.', 'After the first build it becomes a one-step connection for every later customer.'], docs: 'https://www.lectra.com/' },
+  { id: 'tukatech', name: 'Tukatech', vendor: 'TUKAcad, TUKA3D, TUKAcloud', category: 'design', logo: '/brands/tukatech.png', status: 'request', auth: 'Vendor contact; exported files until then', use: '3D samples, tech packs and measurement charts linked to the order.', steps: ['Set up with the vendor once you are a client: VIA requests access with you and builds the connector.', 'After the first build it becomes a one-step connection for every later customer.'], docs: 'https://tukatech.com/' },
+  { id: 'style3d', name: 'Style3D', vendor: '3D design and fabric digitisation', category: 'design', logo: '/brands/style3d.png', status: 'request', auth: 'Enterprise API access arranged with Style3D', use: '3D samples and digital fabrics linked to the order.', steps: ['Set up with the vendor once you are a client: VIA requests access with you and builds the connector.', 'After the first build it becomes a one-step connection for every later customer.'], docs: 'https://www.style3d.com/' },
+  { id: 'audaces', name: 'Audaces', vendor: 'Pattern making and marker', category: 'design', logo: '/brands/audaces.png', status: 'request', auth: 'Vendor contact', use: 'Patterns, grading and markers linked to the order.', steps: ['Set up with the vendor once you are a client: VIA requests access with you and builds the connector.', 'After the first build it becomes a one-step connection for every later customer.'], docs: 'https://audaces.com/' },
+  { id: 'jeanologia', name: 'Jeanologia', vendor: 'eDesigner, eMark, Jeanologia Cloud', category: 'design', logo: '/brands/jeanologia.png', status: 'request', auth: 'Vendor contact; .jean files until then', use: 'Denim wash and laser finishing recipes linked to the order and its approvals.', steps: ['Set up with the vendor once you are a client: VIA requests access with you and builds the connector.', 'After the first build it becomes a one-step connection for every later customer.'], docs: 'https://www.jeanologia.com/' },
 
   // ---- ERP
   { id: 'odoo', name: 'Odoo', category: 'erp', logo: '/brands/odoo.svg', status: 'request', auth: 'JSON-RPC user and API key', use: 'Purchase orders, manufacturing orders, stock.', steps: ['Create an API key for a VIA user in Odoo; give it the purchase and inventory apps.'] },
