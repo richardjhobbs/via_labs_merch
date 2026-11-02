@@ -364,6 +364,7 @@
     "placeholder": "Ask about any PO, customer or supplier, or dictate a message",
     "send": "Send",
     "working": "Reading the record...",
+    "queued": "{name} reads this next",
     "used": "used",
     "approve": "Approve",
     "hold": "Hold",

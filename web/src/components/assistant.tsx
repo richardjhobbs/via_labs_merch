@@ -6,7 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { askAgent, decideFromAssistant, type ChatTurn, type AskResult } from '@/app/app/[tenant]/assistant-actions';
 import type { DraftRef } from '@/lib/agents/tools';
 
-type Turn = ChatTurn & { calls?: AskResult['calls']; drafts?: (DraftRef & { decided?: 'approved' | 'rejected' })[]; error?: string };
+type Turn = ChatTurn & { queued?: boolean; calls?: AskResult['calls']; drafts?: (DraftRef & { decided?: 'approved' | 'rejected' })[]; error?: string };
 type Labels = Record<string, string>;
 
 export function Assistant({ slug, agentName, lang, live, labels }: { slug: string; agentName: string; lang: string; live: boolean; labels: Labels }) {
@@ -27,10 +27,9 @@ export function Assistant({ slug, agentName, lang, live, labels }: { slug: strin
   const po = screen === 'order' ? decodeURIComponent(path.split('/').pop() || '') : '';
   const suggestions = [screen === 'order' ? `${labels.s_order} (${po})` : labels[`s_${screen}`] || labels.s_day, labels.s_any1, labels.s_any2].filter(Boolean);
 
-  const ask = (question: string) => {
-    const text = question.trim(); if (!text || pending || !live) return;
-    const history = turns.map(({ role, text }) => ({ role, text }));
-    setTurns((t) => [...t, { role: 'user', text }]); setQ('');
+  // Typing stays open while the agent works: a message sent meanwhile is shown at once,
+  // marked queued, and goes to the agent (joined with any others) when the current reply lands.
+  const run = (text: string, history: ChatTurn[]) => {
     start(async () => {
       const r = await askAgent(slug, history, text, lang, screen === 'order' ? `PO ${po}` : screen);
       setTurns((t) => [...t, { role: 'assistant', text: r.text || (r.error ? `(${r.error})` : ''), calls: r.calls, drafts: r.drafts, error: r.error }]);
@@ -41,6 +40,22 @@ export function Assistant({ slug, agentName, lang, live, labels }: { slug: strin
       if (r.drafts.length) router.refresh();
     });
   };
+  const ask = (question: string) => {
+    const text = question.trim(); if (!text || !live) return;
+    setQ('');
+    if (pending) { setTurns((t) => [...t, { role: 'user', text, queued: true }]); return; }
+    const history = turns.map(({ role, text }) => ({ role, text }));
+    setTurns((t) => [...t, { role: 'user', text }]);
+    run(text, history);
+  };
+  useEffect(() => {
+    if (pending || !turns.some((m) => m.queued)) return;
+    const waiting = turns.filter((m) => m.queued).map((m) => m.text);
+    const history = turns.filter((m) => !m.queued).map(({ role, text }) => ({ role, text }));
+    setTurns((t) => t.map((m) => (m.queued ? { ...m, queued: false } : m)));
+    run(waiting.join('\n\n'), history);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pending, turns]);
   const decide = (draftId: string, status: 'approved' | 'rejected', ti: number) => start(async () => {
     const r = await decideFromAssistant(slug, draftId, status);
     if (r.ok) setTurns((t) => t.map((m, i) => i !== ti ? m : { ...m, drafts: m.drafts?.map((d) => d.id === draftId ? { ...d, decided: status } : d) }));
@@ -62,7 +77,8 @@ export function Assistant({ slug, agentName, lang, live, labels }: { slug: strin
         {!live && <div className="notice warn">{labels.noKey}</div>}
         {turns.map((m, i) => (
           <div key={i} style={{ display: 'grid', gap: 6 }}>
-            <div className={`msg ${m.role === 'user' ? 'me' : 'ai'}`} style={m.error ? { color: 'var(--crit)' } : undefined}>{m.text}</div>
+            <div className={`msg ${m.role === 'user' ? 'me' : 'ai'}`} style={m.error ? { color: 'var(--crit)' } : m.queued ? { opacity: 0.6 } : undefined}>{m.text}</div>
+            {m.queued && <div className="small muted" style={{ justifySelf: 'end', fontSize: 11 }}>{labels.queued.replace('{name}', agentName)}</div>}
             {m.role === 'assistant' && !!m.calls?.length && <div className="small muted mono" style={{ fontSize: 11 }}>{labels.used}: {m.calls.map((c) => `${c.name}${c.ok ? '' : ' ✗'}`).join(', ')}</div>}
             {m.drafts?.map((d) => (
               <div key={d.id} className="card">
@@ -86,8 +102,8 @@ export function Assistant({ slug, agentName, lang, live, labels }: { slug: strin
         )}
       </div>
       <form onSubmit={(e) => { e.preventDefault(); ask(q); }}>
-        <input className="input flex-1" value={q} onChange={(e) => setQ(e.target.value)} placeholder={labels.placeholder} disabled={!live || pending} />
-        <button className="btn primary" disabled={!live || pending || !q.trim()}>{labels.send}</button>
+        <input className="input flex-1" value={q} onChange={(e) => setQ(e.target.value)} placeholder={labels.placeholder} disabled={!live} autoFocus />
+        <button className="btn primary" disabled={!live || !q.trim()}>{labels.send}</button>
       </form>
     </div>
   );

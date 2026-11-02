@@ -364,6 +364,7 @@
     "placeholder": "Fragen Sie zu einer PO, einem Kunden oder Lieferanten, oder diktieren Sie eine Nachricht",
     "send": "Senden",
     "working": "Liest den Datensatz...",
+    "queued": "{name} liest das als Nächstes",
     "used": "genutzt",
     "approve": "Freigeben",
     "hold": "Zurückstellen",
