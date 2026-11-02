@@ -24,6 +24,7 @@ VIA Merch, the live product at merch.getvia.xyz: agents for merchandising teams 
 
 ## Roadmap notes
 
+- HK and China model profile (founder, 2 Nov 2026; Build Log Phase 10): Claude is not available to companies based in Hong Kong or mainland China, so they get a second profile on DeepSeek or Qwen behind the same harness, tools, gates, ledger and RLS. Plan: `tenants.model_profile` set in the VIA console and fixed by the harness; a provider adapter in `src/lib/llm.ts` mapping the tools and loop to OpenAI-compatible tool calling; a prompt per profile; one eval set run on both before any model change; usage per provider; `/trust` names the providers per profile. Keep every model call in `llm.ts` and the loop provider-neutral so this stays an adapter, not a fork. Required before the first HK or China customer; hosting for mainland data is settled per customer.
 - Historic sync is a paid add-on (plan file, section "Add-on: historic sync"): import a customer's past POs, PLM approvals, QC reports, claims and price history under `source = 'historic'` so the agent cross-references them on new orders. Not in Stage 1; do not build it unprompted.
 
 ## Env vars
