@@ -6,7 +6,7 @@ import { useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { CONNECTORS } from '@/lib/connectors/catalog';
 
-const BANKS: string[][] = [['gmail', 'm365', 'sheets', 'upload'], ['whatsapp', 'wecom', 'zalo', 'telegram'], ['centric', 'topo'], ['odoo', 'sap-b1'], ['inspectorio', 'sedex'], ['maersk', 'kn']];
+const BANKS: string[][] = [['gmail', 'm365', 'sheets', 'upload'], ['whatsapp', 'wecom', 'zalo', 'telegram'], ['centric', 'topo', 'bamboorose', 'backbone'], ['odoo', 'sap-b1', 'infor', 'apparelmagic'], ['inspectorio', 'sedex', 'amfori', 'osh'], ['maersk', 'kn', 'dsv', 'flexport']];
 const BANK_KEYS = ['email', 'chat', 'product', 'erp', 'quality', 'logistics'] as const;
 const EVENTS: [string, string, 'ok' | 'checked' | 'wait'][] = [
   ['whatsapp', 'centric', 'ok'], ['gmail', 'sheets', 'ok'], ['wecom', 'maersk', 'checked'], ['topo', 'gmail', 'wait'],

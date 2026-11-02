@@ -576,7 +576,15 @@
       "inspectorio": "Reads inline and final QC results. Requests bookings after you approve.",
       "sedex": "Reads audit status and expiry dates. Read only.",
       "maersk": "Reads bookings, vessels and ETAs. Tracking only.",
-      "kn": "Reads bookings and shipping documents. Requests bookings after you approve."
+      "kn": "Reads bookings and shipping documents. Requests bookings after you approve.",
+      "bamboorose": "Reads product development, sourcing and PO records. Writes sample and WIP status after you approve.",
+      "backbone": "Reads styles, tech packs and BOMs. Writes sample status after you approve.",
+      "infor": "Reads POs, stock and production orders. Writes PO updates after you approve.",
+      "apparelmagic": "Reads POs, stock and costings. Writes PO updates after you approve.",
+      "amfori": "Reads BSCI audit ratings and dates. Read only.",
+      "osh": "Reads factory names, addresses and IDs. Read only.",
+      "dsv": "Reads bookings, milestones and shipping documents. Requests bookings after you approve.",
+      "flexport": "Reads bookings, milestones and ETAs. Requests bookings after you approve."
     }
   }
 }

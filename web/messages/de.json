@@ -576,7 +576,15 @@
       "inspectorio": "Liest Ergebnisse von Zwischen- und Endkontrollen. Fragt Termine nach Ihrer Freigabe an.",
       "sedex": "Liest Audit-Status und Ablaufdaten. Nur lesend.",
       "maersk": "Liest Buchungen, Schiffe und ETAs. Nur Sendungsverfolgung.",
-      "kn": "Liest Buchungen und Versanddokumente. Fragt Buchungen nach Ihrer Freigabe an."
+      "kn": "Liest Buchungen und Versanddokumente. Fragt Buchungen nach Ihrer Freigabe an.",
+      "bamboorose": "Liest Produktentwicklungs-, Sourcing- und Bestelldaten. Schreibt Muster- und WIP-Status nach Ihrer Freigabe.",
+      "backbone": "Liest Styles, Tech Packs und Stücklisten. Schreibt Musterstatus nach Ihrer Freigabe.",
+      "infor": "Liest Bestellungen, Bestand und Fertigungsaufträge. Schreibt Bestelländerungen nach Ihrer Freigabe.",
+      "apparelmagic": "Liest Bestellungen, Bestand und Kalkulationen. Schreibt Bestelländerungen nach Ihrer Freigabe.",
+      "amfori": "Liest BSCI-Audit-Bewertungen und -Termine. Nur lesend.",
+      "osh": "Liest Fabriknamen, Adressen und IDs. Nur lesend.",
+      "dsv": "Liest Buchungen, Meilensteine und Versanddokumente. Fragt Buchungen nach Ihrer Freigabe an.",
+      "flexport": "Liest Buchungen, Meilensteine und ETAs. Fragt Buchungen nach Ihrer Freigabe an."
     }
   }
 }
