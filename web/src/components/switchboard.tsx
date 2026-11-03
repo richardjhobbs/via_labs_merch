@@ -3,7 +3,7 @@
 // Each scene plugs in a new cord pair in its own colour; cords stay in place and carry pulses, then the board clears.
 // Tool names and live/on-request status come from the connector catalogue; the board is drawn as one SVG, imperatively.
 import { useEffect, useRef } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { CONNECTORS } from '@/lib/connectors/catalog';
 
 const BANKS: string[][] = [['gmail', 'm365', 'sheets', 'upload'], ['whatsapp', 'wecom', 'zalo', 'telegram'], ['centric', 'topo', 'bamboorose', 'backbone'], ['odoo', 'sap-b1', 'infor', 'apparelmagic'], ['inspectorio', 'sedex', 'amfori', 'osh'], ['maersk', 'kn', 'dsv', 'flexport']];
@@ -24,7 +24,12 @@ type Pt = { x: number; y: number };
 type Cord = { g: SVGGElement; paths: SVGPathElement[]; len: number; body: SVGPathElement; pg: SVGGElement; dg: SVGGElement; pulses: SVGCircleElement[]; dir: number };
 type Api = { toggle: () => void; next: () => void; clear: () => void };
 
+// The board reads its strings once when it is drawn, so a language change remounts it (and restarts the scenes).
 export function Switchboard() {
+  return <Board key={useLocale()} />;
+}
+
+function Board() {
   const t = useTranslations('switchboard');
   const svgRef = useRef<SVGSVGElement>(null);
   const infoRef = useRef<HTMLDivElement>(null);
