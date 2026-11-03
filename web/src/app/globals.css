@@ -107,3 +107,15 @@ table.t tr.click { cursor: pointer; } table.t tr.click:hover td { background: va
   .sb-marquee-row { flex-wrap: wrap; }
   .sb-marquee-row[aria-hidden] { display: none; }
 }
+
+/* language picker: flag + native name, always visible */
+.lang { position: relative; display: inline-block; }
+.lang-btn { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px 6px 8px; border: 1.5px solid var(--accent); border-radius: 999px; background: #fff; color: var(--accent); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+.lang-btn:hover { background: var(--accent-soft); }
+.lang-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.lang.compact .lang-btn { padding: 4px 10px 4px 6px; font-size: 12.5px; border-width: 1px; }
+.lang-menu { position: absolute; right: 0; top: calc(100% + 6px); z-index: 50; min-width: 190px; margin: 0; padding: 6px; list-style: none; background: #fff; border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 12px 32px rgba(20,24,22,.16); }
+.lang.up .lang-menu { right: auto; left: 0; top: auto; bottom: calc(100% + 6px); }
+.lang-menu button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 10px; border: 0; border-radius: 6px; background: transparent; color: var(--fg); font: inherit; font-size: 13.5px; text-align: left; cursor: pointer; }
+.lang-menu button:hover, .lang-menu button:focus-visible { background: var(--paper); outline: none; }
+.lang-menu button.on { color: var(--accent); font-weight: 600; }

@@ -1,14 +1,14 @@
 import { Logo } from '@/components/logo';
 import Link from 'next/link';
-import { getTranslations } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
+import { LOCALES, LOCALE_NAMES } from '@/i18n/locales';
 import { currentUser } from '@/lib/supabase/server';
 import { RequestAccessForm } from './request-access-form';
 import { LangSwitch } from '@/components/lang-switch';
 import { Switchboard, ConnectorBanner } from '@/components/switchboard';
 
 export default async function Landing() {
-  const t = await getTranslations();
-  const user = await currentUser();
+  const [t, user, locale] = await Promise.all([getTranslations(), currentUser(), getLocale()]);
   return (
     <main className="min-h-screen" style={{ background: 'var(--paper)' }}>
       <header className="flex items-center justify-between px-6 py-4 max-w-5xl mx-auto">
@@ -46,7 +46,9 @@ export default async function Landing() {
       </section>
       <section className="max-w-5xl mx-auto px-6 pb-12">
         <div className="small font-medium muted" style={{ letterSpacing: '.08em', textTransform: 'uppercase', fontSize: 11 }}>{t('landing.video.title')}</div>
+        {/* Captions in every locale (public/video/via-merch-intro.<locale>.vtt); the page's language is on by default. Keyed on locale so a language change reloads the tracks. */}
         <video
+          key={locale}
           className="mt-3 w-full"
           style={{ display: 'block', borderRadius: 12, border: '1px solid var(--line)', background: '#0a4a3a', aspectRatio: '16 / 9' }}
           controls
@@ -54,7 +56,9 @@ export default async function Landing() {
           preload="metadata"
           poster="/video/via-merch-intro.jpg"
           src="/video/via-merch-intro.mp4"
-        />
+        >
+          {LOCALES.map((l) => <track key={l} kind="captions" srcLang={l} label={LOCALE_NAMES[l]} src={`/video/via-merch-intro.${l}.vtt`} default={l === locale} />)}
+        </video>
         <p className="muted small mt-2">{t('landing.video.note')}</p>
       </section>
       <section className="max-w-5xl mx-auto px-6 pb-12">
