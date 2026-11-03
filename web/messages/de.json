@@ -495,8 +495,8 @@
       "body": "Nutzt ein Kunde oder Lieferant ebenfalls VIA Merch, können Ihr Agent und seiner Status, Termine, Nachweise und Buchungen austauschen. Er sieht nur die Datensätze der Aufträge, die Sie mit ihm teilen, über einen Stream, dessen Autonomiestufe Sie festlegen, und nichts über Ihre anderen Kunden, Lieferanten oder Preise."
     },
     "models": {
-      "title": "Modellanbieter verarbeiten Text nur für die Antwort",
-      "body": "Die Agenten laufen auf den Claude-Modellen von Anthropic über dessen API. Nach diesen Bedingungen wird Ihr Text zur Erzeugung der Antwort genutzt und nicht zum Training von Modellen. Kein anderer Modellanbieter ist derzeit beteiligt; ändert sich das, ändert sich zuerst diese Seite."
+      "title": "Das Modell richtet sich nach Ihrer Region und Ihren Anforderungen",
+      "body": "VIA Merch betreibt jedes Unternehmen auf dem besten für es verfügbaren Modell, je nach Standort und Anforderungen. Das Standardprofil sind die Claude-Modelle von Anthropic über dessen API. Claude wird Unternehmen mit Sitz in Hongkong oder Festlandchina nicht angeboten; sie laufen auf einem führenden dort verfügbaren Modell, etwa DeepSeek oder Qwen. Verlangen Ihre Anforderungen einen bestimmten Anbieter oder eine bestimmte Hosting-Region, richten wir das so ein. Das Profil legt VIA Labs für Ihr Unternehmen in der Software fest, nie der Agent, und auf jedem Profil gelten dieselbe Trennung, dieselben Freigaben und dasselbe Ledger. Wir nutzen einen Anbieter nur zu Bedingungen, unter denen Ihr Text zur Erzeugung der Antwort genutzt wird und nicht zum Training von Modellen. Ihr Anbieter steht in Ihrem Vertrag; ändert er sich, erfahren Sie es zuerst von uns."
     },
     "infra": {
       "title": "Wo Ihre Daten liegen",
@@ -510,7 +510,7 @@
       "title": "Ihre Daten bleiben Ihre",
       "body": "Exportieren Sie Aufträge, Parteien, Gespräche und Ledger jederzeit als xlsx, csv oder json. Beim Ausscheiden löschen wir auf Wunsch die Daten Ihres Unternehmens und bestätigen das schriftlich."
     },
-    "updated": "Stand 31. Oktober 2026.",
+    "updated": "Stand 3. November 2026.",
     "contact": "Fragen:"
   },
   "switchboard": {

@@ -495,8 +495,8 @@
       "body": "When a customer or supplier also runs VIA Merch, your agent and theirs can exchange status, dates, trace records and bookings. They see only the records of the orders you share with them, through a stream whose autonomy level you set, and nothing about your other customers, suppliers or prices."
     },
     "models": {
-      "title": "Model providers process text to produce an answer, nothing more",
-      "body": "The agents run on Anthropic's Claude models through Anthropic's API. Under those terms your text is used to produce the response and is not used to train models. No other model provider is in the path today; if that changes, this page changes first."
+      "title": "The model is chosen for your region and your requirements",
+      "body": "VIA Merch runs each company on the best model available to it, by where the company is based and what it requires. The standard profile is Anthropic's Claude models through Anthropic's API. Claude is not offered to companies based in Hong Kong or mainland China, so they run on a leading model available there, such as DeepSeek or Qwen. Where your requirements call for a particular provider or hosting region, we set that instead. The profile is fixed for your company by VIA Labs in the software, never chosen by the agent, and the same isolation, approvals and ledger apply on every profile. We only use a provider under terms where your text is used to produce the response and not to train models. Your provider is named in your agreement; if it changes, you hear from us first."
     },
     "infra": {
       "title": "Where your data lives",
@@ -510,7 +510,7 @@
       "title": "Your data stays yours",
       "body": "Export your orders, parties, conversations and ledger as xlsx, csv or json at any time. When you leave, ask and we delete your company's records, and confirm in writing when it is done."
     },
-    "updated": "Last updated 31 October 2026.",
+    "updated": "Last updated 3 November 2026.",
     "contact": "Questions:"
   },
   "switchboard": {
