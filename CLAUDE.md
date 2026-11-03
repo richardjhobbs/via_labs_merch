@@ -14,7 +14,7 @@ VIA Merch, the live product at merch.getvia.xyz: agents for merchandising teams 
 - Sign-in is a code or magic link on every visit; sessions are browser-session cookies and end after 2 hours idle (`src/middleware.ts`, `merch.sessions`). Do not add "remember me".
 - Nothing the agent drafts is sent without the stream's gate allowing it; price, claims and order confirmation are capped at L1.
 - Jobs run from `/api/jobs/drain`, called every minute by `merch.tick()` (pg_cron + pg_net) with the `x-merch-jobs` secret. Keep each drain under 55 s.
-- UI strings go through `messages/*.json` (English first, German complete; others fall back to English).
+- UI strings go through `messages/*.json`, and every new or changed string lands in all six files in the same commit (en, de, bn, zh, vi, es): same keys and `{placeholders}` as `en.json`; product, people, demo-company and connector names and trade acronyms (PO, WIP, T&A, ETA, QC) stay as written. The English fallback in `src/i18n/request.ts` merges top-level keys only, so it is a safety net, not a way to skip a language.
 - Hosting is Vercel Hobby and Supabase free until Richard confirms the design; do not add Pro-only features.
 - Functions and the middleware are pinned to `sin1` (`web/vercel.json`, `runtime: 'nodejs'` in `src/middleware.ts`) because the database is in ap-southeast-1. Keep page data loads in one `Promise.all`; `me()` is wrapped in React `cache()`.
 - Models go through `src/lib/llm.ts` only: Claude Sonnet (`claude-sonnet-5-5`) for the agent loop and drafting, Haiku for extraction, DeepSeek for translation when its key is set. Every call records tokens and cost with `recordUsage()`.
