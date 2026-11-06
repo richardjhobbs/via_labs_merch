@@ -1,14 +1,15 @@
 'use client';
 // Add from a document: upload, then a review of what was read. Nothing is saved until the person presses Save.
-import { useActionState, useState } from 'react';
+import { useActionState, useState, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { readDocument, saveDocument, type ReadState } from '../actions';
 import { PartyFields, type PartyDefaults } from '../party-fields';
+import { maskAccount } from '@/lib/bank';
 import type { DocDraft, ReadDoc } from '@/lib/documents';
 
 type Existing = { id: string; name: string };
 
-function Side({ prefix, title, party, kind, match, isUs, existing }: { prefix: string; title: string; party: ReadDoc['buyer']; kind: string; match: string | null; isUs: boolean; existing: Existing[] }) {
+function Side({ prefix, title, party, kind, match, isUs, existing, children }: { prefix: string; title: string; party: ReadDoc['buyer']; kind: string; match: string | null; isUs: boolean; existing: Existing[]; children?: ReactNode }) {
   const t = useTranslations('parties.doc');
   const [use, setUse] = useState(!isUs);
   const [link, setLink] = useState(match || '');
@@ -21,12 +22,39 @@ function Side({ prefix, title, party, kind, match, isUs, existing }: { prefix: s
       {use && <>
         <label className="f mt-3"><span>{t('existing')}</span><select className="input" name={`${prefix}existing`} value={link} onChange={(e) => setLink(e.target.value)}><option value="">{t('newRecord')}</option>{existing.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select></label>
         {link ? <p className="muted small">{t('linkNote')}</p> : <PartyFields prefix={prefix} defaults={defaults} />}
+        {children}
       </>}
     </div>
   );
 }
 
-function Review({ tenant, draft, existing, onReset }: { tenant: string; draft: DocDraft; existing: Existing[]; onReset: () => void }) {
+function Bank({ bank, confirmed }: { bank: NonNullable<ReadDoc['bank']>; confirmed: string[] }) {
+  const t = useTranslations('parties.bank');
+  const [save, setSave] = useState(true);
+  const clean = (s: string | null) => (s || '').replace(/[\s-]/g, '').toUpperCase();
+  const differs = confirmed.length > 0 && !confirmed.some((c) => clean(c) === clean(bank.account_no));
+  const field = (name: string, label: string, value: string | null, max: number) => <label className="f"><span>{label}</span><input className="input" name={`bank_${name}`} maxLength={max} defaultValue={(value || '').slice(0, max)} /></label>;
+  return (
+    <div className="mt-3 pt-3" style={{ borderTop: '1px solid var(--line2)' }}>
+      <h3>{t('title')}</h3>
+      {differs && <div className="notice crit mt-2 small">{t('differsDoc', { account: confirmed.map(maskAccount).join(', ') })}</div>}
+      <label className="flex items-center gap-2 mt-2 small"><input type="checkbox" name="save_bank" checked={save} onChange={(e) => setSave(e.target.checked)} />{t('saveDoc')}</label>
+      {save && <div className="mt-3">
+        <p className="muted small mb-3">{t('docNote')}</p>
+        {field('beneficiary', t('beneficiary'), bank.beneficiary, 160)}
+        {field('bank_name', t('bankName'), bank.bank_name, 160)}
+        {field('bank_address', t('bankAddress'), bank.bank_address, 240)}
+        {field('account_no', t('accountNo'), bank.account_no, 40)}
+        {field('swift', t('swift'), bank.swift, 60)}
+        {field('bank_code', t('bankCode'), bank.bank_code, 20)}
+        {field('branch_code', t('branchCode'), bank.branch_code, 20)}
+        {field('currency', t('currency'), bank.currency, 3)}
+      </div>}
+    </div>
+  );
+}
+
+function Review({ tenant, draft, existing, canBank, onReset }: { tenant: string; draft: DocDraft; existing: Existing[]; canBank: boolean; onReset: () => void }) {
   const t = useTranslations('parties.doc');
   const [state, action, pending] = useActionState<ReadState, FormData>(saveDocument, {});
   const [makeOrder, setMakeOrder] = useState(true);
@@ -41,7 +69,7 @@ function Review({ tenant, draft, existing, onReset }: { tenant: string; draft: D
       <p className="notice">{t('review', { file: draft.file })}</p>
       <div className="grid gap-4 mt-4 md:grid-cols-2">
         <Side prefix="b_" title={t('buyer')} party={doc.buyer} kind="brand" match={draft.buyerMatch} isUs={draft.buyerIsUs} existing={existing} />
-        <Side prefix="s_" title={t('seller')} party={doc.seller} kind="factory" match={draft.sellerMatch} isUs={draft.sellerIsUs} existing={existing} />
+        <Side prefix="s_" title={t('seller')} party={doc.seller} kind="factory" match={draft.sellerMatch} isUs={draft.sellerIsUs} existing={existing}>{canBank && doc.bank?.account_no && <Bank bank={doc.bank} confirmed={draft.sellerConfirmed} />}</Side>
       </div>
       <div className="card mt-4">
         <h2>{t('order')}</h2>
@@ -62,18 +90,17 @@ function Review({ tenant, draft, existing, onReset }: { tenant: string; draft: D
           </dl>
         </>}
       </div>
-      <p className="muted small mt-3">{t('bankNote')}</p>
       {state.error && <div className="notice crit mt-3">{state.error}</div>}
       <div className="flex gap-2 mt-3"><button className="btn primary" disabled={pending}>{pending ? t('saving') : t('save')}</button><button type="button" className="btn" onClick={onReset}>{t('another')}</button></div>
     </form>
   );
 }
 
-export function DocumentForm({ tenant, existing }: { tenant: string; existing: Existing[] }) {
+export function DocumentForm({ tenant, existing, canBank }: { tenant: string; existing: Existing[]; canBank: boolean }) {
   const t = useTranslations('parties.doc');
   const [state, action, pending] = useActionState<ReadState, FormData>(readDocument, {});
   const [dismissed, setDismissed] = useState<DocDraft | null>(null);
-  if (state.draft && state.draft !== dismissed) return <Review key={state.draft.file} tenant={tenant} draft={state.draft} existing={existing} onReset={() => setDismissed(state.draft!)} />;
+  if (state.draft && state.draft !== dismissed) return <Review key={state.draft.file} tenant={tenant} draft={state.draft} existing={existing} canBank={canBank} onReset={() => setDismissed(state.draft!)} />;
   return (
     <form action={action} className="card">
       <input type="hidden" name="tenant" value={tenant} />

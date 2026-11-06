@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { requireTenant } from '@/lib/tenant';
 import { supabaseServer } from '@/lib/supabase/server';
+import { canAddBank } from '@/lib/bank';
 import { DocumentForm } from './document-form';
 
 export default async function AddFromDocument({ params }: { params: Promise<{ tenant: string }> }) {
@@ -17,7 +18,7 @@ export default async function AddFromDocument({ params }: { params: Promise<{ te
       <Link href={`/app/${slug}/parties`} className="small">← {t('title')}</Link>
       <h1 className="mt-2">{t('doc.title')}</h1>
       <p className="muted mt-1 mb-4" style={{ maxWidth: '70ch' }}>{t('doc.intro')}</p>
-      <DocumentForm tenant={slug} existing={existing || []} />
+      <DocumentForm tenant={slug} existing={existing || []} canBank={membership.id !== 'admin' && canAddBank(membership.role)} />
     </div>
   );
 }

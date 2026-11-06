@@ -19,9 +19,10 @@ export const DocSchema = z.object({
   payment_terms: z.string().nullable(),
   lead_time_days: z.number().nullable(),
   hs_code: z.string().nullable(),
+  bank: z.object({ beneficiary: z.string().nullable(), bank_name: z.string().nullable(), bank_address: z.string().nullable(), account_no: z.string().nullable(), swift: z.string().nullable(), bank_code: z.string().nullable(), branch_code: z.string().nullable(), currency: z.string().nullable() }).nullable(),
 });
 export type ReadDoc = z.infer<typeof DocSchema>;
-export type DocDraft = { file: string; doc: ReadDoc; etd: string; buyerMatch: string | null; sellerMatch: string | null; buyerIsUs: boolean; sellerIsUs: boolean };
+export type DocDraft = { file: string; doc: ReadDoc; etd: string; buyerMatch: string | null; sellerMatch: string | null; buyerIsUs: boolean; sellerIsUs: boolean; sellerConfirmed: string[] };
 
 // Spreadsheets become text for the model; PDFs and photos go to it as they are. Null means an unsupported file.
 export async function documentContent(file: File): Promise<DocumentInput | null> {
