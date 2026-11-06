@@ -34,7 +34,7 @@ export async function importOrders(_prev: { ok: boolean; message: string }, form
   if (membership.role === 'viewer') return { ok: false, message: 'Viewers cannot import.' };
   const file = form.get('file') as File | null;
   if (!file || !file.size) return { ok: false, message: 'Choose a file first.' };
-  if (file.size > 5_000_000) return { ok: false, message: 'File is larger than 5 MB.' };
+  if (file.size > 4_000_000) return { ok: false, message: 'File is larger than 4 MB.' };
   const wb = XLSX.read(Buffer.from(await file.arrayBuffer()), { type: 'buffer', cellDates: false });
   const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(wb.Sheets[wb.SheetNames[0]], { defval: '' });
   if (!rows.length) return { ok: false, message: 'The first sheet has no rows.' };

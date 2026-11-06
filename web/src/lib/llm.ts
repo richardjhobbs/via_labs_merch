@@ -27,10 +27,12 @@ export async function recordUsage(tenantId: string, u: { runs?: number; messages
   await supabaseAdmin().rpc('usage_add', { p_tenant: tenantId, p_runs: u.runs || 0, p_in: u.messagesIn || 0, p_out: u.messagesOut || 0, p_tokens_in: u.tokensIn || 0, p_tokens_out: u.tokensOut || 0, p_cost: u.cost || 0 });
 }
 
+// Model input: text, or content blocks for a PDF or photo.
+export type DocumentInput = string | Anthropic.ContentBlockParam[];
 export type Usage = { model: string; tokensIn: number; tokensOut: number; cost: number };
 
 // Structured extraction with a Zod schema (language detection, classification, parsing).
-export async function extract<T extends z.ZodType>(schema: T, system: string, user: string, opts: { model?: string } = {}): Promise<{ data: z.infer<T> | null; usage: Usage }> {
+export async function extract<T extends z.ZodType>(schema: T, system: string, user: DocumentInput, opts: { model?: string } = {}): Promise<{ data: z.infer<T> | null; usage: Usage }> {
   const model = opts.model || SMALL_MODEL;
   const r = await anthropic().messages.parse({ model, max_tokens: 4096, output_config: { effort: 'low', format: zodOutputFormat(schema) }, system, messages: [{ role: 'user', content: user }] });
   const tokensIn = r.usage.input_tokens, tokensOut = r.usage.output_tokens;
