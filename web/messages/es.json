@@ -246,7 +246,20 @@
     "template": "Descargar la plantilla (.xlsx)",
     "file": "Archivo",
     "importing": "Importando...",
-    "importBtn": "Importar"
+    "importBtn": "Importar",
+    "importViewer": "Los lectores no pueden importar.",
+    "importNoFile": "Elija primero un archivo.",
+    "importTooBig": "El archivo supera los 4 MB.",
+    "importEmpty": "La primera hoja no tiene filas.",
+    "importDone": "Pedidos nuevos importados de este archivo: {n}.",
+    "importNone": "No se importó ningún pedido nuevo de este archivo.",
+    "importSkipped": "Filas omitidas: {n} ({why}).",
+    "importUnchanged": "Los pedidos que ya tiene no se ven afectados.",
+    "rowNeeds": "la fila {row} necesita una PO y un ETD",
+    "rowDup": "fila {row}, la PO {po} ya existe",
+    "viewOrders": "Ver sus pedidos",
+    "docHint": "Esta importación necesita una hoja con un pedido por fila. Para una factura proforma, factura u orden de compra con otro formato, use",
+    "docLink": "Añadir desde un documento."
   },
   "parties": {
     "title": "Clientes y proveedores",

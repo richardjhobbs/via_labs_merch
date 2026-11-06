@@ -246,7 +246,20 @@
     "template": "Vorlage herunterladen (.xlsx)",
     "file": "Datei",
     "importing": "Importiert...",
-    "importBtn": "Importieren"
+    "importBtn": "Importieren",
+    "importViewer": "Betrachter können nicht importieren.",
+    "importNoFile": "Wählen Sie zuerst eine Datei.",
+    "importTooBig": "Die Datei ist größer als 4 MB.",
+    "importEmpty": "Das erste Blatt enthält keine Zeilen.",
+    "importDone": "Neue Aufträge aus dieser Datei: {n}.",
+    "importNone": "Aus dieser Datei wurden keine neuen Aufträge importiert.",
+    "importSkipped": "Übersprungene Zeilen: {n} ({why}).",
+    "importUnchanged": "Ihre vorhandenen Aufträge bleiben davon unberührt.",
+    "rowNeeds": "Zeile {row} braucht eine Bestellnummer und ein ETD",
+    "rowDup": "Zeile {row}, Bestellung {po} existiert bereits",
+    "viewOrders": "Ihre Aufträge ansehen",
+    "docHint": "Dieser Import braucht eine Tabelle mit einem Auftrag pro Zeile. Für eine Proforma-Rechnung, Rechnung oder Bestellung in anderem Format nutzen Sie",
+    "docLink": "Aus einem Dokument hinzufügen."
   },
   "parties": {
     "title": "Kunden & Lieferanten",

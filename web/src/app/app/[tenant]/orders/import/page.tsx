@@ -13,6 +13,7 @@ export default async function ImportPage({ params }: { params: Promise<{ tenant:
       <h1 className="mt-2">{t('import')}</h1>
       <p className="muted mt-1">{t('importIntro')}</p>
       <div className="card mt-4"><ImportForm tenant={slug} /></div>
+      <div className="notice mt-4 small">{t('docHint')} <Link href={`/app/${slug}/parties/document`}>{t('docLink')}</Link></div>
       <div className="card mt-4 small">
         <h3>{t('importColumns')}</h3>
         <p className="mt-2"><b>PO, Customer, Factory, Style, Description, Qty, FOB, ETD</b> {t('importRequired')}</p>

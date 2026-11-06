@@ -246,7 +246,20 @@
     "template": "下载模板（.xlsx）",
     "file": "文件",
     "importing": "正在导入...",
-    "importBtn": "导入"
+    "importBtn": "导入",
+    "importViewer": "查看者不能导入。",
+    "importNoFile": "请先选择文件。",
+    "importTooBig": "文件超过 4 MB。",
+    "importEmpty": "第一个工作表没有数据行。",
+    "importDone": "已从此文件导入 {n} 个新订单。",
+    "importNone": "此文件没有导入任何新订单。",
+    "importSkipped": "跳过 {n} 行：{why}。",
+    "importUnchanged": "您已有的订单不受影响。",
+    "rowNeeds": "第 {row} 行需要 PO 和 ETD",
+    "rowDup": "第 {row} 行，PO {po} 已存在",
+    "viewOrders": "查看您的订单",
+    "docHint": "此导入需要每行一个订单的表格。其他格式的形式发票、发票或采购订单，请使用",
+    "docLink": "从文件添加。"
   },
   "parties": {
     "title": "客户与供应商",

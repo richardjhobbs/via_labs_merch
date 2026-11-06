@@ -246,7 +246,20 @@
     "template": "Download the template (.xlsx)",
     "file": "File",
     "importing": "Importing...",
-    "importBtn": "Import"
+    "importBtn": "Import",
+    "importViewer": "Viewers cannot import.",
+    "importNoFile": "Choose a file first.",
+    "importTooBig": "The file is larger than 4 MB.",
+    "importEmpty": "The first sheet has no rows.",
+    "importDone": "New orders imported from this file: {n}.",
+    "importNone": "No new orders were imported from this file.",
+    "importSkipped": "Rows skipped: {n} ({why}).",
+    "importUnchanged": "Orders you already have are not affected.",
+    "rowNeeds": "row {row} needs a PO and an ETD",
+    "rowDup": "row {row}, PO {po} already exists",
+    "viewOrders": "See your orders",
+    "docHint": "This import needs a spreadsheet with one order per row. For a proforma invoice, invoice or purchase order in any other layout, use",
+    "docLink": "Add from a document."
   },
   "parties": {
     "title": "Customers & suppliers",

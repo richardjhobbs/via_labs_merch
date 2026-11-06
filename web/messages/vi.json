@@ -246,7 +246,20 @@
     "template": "Tải tệp mẫu (.xlsx)",
     "file": "Tệp",
     "importing": "Đang nhập...",
-    "importBtn": "Nhập"
+    "importBtn": "Nhập",
+    "importViewer": "Người xem không thể nhập.",
+    "importNoFile": "Hãy chọn tệp trước.",
+    "importTooBig": "Tệp lớn hơn 4 MB.",
+    "importEmpty": "Trang tính đầu tiên không có dòng nào.",
+    "importDone": "Đã nhập {n} đơn hàng mới từ tệp này.",
+    "importNone": "Không có đơn hàng mới nào được nhập từ tệp này.",
+    "importSkipped": "Bỏ qua {n} dòng: {why}.",
+    "importUnchanged": "Các đơn hàng bạn đã có không bị ảnh hưởng.",
+    "rowNeeds": "dòng {row} cần số PO và ETD",
+    "rowDup": "dòng {row}, PO {po} đã tồn tại",
+    "viewOrders": "Xem đơn hàng của bạn",
+    "docHint": "Cách nhập này cần bảng tính mỗi dòng một đơn hàng. Với hóa đơn chiếu lệ, hóa đơn hoặc đơn đặt hàng ở định dạng khác, hãy dùng",
+    "docLink": "Thêm từ tài liệu."
   },
   "parties": {
     "title": "Khách hàng & nhà cung cấp",

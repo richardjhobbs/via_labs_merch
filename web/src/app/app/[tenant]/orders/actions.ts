@@ -1,5 +1,6 @@
 'use server';
 import { redirect } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 import { revalidatePath } from 'next/cache';
 import * as XLSX from 'xlsx';
 import { supabaseServer } from '@/lib/supabase/server';
@@ -31,13 +32,14 @@ const toIso = (v: unknown): string | null => { if (v == null || v === '') return
 export async function importOrders(_prev: { ok: boolean; message: string }, form: FormData): Promise<{ ok: boolean; message: string }> {
   const slug = String(form.get('tenant'));
   const { tenant, membership, user } = await requireTenant(slug);
-  if (membership.role === 'viewer') return { ok: false, message: 'Viewers cannot import.' };
+  const t = await getTranslations('orders');
+  if (membership.role === 'viewer') return { ok: false, message: t('importViewer') };
   const file = form.get('file') as File | null;
-  if (!file || !file.size) return { ok: false, message: 'Choose a file first.' };
-  if (file.size > 4_000_000) return { ok: false, message: 'File is larger than 4 MB.' };
+  if (!file || !file.size) return { ok: false, message: t('importNoFile') };
+  if (file.size > 4_000_000) return { ok: false, message: t('importTooBig') };
   const wb = XLSX.read(Buffer.from(await file.arrayBuffer()), { type: 'buffer', cellDates: false });
   const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(wb.Sheets[wb.SheetNames[0]], { defval: '' });
-  if (!rows.length) return { ok: false, message: 'The first sheet has no rows.' };
+  if (!rows.length) return { ok: false, message: `${t('importEmpty')} ${t('importUnchanged')}` };
   const sb = await supabaseServer();
   const { data: existing } = await sb.from('parties').select('id, name, kind, country').eq('tenant_id', tenant.id);
   const byName = new Map((existing || []).map((p) => [p.name.trim().toLowerCase(), p]));
@@ -51,13 +53,13 @@ export async function importOrders(_prev: { ok: boolean; message: string }, form
   for (const [i, r] of rows.entries()) {
     const po = String(H(r, 'PO', 'PO number', 'Order') || '').trim();
     const etd = toIso(H(r, 'ETD', 'Ship date', 'Ex-factory'));
-    if (!po || !etd) { problems.push(`Row ${i + 2}: needs PO and ETD`); skipped++; continue; }
+    if (!po || !etd) { problems.push(t('rowNeeds', { row: i + 2 })); skipped++; continue; }
     const customer = await party(H(r, 'Customer', 'Brand', 'Buyer'), 'brand', H(r, 'Customer country'));
     const factory = await party(H(r, 'Factory', 'Supplier', 'Vendor'), 'factory', H(r, 'Factory country', 'Country'));
     const mill = await party(H(r, 'Mill', 'Fabric mill'), 'mill'); const fibre = await party(H(r, 'Fibre', 'Fiber', 'Yarn'), 'fibre');
     const qty = Number(H(r, 'Qty', 'Quantity', 'Units') || 0) || null, fob = Number(H(r, 'FOB', 'Price', 'Unit price') || 0) || null;
     const { data: o, error } = await sb.from('orders').insert({ tenant_id: tenant.id, po, customer_id: customer?.id || null, factory_id: factory?.id || null, mill_id: mill?.id || null, fibre_id: fibre?.id || null, owner_user_id: user.id, style: String(H(r, 'Style', 'Style code') || '') || null, description: String(H(r, 'Description', 'Desc', 'Product') || '') || null, category: String(H(r, 'Category') || '') || null, composition: String(H(r, 'Composition', 'Fabric') || '') || null, qty, fob, currency: String(H(r, 'Currency') || 'USD').toUpperCase().slice(0, 3), incoterm: String(H(r, 'Incoterm') || 'FOB'), pol: String(H(r, 'POL', 'Port of loading') || '') || null, pod: String(H(r, 'POD', 'Port of discharge', 'Destination') || '') || null, instore_date: toIso(H(r, 'In-store', 'Instore', 'In store')), season: String(H(r, 'Season') || '') || null, source: 'import' }).select('id').single();
-    if (error || !o) { problems.push(`Row ${i + 2} (${po}): ${error?.message.includes('duplicate') ? 'PO already exists' : error?.message}`); skipped++; continue; }
+    if (error || !o) { problems.push(error?.message.includes('duplicate') ? t('rowDup', { row: i + 2, po }) : `${i + 2} (${po}): ${error?.message}`); skipped++; continue; }
     const plan = planFromEtd(etd, factory?.country);
     const ms = MILESTONES.map((k) => { const given = toIso(H(r, LABELS[k], k)); return { tenant_id: tenant.id, order_id: o.id, key: k, owner_kind: OWNERS[k], plan_date: given || plan[k] }; });
     await sb.from('milestones').insert(ms);
@@ -65,5 +67,6 @@ export async function importOrders(_prev: { ok: boolean; message: string }, form
   }
   await sb.rpc('ledger_append', { p_tenant: tenant.id, p_channel: 'Console', p_actor: membership.display_name || user.email, p_actor_user: user.id, p_counterparty: null, p_stream: 'Setup', p_order: null, p_what: `Imported ${created} POs from ${file.name}${skipped ? ` (${skipped} skipped)` : ''}`, p_gate: 'Logged', p_gated: false, p_ref: { file: file.name, created, skipped } });
   revalidatePath(`/app/${slug}/orders`);
-  return { ok: created > 0, message: `${created} orders imported${skipped ? `, ${skipped} skipped: ${problems.slice(0, 5).join('; ')}` : ''}.` };
+  const why = skipped ? ` ${t('importSkipped', { n: skipped, why: problems.slice(0, 5).join('; ') })}` : '';
+  return { ok: created > 0, message: created ? `${t('importDone', { n: created })}${why}` : `${t('importNone')}${why} ${t('importUnchanged')}` };
 }
