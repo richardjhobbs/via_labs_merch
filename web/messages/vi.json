@@ -451,6 +451,19 @@
         "label": "Hộp thư này không có nhãn Gmail nào tên \"{label}\".",
         "forbidden": "Chỉ người đã kết nối hộp thư này, hoặc owner hay manager, mới có thể thay đổi."
       }
+    },
+    "m365": {
+      "connect": "Kết nối Outlook",
+      "another": "Kết nối hộp thư Outlook khác",
+      "done": "Đã kết nối Microsoft 365: {account}. Thư mới từ khách hàng và nhà cung cấp đã biết sẽ được nhận mỗi phút.",
+      "label": "Chỉ thư trong thư mục Outlook này",
+      "labelName": "Tên thư mục",
+      "errors": {
+        "notReady": "Đăng nhập Microsoft chưa được bật. VIA Labs đang hoàn tất thiết lập Microsoft.",
+        "refresh": "Microsoft không cấp quyền truy cập lâu dài. Hãy kết nối lại và chấp nhận mọi quyền được yêu cầu.",
+        "adminConsent": "Quản trị viên Microsoft của công ty bạn cần phê duyệt VIA Merch một lần trước khi bạn kết nối. Hãy nhờ bộ phận IT phê duyệt rồi thử lại.",
+        "folder": "Hộp thư này không có thư mục Outlook nào tên \"{label}\"."
+      }
     }
   },
   "ledger": {

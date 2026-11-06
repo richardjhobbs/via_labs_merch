@@ -451,6 +451,19 @@
         "label": "此邮箱没有名为“{label}”的 Gmail 标签。",
         "forbidden": "只有连接此邮箱的人，或 owner、manager，才能更改它。"
       }
+    },
+    "m365": {
+      "connect": "连接 Outlook",
+      "another": "连接另一个 Outlook 邮箱",
+      "done": "Microsoft 365 已连接：{account}。已知客户和供应商的新邮件现在每分钟收取一次。",
+      "label": "仅读取此 Outlook 文件夹中的邮件",
+      "labelName": "文件夹名称",
+      "errors": {
+        "notReady": "Microsoft 登录尚未开通。VIA Labs 正在完成 Microsoft 设置。",
+        "refresh": "Microsoft 未授予长期访问权限。请重新连接并接受所请求的全部权限。",
+        "adminConsent": "贵公司的 Microsoft 管理员需先批准一次 VIA Merch，您才能连接。请联系 IT 批准后重试。",
+        "folder": "此邮箱没有名为“{label}”的 Outlook 文件夹。"
+      }
     }
   },
   "ledger": {

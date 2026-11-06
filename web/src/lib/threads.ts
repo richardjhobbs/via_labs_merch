@@ -53,11 +53,13 @@ export async function recordOutbound(tenantId: string, draft: { id: string; body
   if (draft.source_message_id) {
     const { data: src } = await sb.from('messages').select('thread_id, raw, channel_id, from_addr').eq('id', draft.source_message_id).maybeSingle();
     threadId = src?.thread_id || null; kind = (src?.raw as { channel?: string })?.channel || null;
-    // a reply to mail that came in through a connected Gmail mailbox goes back out from that mailbox
-    const g = (src?.raw as { gmail?: { thread_id?: string; message_id?: string; references?: string; reply_to?: string | null }; subject?: string | null })?.gmail;
+    // a reply to mail that came in through a connected mailbox (Gmail or Microsoft 365) goes back out from it
+    type Src = { thread_id?: string; conversation_id?: string | null; id?: string; message_id?: string | null; references?: string; reply_to?: string | null };
+    const r = (src?.raw || {}) as { gmail?: Src; m365?: Src; subject?: string | null };
+    const g = r.gmail || r.m365;
     if (src?.channel_id && g) {
       const { data: ch } = await sb.from('channels').select('id, kind').eq('id', src.channel_id).maybeSingle();
-      if (ch?.kind === 'email_gmail') { channelId = ch.id; send = { send: 'pending', reply: { to: g.reply_to || src.from_addr, subject: (src.raw as { subject?: string | null }).subject || null, message_id: g.message_id || null, references: g.references || null, thread_id: g.thread_id || null } }; }
+      if (ch && ['email_gmail', 'email_m365'].includes(ch.kind)) { channelId = ch.id; send = { send: 'pending', reply: { to: g.reply_to || src.from_addr, subject: r.subject || null, message_id: g.message_id || null, references: g.references || null, thread_id: g.thread_id || g.conversation_id || null, provider_id: g.id || null } }; }
     }
   }
   if (!threadId) threadId = await findOrCreateThread(sb, tenantId, draft.party_id, draft.order_id, kind, null);

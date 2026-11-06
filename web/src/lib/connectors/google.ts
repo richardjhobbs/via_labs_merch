@@ -8,19 +8,18 @@
 // - A reply goes out only after a person approved it, or the stream's gate approved it (L2+ uncapped),
 //   from the mailbox the original arrived in, threaded under it.
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { seal, open, hasTokenKey } from '@/lib/crypto';
+import { open, hasTokenKey } from '@/lib/crypto';
 import { ingestInbound } from '@/lib/agents/inbound';
+import { ReauthError, channelToken, knownSenders, newPart, type Auth, type Channel, type MailConfig, type Reply } from './mail';
+export type { Channel } from './mail';
 
+export { sealAuth } from './mail';
 type Client = SupabaseClient<any, 'merch', any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 export const GMAIL_SCOPES = ['https://www.googleapis.com/auth/gmail.readonly', 'https://www.googleapis.com/auth/gmail.send'];
 const API = 'https://gmail.googleapis.com/gmail/v1/users/me';
 
-export type GmailConfig = { connector: 'gmail'; history_id?: string; filter?: 'known' | 'label'; label?: string | null; label_id?: string | null; connected_by?: string };
-type Auth = { refresh_token: string; access_token?: string; expires_at?: number };
-export type Channel = { id: string; tenant_id: string; kind: string; status: string; account: string | null; owner_user_id: string | null; auth_enc: string | null; config: GmailConfig; last_sync_at: string | null };
-
-export class ReauthError extends Error {}
+export type GmailConfig = MailConfig & { connector: 'gmail'; history_id?: string };
 
 export function googleConfigured() { return !!process.env.GOOGLE_CLIENT_ID && !!process.env.GOOGLE_CLIENT_SECRET && hasTokenKey(); }
 
@@ -46,21 +45,7 @@ export async function revoke(stored: string | null) {
   if (a?.refresh_token) await fetch('https://oauth2.googleapis.com/revoke', { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ token: a.refresh_token }) }).catch(() => null);
 }
 
-export function sealAuth(t: { refresh_token: string; access_token?: string; expires_in?: number }) {
-  return seal({ refresh_token: t.refresh_token, access_token: t.access_token, expires_at: t.expires_in ? Date.now() + (t.expires_in - 60) * 1000 : 0 } satisfies Auth);
-}
-
-// A valid access token for the channel, refreshed and re-sealed when it has expired.
-async function accessToken(sb: Client, ch: Channel) {
-  const a = open<Auth>(ch.auth_enc);
-  if (!a?.refresh_token) throw new ReauthError('no token stored');
-  if (a.access_token && (a.expires_at || 0) > Date.now()) return a.access_token;
-  const t = await tokenCall({ grant_type: 'refresh_token', refresh_token: a.refresh_token });
-  const enc = sealAuth({ refresh_token: t.refresh_token || a.refresh_token, access_token: t.access_token, expires_in: t.expires_in });
-  await sb.from('channels').update({ auth_enc: enc }).eq('id', ch.id);
-  ch.auth_enc = enc;
-  return t.access_token;
-}
+const accessToken = (sb: Client, ch: Channel) => channelToken(sb, ch, (refresh_token) => tokenCall({ grant_type: 'refresh_token', refresh_token }));
 
 export async function gmail<T = any>(token: string, path: string, init: RequestInit = {}): Promise<T> { // eslint-disable-line @typescript-eslint/no-explicit-any
   const r = await fetch(API + path, { ...init, headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json', ...(init.headers || {}) } });
@@ -80,15 +65,13 @@ export async function findLabelId(sb: Client, ch: Channel, name: string) {
 
 // ------------------------------------------------------------------ inbound
 
-const FREE_MAIL = new Set(['gmail.com', 'googlemail.com', 'yahoo.com', 'yahoo.co.uk', 'hotmail.com', 'outlook.com', 'live.com', 'msn.com', 'icloud.com', 'me.com', 'aol.com', 'proton.me', 'protonmail.com', 'qq.com', '163.com', '126.com', 'sina.com', 'yeah.net', 'foxmail.com', 'aliyun.com', 'naver.com', 'yandex.com', 'gmx.de', 'web.de', 'mail.ru', 'rediffmail.com']);
-
 type Header = { name: string; value: string };
 type Part = { mimeType?: string; filename?: string; body?: { data?: string; size?: number; attachmentId?: string }; parts?: Part[]; headers?: Header[] };
 type GMsg = { id: string; threadId: string; labelIds?: string[]; internalDate?: string; payload?: Part };
 
 const hdr = (p: Part | undefined, n: string) => p?.headers?.find((h) => h.name.toLowerCase() === n.toLowerCase())?.value || '';
-const addrOf = (v: string) => (v.match(/<([^>]+)>/)?.[1] || v).trim().toLowerCase();
-const nameOf = (v: string) => v.replace(/<[^>]*>/, '').replace(/"/g, '').trim() || null;
+export const addrOf = (v: string) => (v.match(/<([^>]+)>/)?.[1] || v).trim().toLowerCase();
+export const nameOf = (v: string) => v.replace(/<[^>]*>/, '').replace(/"/g, '').trim() || null;
 const b64 = (s: string) => Buffer.from(s.replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf8');
 
 export function bodyText(p: Part | undefined): string {
@@ -105,14 +88,6 @@ export function bodyText(p: Part | undefined): string {
   return html.replace(/<(style|script)[\s\S]*?<\/\1>/gi, '').replace(/<br\s*\/?>|<\/(p|div|tr|li|h\d)>/gi, '\n').replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/\n{3,}/g, '\n\n').trim();
 }
 
-// Keep the new part of a reply: cut at the quoted chain.
-export function newPart(text: string) {
-  const re = /^(On .{4,200}wrote:|-{2,}\s*Original Message\s*-{2,}|From: .+|发件人[:：].+|_{10,})\s*$/m;
-  const m = text.match(re);
-  const cut = m && m.index !== undefined && m.index > 40 ? text.slice(0, m.index) : text;
-  return cut.replace(/\r/g, '').split('\n').filter((l) => !l.startsWith('>')).join('\n').replace(/\n{3,}/g, '\n\n').trim().slice(0, 12_000);
-}
-
 function attachmentsOf(p: Part | undefined, out: { name: string; mime: string; bytes: number }[] = []) {
   if (!p) return out;
   if (p.filename && p.body?.attachmentId) out.push({ name: p.filename, mime: p.mimeType || '', bytes: p.body.size || 0 });
@@ -120,29 +95,11 @@ function attachmentsOf(p: Part | undefined, out: { name: string; mime: string; b
   return out;
 }
 
-async function knownSenders(sb: Client, tenantId: string) {
-  const { data } = await sb.from('contacts').select('id, party_id, email').eq('tenant_id', tenantId).not('email', 'is', null);
-  const byEmail = new Map<string, { party_id: string; contact_id: string }>();
-  const byDomain = new Map<string, Set<string>>();
-  for (const c of data || []) {
-    const e = String(c.email).trim().toLowerCase(); if (!e.includes('@')) continue;
-    byEmail.set(e, { party_id: c.party_id, contact_id: c.id });
-    const d = e.split('@')[1]; if (!FREE_MAIL.has(d)) { if (!byDomain.has(d)) byDomain.set(d, new Set()); byDomain.get(d)!.add(c.party_id); }
-  }
-  return (addr: string): { party_id: string | null; known: boolean } => {
-    const hit = byEmail.get(addr); if (hit) return { party_id: hit.party_id, known: true };
-    const parties = byDomain.get(addr.split('@')[1] || '');
-    if (parties) return { party_id: parties.size === 1 ? [...parties][0] : null, known: true };
-    return { party_id: null, known: false };
-  };
-}
-
-// One pass over a mailbox: new messages since the stored history id, filtered, into the inbound pipeline.
 export async function syncGmail(sb: Client, ch: Channel, deadline: number) {
   const out = { fetched: 0, ingested: 0, skipped: 0 };
   try {
     const token = await accessToken(sb, ch);
-    const cfg = ch.config || ({ connector: 'gmail' } as GmailConfig);
+    const cfg = (ch.config || { connector: 'gmail' }) as GmailConfig;
     if (!cfg.history_id) { const p = await profile(token); await saveConfig(sb, ch, { history_id: p.historyId }); return out; }
     const labelId = cfg.filter === 'label' && cfg.label_id ? cfg.label_id : 'INBOX';
 
@@ -202,7 +159,7 @@ export async function syncGmail(sb: Client, ch: Channel, deadline: number) {
 }
 
 async function saveConfig(sb: Client, ch: Channel, patch: Partial<GmailConfig>) {
-  ch.config = { ...(ch.config || { connector: 'gmail' }), ...patch };
+  ch.config = { ...((ch.config || { connector: 'gmail' }) as GmailConfig), ...patch };
   await sb.from('channels').update({ config: ch.config, last_sync_at: new Date().toISOString(), error: null }).eq('id', ch.id);
 }
 
@@ -210,8 +167,6 @@ async function saveConfig(sb: Client, ch: Channel, patch: Partial<GmailConfig>) 
 
 const mimeWord = (s: string) => (/^[\x20-\x7e]*$/.test(s) ? s : `=?UTF-8?B?${Buffer.from(s, 'utf8').toString('base64')}?=`);
 const b64url = (b: Buffer) => b.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-
-export type Reply = { to: string; subject: string | null; message_id: string | null; references: string | null; thread_id: string | null };
 
 export async function sendReply(sb: Client, ch: Channel, r: Reply, body: string) {
   const token = await accessToken(sb, ch);
@@ -222,33 +177,3 @@ export async function sendReply(sb: Client, ch: Channel, r: Reply, body: string)
   return gmail<{ id: string; threadId: string }>(token, '/messages/send', { method: 'POST', body: JSON.stringify({ raw: b64url(Buffer.from(raw, 'utf8')), ...(r.thread_id ? { threadId: r.thread_id } : {}) }) });
 }
 
-// Approved replies waiting on a Gmail channel go out here, oldest first.
-export async function sendPending(sb: Client, deadline: number) {
-  const out = { sent: 0, failed: 0 };
-  const { data: rows } = await sb.from('messages').select('id, tenant_id, channel_id, thread_id, order_id, stream, text, sender_name, raw').eq('direction', 'out').is('sent_at', null).not('channel_id', 'is', null).eq('raw->>send', 'pending').order('created_at').limit(5);
-  for (const m of rows || []) {
-    if (Date.now() > deadline - 5000) break;
-    const raw = (m.raw || {}) as { reply?: Reply; draft_id?: string; attempts?: number };
-    const { data: ch } = await sb.from('channels').select('id, tenant_id, kind, status, account, owner_user_id, auth_enc, config, last_sync_at').eq('id', m.channel_id).maybeSingle();
-    const fail = async (why: string, final: boolean) => {
-      const attempts = (raw.attempts || 0) + 1, give = final || attempts >= 3;
-      await sb.from('messages').update({ raw: { ...raw, attempts, send: give ? 'failed' : 'pending', send_error: why.slice(0, 300) } }).eq('id', m.id);
-      if (give) { out.failed++; await sb.rpc('ledger_append', { p_tenant: m.tenant_id, p_channel: 'Email', p_actor: ch?.account || 'Gmail', p_actor_user: null, p_counterparty: raw.reply?.to || null, p_stream: m.stream, p_order: m.order_id, p_what: `Send failed: ${why.slice(0, 160)}`, p_gate: 'NOT SENT', p_gated: true, p_ref: { message_id: m.id, draft_id: raw.draft_id || null } }); }
-    };
-    if (!ch || ch.kind !== 'email_gmail') { await fail('the mailbox is no longer connected', true); continue; }
-    if (ch.status !== 'connected') { await fail(`the mailbox ${ch.account} needs signing in again`, false); continue; }
-    if (!raw.reply?.to) { await fail('no address to reply to', true); continue; }
-    try {
-      const s = await sendReply(sb, ch as Channel, raw.reply, m.text);
-      const at = new Date().toISOString();
-      await sb.from('messages').update({ sent_at: at, external_id: s.id, from_addr: ch.account, to_addr: [raw.reply.to], raw: { ...raw, send: 'sent', gmail: { id: s.id, thread_id: s.threadId } } }).eq('id', m.id);
-      if (raw.draft_id) await sb.from('drafts').update({ status: 'sent' }).eq('id', raw.draft_id);
-      await sb.rpc('ledger_append', { p_tenant: m.tenant_id, p_channel: 'Email', p_actor: m.sender_name || ch.account, p_actor_user: null, p_counterparty: raw.reply.to, p_stream: m.stream, p_order: m.order_id, p_what: `Sent from ${ch.account} to ${raw.reply.to}: ${raw.reply.subject || '(no subject)'}`, p_gate: 'SENT', p_gated: true, p_ref: { message_id: m.id, draft_id: raw.draft_id || null } });
-      out.sent++;
-    } catch (e) {
-      if (e instanceof ReauthError) await sb.from('channels').update({ status: 'reauth', error: e.message }).eq('id', ch.id);
-      await fail(e instanceof Error ? e.message : String(e), false);
-    }
-  }
-  return out;
-}

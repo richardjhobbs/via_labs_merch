@@ -451,6 +451,19 @@
         "label": "This mailbox has no Gmail label called \"{label}\".",
         "forbidden": "Only the person who connected this mailbox, or an owner or manager, can change it."
       }
+    },
+    "m365": {
+      "connect": "Connect Outlook",
+      "another": "Connect another Outlook mailbox",
+      "done": "Microsoft 365 connected: {account}. New mail from known customers and suppliers now comes in every minute.",
+      "label": "Only mail in this Outlook folder",
+      "labelName": "Folder name",
+      "errors": {
+        "notReady": "Microsoft sign-in is not switched on yet. VIA Labs is completing the Microsoft setup.",
+        "refresh": "Microsoft did not give lasting access. Connect again and accept all the permissions asked.",
+        "adminConsent": "Your company's Microsoft admin must approve VIA Merch once before you can connect. Ask IT to approve it, then try again.",
+        "folder": "This mailbox has no Outlook folder called \"{label}\"."
+      }
     }
   },
   "ledger": {

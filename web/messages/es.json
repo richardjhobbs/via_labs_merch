@@ -451,6 +451,19 @@
         "label": "Este buzón no tiene ninguna etiqueta de Gmail llamada \"{label}\".",
         "forbidden": "Solo la persona que conectó este buzón, o un owner o manager, puede cambiarlo."
       }
+    },
+    "m365": {
+      "connect": "Conectar Outlook",
+      "another": "Conectar otro buzón de Outlook",
+      "done": "Microsoft 365 conectado: {account}. El correo nuevo de clientes y proveedores conocidos llega ahora cada minuto.",
+      "label": "Solo correo en esta carpeta de Outlook",
+      "labelName": "Nombre de la carpeta",
+      "errors": {
+        "notReady": "El inicio de sesión con Microsoft aún no está activado. VIA Labs está completando la configuración de Microsoft.",
+        "refresh": "Microsoft no concedió acceso permanente. Vuelva a conectar y acepte todos los permisos solicitados.",
+        "adminConsent": "El administrador de Microsoft de su empresa debe aprobar VIA Merch una vez antes de que pueda conectar. Pida a TI que lo apruebe e inténtelo de nuevo.",
+        "folder": "Este buzón no tiene ninguna carpeta de Outlook llamada \"{label}\"."
+      }
     }
   },
   "ledger": {
