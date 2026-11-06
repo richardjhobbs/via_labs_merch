@@ -421,7 +421,37 @@
     "catalogueNote": "以下每个系统都有成熟的对接方式。提出需求后，VIA Labs 会在服务费范围内开发并测试连接器。",
     "needs": "所需条件",
     "request": "申请对接",
-    "trademark": "产品名称和标志归其所有者所有，仅用于标识 VIA 可对接的系统，并不代表任何背书。"
+    "trademark": "产品名称和标志归其所有者所有，仅用于标识 VIA 可对接的系统，并不代表任何背书。",
+    "gmail": {
+      "connect": "连接 Gmail",
+      "another": "连接另一个邮箱",
+      "done": "Gmail 已连接：{account}。已知客户和供应商的新邮件现在每分钟收取一次。",
+      "saved": "已保存。",
+      "reauth": "重新登录",
+      "by": "由 {name} 连接",
+      "checked": "最近检查 {time}",
+      "never": "尚未检查",
+      "handles": "代理读取的邮件",
+      "known": "已知客户和供应商的邮件",
+      "label": "仅读取带此 Gmail 标签的邮件",
+      "labelName": "标签名称",
+      "save": "保存",
+      "reconnect": "重新登录",
+      "disconnect": "断开连接",
+      "note": "只读取连接之后的新邮件。其他发件人的邮件从不保存。回复须经批准后才从此邮箱发出。",
+      "errors": {
+        "notReady": "Google 登录尚未开通。VIA Labs 正在完成 Google 设置。",
+        "support": "VIA Labs 在支持访问下不能连接邮箱。",
+        "viewer": "查看者不能连接邮箱。",
+        "state": "登录耗时过长或被打开了两次，请重试。",
+        "denied": "Google 登录已取消。",
+        "scopes": "请在 Google 页面同时允许读取和发送，然后重试。",
+        "refresh": "Google 未授予长期访问权限。请在 myaccount.google.com/permissions 移除 VIA Merch 后重新连接。",
+        "failed": "Google 登录失败：{error}",
+        "label": "此邮箱没有名为“{label}”的 Gmail 标签。",
+        "forbidden": "只有连接此邮箱的人，或 owner、manager，才能更改它。"
+      }
+    }
   },
   "ledger": {
     "title": "台账与自主级别",

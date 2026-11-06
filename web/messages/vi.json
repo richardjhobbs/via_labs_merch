@@ -421,7 +421,37 @@
     "catalogueNote": "Mọi hệ thống dưới đây đều có cách kết nối đã biết. Hãy yêu cầu, VIA Labs sẽ xây dựng và kiểm thử connector trong phạm vi phí dịch vụ của bạn.",
     "needs": "Cần",
     "request": "Yêu cầu",
-    "trademark": "Tên sản phẩm và logo thuộc về chủ sở hữu tương ứng, chỉ được hiển thị để nhận diện các hệ thống VIA kết nối; điều này không ngụ ý sự chứng thực."
+    "trademark": "Tên sản phẩm và logo thuộc về chủ sở hữu tương ứng, chỉ được hiển thị để nhận diện các hệ thống VIA kết nối; điều này không ngụ ý sự chứng thực.",
+    "gmail": {
+      "connect": "Kết nối Gmail",
+      "another": "Kết nối hộp thư khác",
+      "done": "Đã kết nối Gmail: {account}. Thư mới từ khách hàng và nhà cung cấp đã biết sẽ được nhận mỗi phút.",
+      "saved": "Đã lưu.",
+      "reauth": "Đăng nhập lại",
+      "by": "Kết nối bởi {name}",
+      "checked": "Kiểm tra lúc {time}",
+      "never": "Chưa kiểm tra",
+      "handles": "Agent đọc thư nào",
+      "known": "Thư từ khách hàng và nhà cung cấp đã biết",
+      "label": "Chỉ thư có nhãn Gmail này",
+      "labelName": "Tên nhãn",
+      "save": "Lưu",
+      "reconnect": "Đăng nhập lại",
+      "disconnect": "Ngắt kết nối",
+      "note": "Chỉ đọc thư mới, kể từ lúc kết nối. Thư từ người khác không bao giờ được lưu. Thư trả lời chỉ được gửi từ hộp thư này sau khi được duyệt.",
+      "errors": {
+        "notReady": "Đăng nhập Google chưa được bật. VIA Labs đang hoàn tất thiết lập Google.",
+        "support": "VIA Labs không thể kết nối hộp thư khi dùng quyền hỗ trợ.",
+        "viewer": "Người xem không thể kết nối hộp thư.",
+        "state": "Đăng nhập quá lâu hoặc được mở hai lần. Vui lòng thử lại.",
+        "denied": "Đã hủy đăng nhập Google.",
+        "scopes": "Hãy cho phép cả Đọc và Gửi trên màn hình Google, rồi thử lại.",
+        "refresh": "Google không cấp quyền truy cập lâu dài. Hãy gỡ VIA Merch tại myaccount.google.com/permissions rồi kết nối lại.",
+        "failed": "Đăng nhập Google thất bại: {error}",
+        "label": "Hộp thư này không có nhãn Gmail nào tên \"{label}\".",
+        "forbidden": "Chỉ người đã kết nối hộp thư này, hoặc owner hay manager, mới có thể thay đổi."
+      }
+    }
   },
   "ledger": {
     "title": "Sổ ghi & quyền tự chủ",

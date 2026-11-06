@@ -421,7 +421,37 @@
     "catalogueNote": "Für jedes System unten gibt es einen bekannten Weg. Fragen Sie an, und VIA Labs baut und testet den Konnektor im Rahmen Ihres Retainers.",
     "needs": "Benötigt",
     "request": "Anfragen",
-    "trademark": "Produktnamen und Logos gehören ihren Eigentümern und dienen der Kennzeichnung der Systeme, mit denen VIA verbindet; sie bedeuten keine Empfehlung."
+    "trademark": "Produktnamen und Logos gehören ihren Eigentümern und dienen der Kennzeichnung der Systeme, mit denen VIA verbindet; sie bedeuten keine Empfehlung.",
+    "gmail": {
+      "connect": "Gmail verbinden",
+      "another": "Weiteres Postfach verbinden",
+      "done": "Gmail verbunden: {account}. Neue Mails von bekannten Kunden und Lieferanten kommen jetzt jede Minute an.",
+      "saved": "Gespeichert.",
+      "reauth": "Erneut anmelden",
+      "by": "Verbunden von {name}",
+      "checked": "Geprüft {time}",
+      "never": "Noch nicht geprüft",
+      "handles": "Was der Agent liest",
+      "known": "Mails von bekannten Kunden und Lieferanten",
+      "label": "Nur Mails mit diesem Gmail-Label",
+      "labelName": "Label-Name",
+      "save": "Speichern",
+      "reconnect": "Erneut anmelden",
+      "disconnect": "Trennen",
+      "note": "Gelesen werden nur neue Mails ab dem Moment der Verbindung. Mails von anderen Absendern werden nie gespeichert. Antworten gehen erst nach Freigabe aus diesem Postfach hinaus.",
+      "errors": {
+        "notReady": "Die Google-Anmeldung ist noch nicht freigeschaltet. VIA Labs schließt die Google-Einrichtung ab.",
+        "support": "VIA Labs kann unter Support-Zugang kein Postfach verbinden.",
+        "viewer": "Betrachter können kein Postfach verbinden.",
+        "state": "Die Anmeldung hat zu lange gedauert oder wurde zweimal geöffnet. Bitte erneut versuchen.",
+        "denied": "Die Google-Anmeldung wurde abgebrochen.",
+        "scopes": "Erlauben Sie auf der Google-Seite Lesen und Senden und versuchen Sie es erneut.",
+        "refresh": "Google hat keinen dauerhaften Zugriff erteilt. Entfernen Sie VIA Merch unter myaccount.google.com/permissions und verbinden Sie erneut.",
+        "failed": "Google-Anmeldung fehlgeschlagen: {error}",
+        "label": "Dieses Postfach hat kein Gmail-Label \"{label}\".",
+        "forbidden": "Nur die Person, die dieses Postfach verbunden hat, oder ein Owner oder Manager kann es ändern."
+      }
+    }
   },
   "ledger": {
     "title": "Ledger & Autonomie",

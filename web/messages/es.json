@@ -421,7 +421,37 @@
     "catalogueNote": "Cada sistema de la lista tiene una vía de integración conocida. Solicite uno y VIA Labs desarrolla y prueba el conector como parte de su cuota de servicio.",
     "needs": "Requiere",
     "request": "Solicitar",
-    "trademark": "Los nombres y logotipos de productos pertenecen a sus propietarios y se muestran para identificar los sistemas a los que se conecta VIA; no implican respaldo."
+    "trademark": "Los nombres y logotipos de productos pertenecen a sus propietarios y se muestran para identificar los sistemas a los que se conecta VIA; no implican respaldo.",
+    "gmail": {
+      "connect": "Conectar Gmail",
+      "another": "Conectar otro buzón",
+      "done": "Gmail conectado: {account}. El correo nuevo de clientes y proveedores conocidos llega ahora cada minuto.",
+      "saved": "Guardado.",
+      "reauth": "Inicie sesión de nuevo",
+      "by": "Conectado por {name}",
+      "checked": "Revisado {time}",
+      "never": "Aún sin revisar",
+      "handles": "Qué lee el agente",
+      "known": "Correo de clientes y proveedores conocidos",
+      "label": "Solo correo con esta etiqueta de Gmail",
+      "labelName": "Nombre de la etiqueta",
+      "save": "Guardar",
+      "reconnect": "Iniciar sesión de nuevo",
+      "disconnect": "Desconectar",
+      "note": "Solo se lee el correo nuevo, desde el momento de la conexión. El correo de otros remitentes nunca se guarda. Las respuestas salen de este buzón solo después de su aprobación.",
+      "errors": {
+        "notReady": "El inicio de sesión con Google aún no está activado. VIA Labs está completando la configuración de Google.",
+        "support": "VIA Labs no puede conectar un buzón con acceso de soporte.",
+        "viewer": "Los lectores no pueden conectar un buzón.",
+        "state": "El inicio de sesión tardó demasiado o se abrió dos veces. Inténtelo de nuevo.",
+        "denied": "Se canceló el inicio de sesión con Google.",
+        "scopes": "Permita Leer y Enviar en la pantalla de Google e inténtelo de nuevo.",
+        "refresh": "Google no concedió acceso permanente. Quite VIA Merch en myaccount.google.com/permissions y vuelva a conectar.",
+        "failed": "Falló el inicio de sesión con Google: {error}",
+        "label": "Este buzón no tiene ninguna etiqueta de Gmail llamada \"{label}\".",
+        "forbidden": "Solo la persona que conectó este buzón, o un owner o manager, puede cambiarlo."
+      }
+    }
   },
   "ledger": {
     "title": "Registro y autonomía",

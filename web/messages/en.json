@@ -421,7 +421,37 @@
     "catalogueNote": "Every system below has a known route in. Ask for one and VIA Labs builds and tests the connector as part of your retainer.",
     "needs": "Needs",
     "request": "Request this",
-    "trademark": "Product names and logos belong to their owners and are shown to identify the systems VIA connects to; they do not imply endorsement."
+    "trademark": "Product names and logos belong to their owners and are shown to identify the systems VIA connects to; they do not imply endorsement.",
+    "gmail": {
+      "connect": "Connect Gmail",
+      "another": "Connect another mailbox",
+      "done": "Gmail connected: {account}. New mail from known customers and suppliers now comes in every minute.",
+      "saved": "Saved.",
+      "reauth": "Sign in again",
+      "by": "Connected by {name}",
+      "checked": "Checked {time}",
+      "never": "Not checked yet",
+      "handles": "What the agent reads",
+      "known": "Mail from known customers and suppliers",
+      "label": "Only mail with this Gmail label",
+      "labelName": "Label name",
+      "save": "Save",
+      "reconnect": "Sign in again",
+      "disconnect": "Disconnect",
+      "note": "Only new mail is read, from the moment you connect. Mail from anyone else is never stored. Replies go out from this mailbox only after approval.",
+      "errors": {
+        "notReady": "Google sign-in is not switched on yet. VIA Labs is completing the Google setup.",
+        "support": "VIA Labs cannot connect a mailbox under support access.",
+        "viewer": "Viewers cannot connect a mailbox.",
+        "state": "The sign-in took too long or was opened twice. Try again.",
+        "denied": "Google sign-in was cancelled.",
+        "scopes": "Allow both Read and Send on the Google screen, then try again.",
+        "refresh": "Google did not give lasting access. Remove VIA Merch at myaccount.google.com/permissions and connect again.",
+        "failed": "Google sign-in failed: {error}",
+        "label": "This mailbox has no Gmail label called \"{label}\".",
+        "forbidden": "Only the person who connected this mailbox, or an owner or manager, can change it."
+      }
+    }
   },
   "ledger": {
     "title": "Ledger & autonomy",

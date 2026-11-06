@@ -6,7 +6,7 @@ import { z } from 'zod';
 import { supabaseAdmin } from '@/lib/supabase/server';
 import { listOrders, getOrder, exceptionsOf } from '@/lib/orders';
 import { LABELS, MILESTONES, isoOf, type MilestoneKey } from '@/lib/core/path';
-import { orderFile, orderSummary } from '@/lib/threads';
+import { orderFile, orderSummary, recordOutbound } from '@/lib/threads';
 
 export type AgentCtx = {
   tenantId: string; agentId: string | null; agentName: string;
@@ -181,7 +181,8 @@ export function toolsFor(ctx: AgentCtx) {
       if (g.level < 2 || g.locked != null) return { sent: false, needs_person: true, ref: `Q-${dr.seq}`, autonomy: `L${g.level}`, note: 'Waiting in the approval queue for a person.' };
       await sb.from('drafts').update({ status: 'approved', decided_at: new Date().toISOString(), decision_note: `AUTO · L${g.level}` }).eq('id', dr.id);
       await sb.rpc('ledger_append', { p_tenant: T, p_channel: 'Draft', p_actor: ctx.agentName, p_actor_user: null, p_counterparty: null, p_stream: dr.stream, p_order: dr.order_id, p_what: `Approved Q-${dr.seq} under L${g.level}: ${dr.title}`, p_gate: `AUTO · L${g.level}`, p_gated: false, p_ref: { draft_id: dr.id } });
-      return { sent: false, approved: true, ref: `Q-${dr.seq}`, note: 'Approved under L2; it goes out when the channel is connected.' };
+      const ob = await recordOutbound(T, { id: dr.id, body: dr.body, body_en: dr.body_en, lang: dr.lang, stream: dr.stream, party_id: dr.party_id, order_id: dr.order_id, source_message_id: dr.source_message_id }, ctx.agentName);
+      return { sent: false, approved: true, ref: `Q-${dr.seq}`, note: ob.messageId ? 'Approved under the gate; it goes out on the next minute if the conversation came in on a connected mailbox, otherwise a person sends it.' : 'Approved under the gate.' };
     }),
   });
 

@@ -6,6 +6,7 @@ import { supabaseAdmin } from '@/lib/supabase/server';
 import { processInbound } from '@/lib/agents/inbound';
 import { runProactive, lastPass } from '@/lib/agents/proactive';
 import { hasLlm } from '@/lib/llm';
+import { googleConfigured, syncGmail, sendPending, type Channel } from '@/lib/connectors/google';
 
 export const maxDuration = 55;
 const BUDGET_MS = 40_000;
@@ -14,9 +15,20 @@ export async function POST(req: NextRequest) {
   if (!process.env.JOBS_SECRET || req.headers.get('x-merch-jobs') !== process.env.JOBS_SECRET) return NextResponse.json({ error: 'forbidden' }, { status: 403 });
   const sb = supabaseAdmin();
   const t0 = Date.now();
-  const done: Record<string, number> = { inbound: 0, jobs: 0, proactive: 0, failed: 0 };
+  const done: Record<string, number> = { mail_in: 0, mail_out: 0, inbound: 0, jobs: 0, proactive: 0, failed: 0 };
   const errors: string[] = [];
   const left = () => BUDGET_MS - (Date.now() - t0);
+
+  // 0. connected Gmail mailboxes: new mail in, approved replies out (about 12 s at most)
+  if (googleConfigured()) {
+    const until = t0 + 12_000;
+    const { data: boxes } = await sb.from('channels').select('id, tenant_id, kind, status, account, owner_user_id, auth_enc, config, last_sync_at').eq('kind', 'email_gmail').eq('status', 'connected').or(`last_sync_at.is.null,last_sync_at.lt.${new Date(Date.now() - 50_000).toISOString()}`).order('last_sync_at', { ascending: true, nullsFirst: true }).limit(5);
+    for (const ch of (boxes || []) as Channel[]) {
+      if (Date.now() > until - 3000) break;
+      try { done.mail_in += (await syncGmail(sb, ch, until)).ingested; } catch (e) { done.failed++; errors.push(`gmail ${ch.account}: ${e instanceof Error ? e.message : String(e)}`); }
+    }
+    try { const s = await sendPending(sb, t0 + 20_000); done.mail_out += s.sent; done.failed += s.failed; } catch (e) { done.failed++; errors.push(`send: ${e instanceof Error ? e.message : String(e)}`); }
+  }
 
   if (hasLlm()) {
     // 1. inbound messages

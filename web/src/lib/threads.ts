@@ -48,10 +48,20 @@ export async function threadSummary(tenantId: string, threadId: string, opts: { 
 // An approved draft becomes an outbound message on the thread (sent when a channel is connected).
 export async function recordOutbound(tenantId: string, draft: { id: string; body: string; body_en: string | null; lang: string | null; stream: string; party_id: string | null; order_id: string | null; source_message_id: string | null }, who: string) {
   const sb = supabaseAdmin();
-  let threadId: string | null = null, kind: string | null = null;
-  if (draft.source_message_id) { const { data: src } = await sb.from('messages').select('thread_id, raw').eq('id', draft.source_message_id).maybeSingle(); threadId = src?.thread_id || null; kind = (src?.raw as { channel?: string })?.channel || null; }
+  let threadId: string | null = null, kind: string | null = null, channelId: string | null = null;
+  let send: Record<string, unknown> = {};
+  if (draft.source_message_id) {
+    const { data: src } = await sb.from('messages').select('thread_id, raw, channel_id, from_addr').eq('id', draft.source_message_id).maybeSingle();
+    threadId = src?.thread_id || null; kind = (src?.raw as { channel?: string })?.channel || null;
+    // a reply to mail that came in through a connected Gmail mailbox goes back out from that mailbox
+    const g = (src?.raw as { gmail?: { thread_id?: string; message_id?: string; references?: string; reply_to?: string | null }; subject?: string | null })?.gmail;
+    if (src?.channel_id && g) {
+      const { data: ch } = await sb.from('channels').select('id, kind').eq('id', src.channel_id).maybeSingle();
+      if (ch?.kind === 'email_gmail') { channelId = ch.id; send = { send: 'pending', reply: { to: g.reply_to || src.from_addr, subject: (src.raw as { subject?: string | null }).subject || null, message_id: g.message_id || null, references: g.references || null, thread_id: g.thread_id || null } }; }
+    }
+  }
   if (!threadId) threadId = await findOrCreateThread(sb, tenantId, draft.party_id, draft.order_id, kind, null);
-  const { data: m } = await sb.from('messages').insert({ tenant_id: tenantId, thread_id: threadId, direction: 'out', party_id: draft.party_id, order_id: draft.order_id, sender_name: who, lang: draft.lang, text: draft.body, text_en: draft.body_en || (draft.lang === 'en' || !draft.lang ? draft.body : null), stream: draft.stream, sent_at: null, raw: { draft_id: draft.id } }).select('id').single();
+  const { data: m } = await sb.from('messages').insert({ tenant_id: tenantId, thread_id: threadId, channel_id: channelId, direction: 'out', party_id: draft.party_id, order_id: draft.order_id, sender_name: who, lang: draft.lang, text: draft.body, text_en: draft.body_en || (draft.lang === 'en' || !draft.lang ? draft.body : null), stream: draft.stream, sent_at: null, raw: { draft_id: draft.id, ...send } }).select('id').single();
   await sb.from('threads').update({ last_message_at: new Date().toISOString() }).eq('id', threadId);
   if (m) await sb.from('drafts').update({ sent_message_id: m.id }).eq('id', draft.id);
   await recordUsage(tenantId, { messagesOut: 1 });
