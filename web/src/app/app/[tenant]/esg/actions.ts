@@ -10,7 +10,7 @@ import { supabaseAdmin, supabaseServer } from '@/lib/supabase/server';
 import { requireTenant } from '@/lib/tenant';
 import { extract, hasLlm, recordUsage } from '@/lib/llm';
 import { documentContent, findParty } from '@/lib/documents';
-import { APPLIES, DISCIPLINES, EVIDENCE_BUCKET, FREQUENCIES, MEASURES, ORDER_MILESTONES, OWNER_ROLES, PROGRAMME_KINDS, SEVERITIES, TRIGGERS, READ_REQUIREMENTS_SYSTEM, RequirementsSchema, canApproveReport, canLead, defaultPeriodEnd, esgEnabled, generateTasks, type ReadRequirements } from '@/lib/esg';
+import { APPLIES, DISCIPLINES, EVIDENCE_BUCKET, FREQUENCIES, MEASURES, ORDER_MILESTONES, OWNER_ROLES, PROGRAMME_KINDS, SEVERITIES, TRIGGERS, READ_REQUIREMENTS_SYSTEM, RequirementsSchema, normalizeRequirements, canApproveReport, canLead, defaultPeriodEnd, esgEnabled, generateTasks, type ReadRequirements } from '@/lib/esg';
 import { draftSummary, gatherRows } from '@/lib/esg-report';
 import { localizeTemplate, templateById } from '@/lib/esg-templates';
 import { isoOf, today } from '@/lib/core/path';
@@ -127,7 +127,7 @@ export async function readRequirements(_prev: ReadReqState, form: FormData): Pro
   try {
     const { data, usage } = await extract(RequirementsSchema, READ_REQUIREMENTS_SYSTEM, content, { maxTokens: 16000 });
     await recordUsage(c.tenant.id, { tokensIn: usage.tokensIn, tokensOut: usage.tokensOut, cost: usage.cost });
-    doc = data;
+    doc = data ? normalizeRequirements(data) : null;
     if (!doc) console.error('[esg] requirements read returned no parsed output', file.name, usage);
   } catch (e) {
     // log the real cause; VIA Labs staff also see it on screen to diagnose
