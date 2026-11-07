@@ -128,8 +128,14 @@ export async function readRequirements(_prev: ReadReqState, form: FormData): Pro
     const { data, usage } = await extract(RequirementsSchema, READ_REQUIREMENTS_SYSTEM, content, { maxTokens: 16000 });
     await recordUsage(c.tenant.id, { tokensIn: usage.tokensIn, tokensOut: usage.tokensOut, cost: usage.cost });
     doc = data;
-  } catch { return { error: t('unreadable') }; }
-  if (!doc || !doc.requirements.length) return { error: t('unreadable') };
+    if (!doc) console.error('[esg] requirements read returned no parsed output', file.name, usage);
+  } catch (e) {
+    // log the real cause; VIA Labs staff also see it on screen to diagnose
+    const why = e instanceof Error ? e.message : String(e);
+    console.error('[esg] requirements read failed', file.name, file.size, why);
+    return { error: c.isAdmin ? `${t('unreadable')} (${why.slice(0, 300)})` : t('unreadable') };
+  }
+  if (!doc || !doc.requirements.length) { console.error('[esg] requirements read found none', file.name, doc ? 'empty list' : 'null'); return { error: t('unreadable') }; }
   // fill what the document left open with defaults the person can change in the review
   const ISO = /^\d{4}-\d{2}-\d{2}$/;
   for (const k of ['starts_on', 'ends_on'] as const) if (doc.programme[k] && !ISO.test(doc.programme[k]!)) doc.programme[k] = null;
@@ -390,7 +396,11 @@ Copy figures exactly; add lines only when the requirement needs a total and say 
     const { data, usage } = await extract(EvidenceSchema, system, content);
     await recordUsage(c.tenant.id, { tokensIn: usage.tokensIn, tokensOut: usage.tokensOut, cost: usage.cost });
     read = data;
-  } catch { return { error: t('unreadableEvidence') }; }
+  } catch (e) {
+    const why = e instanceof Error ? e.message : String(e);
+    console.error('[esg] evidence read failed', file.name, why);
+    return { error: c.isAdmin ? `${t('unreadableEvidence')} (${why.slice(0, 300)})` : t('unreadableEvidence') };
+  }
   if (!read) return { error: t('unreadableEvidence') };
   const ISO = /^\d{4}-\d{2}-\d{2}$/;
   if (read.valid_from && !ISO.test(read.valid_from)) read.valid_from = null;
