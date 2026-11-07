@@ -130,3 +130,13 @@ table.t tr.click { cursor: pointer; } table.t tr.click:hover td { background: va
 .cs-menu li button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 6px 8px; border: 0; border-radius: 6px; background: transparent; color: var(--fg); font: inherit; font-size: 13px; text-align: left; cursor: pointer; }
 .cs-menu li button.active { background: var(--paper); }
 .cs-menu li button.on { color: var(--accent); font-weight: 600; }
+
+/* Printing a compliance report: the page alone, without the rail, the assistant or the controls. */
+.print-only { display: none; }
+@media print {
+  .rail, .no-print, .asst, .asst-fab { display: none !important; }
+  .print-only { display: block; }
+  main { padding: 0 !important; background: #fff !important; }
+  body > div, .min-h-screen { display: block !important; }
+  .card { break-inside: avoid; border-color: #ccc; }
+}

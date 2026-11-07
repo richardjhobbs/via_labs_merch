@@ -174,3 +174,18 @@ export async function endSupport(form: FormData) {
   revalidatePath(`/admin/tenants/${tenantId}`);
   redirect(`/admin/tenants/${tenantId}`);
 }
+
+// Paid add-ons, switched per company by VIA staff (service metadata, no support grant needed).
+export async function setAddon(form: FormData) {
+  const me = await requireAdmin();
+  const tenantId = String(form.get('tenant_id')), addon = String(form.get('addon')), on = form.get('on') === '1';
+  if (!['esg'].includes(addon)) redirect(`/admin/tenants/${tenantId}?error=unknown%20add-on`);
+  const sb = supabaseAdmin();
+  const { data: t } = await sb.from('tenants').select('settings').eq('id', tenantId).single();
+  const settings = (t?.settings || {}) as { addons?: Record<string, boolean> };
+  const { error } = await sb.from('tenants').update({ settings: { ...settings, addons: { ...(settings.addons || {}), [addon]: on } } }).eq('id', tenantId);
+  if (error) redirect(`/admin/tenants/${tenantId}?error=${encodeURIComponent(error.message)}`);
+  await sb.rpc('ledger_append', { p_tenant: tenantId, p_channel: 'Console', p_actor: `VIA admin (${me.user.email})`, p_actor_user: me.user.id, p_counterparty: null, p_stream: 'Setup', p_order: null, p_what: `${on ? 'Switched on' : 'Switched off'} the ESG and compliance add-on`, p_gate: 'ADMIN', p_gated: true, p_ref: { addon } });
+  revalidatePath(`/admin/tenants/${tenantId}`);
+  redirect(`/admin/tenants/${tenantId}?sent=${encodeURIComponent(`add-on ${on ? 'on' : 'off'}`)}`);
+}

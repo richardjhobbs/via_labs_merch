@@ -29,7 +29,7 @@ export async function loadSample(tenantId: string, byUser: string, byEmail: stri
     const sizeKeys = category === 'Baby' ? ['0-3m', '3-6m', '6-12m', '12-18m', '18-24m'] : kids ? ['3-4y', '5-6y', '7-8y', '9-10y', '11-12y'] : ['XS', 'S', 'M', 'L', 'XL'];
     const ratio = [0.1, 0.22, 0.32, 0.24, 0.12];
     const sizes = Object.fromEntries(sizeKeys.map((s, j) => [s, Math.round(qty * ratio[j] / 10) * 10]));
-    return { tenant_id: tenantId, po, customer_id: idOf[brand], factory_id: idOf[factory], mill_id: idOf[mill], fibre_id: idOf[fibre], style, description: desc, category, composition, qty, sizes, colours: ['Black', 'Navy', 'Stone'].slice(0, 1 + (qty % 3)), fob, currency: 'USD', incoterm: brand === 'OK' ? 'FOB, LC at sight' : 'FOB', pol: POL[country], pod: POD[brand], instore_date: isoOf(T + etdOff + transit + 14), season: 'SS27', status: etdOff < -3 ? 'shipped' : 'open', source: 'sample', meta: { sample: true, etdOff, transit } };
+    return { tenant_id: tenantId, po, customer_id: idOf[brand], factory_id: idOf[factory], mill_id: idOf[mill], fibre_id: idOf[fibre], style, description: desc, category, composition, qty, sizes, colours: ['Black', 'Navy', 'Stone'].slice(0, 1 + (qty % 3)), fob, currency: 'USD', incoterm: brand === 'OK' ? 'FOB, LC at sight' : 'FOB', pol: POL[country], pod: POD[brand], destination: SAMPLE_BRANDS.find((b) => b.code === brand)?.country || null, instore_date: isoOf(T + etdOff + transit + 14), season: 'SS27', status: etdOff < -3 ? 'shipped' : 'open', source: 'sample', meta: { sample: true, etdOff, transit } };
   });
   const { data: orders, error: oe } = await sb.from('orders').insert(orderRows).select('id, po, meta');
   if (oe || !orders) return { ok: false, error: oe?.message || 'orders failed' };

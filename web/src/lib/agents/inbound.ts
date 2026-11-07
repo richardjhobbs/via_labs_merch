@@ -68,8 +68,9 @@ export async function processInbound(messageId: string) {
   // hand to the agent: capture dates, draft the reply
   const brief = `An inbound message arrived and was logged. Handle it:
 1. If it states a milestone date as fact for a known PO, record it with set_milestone (expected for a promised date, actual for a completed step).
-2. Queue one reply with queue_draft on stream "${parsed?.stream || 'General enquiries'}" to the sender${party ? ` (${party.name})` : ''}, in ${LANG_NAMES[parsed?.lang || 'en'] || 'their language'} with body_en, answering their asks from the record. If something needs a decision by a person (price, quantity, promised date, claim), say so in the draft's impact and do not promise it.
-3. Reply here with two lines: what you recorded, and the draft ref.
+2. If it reports an ESG or compliance figure or confirmation for a stated period (energy, water, effluent, chemicals, waste, emissions, wages, accidents, audits, certificates), look it up with get_compliance and, if a matching open task exists, record it with record_compliance_value. A person checks it.
+3. Queue one reply with queue_draft on stream "${parsed?.stream || 'General enquiries'}" to the sender${party ? ` (${party.name})` : ''}, in ${LANG_NAMES[parsed?.lang || 'en'] || 'their language'} with body_en, answering their asks from the record. If something needs a decision by a person (price, quantity, promised date, claim), say so in the draft's impact and do not promise it.
+4. Reply here with two lines: what you recorded, and the draft ref.
 
 ${history.length ? `Earlier in this conversation (oldest first):\n${history.map((h) => `${h.received_at.slice(0, 10)} ${h.direction === 'in' ? (h.sender_name || 'them') : 'us'}: ${(h.text_en || h.text).slice(0, 400)}`).join('\n')}\n\n` : ''}Message from ${m.sender_name || m.from_addr || 'unknown'}${party ? ` at ${party.name}` : ''} via ${(m.raw as { channel?: string })?.channel || 'channel'}:
 ---

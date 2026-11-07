@@ -1,0 +1,430 @@
+{
+  "bank-esap": {
+    "name": "Convenios ESG de banco o fondo (ESAP)",
+    "summary": "El Plan de Acción Ambiental y Social y los informes de KPI habituales que un banco traslada a sus clientes desde su prestamista de financiación del desarrollo. Fije las metas a partir de su contrato de financiación.",
+    "reqs": [
+      {
+        "title": "Consumo de energía",
+        "instruction": "Informe de la electricidad y el combustible totales consumidos en el trimestre, a partir de las lecturas de contadores y las facturas, y la proporción procedente de fuentes renovables.",
+        "evidence": "Lecturas de contadores, facturas de servicios públicos y de combustible"
+      },
+      {
+        "title": "Consumo de agua y calidad de los efluentes",
+        "instruction": "Informe del agua captada en el trimestre y adjunte los resultados de los análisis de efluentes frente a los límites de vertido.",
+        "evidence": "Registro del contador de agua, informe de análisis de efluentes de un laboratorio acreditado"
+      },
+      {
+        "title": "Emisiones de gases de efecto invernadero (scope 1 and 2)",
+        "instruction": "Calcule las emisiones de scope 1 and 2 del año a partir de las cifras de energía, indicando el método y los factores de emisión utilizados.",
+        "evidence": "Hoja de cálculo"
+      },
+      {
+        "title": "Accidentes y lesiones con baja laboral",
+        "instruction": "Informe del número de accidentes registrables y de lesiones con baja laboral, y comunique de inmediato al banco cualquier fallecimiento o incidente grave.",
+        "evidence": "Registro de accidentes"
+      },
+      {
+        "title": "Salarios, jornadas y quejas",
+        "instruction": "Confirme que se pagaron el salario mínimo legal y las horas extra, informe de la jornada semanal media y de las quejas recibidas y cerradas.",
+        "evidence": "Resumen de nómina, registros de asistencia, registro de quejas"
+      },
+      {
+        "title": "Informe anual de seguimiento ambiental y social",
+        "instruction": "Elabore el informe anual ambiental y social en el formato que solicite el banco y haga que lo firme la dirección.",
+        "evidence": "Informe anual firmado"
+      }
+    ]
+  },
+  "brand-coc": {
+    "name": "Código de conducta de la marca y manual de proveedores",
+    "summary": "El código de conducta de una marca o minorista: aceptación firmada, una auditoría social vigente, acciones correctivas abiertas, divulgación de subcontratistas y las mismas condiciones trasladadas a sus propios proveedores.",
+    "reqs": [
+      {
+        "title": "Aceptación firmada del código de conducta",
+        "instruction": "Firme el código de conducta y el manual de proveedores vigentes del cliente y devuélvalos.",
+        "evidence": "Aceptación firmada"
+      },
+      {
+        "title": "Código de conducta trasladado a los proveedores",
+        "instruction": "Cada fábrica que trabaje en los pedidos de este cliente firma el código de conducta.",
+        "evidence": "Aceptación firmada de la fábrica"
+      },
+      {
+        "title": "Auditoría social vigente",
+        "instruction": "Mantenga vigente en cada centro de producción una auditoría social aceptada (BSCI, SMETA, WRAP, SLCP o la que indique el cliente).",
+        "evidence": "Informe de auditoría y calificación"
+      },
+      {
+        "title": "Divulgación de subcontratistas y centros de producción",
+        "instruction": "Divulgue todos los centros y subcontratistas utilizados para este cliente, incluidos estampado, bordado y lavado, y obtenga aprobación antes de usar uno nuevo.",
+        "evidence": "Lista de centros"
+      },
+      {
+        "title": "Mecanismo de quejas de los trabajadores",
+        "instruction": "Demuestre que existe un canal de quejas operativo para los trabajadores, con el registro de casos y cómo se cerró cada uno.",
+        "evidence": "Procedimiento y registro de quejas"
+      }
+    ]
+  },
+  "brand-rsl": {
+    "name": "Sustancias restringidas de la marca y ensayos de producto",
+    "summary": "La lista de sustancias restringidas y el manual de ensayos del cliente: un informe de ensayo acreditado para cada pedido antes de la inspección final y gestión química en las fábricas textiles.",
+    "reqs": [
+      {
+        "title": "Informe de ensayo de producto",
+        "instruction": "Envíe, una semana antes de la inspección final, un informe de laboratorio acreditado que cubra la RSL del cliente y los ensayos físicos del pedido, con resultado favorable.",
+        "evidence": "Informe de ensayo acreditado"
+      },
+      {
+        "title": "Aceptación de la RSL",
+        "instruction": "Firme la lista de sustancias restringidas vigente del cliente.",
+        "evidence": "RSL firmada"
+      },
+      {
+        "title": "Inventario químico en el procesado húmedo",
+        "instruction": "Cada fábrica textil y lavandería envía su inventario químico con la conformidad MRSL de cada producto utilizado.",
+        "evidence": "Inventario químico, informe de ZDHC Gateway o InCheck"
+      }
+    ]
+  },
+  "brand-traceability": {
+    "name": "Mapeo de la cadena de suministro y trazabilidad",
+    "summary": "Divulgación del nivel 1 al nivel 3 una vez al año y documentos de origen de fibra e hilo para cada pedido.",
+    "reqs": [
+      {
+        "title": "Mapa de proveedores del nivel 1 al 3",
+        "instruction": "Divulgue la fábrica de confección, la fábrica textil y el proveedor de hilo o fibra de cada grupo de productos, con sus direcciones.",
+        "evidence": "Mapa de proveedores"
+      },
+      {
+        "title": "Documentos de origen del pedido",
+        "instruction": "Reúna las facturas y las listas de empaque de tela e hilo hasta la hilandería para el pedido, y el origen de la fibra cuando el cliente lo pida.",
+        "evidence": "Facturas y listas de empaque por nivel"
+      }
+    ]
+  },
+  "amfori-bsci": {
+    "name": "amfori BSCI",
+    "summary": "Una auditoría BSCI vigente en cada centro y las acciones correctivas derivadas de ella cerradas a tiempo. Suba el informe de auditoría para añadir cada hallazgo.",
+    "status": "amfori BSCI figura como reconocido por SSCI, marzo de 2026. La validez de la auditoría depende de la calificación.",
+    "reqs": [
+      {
+        "title": "Auditoría BSCI vigente",
+        "instruction": "Reserve la próxima auditoría con mucha antelación al vencimiento de la actual y prepárese con una autoevaluación.",
+        "evidence": "Informe de auditoría en la plataforma de amfori"
+      }
+    ]
+  },
+  "smeta": {
+    "name": "SMETA (Sedex)",
+    "summary": "La autoevaluación de Sedex al día y una auditoría SMETA vigente para los clientes que la soliciten.",
+    "reqs": [
+      {
+        "title": "Cuestionario de autoevaluación de Sedex",
+        "instruction": "Actualice la autoevaluación del centro en Sedex.",
+        "evidence": "SAQ de Sedex"
+      },
+      {
+        "title": "Auditoría SMETA vigente",
+        "instruction": "Mantenga una auditoría SMETA dentro del plazo que aceptan sus clientes y cierre sus acciones correctivas en Sedex.",
+        "evidence": "Informe SMETA y CAP"
+      }
+    ]
+  },
+  "wrap": {
+    "name": "WRAP",
+    "summary": "Un certificado WRAP vigente en cada centro, con la autoevaluación realizada antes de la auditoría.",
+    "status": "Informado a partir del 1 de marzo de 2026: los certificados son válidos durante un año, la renovación exige 90 días de práctica (45 para la recertificación). Fuente única.",
+    "reqs": [
+      {
+        "title": "Certificado WRAP vigente",
+        "instruction": "Complete la autoevaluación previa a la auditoría y reserve la auditoría con tiempo suficiente para renovar antes del vencimiento.",
+        "evidence": "Certificado WRAP"
+      }
+    ]
+  },
+  "slcp-higg": {
+    "name": "SLCP y Higg FEM",
+    "summary": "La evaluación social anual de SLCP y el módulo ambiental Higg FEM, autoevaluados y verificados, compartidos con los clientes.",
+    "status": "Protocolo de verificación de Higg FEM 1.6 desde el 1 de enero de 2026.",
+    "reqs": [
+      {
+        "title": "Evaluación SLCP verificada",
+        "instruction": "Complete la autoevaluación SLCP y su verificación, y compártala con los clientes en el Gateway.",
+        "evidence": "Evaluación SLCP verificada"
+      },
+      {
+        "title": "Autoevaluación y verificación de Higg FEM",
+        "instruction": "Complete el Higg FEM, hágalo verificar y comparta el módulo verificado con los clientes.",
+        "evidence": "Higg FEM verificado"
+      }
+    ]
+  },
+  "building-safety": {
+    "name": "Seguridad estructural y contra incendios (RSC, Pakistan Accord)",
+    "summary": "Subsanación estructural, contra incendios y eléctrica con seguimiento hasta su cierre, comité de seguridad en funcionamiento e inspecciones preparadas.",
+    "status": "Pakistan Accord renovado el 1 de enero de 2026, se prorroga automáticamente hasta finales de 2029.",
+    "reqs": [
+      {
+        "title": "Avance del plan de subsanación",
+        "instruction": "Informe del avance de cada hallazgo estructural, contra incendios y eléctrico abierto, con fotos y la fecha prevista de cierre.",
+        "evidence": "Estado del CAP y fotos"
+      },
+      {
+        "title": "Reuniones del comité de seguridad",
+        "instruction": "Celebre la reunión del comité de seguridad y conserve las actas.",
+        "evidence": "Actas"
+      }
+    ]
+  },
+  "better-work": {
+    "name": "ILO Better Work",
+    "summary": "La evaluación anual de Better Work y el plan de mejora que le sigue.",
+    "reqs": [
+      {
+        "title": "Evaluación de Better Work",
+        "instruction": "Prepare y complete la evaluación anual.",
+        "evidence": "Informe de evaluación"
+      },
+      {
+        "title": "Avance del plan de mejora",
+        "instruction": "Actualice el plan de mejora acordado con Better Work.",
+        "evidence": "Informe de avance"
+      }
+    ]
+  },
+  "oeko-tex": {
+    "name": "OEKO-TEX STANDARD 100",
+    "summary": "Certificados vigentes para cada grupo de artículos, tanto de su propio centro como de las fábricas textiles y los proveedores de avíos cuyos materiales se incorporan a productos certificados.",
+    "status": "Los límites de 2026, incluidos límites más estrictos para los PFAS, se aplican desde el 1 de junio de 2026.",
+    "reqs": [
+      {
+        "title": "Certificado OEKO-TEX vigente",
+        "instruction": "Renueve el certificado de cada grupo de artículos antes de que venza.",
+        "evidence": "Certificado OEKO-TEX"
+      },
+      {
+        "title": "Certificados OEKO-TEX de proveedores",
+        "instruction": "Conserve un certificado válido de cada fábrica textil y proveedor de avíos utilizado en productos certificados.",
+        "evidence": "Certificado del proveedor"
+      }
+    ]
+  },
+  "gots": {
+    "name": "GOTS",
+    "summary": "Un certificado de alcance vigente en toda la cadena y un certificado de transacción para cada envío de mercancía certificada.",
+    "status": "La versión 8.0 es obligatoria desde el 1 de marzo de 2027. Los certificados de transacción se emiten por envío.",
+    "reqs": [
+      {
+        "title": "Certificado de alcance GOTS",
+        "instruction": "Mantenga vigente el certificado de alcance; prepare la inspección anual.",
+        "evidence": "Certificado de alcance"
+      },
+      {
+        "title": "Certificados de alcance de proveedores",
+        "instruction": "Conserve un certificado de alcance GOTS válido de cada fábrica textil y procesador de la cadena.",
+        "evidence": "Certificado de alcance"
+      },
+      {
+        "title": "Certificado de transacción GOTS",
+        "instruction": "Solicite el certificado de transacción del envío y remítalo al cliente.",
+        "evidence": "Certificado de transacción"
+      }
+    ]
+  },
+  "textile-exchange": {
+    "name": "GRS, RCS, OCS, RWS (Textile Exchange)",
+    "summary": "Normas de material reciclado, orgánico y de lana: certificados de alcance vigentes y un certificado de transacción para cada envío de mercancía certificada.",
+    "reqs": [
+      {
+        "title": "Certificado de alcance",
+        "instruction": "Mantenga vigente el certificado de alcance de cada norma que posea.",
+        "evidence": "Certificado de alcance"
+      },
+      {
+        "title": "Certificado de transacción",
+        "instruction": "Solicite el certificado de transacción del envío en la base de datos de Textile Exchange y remítalo.",
+        "evidence": "Certificado de transacción"
+      }
+    ]
+  },
+  "better-cotton": {
+    "name": "Better Cotton",
+    "summary": "Certificación de cadena de custodia vigente y volúmenes declarados en la plataforma de Better Cotton.",
+    "status": "Ha pasado a un modelo de cadena de custodia certificada.",
+    "reqs": [
+      {
+        "title": "Certificado de cadena de custodia",
+        "instruction": "Mantenga vigente la certificación de cadena de custodia.",
+        "evidence": "Certificado"
+      },
+      {
+        "title": "Declaraciones de volumen",
+        "instruction": "Declare en la plataforma los volúmenes de Better Cotton comprados y vendidos.",
+        "evidence": "Declaraciones de la plataforma"
+      }
+    ]
+  },
+  "zdhc": {
+    "name": "Aguas residuales y productos químicos ZDHC",
+    "summary": "Análisis de aguas residuales e inventarios químicos en cada centro de procesado húmedo (teñido, estampado, lavado), compartidos en el ZDHC Gateway.",
+    "status": "MRSL 3.1 se aplica en el Gateway; las Directrices de Aguas Residuales y Lodos versión 2 se publicaron en octubre de 2025.",
+    "reqs": [
+      {
+        "title": "Análisis de aguas residuales (ClearStream)",
+        "instruction": "Haga que un laboratorio aprobado tome muestras de aguas residuales y lodos y que el informe se publique en el Gateway.",
+        "evidence": "Informe de ClearStream"
+      },
+      {
+        "title": "Inventario químico (InCheck)",
+        "instruction": "Suba el inventario químico y obtenga el informe de InCheck con la conformidad MRSL.",
+        "evidence": "Informe de InCheck"
+      }
+    ]
+  },
+  "eu-market": {
+    "name": "Venta en la UE",
+    "summary": "Para pedidos cuyo destino está en la EU o el EEA: restricciones químicas ensayadas, etiquetas correctas, la lista SVHC revisada tras cada actualización y registros de diligencia debida sobre trabajo forzoso preparados.",
+    "status": "Lista de Candidatas SVHC con 253 entradas (febrero de 2026). La prohibición del Reglamento de la EU sobre trabajo forzoso se aplica desde el 14 de diciembre de 2027. El Pasaporte Digital de Producto textil aún no es exigible (acto delegado previsto para 2027).",
+    "reqs": [
+      {
+        "title": "Ensayos de restricciones REACH",
+        "instruction": "Informe de ensayo acreditado de las sustancias restringidas aplicables (colorantes azoicos, liberación de níquel, HAP, cromo VI en cuero y otras).",
+        "evidence": "Informe de ensayo"
+      },
+      {
+        "title": "Revisión de composición de fibras y etiqueta de cuidado",
+        "instruction": "Revise los nombres y porcentajes de fibras y las etiquetas de cuidado y de origen conforme al Reglamento 1007/2011 y al arte del cliente en PP.",
+        "evidence": "Arte de etiqueta aprobado, ensayo de composición"
+      },
+      {
+        "title": "Revisión de la Lista de Candidatas SVHC",
+        "instruction": "Compare los materiales con la última Lista de Candidatas SVHC e informe a los clientes de cualquier artículo que supere el 0,1 %.",
+        "evidence": "Declaraciones de proveedores"
+      },
+      {
+        "title": "Expediente de diligencia debida sobre trabajo forzoso",
+        "instruction": "Conserve mapas de la cadena de suministro, declaraciones de proveedores y evidencias de auditoría que demuestren que los productos no se fabrican con trabajo forzoso.",
+        "evidence": "Expediente de diligencia debida"
+      }
+    ]
+  },
+  "us-market": {
+    "name": "Venta en EE. UU.",
+    "summary": "Para pedidos cuyo destino es US: trazabilidad del algodón y de los insumos, ensayos de productos infantiles, Prop 65 y etiquetado, y los datos del certificado de cada envío.",
+    "status": "La presunción refutable de UFLPA está en vigor y la lista de entidades crece (julio de 2026). Se informa de que la presentación electrónica de certificados ante CPSC es efectiva desde el 8 de julio de 2026. Los aranceles cambian con frecuencia: no se cubren.",
+    "reqs": [
+      {
+        "title": "Paquete de trazabilidad UFLPA",
+        "instruction": "Reúna la trazabilidad del algodón y del hilo hasta la materia prima, con los documentos de transacción, para el envío.",
+        "evidence": "Documentos de trazabilidad por nivel"
+      },
+      {
+        "title": "Ensayo y certificado de producto infantil (CPSIA)",
+        "instruction": "Para productos infantiles: ensayo de un laboratorio aceptado por CPSC y un Children's Product Certificate. Configure el filtro de pedidos en las categorías infantiles.",
+        "evidence": "Informe de ensayo y CPC"
+      },
+      {
+        "title": "Datos del certificado para la presentación electrónica ante CPSC",
+        "instruction": "Envíe al importador los datos del certificado del envío (producto, normas certificadas, lugar y fecha de fabricación, laboratorio y fecha del ensayo).",
+        "evidence": "Datos del certificado"
+      },
+      {
+        "title": "Etiquetas de contenido de fibras, cuidado y origen (FTC)",
+        "instruction": "Revise en PP las etiquetas de contenido de fibras, cuidado, origen e identificación del fabricante.",
+        "evidence": "Arte de etiqueta aprobado"
+      }
+    ]
+  },
+  "eu-due-diligence": {
+    "name": "Diligencia debida de clientes y solicitudes de datos de sostenibilidad",
+    "summary": "Los cuestionarios y solicitudes de datos anuales que envían los grandes clientes en virtud de la legislación de cadena de suministro de la EU y de Alemania: riesgos, políticas, canales de quejas y cifras ambientales.",
+    "status": "CSDDD reducida por Omnibus I (en vigor el 18 de marzo de 2026): empresas de más de 5.000 empleados y 1.500 millones de EUR, con aplicación desde el 26 de julio de 2029. CSRD para más de 1.000 empleados y 450 millones de EUR; los proveedores por debajo de ese umbral pueden limitar los datos a la norma voluntaria. Se está eliminando la obligación de informar de LkSG.",
+    "reqs": [
+      {
+        "title": "Cuestionario de sostenibilidad del cliente",
+        "instruction": "Responda el cuestionario anual de diligencia debida o sostenibilidad del cliente con las cifras que ya constan en el archivo.",
+        "evidence": "Cuestionario completado"
+      },
+      {
+        "title": "Revisión de riesgos de derechos humanos y ambientales",
+        "instruction": "Revise los principales riesgos de derechos humanos y ambientales en sus propias operaciones y cadena de suministro, y lo que hace al respecto.",
+        "evidence": "Revisión de riesgos"
+      }
+    ]
+  },
+  "uk-msa": {
+    "name": "Declaración de la Modern Slavery Act del Reino Unido",
+    "summary": "Para organizaciones que superan el umbral de facturación del UK, o que les suministran: la declaración anual y las evidencias que la respaldan.",
+    "reqs": [
+      {
+        "title": "Declaración sobre esclavitud moderna",
+        "instruction": "Publique la declaración anual firmada por un director, o envíe al cliente la información que necesita para la suya.",
+        "evidence": "Declaración firmada"
+      }
+    ]
+  },
+  "bd-licences": {
+    "name": "Licencias y permisos de fábricas en Bangladés",
+    "summary": "Las licencias de una fábrica de confección de Bangladés mantenidas al día: comercial, de fábrica, contra incendios, de calderas, autorización ambiental y los registros de la ETP que la respaldan.",
+    "status": "Los plazos de renovación varían según la autoridad y la categoría; fije cada vencimiento a partir de la propia licencia.",
+    "reqs": [
+      {
+        "title": "Licencia comercial",
+        "instruction": "Renueve la licencia comercial ante la City Corporation o la Union Parishad.",
+        "evidence": "Licencia comercial"
+      },
+      {
+        "title": "Licencia de fábrica (DIFE)",
+        "instruction": "Renueve la licencia de fábrica ante DIFE.",
+        "evidence": "Licencia de fábrica"
+      },
+      {
+        "title": "Licencia contra incendios",
+        "instruction": "Renueve la licencia contra incendios ante el Servicio de Bomberos y Defensa Civil.",
+        "evidence": "Licencia contra incendios"
+      },
+      {
+        "title": "Certificado de calderas",
+        "instruction": "Reserve la inspección anual de calderas y renueve el certificado.",
+        "evidence": "Certificado de calderas"
+      },
+      {
+        "title": "Certificado de autorización ambiental (DoE)",
+        "instruction": "Renueve la autorización ambiental ante el Departamento de Medio Ambiente.",
+        "evidence": "Certificado de autorización ambiental"
+      },
+      {
+        "title": "Registros de operación de la ETP",
+        "instruction": "Conserve el registro de funcionamiento de la ETP, el uso de productos químicos y las lecturas de caudal del mes.",
+        "evidence": "Registro de la ETP"
+      }
+    ]
+  },
+  "site-licences": {
+    "name": "Licencias y permisos del centro (cualquier país)",
+    "summary": "Las licencias que tiene cualquier centro de producción, para Vietnam, China, India, Pakistán, Camboya, Turquía y otros países. Cámbieles el nombre para que coincidan con sus permisos locales.",
+    "reqs": [
+      {
+        "title": "Licencia comercial o de fábrica",
+        "instruction": "Renueve la licencia comercial o de funcionamiento de la fábrica.",
+        "evidence": "Licencia"
+      },
+      {
+        "title": "Aprobación de seguridad contra incendios",
+        "instruction": "Mantenga vigente la aprobación o el certificado de inspección de seguridad contra incendios.",
+        "evidence": "Certificado"
+      },
+      {
+        "title": "Permiso ambiental o de vertidos",
+        "instruction": "Mantenga vigente el permiso ambiental o el permiso de vertido de contaminantes.",
+        "evidence": "Permiso"
+      },
+      {
+        "title": "Informe de seguimiento ambiental",
+        "instruction": "Presente el informe de seguimiento periódico que exige el permiso.",
+        "evidence": "Informe de seguimiento"
+      }
+    ]
+  }
+}

@@ -1,0 +1,430 @@
+{
+  "bank-esap": {
+    "name": "ESG-Auflagen von Bank oder Fonds (ESAP)",
+    "summary": "Der übliche Umwelt- und Sozialaktionsplan (ESAP) und die KPI-Berichterstattung, die eine Bank von ihrem Entwicklungsfinanzierer weitergibt. Legen Sie die Zielwerte anhand Ihres Kreditvertrags fest.",
+    "reqs": [
+      {
+        "title": "Energieverbrauch",
+        "instruction": "Melden Sie den gesamten Strom- und Kraftstoffverbrauch des Quartals anhand von Zählerständen und Rechnungen sowie den Anteil aus erneuerbaren Quellen.",
+        "evidence": "Zählerstände, Strom- und Kraftstoffrechnungen"
+      },
+      {
+        "title": "Wasserverbrauch und Abwasserqualität",
+        "instruction": "Melden Sie die im Quartal entnommene Wassermenge und fügen Sie die Abwasserprüfergebnisse im Vergleich zu den Einleitgrenzwerten bei.",
+        "evidence": "Wasserzählerprotokoll, Abwasserprüfbericht eines akkreditierten Labors"
+      },
+      {
+        "title": "Treibhausgasemissionen (Scope 1 und 2)",
+        "instruction": "Berechnen Sie die Scope-1- und Scope-2-Emissionen des Jahres aus den Energiedaten und geben Sie die verwendete Methode und die Emissionsfaktoren an.",
+        "evidence": "Berechnungstabelle"
+      },
+      {
+        "title": "Unfälle und Verletzungen mit Ausfallzeit",
+        "instruction": "Melden Sie die Zahl der meldepflichtigen Unfälle und der Verletzungen mit Ausfallzeit; Todesfälle und schwere Vorfälle sind der Bank unverzüglich zu melden.",
+        "evidence": "Unfallregister"
+      },
+      {
+        "title": "Löhne, Arbeitszeiten und Beschwerden",
+        "instruction": "Bestätigen Sie, dass der gesetzliche Mindestlohn und die Überstunden vergütet wurden, und melden Sie die durchschnittliche Wochenarbeitszeit sowie die eingegangenen und abgeschlossenen Beschwerden.",
+        "evidence": "Lohnübersicht, Anwesenheitsnachweise, Beschwerdeprotokoll"
+      },
+      {
+        "title": "Jährlicher Umwelt- und Sozialüberwachungsbericht",
+        "instruction": "Erstellen Sie den jährlichen Umwelt- und Sozialbericht im von der Bank geforderten Format und lassen Sie ihn von der Geschäftsleitung unterzeichnen.",
+        "evidence": "Unterzeichneter Jahresbericht"
+      }
+    ]
+  },
+  "brand-coc": {
+    "name": "Verhaltenskodex und Lieferantenhandbuch der Marke",
+    "summary": "Der Verhaltenskodex einer Marke oder eines Händlers: unterzeichnete Anerkennung, ein gültiges Sozialaudit, offene Korrekturmaßnahmen, Offenlegung der Subunternehmer und dieselben Bedingungen, an die eigenen Lieferanten weitergegeben.",
+    "reqs": [
+      {
+        "title": "Unterzeichnete Anerkennung des Verhaltenskodex",
+        "instruction": "Unterzeichnen Sie den aktuellen Verhaltenskodex und das Lieferantenhandbuch des Kunden und senden Sie sie zurück.",
+        "evidence": "Unterzeichnete Anerkennung"
+      },
+      {
+        "title": "Weitergabe des Verhaltenskodex an Lieferanten",
+        "instruction": "Jede Fabrik, die Aufträge dieses Kunden fertigt, unterzeichnet den Verhaltenskodex.",
+        "evidence": "Unterzeichnete Anerkennung der Fabrik"
+      },
+      {
+        "title": "Gültiges Sozialaudit",
+        "instruction": "Halten Sie an jedem Produktionsstandort ein anerkanntes Sozialaudit (BSCI, SMETA, WRAP, SLCP oder das vom Kunden benannte) gültig.",
+        "evidence": "Auditbericht und Bewertung"
+      },
+      {
+        "title": "Offenlegung von Subunternehmern und Produktionsstandorten",
+        "instruction": "Legen Sie jeden für diesen Kunden genutzten Standort und Subunternehmer offen, einschließlich Druck, Stickerei und Wäsche, und lassen Sie neue vor dem Einsatz genehmigen.",
+        "evidence": "Standortliste"
+      },
+      {
+        "title": "Beschwerdemechanismus für Beschäftigte",
+        "instruction": "Weisen Sie einen funktionierenden Beschwerdekanal für Beschäftigte nach, mit dem Protokoll der Fälle und ihrer jeweiligen Erledigung.",
+        "evidence": "Beschwerdeverfahren und Protokoll"
+      }
+    ]
+  },
+  "brand-rsl": {
+    "name": "Beschränkte Stoffe und Produktprüfung der Marke",
+    "summary": "Die Liste beschränkter Stoffe (RSL) und das Prüfhandbuch des Kunden: ein Prüfbericht eines akkreditierten Labors für jeden Auftrag vor der Endkontrolle sowie Chemikalienmanagement in den Webereien und Veredlungsbetrieben.",
+    "reqs": [
+      {
+        "title": "Produktprüfbericht",
+        "instruction": "Senden Sie eine Woche vor der Endkontrolle einen bestandenen Bericht eines akkreditierten Labors, der die RSL des Kunden und die physikalischen Prüfungen für den Auftrag abdeckt.",
+        "evidence": "Prüfbericht eines akkreditierten Labors"
+      },
+      {
+        "title": "Anerkennung der RSL",
+        "instruction": "Unterzeichnen Sie die aktuelle Liste beschränkter Stoffe (RSL) des Kunden.",
+        "evidence": "Unterzeichnete RSL"
+      },
+      {
+        "title": "Chemikalienverzeichnis in der Nassveredlung",
+        "instruction": "Jede Weberei und Wäscherei sendet ihr Chemikalienverzeichnis mit dem MRSL-Konformitätsnachweis für jedes eingesetzte Produkt.",
+        "evidence": "Chemikalienverzeichnis, ZDHC-Gateway- oder InCheck-Bericht"
+      }
+    ]
+  },
+  "brand-traceability": {
+    "name": "Lieferkettenkartierung und Rückverfolgbarkeit",
+    "summary": "Offenlegung von Tier 1 bis Tier 3 einmal jährlich sowie Herkunftsnachweise für Faser und Garn zu jedem Auftrag.",
+    "reqs": [
+      {
+        "title": "Lieferantenkarte Tier 1 bis 3",
+        "instruction": "Legen Sie für jede Produktgruppe Bekleidungsfabrik, Stoffhersteller sowie Garn- oder Faserlieferant mit Adressen offen.",
+        "evidence": "Lieferantenkarte"
+      },
+      {
+        "title": "Herkunftsnachweise zum Auftrag",
+        "instruction": "Sammeln Sie für den Auftrag Stoff- und Garnrechnungen sowie Packlisten bis zur Spinnerei zurück und, sofern der Kunde es verlangt, den Faserursprung.",
+        "evidence": "Rechnungen und Packlisten je Tier"
+      }
+    ]
+  },
+  "amfori-bsci": {
+    "name": "amfori BSCI",
+    "summary": "Ein gültiges BSCI-Audit an jedem Standort und die daraus folgenden Korrekturmaßnahmen, fristgerecht abgeschlossen. Laden Sie den Auditbericht hoch, um jede Feststellung zu erfassen.",
+    "status": "amfori BSCI wurde im März 2026 als SSCI-anerkannt gemeldet. Die Gültigkeit des Audits hängt von der Bewertung ab.",
+    "reqs": [
+      {
+        "title": "BSCI-Audit gültig",
+        "instruction": "Buchen Sie das nächste Audit rechtzeitig vor Ablauf des aktuellen und bereiten Sie sich mit einer Selbstbewertung vor.",
+        "evidence": "Auditbericht auf der amfori-Plattform"
+      }
+    ]
+  },
+  "smeta": {
+    "name": "SMETA (Sedex)",
+    "summary": "Die Sedex-Selbstbewertung aktuell gehalten und ein gültiges SMETA-Audit für Kunden, die es verlangen.",
+    "reqs": [
+      {
+        "title": "Sedex-Selbstbewertungsfragebogen",
+        "instruction": "Aktualisieren Sie die Standort-Selbstbewertung auf Sedex.",
+        "evidence": "Sedex SAQ"
+      },
+      {
+        "title": "SMETA-Audit gültig",
+        "instruction": "Halten Sie ein SMETA-Audit innerhalb des von Ihren Kunden akzeptierten Zeitraums vor und schließen Sie die zugehörigen Korrekturmaßnahmen auf Sedex ab.",
+        "evidence": "SMETA-Bericht und CAP"
+      }
+    ]
+  },
+  "wrap": {
+    "name": "WRAP",
+    "summary": "Ein gültiges WRAP-Zertifikat an jedem Standort, mit der vor dem Audit durchgeführten Selbstbewertung.",
+    "status": "Gemeldet ab 1. März 2026: Zertifikate sind ein Jahr gültig, die Verlängerung erfordert 90 Tage Praxisnachweis (45 bei Rezertifizierung). Einzige Quelle.",
+    "reqs": [
+      {
+        "title": "WRAP-Zertifikat gültig",
+        "instruction": "Schließen Sie die Selbstbewertung vor dem Audit ab und buchen Sie das Audit früh genug, um vor Ablauf zu verlängern.",
+        "evidence": "WRAP-Zertifikat"
+      }
+    ]
+  },
+  "slcp-higg": {
+    "name": "SLCP und Higg FEM",
+    "summary": "Die jährliche soziale SLCP-Bewertung und das Umweltmodul Higg FEM, selbst bewertet und verifiziert und mit Kunden geteilt.",
+    "status": "Higg-FEM-Verifizierungsprotokoll 1.6 ab 1. Januar 2026.",
+    "reqs": [
+      {
+        "title": "Verifizierte SLCP-Bewertung",
+        "instruction": "Schließen Sie die SLCP-Selbstbewertung und ihre Verifizierung ab und teilen Sie sie anschließend über das Gateway mit Kunden.",
+        "evidence": "Verifizierte SLCP-Bewertung"
+      },
+      {
+        "title": "Higg-FEM-Selbstbewertung und Verifizierung",
+        "instruction": "Schließen Sie das Higg FEM ab, lassen Sie es verifizieren und teilen Sie das verifizierte Modul mit Kunden.",
+        "evidence": "Verifiziertes Higg FEM"
+      }
+    ]
+  },
+  "building-safety": {
+    "name": "Gebäude- und Brandschutz (RSC, Pakistan Accord)",
+    "summary": "Bauliche, brandschutztechnische und elektrische Sanierung bis zum Abschluss verfolgt, ein funktionierender Sicherheitsausschuss und vorbereitete Inspektionen.",
+    "status": "Pakistan Accord am 1. Januar 2026 erneuert, verlängert sich automatisch bis Ende 2029.",
+    "reqs": [
+      {
+        "title": "Fortschritt des Sanierungsplans",
+        "instruction": "Berichten Sie über den Stand jeder offenen baulichen, brandschutztechnischen und elektrischen Feststellung mit Fotos und dem voraussichtlichen Abschlusstermin.",
+        "evidence": "CAP-Status und Fotos"
+      },
+      {
+        "title": "Sitzungen des Sicherheitsausschusses",
+        "instruction": "Halten Sie die Sitzung des Sicherheitsausschusses ab und bewahren Sie das Protokoll auf.",
+        "evidence": "Protokoll"
+      }
+    ]
+  },
+  "better-work": {
+    "name": "ILO Better Work",
+    "summary": "Die jährliche Better-Work-Bewertung und der darauf folgende Verbesserungsplan.",
+    "reqs": [
+      {
+        "title": "Better-Work-Bewertung",
+        "instruction": "Bereiten Sie die jährliche Bewertung vor und schließen Sie sie ab.",
+        "evidence": "Bewertungsbericht"
+      },
+      {
+        "title": "Fortschritt des Verbesserungsplans",
+        "instruction": "Aktualisieren Sie den mit Better Work vereinbarten Verbesserungsplan.",
+        "evidence": "Fortschrittsbericht"
+      }
+    ]
+  },
+  "oeko-tex": {
+    "name": "OEKO-TEX STANDARD 100",
+    "summary": "Gültige Zertifikate für jede Artikelgruppe, vom eigenen Standort sowie von den Webereien und Zubehörlieferanten, deren Materialien in zertifizierte Produkte eingehen.",
+    "status": "Die Grenzwerte 2026, einschließlich verschärfter PFAS-Grenzwerte, gelten ab 1. Juni 2026.",
+    "reqs": [
+      {
+        "title": "OEKO-TEX-Zertifikat gültig",
+        "instruction": "Verlängern Sie das Zertifikat für jede Artikelgruppe vor Ablauf.",
+        "evidence": "OEKO-TEX-Zertifikat"
+      },
+      {
+        "title": "OEKO-TEX-Zertifikate der Lieferanten",
+        "instruction": "Halten Sie von jeder Weberei und jedem Zubehörlieferanten, die in zertifizierten Produkten eingesetzt werden, ein gültiges Zertifikat vor.",
+        "evidence": "Lieferantenzertifikat"
+      }
+    ]
+  },
+  "gots": {
+    "name": "GOTS",
+    "summary": "Ein gültiges Geltungsbereichszertifikat über die gesamte Kette und ein Transaktionszertifikat für jede Lieferung zertifizierter Ware.",
+    "status": "Version 8.0 verpflichtend ab 1. März 2027. Transaktionszertifikate gelten je Lieferung.",
+    "reqs": [
+      {
+        "title": "GOTS-Geltungsbereichszertifikat",
+        "instruction": "Halten Sie das Geltungsbereichszertifikat gültig und bereiten Sie sich auf die jährliche Inspektion vor.",
+        "evidence": "Geltungsbereichszertifikat"
+      },
+      {
+        "title": "Geltungsbereichszertifikate der Lieferanten",
+        "instruction": "Halten Sie von jeder Weberei und jedem Verarbeiter in der Kette ein gültiges GOTS-Geltungsbereichszertifikat vor.",
+        "evidence": "Geltungsbereichszertifikat"
+      },
+      {
+        "title": "GOTS-Transaktionszertifikat",
+        "instruction": "Beantragen Sie das Transaktionszertifikat für die Lieferung und senden Sie es an den Kunden.",
+        "evidence": "Transaktionszertifikat"
+      }
+    ]
+  },
+  "textile-exchange": {
+    "name": "GRS, RCS, OCS, RWS (Textile Exchange)",
+    "summary": "Standards für Recycling, Bio und Wolle: gültige Geltungsbereichszertifikate und ein Transaktionszertifikat für jede Lieferung zertifizierter Ware.",
+    "reqs": [
+      {
+        "title": "Geltungsbereichszertifikat",
+        "instruction": "Halten Sie das Geltungsbereichszertifikat für jeden von Ihnen gehaltenen Standard gültig.",
+        "evidence": "Geltungsbereichszertifikat"
+      },
+      {
+        "title": "Transaktionszertifikat",
+        "instruction": "Fordern Sie das Transaktionszertifikat für die Lieferung in der Textile-Exchange-Datenbank an und leiten Sie es weiter.",
+        "evidence": "Transaktionszertifikat"
+      }
+    ]
+  },
+  "better-cotton": {
+    "name": "Better Cotton",
+    "summary": "Gültige Zertifizierung der Produktkette (Chain of Custody) und auf der Better Cotton Platform gemeldete Mengen.",
+    "status": "Auf ein Modell mit zertifizierter Produktkette umgestellt.",
+    "reqs": [
+      {
+        "title": "Chain-of-Custody-Zertifikat",
+        "instruction": "Halten Sie die Chain-of-Custody-Zertifizierung gültig.",
+        "evidence": "Zertifikat"
+      },
+      {
+        "title": "Mengenmeldungen",
+        "instruction": "Melden Sie die ein- und verkauften Better-Cotton-Mengen auf der Plattform.",
+        "evidence": "Meldungen auf der Plattform"
+      }
+    ]
+  },
+  "zdhc": {
+    "name": "ZDHC Abwasser und Chemikalien",
+    "summary": "Abwasserprüfung und Chemikalienverzeichnisse an jedem Standort der Nassveredlung (Färben, Drucken, Waschen), geteilt über das ZDHC Gateway.",
+    "status": "MRSL 3.1 gilt auf dem Gateway; die Wastewater and Sludge Guidelines Version 2 wurden im Oktober 2025 veröffentlicht.",
+    "reqs": [
+      {
+        "title": "Abwasserprüfung (ClearStream)",
+        "instruction": "Lassen Sie Abwasser und Klärschlamm von einem anerkannten Labor beproben und den Bericht auf dem Gateway veröffentlichen.",
+        "evidence": "ClearStream-Bericht"
+      },
+      {
+        "title": "Chemikalienverzeichnis (InCheck)",
+        "instruction": "Laden Sie das Chemikalienverzeichnis hoch und holen Sie den InCheck-Bericht mit MRSL-Konformität ein.",
+        "evidence": "InCheck-Bericht"
+      }
+    ]
+  },
+  "eu-market": {
+    "name": "Verkauf in die EU",
+    "summary": "Für Aufträge mit Bestimmungsort in der EU oder im EWR (EEA): Chemikalienbeschränkungen geprüft, Etiketten korrekt, die SVHC-Liste nach jeder Aktualisierung kontrolliert und Unterlagen zur Sorgfaltspflicht bei Zwangsarbeit bereit.",
+    "status": "SVHC-Kandidatenliste mit 253 Einträgen (Februar 2026). Das Verbot der EU-Zwangsarbeitsverordnung gilt ab 14. Dezember 2027. Digitaler Produktpass für Textilien noch nicht erforderlich (delegierter Rechtsakt für 2027 erwartet).",
+    "reqs": [
+      {
+        "title": "REACH-Beschränkungsprüfungen",
+        "instruction": "Prüfbericht eines akkreditierten Labors für die geltenden beschränkten Stoffe (Azofarbstoffe, Nickelabgabe, PAK, Chrom VI in Leder und weitere).",
+        "evidence": "Prüfbericht"
+      },
+      {
+        "title": "Prüfung von Faserzusammensetzung und Pflegeetikett",
+        "instruction": "Prüfen Sie Fasernamen und Prozentangaben sowie Pflege- und Herkunftsetiketten anhand der Verordnung 1007/2011 und der Kundenvorlage bei PP.",
+        "evidence": "Freigegebene Etikettenvorlage, Zusammensetzungsprüfung"
+      },
+      {
+        "title": "Prüfung der SVHC-Kandidatenliste",
+        "instruction": "Gleichen Sie Materialien mit der aktuellen SVHC-Kandidatenliste ab und informieren Sie Kunden über jeden Artikel mit mehr als 0,1 %.",
+        "evidence": "Lieferantenerklärungen"
+      },
+      {
+        "title": "Sorgfaltspflichtakte zu Zwangsarbeit",
+        "instruction": "Führen Sie Lieferkettenkarten, Lieferantenerklärungen und Auditnachweise, die belegen, dass die Ware nicht unter Zwangsarbeit hergestellt wurde.",
+        "evidence": "Sorgfaltspflichtakte"
+      }
+    ]
+  },
+  "us-market": {
+    "name": "Verkauf in die USA",
+    "summary": "Für Aufträge mit Bestimmungsort US: Rückverfolgbarkeit von Baumwolle und Vormaterialien, Prüfung von Kinderprodukten, Prop 65 und Kennzeichnung sowie die Zertifikatsdaten für jede Lieferung.",
+    "status": "Die widerlegbare Vermutung nach UFLPA gilt, die Entity List wächst (Juli 2026). Die elektronische Einreichung (eFiling) von Zertifikaten bei der CPSC wurde als ab 8. Juli 2026 wirksam gemeldet. Zölle ändern sich häufig: nicht abgedeckt.",
+    "reqs": [
+      {
+        "title": "UFLPA-Rückverfolgbarkeitsmappe",
+        "instruction": "Stellen Sie für die Lieferung die Rückverfolgbarkeit von Baumwolle und Garn bis zum Rohmaterial mit Transaktionsdokumenten zusammen.",
+        "evidence": "Rückverfolgbarkeitsunterlagen je Tier"
+      },
+      {
+        "title": "Prüfung und Zertifikat für Kinderprodukte (CPSIA)",
+        "instruction": "Für Kinderprodukte: von der CPSC anerkannte Laborprüfung und ein Children's Product Certificate (CPC). Stellen Sie den Auftragsfilter auf Kinderkategorien.",
+        "evidence": "Prüfbericht und CPC"
+      },
+      {
+        "title": "Zertifikatsdaten für CPSC eFiling",
+        "instruction": "Senden Sie dem Importeur die Zertifikatsdaten für die Lieferung (Produkt, zertifizierte Vorschriften, Herstellungsort und -datum, Labor und Prüfdatum).",
+        "evidence": "Zertifikatsdaten"
+      },
+      {
+        "title": "Etiketten für Fasergehalt, Pflege und Herkunft (FTC)",
+        "instruction": "Prüfen Sie bei PP die Etiketten für Fasergehalt, Pflege, Herkunft und Herstellerkennzeichnung.",
+        "evidence": "Freigegebene Etikettenvorlage"
+      }
+    ]
+  },
+  "eu-due-diligence": {
+    "name": "Sorgfaltspflichten der Kunden und Anfragen zu Nachhaltigkeitsdaten",
+    "summary": "Die jährlichen Fragebögen und Datenanfragen, die große Kunden aufgrund des EU-Rechts und des deutschen Lieferkettenrechts senden: Risiken, Richtlinien, Beschwerdekanäle und Umweltkennzahlen.",
+    "status": "CSDDD durch Omnibus I eingeschränkt (in Kraft seit 18. März 2026): Unternehmen mit mehr als 5.000 Beschäftigten und EUR 1,5 Mrd., Anwendung ab 26. Juli 2029. CSRD für mehr als 1.000 Beschäftigte und EUR 450 Mio.; Lieferanten unterhalb dieser Schwellen dürfen Daten auf den freiwilligen Standard beschränken. Die Berichtspflicht nach LkSG wird abgeschafft.",
+    "reqs": [
+      {
+        "title": "Nachhaltigkeitsfragebogen des Kunden",
+        "instruction": "Beantworten Sie den jährlichen Sorgfaltspflicht- oder Nachhaltigkeitsfragebogen des Kunden anhand der bereits vorliegenden Kennzahlen.",
+        "evidence": "Ausgefüllter Fragebogen"
+      },
+      {
+        "title": "Risikoanalyse zu Menschenrechten und Umwelt",
+        "instruction": "Überprüfen Sie die wesentlichen Menschenrechts- und Umweltrisiken im eigenen Geschäftsbereich und in der Lieferkette sowie die Maßnahmen, die Sie dagegen ergreifen.",
+        "evidence": "Risikoanalyse"
+      }
+    ]
+  },
+  "uk-msa": {
+    "name": "Erklärung nach dem UK Modern Slavery Act",
+    "summary": "Für Organisationen oberhalb der britischen Umsatzschwelle oder deren Lieferanten: die jährliche Erklärung und die zugrunde liegenden Nachweise.",
+    "reqs": [
+      {
+        "title": "Erklärung zur modernen Sklaverei",
+        "instruction": "Veröffentlichen Sie die von einem Direktor unterzeichnete Jahreserklärung oder senden Sie dem Kunden die Angaben, die er für seine eigene benötigt.",
+        "evidence": "Unterzeichnete Erklärung"
+      }
+    ]
+  },
+  "bd-licences": {
+    "name": "Lizenzen und Genehmigungen für Fabriken in Bangladesch",
+    "summary": "Die Lizenzen einer Bekleidungsfabrik in Bangladesch gültig gehalten: Gewerbe-, Fabrik-, Brandschutz- und Kessellizenz, Umweltfreigabe und die dahinterstehenden ETP-Aufzeichnungen.",
+    "status": "Die Erneuerungsfristen variieren je nach Behörde und Kategorie; legen Sie jedes Ablaufdatum anhand der Lizenz selbst fest.",
+    "reqs": [
+      {
+        "title": "Gewerbelizenz",
+        "instruction": "Erneuern Sie die Gewerbelizenz bei der City Corporation oder dem Union Parishad.",
+        "evidence": "Gewerbelizenz"
+      },
+      {
+        "title": "Fabriklizenz (DIFE)",
+        "instruction": "Erneuern Sie die Fabriklizenz bei der DIFE.",
+        "evidence": "Fabriklizenz"
+      },
+      {
+        "title": "Brandschutzlizenz",
+        "instruction": "Erneuern Sie die Brandschutzlizenz beim Fire Service and Civil Defence.",
+        "evidence": "Brandschutzlizenz"
+      },
+      {
+        "title": "Kesselzertifikat",
+        "instruction": "Buchen Sie die jährliche Kesselprüfung und erneuern Sie das Zertifikat.",
+        "evidence": "Kesselzertifikat"
+      },
+      {
+        "title": "Umweltfreigabezertifikat (DoE)",
+        "instruction": "Erneuern Sie die Umweltfreigabe beim Department of Environment.",
+        "evidence": "Umweltfreigabezertifikat"
+      },
+      {
+        "title": "ETP-Betriebsaufzeichnungen",
+        "instruction": "Führen Sie für den Monat das ETP-Betriebsprotokoll sowie Aufzeichnungen zu Chemikalieneinsatz und Durchflussmessungen.",
+        "evidence": "ETP-Protokoll"
+      }
+    ]
+  },
+  "site-licences": {
+    "name": "Standortlizenzen und Genehmigungen (jedes Land)",
+    "summary": "Die Lizenzen, die jeder Produktionsstandort besitzt, für Vietnam, China, Indien, Pakistan, Kambodscha, die Türkei und andere Länder. Benennen Sie sie passend zu Ihren lokalen Genehmigungen um.",
+    "reqs": [
+      {
+        "title": "Gewerbe- oder Fabriklizenz",
+        "instruction": "Erneuern Sie die Gewerbe- oder Betriebslizenz der Fabrik.",
+        "evidence": "Lizenz"
+      },
+      {
+        "title": "Brandschutzgenehmigung",
+        "instruction": "Halten Sie die Brandschutzgenehmigung oder das Prüfzertifikat gültig.",
+        "evidence": "Zertifikat"
+      },
+      {
+        "title": "Umwelt- oder Einleitgenehmigung",
+        "instruction": "Halten Sie die Umweltgenehmigung oder die Schadstoffeinleitgenehmigung gültig.",
+        "evidence": "Genehmigung"
+      },
+      {
+        "title": "Umweltüberwachungsbericht",
+        "instruction": "Reichen Sie den periodischen Überwachungsbericht ein, den die Genehmigung verlangt.",
+        "evidence": "Überwachungsbericht"
+      }
+    ]
+  }
+}

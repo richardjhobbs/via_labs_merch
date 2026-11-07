@@ -25,7 +25,7 @@ export async function setMilestone(form: FormData) {
 
 // Import orders from a spreadsheet. Expected headers (case-insensitive):
 // PO, Customer, Factory, Style, Description, Qty, FOB, ETD (date), and optionally
-// Mill, Fibre, Category, Composition, Currency, Incoterm, POL, POD, In-store, Season.
+// Mill, Fibre, Category, Composition, Currency, Incoterm, POL, POD, Destination (country code), In-store, Season.
 const H = (r: Record<string, unknown>, ...names: string[]) => { for (const n of names) { const k = Object.keys(r).find((x) => x.trim().toLowerCase() === n.toLowerCase()); if (k !== undefined && r[k] !== '' && r[k] != null) return r[k]; } return undefined; };
 const toIso = (v: unknown): string | null => { if (v == null || v === '') return null; if (typeof v === 'number') { const d = XLSX.SSF.parse_date_code(v); return d ? `${d.y}-${String(d.m).padStart(2, '0')}-${String(d.d).padStart(2, '0')}` : null; } const s = String(v).trim(); const m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/) || s.match(/^(\d{1,2})[/.](\d{1,2})[/.](\d{4})/); if (!m) { const d = new Date(s); return isNaN(+d) ? null : d.toISOString().slice(0, 10); } return m[1].length === 4 ? `${m[1]}-${m[2].padStart(2, '0')}-${m[3].padStart(2, '0')}` : `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`; };
 
@@ -57,8 +57,10 @@ export async function importOrders(_prev: { ok: boolean; message: string }, form
     const customer = await party(H(r, 'Customer', 'Brand', 'Buyer'), 'brand', H(r, 'Customer country'));
     const factory = await party(H(r, 'Factory', 'Supplier', 'Vendor'), 'factory', H(r, 'Factory country', 'Country'));
     const mill = await party(H(r, 'Mill', 'Fabric mill'), 'mill'); const fibre = await party(H(r, 'Fibre', 'Fiber', 'Yarn'), 'fibre');
+    const dest = String(H(r, 'Destination', 'Destination country', 'Ship to country', 'Country of destination') || '').trim().toUpperCase();
+    const destination = /^[A-Z]{2}$/.test(dest) ? dest : (customer as { country?: string | null } | null)?.country?.toUpperCase() || null;
     const qty = Number(H(r, 'Qty', 'Quantity', 'Units') || 0) || null, fob = Number(H(r, 'FOB', 'Price', 'Unit price') || 0) || null;
-    const { data: o, error } = await sb.from('orders').insert({ tenant_id: tenant.id, po, customer_id: customer?.id || null, factory_id: factory?.id || null, mill_id: mill?.id || null, fibre_id: fibre?.id || null, owner_user_id: user.id, style: String(H(r, 'Style', 'Style code') || '') || null, description: String(H(r, 'Description', 'Desc', 'Product') || '') || null, category: String(H(r, 'Category') || '') || null, composition: String(H(r, 'Composition', 'Fabric') || '') || null, qty, fob, currency: String(H(r, 'Currency') || 'USD').toUpperCase().slice(0, 3), incoterm: String(H(r, 'Incoterm') || 'FOB'), pol: String(H(r, 'POL', 'Port of loading') || '') || null, pod: String(H(r, 'POD', 'Port of discharge', 'Destination') || '') || null, instore_date: toIso(H(r, 'In-store', 'Instore', 'In store')), season: String(H(r, 'Season') || '') || null, source: 'import' }).select('id').single();
+    const { data: o, error } = await sb.from('orders').insert({ tenant_id: tenant.id, po, destination, customer_id: customer?.id || null, factory_id: factory?.id || null, mill_id: mill?.id || null, fibre_id: fibre?.id || null, owner_user_id: user.id, style: String(H(r, 'Style', 'Style code') || '') || null, description: String(H(r, 'Description', 'Desc', 'Product') || '') || null, category: String(H(r, 'Category') || '') || null, composition: String(H(r, 'Composition', 'Fabric') || '') || null, qty, fob, currency: String(H(r, 'Currency') || 'USD').toUpperCase().slice(0, 3), incoterm: String(H(r, 'Incoterm') || 'FOB'), pol: String(H(r, 'POL', 'Port of loading') || '') || null, pod: String(H(r, 'POD', 'Port of discharge', 'Destination') || '') || null, instore_date: toIso(H(r, 'In-store', 'Instore', 'In store')), season: String(H(r, 'Season') || '') || null, source: 'import' }).select('id').single();
     if (error || !o) { problems.push(error?.message.includes('duplicate') ? t('rowDup', { row: i + 2, po }) : `${i + 2} (${po}): ${error?.message}`); skipped++; continue; }
     const plan = planFromEtd(etd, factory?.country);
     const ms = MILESTONES.map((k) => { const given = toIso(H(r, LABELS[k], k)); return { tenant_id: tenant.id, order_id: o.id, key: k, owner_kind: OWNERS[k], plan_date: given || plan[k] }; });
@@ -69,4 +71,19 @@ export async function importOrders(_prev: { ok: boolean; message: string }, form
   revalidatePath(`/app/${slug}/orders`);
   const why = skipped ? ` ${t('importSkipped', { n: skipped, why: problems.slice(0, 5).join('; ') })}` : '';
   return { ok: created > 0, message: created ? `${t('importDone', { n: created })}${why}` : `${t('importNone')}${why} ${t('importUnchanged')}` };
+}
+
+// Where the goods go (ISO country code): market compliance rules follow it.
+export async function setDestination(form: FormData) {
+  const slug = String(form.get('tenant')), id = String(form.get('order_id')), po = String(form.get('po'));
+  const { tenant, membership, user } = await requireTenant(slug);
+  const back = `/app/${slug}/orders/${encodeURIComponent(po)}`;
+  const code = String(form.get('destination') || '').trim().toUpperCase();
+  if (membership.role === 'viewer' || (code && !/^[A-Z]{2}$/.test(code))) redirect(`${back}?error=${encodeURIComponent('Use a two-letter country code, e.g. DE or US.')}`);
+  const sb = await supabaseServer();
+  const { error } = await sb.from('orders').update({ destination: code || null }).eq('id', id).eq('tenant_id', tenant.id);
+  if (error) redirect(`${back}?error=${encodeURIComponent(error.message)}`);
+  await sb.rpc('ledger_append', { p_tenant: tenant.id, p_channel: 'Console', p_actor: membership.display_name || user.email, p_actor_user: user.id, p_counterparty: null, p_stream: 'Setup', p_order: id, p_what: `Destination set to ${code || 'none'}`, p_gate: 'Logged', p_gated: false, p_ref: {} });
+  revalidatePath(back);
+  redirect(`${back}?saved=1`);
 }

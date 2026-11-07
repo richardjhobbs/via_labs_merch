@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { supabaseAdmin } from '@/lib/supabase/server';
-import { inviteMember, resendInvite, loadSampleAction, loadSampleThreadsAction, setMemberScope, requestSupport, endSupport } from '../../actions';
+import { inviteMember, resendInvite, loadSampleAction, loadSampleThreadsAction, setMemberScope, requestSupport, endSupport, setAddon } from '../../actions';
 import { activeSupportGrant, pendingSupportRequest, supportHistory, SUPPORT_HOURS } from '@/lib/support';
 import { InboundSim } from '@/app/app/[tenant]/agents/panels';
 
@@ -62,6 +62,12 @@ export default async function TenantAdmin({ params, searchParams }: { params: Pr
               {(invites || []).map((i) => <tr key={i.id}><td>{i.email}<div className="muted small">{i.display_name}</div></td><td><span className="pill">{t(`roles.${i.role}`)}</span></td><td className="muted">{new Date(i.created_at).toLocaleDateString('en-GB')}</td><td className="muted">{new Date(i.expires_at).toLocaleDateString('en-GB')}</td><td><form action={resendInvite}><input type="hidden" name="id" value={i.id} /><button className="btn sm">Resend</button></form></td></tr>)}
               {!invites?.length && <tr><td colSpan={5} className="muted">{t('common.none')}</td></tr>}
             </tbody></table></div>
+          <div className="card">
+            <div className="flex items-baseline gap-3"><h2>Add-ons</h2></div>
+            <div className="flex items-center gap-3 mt-3 small"><b>ESG &amp; compliance</b>{(tenant.settings as { addons?: { esg?: boolean } })?.addons?.esg ? <span className="pill ok">on</span> : <span className="pill">off</span>}
+              <span className="muted">Lender, fund, customer and certifier requirements turned into dated tasks, reminders, evidence and reports.</span>
+              <form action={setAddon} className="ml-auto"><input type="hidden" name="tenant_id" value={id} /><input type="hidden" name="addon" value="esg" /><input type="hidden" name="on" value={(tenant.settings as { addons?: { esg?: boolean } })?.addons?.esg ? '0' : '1'} /><button className="btn sm">{(tenant.settings as { addons?: { esg?: boolean } })?.addons?.esg ? 'Switch off' : 'Switch on'}</button></form></div>
+          </div>
           <div className="card tw" style={{ padding: 0 }}><div className="p-4 pb-2"><h2>Autonomy by stream</h2></div>
             <table className="t"><thead><tr><th>Stream</th><th>Level</th><th>Cap</th></tr></thead><tbody>
               {(gates || []).map((g) => <tr key={g.stream}><td>{g.stream}</td><td><span className={`pill ${g.level >= 2 ? 'ok' : g.level === 0 ? '' : 'warn'}`}>L{g.level}</span></td><td className="muted">{g.locked !== null ? `capped at L${g.locked}` : ''}</td></tr>)}

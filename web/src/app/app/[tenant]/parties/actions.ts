@@ -10,7 +10,7 @@ import { MILESTONES, OWNERS, planFromEtd } from '@/lib/core/path';
 import { bankFrom, canAddBank, maskAccount, sameAccount } from '@/lib/bank';
 import { DocSchema, documentContent, findParty, sameCompany, type DocDraft } from '@/lib/documents';
 
-const KINDS = ['brand', 'retailer', 'store', 'buying_office', 'trading', 'factory', 'mill', 'fibre', 'forwarder', 'carrier', 'lab', 'auditor', 'other'] as const;
+const KINDS = ['brand', 'retailer', 'store', 'buying_office', 'trading', 'factory', 'mill', 'fibre', 'forwarder', 'carrier', 'lab', 'auditor', 'other', 'bank', 'funder'] as const;
 const Party = z.object({ name: z.string().trim().min(2).max(120), kind: z.enum(KINDS), country: z.string().max(2).optional(), city: z.string().max(60).optional(), address: z.string().max(200).optional(), lang: z.string().max(5).optional(), tier: z.string().optional(), channel_pref: z.string().max(20).optional(), contact_name: z.string().max(80).optional(), contact_email: z.string().max(120).optional(), contact_phone: z.string().max(30).optional() });
 type PartyInput = z.infer<typeof Party>;
 
@@ -158,7 +158,7 @@ export async function saveDocument(_prev: ReadState, form: FormData): Promise<Re
     const d = o.data;
     let extra: Record<string, unknown> = {};
     try { extra = JSON.parse(String(form.get('doc_meta') || '{}')); } catch { /* the summary is optional */ }
-    const { data: order, error } = await sb.from('orders').insert({ tenant_id: tenant.id, po: d.po, customer_id: buyer?.id || null, factory_id: seller?.id || null, owner_user_id: user.id, description: d.description || null, qty: Math.round(Number(d.qty)) || null, fob: Number(d.fob) || null, currency: (d.currency || 'USD').toUpperCase(), incoterm: d.incoterm || null, source: 'document', meta: { document: { file, ...extra } } }).select('id').single();
+    const { data: order, error } = await sb.from('orders').insert({ tenant_id: tenant.id, po: d.po, destination: buyer?.country?.toUpperCase() || null, customer_id: buyer?.id || null, factory_id: seller?.id || null, owner_user_id: user.id, description: d.description || null, qty: Math.round(Number(d.qty)) || null, fob: Number(d.fob) || null, currency: (d.currency || 'USD').toUpperCase(), incoterm: d.incoterm || null, source: 'document', meta: { document: { file, ...extra } } }).select('id').single();
     if (error || !order) return { error: error?.message || t('nothing') };
     const plan = planFromEtd(d.etd, seller?.country);
     await sb.from('milestones').insert(MILESTONES.map((k) => ({ tenant_id: tenant.id, order_id: order.id, key: k, owner_kind: OWNERS[k], plan_date: plan[k] })));

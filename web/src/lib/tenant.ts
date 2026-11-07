@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 import { supabaseServer, supabaseAdmin } from './supabase/server';
 import { activeSupportGrant } from './support';
 
-export type Role = 'owner' | 'manager' | 'merchandiser' | 'qc' | 'compliance' | 'logistics' | 'viewer';
+export type Role = 'owner' | 'manager' | 'merchandiser' | 'qc' | 'compliance' | 'logistics' | 'viewer' | 'partner';
 export type Membership = { id: string; tenant_id: string; role: Role; display_name: string | null; initials: string | null; title: string | null; locale: string | null; scopes: { parties?: string[] }; tenants: { id: string; slug: string; name: string; kind: string; locale: string; tz: string; currency: string } };
 
 // cache(): layout and page both call this; one lookup per request.
@@ -26,9 +26,12 @@ export async function requireMe() {
   return m;
 }
 
-export async function requireTenant(slug: string) {
+// Partners (people at a customer or supplier, role 'partner') reach only the shared compliance portal:
+// every other page and action sends them there. Pass { partner: true } only from the portal and the layout.
+export async function requireTenant(slug: string, opts: { partner?: boolean } = {}) {
   const m = await requireMe();
   const membership = m.memberships.find((x) => x.tenants.slug === slug);
+  if (membership?.role === 'partner' && !opts.partner) redirect(`/app/${slug}/shared`);
   // VIA staff who are not members open a workspace only under support access the company granted
   // (merch.support_access, 72 hours, revocable). The database policies enforce the same rule for reads;
   // this keeps the app honest too, and records the first opening on the company's ledger.

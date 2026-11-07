@@ -1,6 +1,6 @@
 // Called every minute by Supabase pg_cron (merch.tick) with the shared secret.
 // Drains the pgmq queues in small batches so each call stays well under the function limit,
-// then gives one company its hourly proactive pass.
+// then gives one company its hourly proactive pass and one its compliance pass.
 import { NextResponse, type NextRequest } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase/server';
 import { processInbound } from '@/lib/agents/inbound';
@@ -10,6 +10,7 @@ import { googleConfigured, syncGmail } from '@/lib/connectors/google';
 import { microsoftConfigured, syncOutlook } from '@/lib/connectors/microsoft';
 import { sendPending } from '@/lib/connectors/outbound';
 import { CHANNEL_COLS, type Channel } from '@/lib/connectors/mail';
+import { nextEsgTenant, runEsgPass } from '@/lib/agents/esg-pass';
 
 export const maxDuration = 55;
 const BUDGET_MS = 40_000;
@@ -18,7 +19,7 @@ export async function POST(req: NextRequest) {
   if (!process.env.JOBS_SECRET || req.headers.get('x-merch-jobs') !== process.env.JOBS_SECRET) return NextResponse.json({ error: 'forbidden' }, { status: 403 });
   const sb = supabaseAdmin();
   const t0 = Date.now();
-  const done: Record<string, number> = { mail_in: 0, mail_out: 0, inbound: 0, jobs: 0, proactive: 0, failed: 0 };
+  const done: Record<string, number> = { mail_in: 0, mail_out: 0, inbound: 0, jobs: 0, proactive: 0, esg: 0, failed: 0 };
   const errors: string[] = [];
   const left = () => BUDGET_MS - (Date.now() - t0);
 
@@ -61,6 +62,12 @@ export async function POST(req: NextRequest) {
       }
       if (pick) { try { const r = await runProactive(pick); if ('queued' in r) done.proactive++; } catch (e) { done.failed++; errors.push(e instanceof Error ? e.message : String(e)); } }
     }
+  }
+
+  // 4. hourly ESG and compliance pass (tasks, reminders, supplier requests) for one company with the add-on
+  if (left() > 20_000) {
+    try { const pick = await nextEsgTenant(); if (pick) { const r = await runEsgPass(pick); if ('created' in r) done.esg++; } }
+    catch (e) { done.failed++; errors.push(`esg: ${e instanceof Error ? e.message : String(e)}`); }
   }
 
   const { data: depth } = await sb.rpc('queue_depth');
