@@ -10,7 +10,7 @@ import { MILESTONES, OWNERS, planFromEtd } from '@/lib/core/path';
 import { bankFrom, canAddBank, maskAccount, sameAccount } from '@/lib/bank';
 import { DocSchema, documentContent, findParty, sameCompany, type DocDraft } from '@/lib/documents';
 
-const KINDS = ['brand', 'retailer', 'store', 'buying_office', 'trading', 'factory', 'mill', 'fibre', 'forwarder', 'carrier', 'lab', 'auditor', 'other'] as const;
+const KINDS = ['brand', 'retailer', 'store', 'buying_office', 'trading', 'factory', 'mill', 'fibre', 'forwarder', 'carrier', 'lab', 'auditor', 'other', 'bank', 'funder'] as const;
 const Party = z.object({ name: z.string().trim().min(2).max(120), kind: z.enum(KINDS), country: z.string().max(2).optional(), city: z.string().max(60).optional(), address: z.string().max(200).optional(), lang: z.string().max(5).optional(), tier: z.string().optional(), channel_pref: z.string().max(20).optional(), contact_name: z.string().max(80).optional(), contact_email: z.string().max(120).optional(), contact_phone: z.string().max(30).optional() });
 type PartyInput = z.infer<typeof Party>;
 

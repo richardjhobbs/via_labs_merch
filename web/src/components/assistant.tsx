@@ -23,7 +23,7 @@ export function Assistant({ slug, agentName, lang, live, labels }: { slug: strin
   useEffect(() => { try { sessionStorage.setItem(key + '_open', open ? '1' : '0'); } catch {} }, [open, key]);
 
   const base = `/app/${slug}`;
-  const screen = path === base ? 'day' : path.startsWith(`${base}/orders/`) ? 'order' : path.startsWith(`${base}/orders`) ? 'orders' : path.startsWith(`${base}/parties`) ? 'parties' : path.startsWith(`${base}/queue`) ? 'queue' : path.startsWith(`${base}/ledger`) ? 'ledger' : 'other';
+  const screen = path === base ? 'day' : path.startsWith(`${base}/orders/`) ? 'order' : path.startsWith(`${base}/orders`) ? 'orders' : path.startsWith(`${base}/parties`) ? 'parties' : path.startsWith(`${base}/esg`) ? 'esg' : path.startsWith(`${base}/queue`) ? 'queue' : path.startsWith(`${base}/ledger`) ? 'ledger' : 'other';
   const po = screen === 'order' ? decodeURIComponent(path.split('/').pop() || '') : '';
   const suggestions = [screen === 'order' ? `${labels.s_order} (${po})` : labels[`s_${screen}`] || labels.s_day, labels.s_any1, labels.s_any2].filter(Boolean);
 

@@ -8,19 +8,24 @@ import { lastPass } from '@/lib/agents/proactive';
 import { supabaseServer } from '@/lib/supabase/server';
 import { listOrders, exceptionsOf } from '@/lib/orders';
 import { HealthPill } from '@/components/milestones';
+import { esgEnabled, esgSnapshot, isMine, STATE_PILL } from '@/lib/esg';
 
 export default async function MyDay({ params, searchParams }: { params: Promise<{ tenant: string }>; searchParams: Promise<{ saved?: string; error?: string }> }) {
   const { tenant: slug } = await params; const q = await searchParams;
-  const { tenant, membership } = await requireTenant(slug);
-  const t = await getTranslations('day');
+  const { tenant, membership, user } = await requireTenant(slug);
+  const [t, te] = await Promise.all([getTranslations('day'), getTranslations('esg')]);
   const sb = await supabaseServer();
   const scope = scopeOf(membership), manager = ['owner', 'manager'].includes(membership.role);
-  const [{ data: queuedRows }, { count: approvedToday }, orders, { data: scopeNames }] = await Promise.all([
+  const [{ data: queuedRows }, { count: approvedToday }, orders, { data: scopeNames }, { data: tnRow }, esgAll] = await Promise.all([
     sb.from('drafts').select('id, seq, priority, stream, title, impact, body, lang, gate_level, created_at, party_id, orders(po, customer_id), parties(name), source:messages!drafts_source_message_id_fkey(thread_id)').eq('tenant_id', tenant.id).in('status', ['queued', 'escalated']).order('priority').order('seq'),
     sb.from('drafts').select('id', { count: 'exact', head: true }).eq('tenant_id', tenant.id).eq('status', 'sent').gte('decided_at', new Date(new Date().setHours(0, 0, 0, 0)).toISOString()),
     listOrders(tenant.id, { status: 'open', customers: scope }),
     scope ? sb.from('parties').select('name').in('id', scope) : Promise.resolve({ data: null }),
+    sb.from('tenants').select('settings').eq('id', tenant.id).single(),
+    esgSnapshot(tenant.id, sb),
   ]);
+  const esgOn = esgEnabled(tnRow?.settings);
+  const esgDue = esgOn ? esgAll.filter((x) => ['overdue', 'due', 'returned'].includes(x.state) && (manager || isMine(x, user.id, membership.role))) : [];
   const prepared = (queuedRows || []).filter((d) => !scope || (d.party_id && scope.includes(d.party_id)) || scope.includes((d.orders as unknown as { customer_id: string } | null)?.customer_id || ''));
   const queued = prepared.length;
   const lp = await lastPass(tenant.id);
@@ -64,6 +69,10 @@ export default async function MyDay({ params, searchParams }: { params: Promise<
           {!ex.length && <p className="muted small mt-2">{t('noExceptions')}</p>}
         </div>
       </div>
+      {!!esgDue.length && <div className="card mt-4"><div className="flex items-baseline gap-2"><h2>{te('dayTitle')}</h2><Link className="small ml-auto" href={`/app/${slug}/esg`}>{te('open')}</Link></div>
+        {esgDue.slice(0, 5).map((x) => <Link key={x.id} href={`/app/${slug}/esg/task/${x.id}`} className="block small no-underline" style={{ padding: '8px 0', borderTop: '1px solid var(--line2)', color: 'inherit' }}><span className={`pill ${STATE_PILL[x.state]}`}>{te(`state.${x.state}`)}</span> <b>{x.code ? `${x.code} ` : ''}{x.title}</b> <span className="muted">· {x.period} · {x.days_left < 0 ? te('daysOver', { n: -x.days_left }) : te('dueIn', { date: x.due, n: x.days_left })} · {x.programme}</span></Link>)}
+        {esgDue.length > 5 && <Link className="small" href={`/app/${slug}/esg`}>{t('more', { n: esgDue.length - 5 })}</Link>}
+      </div>}
       {!!off.length && <div className="card mt-4 tw" style={{ padding: 0 }}><div className="p-4 pb-2"><h2>{t('offplanTitle')}</h2></div><table className="t"><thead><tr><th>PO</th><th>{t('style')}</th><th>{t('customer')}</th><th>{t('factory')}</th><th>{t('health')}</th></tr></thead><tbody>
         {off.slice(0, 10).map((o) => <tr key={o.id}><td><Link className="mono" href={`/app/${slug}/orders/${encodeURIComponent(o.po)}`}>{o.po}</Link></td><td>{o.style} <span className="muted small">{o.description}</span></td><td>{o.customer?.name}</td><td>{o.factory?.short || o.factory?.name}</td><td><HealthPill h={o.health} /></td></tr>)}
       </tbody></table></div>}

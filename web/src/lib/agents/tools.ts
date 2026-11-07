@@ -8,6 +8,7 @@ import { listOrders, getOrder, exceptionsOf } from '@/lib/orders';
 import { LABELS, MILESTONES, isoOf, type MilestoneKey } from '@/lib/core/path';
 import { orderFile, orderSummary, recordOutbound } from '@/lib/threads';
 import { searchMailboxes } from '@/lib/connectors/search';
+import { esgEnabled, esgSnapshot } from '@/lib/esg';
 
 export type AgentCtx = {
   tenantId: string; agentId: string | null; agentName: string;
@@ -235,8 +236,8 @@ export function toolsFor(ctx: AgentCtx) {
 
   const navigate = betaZodTool({
     name: 'navigate',
-    description: 'Show a screen to the person so the workspace follows the conversation: day, orders, order (with id = PO), parties, queue, ledger, agents, connections. Call it alongside your answer when the person asks to see or open something.',
-    inputSchema: z.object({ screen: z.enum(['day', 'orders', 'order', 'parties', 'queue', 'ledger', 'agents', 'connections']), id: z.string().optional().describe('PO number for screen=order') }),
+    description: 'Show a screen to the person so the workspace follows the conversation: day, orders, order (with id = PO), parties, queue, ledger, agents, connections, esg (ESG and compliance). Call it alongside your answer when the person asks to see or open something.',
+    inputSchema: z.object({ screen: z.enum(['day', 'orders', 'order', 'parties', 'queue', 'ledger', 'agents', 'connections', 'esg']), id: z.string().optional().describe('PO number for screen=order') }),
     run: wrap('navigate', async (a) => { ctx.nav = { screen: a.screen, id: a.id }; return { ok: true }; }),
   });
 
@@ -265,7 +266,42 @@ export function toolsFor(ctx: AgentCtx) {
     }),
   });
 
-  const all = [get_briefing, search_orders, get_order, get_exceptions, get_party, get_messages, get_ledger, get_gates, queue_draft, request_approval, set_milestone, navigate, get_team, get_order_file, search_mailbox];
+  // ESG and compliance (add-on): what is due, and recording a figure someone reported, for a person to check.
+  const esgOn = async () => esgEnabled((await sb.from('tenants').select('settings').eq('id', T).single()).data?.settings);
+  const get_compliance = betaZodTool({
+    name: 'get_compliance',
+    description: 'ESG and compliance reporting the company owes its lenders, funds, customers or certifiers: open tasks with requirement, programme, period, due date, owner role and state (overdue, due, upcoming, review, returned). Use for "what ESG reporting is due", "what does the bank need from us this quarter", "is the water figure in".',
+    inputSchema: z.object({ programme: z.string().optional().describe('programme name text to filter by') }),
+    run: wrap('get_compliance', async (a) => {
+      if (!(await esgOn())) return { error: 'ESG and compliance is not switched on for this company. VIA Labs can enable the add-on.' };
+      let L = await esgSnapshot(T, sb);
+      if (a.programme) L = L.filter((x) => x.programme.toLowerCase().includes(a.programme!.toLowerCase()));
+      return L.slice(0, 40).map((x) => ({ task_id: x.id, programme: x.programme, code: x.code, title: x.title, discipline: x.discipline, owner_role: x.owner_role, period: x.period, due: x.due, days_left: x.days_left, status: x.status, state: x.state, measure: x.measure, unit: x.unit, target: x.target, supplier_provides: !!x.supplier_party_id }));
+    }),
+  });
+
+  const record_compliance_value = betaZodTool({
+    name: 'record_compliance_value',
+    description: 'Record a figure, answer or statement for an ESG or compliance task when a person or a supplier clearly reported it (e.g. "the mill used 4,820 m3 of water in Q1"). It is submitted as a new version for a person to check; it is never accepted by you. Only when the value and the period are explicit; never estimate.',
+    inputSchema: z.object({ task_id: z.string().describe('task id from get_compliance'), value_num: z.number().optional(), value_text: z.string().optional(), note: z.string().optional().describe('how it was measured and who reported it') }),
+    run: wrap('record_compliance_value', async (a) => {
+      if (!(await esgOn())) return { error: 'ESG and compliance is not switched on for this company.' };
+      if (a.value_num == null && !a.value_text) return { error: 'Give value_num or value_text.' };
+      const { data: task } = await sb.from('esg_tasks').select('id, status, period_label, esg_requirements(code, title, unit)').eq('tenant_id', T).eq('id', a.task_id).maybeSingle();
+      if (!task) return { error: 'No such task' };
+      if (['accepted', 'waived'].includes(task.status)) return { error: `Task is ${task.status}; a person must reopen it.` };
+      const { data: prev } = await sb.from('esg_submissions').select('version').eq('task_id', task.id).order('version', { ascending: false }).limit(1).maybeSingle();
+      const version = (prev?.version || 0) + 1;
+      const { data: sub, error } = await sb.from('esg_submissions').insert({ tenant_id: T, task_id: task.id, version, value_num: a.value_num ?? null, value_text: a.value_text?.slice(0, 4000) || null, note: a.note?.slice(0, 2000) || null, source: ctx.sourceMessageId ? 'message' : 'agent', source_message_id: ctx.sourceMessageId || null, submitted_by: ctx.userId, submitted_by_name: actorOf(ctx) }).select('id').single();
+      if (error || !sub) throw new Error(error?.message || 'submission failed');
+      await sb.from('esg_tasks').update({ status: 'submitted', latest_submission_id: sub.id }).eq('id', task.id);
+      const r = task.esg_requirements as unknown as { code: string | null; title: string; unit: string | null };
+      await sb.rpc('ledger_append', { p_tenant: T, p_channel: ctx.trigger === 'chat' ? 'Console' : 'Inbound', p_actor: actorOf(ctx), p_actor_user: ctx.userId, p_counterparty: null, p_stream: 'Compliance and CSR', p_order: null, p_what: `Recorded v${version} for ${r.code ? `${r.code} ` : ''}${r.title}, ${task.period_label}: ${a.value_num != null ? `${a.value_num}${r.unit ? ` ${r.unit}` : ''}` : `"${(a.value_text || '').slice(0, 60)}"`}, awaiting a person's check`, p_gate: ctx.trigger === 'chat' ? 'PERSON · chat' : 'AUTO · capture', p_gated: false, p_ref: { esg_task: task.id, esg_submission: sub.id, message_id: ctx.sourceMessageId || null } });
+      return { ok: true, version, status: 'submitted', note: 'Waiting for an owner, manager or compliance lead to accept it.' };
+    }),
+  });
+
+  const all = [get_briefing, search_orders, get_order, get_exceptions, get_party, get_messages, get_ledger, get_gates, queue_draft, request_approval, set_milestone, navigate, get_team, get_order_file, search_mailbox, get_compliance, record_compliance_value];
   const forRole = ['owner', 'manager'].includes(ctx.role || '') || ctx.trigger !== 'chat' ? all : all.filter((t) => t.name !== 'get_team');
   // inbound runs may capture a reported date (L1 record) and draft; they never approve
   // mailbox search is for a person in chat only, on their own mailbox

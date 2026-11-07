@@ -32,9 +32,9 @@ export type DocumentInput = string | Anthropic.ContentBlockParam[];
 export type Usage = { model: string; tokensIn: number; tokensOut: number; cost: number };
 
 // Structured extraction with a Zod schema (language detection, classification, parsing).
-export async function extract<T extends z.ZodType>(schema: T, system: string, user: DocumentInput, opts: { model?: string } = {}): Promise<{ data: z.infer<T> | null; usage: Usage }> {
+export async function extract<T extends z.ZodType>(schema: T, system: string, user: DocumentInput, opts: { model?: string; maxTokens?: number } = {}): Promise<{ data: z.infer<T> | null; usage: Usage }> {
   const model = opts.model || SMALL_MODEL;
-  const r = await anthropic().messages.parse({ model, max_tokens: 4096, output_config: { effort: 'low', format: zodOutputFormat(schema) }, system, messages: [{ role: 'user', content: user }] });
+  const r = await anthropic().messages.parse({ model, max_tokens: opts.maxTokens || 4096, output_config: { effort: 'low', format: zodOutputFormat(schema) }, system, messages: [{ role: 'user', content: user }] });
   const tokensIn = r.usage.input_tokens, tokensOut = r.usage.output_tokens;
   return { data: (r.parsed_output as z.infer<T> | null) ?? null, usage: { model, tokensIn, tokensOut, cost: costOf(model, tokensIn, tokensOut) } };
 }
