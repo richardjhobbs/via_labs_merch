@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { supabaseAdmin } from '@/lib/supabase/server';
-import { inviteMember, resendInvite, loadSampleAction, loadSampleThreadsAction, setMemberScope, requestSupport, endSupport, setAddon } from '../../actions';
+import { inviteMember, resendInvite, loadSampleAction, loadSampleThreadsAction, setMemberScope, requestSupport, endSupport, setAddon, declineAddon } from '../../actions';
 import { activeSupportGrant, pendingSupportRequest, supportHistory, SUPPORT_HOURS } from '@/lib/support';
 import { InboundSim } from '@/app/app/[tenant]/agents/panels';
 
@@ -26,6 +26,7 @@ export default async function TenantAdmin({ params, searchParams }: { params: Pr
     grant ? sb.from('ledger').select('id, at, actor, what, gate').eq('tenant_id', id).order('id', { ascending: false }).limit(20) : none,
   ]);
   const when = (s: string | null) => (s ? new Date(s).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' }) : '');
+  const { data: addonReq } = await sb.from('addon_requests').select('id, note, requested_by_name, requested_at').eq('tenant_id', id).eq('status', 'requested').maybeSingle();
   const { data: users } = await sb.auth.admin.listUsers({ perPage: 200 });
   const emailOf = (uid: string) => users?.users.find((u) => u.id === uid)?.email || uid;
   return (
@@ -66,7 +67,10 @@ export default async function TenantAdmin({ params, searchParams }: { params: Pr
             <div className="flex items-baseline gap-3"><h2>Add-ons</h2></div>
             <div className="flex items-center gap-3 mt-3 small"><b>ESG &amp; compliance</b>{(tenant.settings as { addons?: { esg?: boolean } })?.addons?.esg ? <span className="pill ok">on</span> : <span className="pill">off</span>}
               <span className="muted">Lender, fund, customer and certifier requirements turned into dated tasks, reminders, evidence and reports.</span>
+              {addonReq && <span className="pill warn">requested</span>}
               <form action={setAddon} className="ml-auto"><input type="hidden" name="tenant_id" value={id} /><input type="hidden" name="addon" value="esg" /><input type="hidden" name="on" value={(tenant.settings as { addons?: { esg?: boolean } })?.addons?.esg ? '0' : '1'} /><button className="btn sm">{(tenant.settings as { addons?: { esg?: boolean } })?.addons?.esg ? 'Switch off' : 'Switch on'}</button></form></div>
+            {addonReq && <div className="notice warn small mt-3"><b>Requested by {addonReq.requested_by_name} · {when(addonReq.requested_at)}</b>{addonReq.note && <div className="mt-1">{addonReq.note}</div>}
+              <form action={declineAddon} className="flex gap-2 mt-2 items-center"><input type="hidden" name="tenant_id" value={id} /><input type="hidden" name="id" value={addonReq.id} /><input className="input sm" name="note" placeholder="Reason (sent to them)" maxLength={500} style={{ maxWidth: 320 }} /><button className="btn sm">Decline</button><span className="muted">or Switch on above</span></form></div>}
           </div>
           <div className="card tw" style={{ padding: 0 }}><div className="p-4 pb-2"><h2>Autonomy by stream</h2></div>
             <table className="t"><thead><tr><th>Stream</th><th>Level</th><th>Cap</th></tr></thead><tbody>

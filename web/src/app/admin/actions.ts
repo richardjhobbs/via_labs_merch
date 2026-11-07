@@ -186,6 +186,33 @@ export async function setAddon(form: FormData) {
   const { error } = await sb.from('tenants').update({ settings: { ...settings, addons: { ...(settings.addons || {}), [addon]: on } } }).eq('id', tenantId);
   if (error) redirect(`/admin/tenants/${tenantId}?error=${encodeURIComponent(error.message)}`);
   await sb.rpc('ledger_append', { p_tenant: tenantId, p_channel: 'Console', p_actor: `VIA admin (${me.user.email})`, p_actor_user: me.user.id, p_counterparty: null, p_stream: 'Setup', p_order: null, p_what: `${on ? 'Switched on' : 'Switched off'} the ESG and compliance add-on`, p_gate: 'ADMIN', p_gated: true, p_ref: { addon } });
+  // switching on answers an open request from the company; tell the person who asked
+  if (on) {
+    const { data: open } = await sb.from('addon_requests').update({ status: 'approved', decided_by_email: me.user.email, decided_at: new Date().toISOString() }).eq('tenant_id', tenantId).eq('addon', addon).eq('status', 'requested').select('requested_by').maybeSingle();
+    if (open?.requested_by) await notifyRequester(tenantId, open.requested_by, true, null);
+  }
   revalidatePath(`/admin/tenants/${tenantId}`);
   redirect(`/admin/tenants/${tenantId}?sent=${encodeURIComponent(`add-on ${on ? 'on' : 'off'}`)}`);
+}
+
+export async function declineAddon(form: FormData) {
+  const me = await requireAdmin();
+  const tenantId = String(form.get('tenant_id')), id = String(form.get('id')), note = String(form.get('note') || '').trim().slice(0, 500) || null;
+  const sb = supabaseAdmin();
+  const { data: r } = await sb.from('addon_requests').update({ status: 'declined', decided_by_email: me.user.email, decided_at: new Date().toISOString(), decision_note: note }).eq('id', id).eq('tenant_id', tenantId).eq('status', 'requested').select('requested_by').maybeSingle();
+  await sb.rpc('ledger_append', { p_tenant: tenantId, p_channel: 'Console', p_actor: `VIA admin (${me.user.email})`, p_actor_user: me.user.id, p_counterparty: null, p_stream: 'Setup', p_order: null, p_what: `Declined the ESG and compliance add-on request${note ? `: ${note}` : ''}`, p_gate: 'ADMIN', p_gated: true, p_ref: { addon_request: id } });
+  if (r?.requested_by) await notifyRequester(tenantId, r.requested_by, false, note);
+  revalidatePath(`/admin/tenants/${tenantId}`);
+  redirect(`/admin/tenants/${tenantId}?sent=${encodeURIComponent('request declined')}`);
+}
+
+async function notifyRequester(tenantId: string, userId: string, approved: boolean, note: string | null) {
+  const sb = supabaseAdmin();
+  const [{ data: u }, { data: t }] = await Promise.all([sb.auth.admin.getUserById(userId), sb.from('tenants').select('name, slug').eq('id', tenantId).single()]);
+  const email = u?.user?.email;
+  if (!email || !t) return;
+  const url = `${process.env.NEXT_PUBLIC_APP_URL || 'https://merch.getvia.xyz'}/app/${t.slug}/esg`;
+  const subject = approved ? `ESG and compliance is on for ${t.name}` : `Your ESG and compliance request for ${t.name}`;
+  const text = approved ? 'VIA Labs has switched on ESG and compliance. Start from a template or upload a requirements document.' : `VIA Labs has not switched on ESG and compliance yet.${note ? ` ${note}` : ''} Reply to this email to talk it through.`;
+  try { await sendMail({ to: email, subject, text: `${text}\n\n${url}`, html: brandedHtml({ title: subject, paragraphs: [text], cta: approved ? { label: 'Open ESG & compliance', url } : undefined }) }); } catch { /* the outcome shows in the workspace */ }
 }

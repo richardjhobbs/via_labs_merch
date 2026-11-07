@@ -783,7 +783,7 @@
     "addonPill": "Complemento",
     "addonTitle": "Todos los requisitos de cumplimiento, llevados hasta las personas y los proveedores que hacen el trabajo",
     "addonP1": "Condiciones de los bancos, códigos de conducta de las marcas, auditorías y acciones correctivas, certificados y licencias, informes de ensayo y certificados de transacción por pedido, normas de mercado en la EU y en US. Llegan al propietario o al gestor de la cuenta, y luego se pierden, se malinterpretan o se olvidan antes de llegar a quienes hacen el trabajo. VIA Merch lleva cada requisito hasta la persona o el proveedor responsable, se lo recuerda con tiempo, reúne las pruebas y prepara el informe de respuesta.",
-    "addonCta": "Pedir a VIA Labs que lo active",
+    "addonCta": "Pedir el complemento",
     "how1": "Parta de una plantilla (ESAP del banco, código de conducta, BSCI, WRAP, OEKO-TEX, GOTS, ZDHC, normas de mercado de la EU y de US, licencias locales) o suba el propio documento. El agente lee cada obligación; usted la revisa antes de guardar nada.",
     "how2": "Cada requisito tiene un responsable, las pruebas que lo acreditan y cuándo vence: cada periodo, en cada pedido que coincida en un hito de producción, o antes de que caduque un certificado o una licencia. Puede aplicarse a la empresa o a cada proveedor que coincida.",
     "how3": "Las tareas se crean antes de cada fecha de vencimiento. Se avisa por correo a los responsables cuando empieza el plazo de antelación, una semana antes y el día antes, y el agente deja en cola las solicitudes a proveedores para su aprobación.",
@@ -1110,7 +1110,17 @@
     "readBtn": "Leer el archivo",
     "readDone": "Leído desde {file}. Revise los campos de abajo y luego envíe.",
     "readConcern": "Revisar",
-    "unreadableEvidence": "No se pudo leer nada de este archivo. Introduzca la cifra a mano y adjunte el archivo."
+    "unreadableEvidence": "No se pudo leer nada de este archivo. Introduzca la cifra a mano y adjunte el archivo.",
+    "addonCtaHelp": "Se avisa a VIA Labs y responde por correo electrónico. Nada cambia en su espacio de trabajo hasta que se active.",
+    "addonNote": "¿Hay algo que debamos saber? (opcional)",
+    "addonNotePh": "Por ejemplo: nuestro banco necesita informes ESG trimestrales desde enero",
+    "addonRequested": "Solicitado por {name} el {date}.",
+    "addonRequestedNext": "Se ha avisado a VIA Labs y se pondrá en contacto con usted. Recibirá un correo electrónico cuando se active.",
+    "addonDeclined": "VIA Labs no lo activó ({date}).",
+    "addonAskManager": "Un propietario o gestor de su empresa puede pedirlo aquí.",
+    "addonOnlyManagers": "Solo un propietario o gestor puede pedir un complemento.",
+    "addonSwitchOn": "Activar ahora",
+    "addonAdminOnly": "Solo para el personal de VIA Labs. Queda registrado en el libro mayor de la empresa."
   },
   "partners": {
     "title": "Registros de cumplimiento compartidos por {company}",

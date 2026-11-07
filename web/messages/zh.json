@@ -783,7 +783,7 @@
     "addonPill": "附加服务",
     "addonTitle": "每一项合规要求，都传达到具体执行的人和供应商",
     "addonP1": "银行契约条款、品牌行为准则、审核和整改措施、证书和许可证、每张订单的测试报告和交易证书、欧盟和美国的市场规则。这些要求先到达所有者或客户经理手中，再传给具体执行的人，途中往往被遗失、误读或遗忘。VIA Merch 把每项要求落实到责任人或供应商，提前提醒，收集证据，并准备好回报的报告。",
-    "addonCta": "请 VIA Labs 开通",
+    "addonCta": "申请开通附加服务",
     "how1": "从模板开始（银行 ESAP、行为准则、BSCI、WRAP、OEKO-TEX、GOTS、ZDHC、EU 和 US 市场规则、本地许可证），或直接上传文件。智能体会读取每一项义务；保存之前由您核对。",
     "how2": "每项要求都有负责人、用来证明的证据，以及到期时间：每个期间一次、每张匹配订单在生产里程碑时，或在证书或许可证到期之前。可以适用于公司本身，也可以适用于每个匹配的供应商。",
     "how3": "任务会在每个到期日之前创建。提前期开始时、一周前和前一天，负责人都会收到邮件，智能体会把向供应商发出的请求排入队列等待批准。",
@@ -1110,7 +1110,17 @@
     "readBtn": "读取文件",
     "readDone": "已从 {file} 读取。请核对下方字段，然后提交。",
     "readConcern": "请核对",
-    "unreadableEvidence": "无法从此文件读取任何内容。请手动输入数据并附上文件。"
+    "unreadableEvidence": "无法从此文件读取任何内容。请手动输入数据并附上文件。",
+    "addonCtaHelp": "VIA Labs 会收到通知并通过电子邮件回复。在开通之前，您的工作区不会有任何变化。",
+    "addonNote": "有什么需要我们了解的吗？（选填）",
+    "addonNotePh": "例如：从一月起，我们的银行要求提交季度 ESG 报告",
+    "addonRequested": "{name} 于 {date} 提出申请。",
+    "addonRequestedNext": "已通知 VIA Labs，对方会与您联系。开通后您将收到一封电子邮件。",
+    "addonDeclined": "VIA Labs 未予开通（{date}）。",
+    "addonAskManager": "贵公司的所有者或经理可以在此申请。",
+    "addonOnlyManagers": "只有所有者或经理可以申请附加服务。",
+    "addonSwitchOn": "立即开通",
+    "addonAdminOnly": "仅限 VIA Labs 员工。已记录在公司的账本中。"
   },
   "partners": {
     "title": "{company} 共享的合规记录",

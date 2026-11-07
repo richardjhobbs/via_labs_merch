@@ -6,19 +6,21 @@ import { requireTenant } from '@/lib/tenant';
 import { supabaseServer } from '@/lib/supabase/server';
 import { canLead, esgEnabled, esgSnapshot, isMine, PROGRAMME_KINDS, STATE_PILL } from '@/lib/esg';
 import { addProgramme } from './actions';
+import { requestAddon, switchOnNow } from './addon-actions';
 
-export default async function Esg({ params, searchParams }: { params: Promise<{ tenant: string }>; searchParams: Promise<{ error?: string; saved?: string }> }) {
+export default async function Esg({ params, searchParams }: { params: Promise<{ tenant: string }>; searchParams: Promise<{ error?: string; saved?: string; requested?: string }> }) {
   const { tenant: slug } = await params; const q = await searchParams;
-  const { tenant, membership, user } = await requireTenant(slug);
+  const { tenant, membership, user, isAdmin } = await requireTenant(slug);
   const [t, tr] = await Promise.all([getTranslations('esg'), getTranslations('roles')]);
   const sb = await supabaseServer();
-  const [{ data: tn }, { data: programmes }, { data: parties }, tasks] = await Promise.all([
+  const [{ data: tn }, { data: programmes }, { data: parties }, tasks, { data: lastReq }] = await Promise.all([
     sb.from('tenants').select('settings').eq('id', tenant.id).single(),
     sb.from('esg_programmes').select('id, name, kind, issuer_name, chain, status, ends_on, parties(name), esg_requirements(count)').eq('tenant_id', tenant.id).order('status').order('created_at', { ascending: false }),
     sb.from('parties').select('id, name, kind').eq('tenant_id', tenant.id).order('name'),
     esgSnapshot(tenant.id, sb),
+    sb.from('addon_requests').select('status, requested_by_name, requested_at, decided_at, decision_note').eq('tenant_id', tenant.id).eq('addon', 'esg').order('requested_at', { ascending: false }).limit(1).maybeSingle(),
   ]);
-  if (!esgEnabled(tn?.settings)) return <AddOn t={t} />;
+  if (!esgEnabled(tn?.settings)) return <AddOn t={t} slug={slug} req={lastReq} canRequest={['owner', 'manager'].includes(membership.role) && membership.id !== 'admin'} isAdmin={isAdmin} justRequested={!!q.requested} error={q.error} />;
   const lead = canLead(membership.role), manager = ['owner', 'manager'].includes(membership.role);
   const overdue = tasks.filter((x) => x.state === 'overdue'), due = tasks.filter((x) => x.state === 'due' || x.state === 'returned'), review = tasks.filter((x) => x.state === 'review');
   const mine = tasks.filter((x) => (manager ? true : isMine(x, user.id, membership.role)) && x.state !== 'upcoming');
@@ -88,16 +90,32 @@ export default async function Esg({ params, searchParams }: { params: Promise<{ 
   );
 }
 
-function AddOn({ t }: { t: Awaited<ReturnType<typeof getTranslations<'esg'>>> }) {
+type AddonReq = { status: string; requested_by_name: string | null; requested_at: string; decided_at: string | null; decision_note: string | null } | null;
+function AddOn({ t, slug, req, canRequest, isAdmin, justRequested, error }: { t: Awaited<ReturnType<typeof getTranslations<'esg'>>>; slug: string; req: AddonReq; canRequest: boolean; isAdmin: boolean; justRequested: boolean; error?: string }) {
+  const open = req?.status === 'requested';
+  const day = (s: string | null) => (s ? new Date(s).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '');
   return (
     <div className="max-w-3xl">
       <h1>{t('title')}</h1>
+      {error && <div className="notice crit mt-3">{error}</div>}
       <div className="card mt-4">
         <span className="pill agent">{t('addonPill')}</span>
         <h2 className="mt-3" style={{ fontSize: 18 }}>{t('addonTitle')}</h2>
         <p className="mt-2" style={{ color: 'var(--fg2)' }}>{t('addonP1')}</p>
         <ul className="mt-3 grid gap-2 small" style={{ color: 'var(--fg2)' }}>{(['how1', 'how2', 'how3', 'how4'] as const).map((k) => <li key={k} className="flex gap-2"><span style={{ color: 'var(--accent)' }}>→</span><span>{t(k)}</span></li>)}</ul>
-        <a className="btn primary mt-4" href="mailto:contact@getvia.xyz?subject=VIA%20Merch%20ESG%20and%20compliance">{t('addonCta')}</a>
+        <div className="mt-4 pt-4" style={{ borderTop: '1px solid var(--line2)' }}>
+          {open ? <div className={`notice ${justRequested ? 'ok' : ''}`}><b>{t('addonRequested', { name: req!.requested_by_name || '', date: day(req!.requested_at) })}</b><div className="small mt-1">{t('addonRequestedNext')}</div></div>
+            : <>
+              {req?.status === 'declined' && <div className="notice warn small mb-3">{t('addonDeclined', { date: day(req.decided_at) })}{req.decision_note ? ` ${req.decision_note}` : ''}</div>}
+              {canRequest ? <form action={requestAddon} className="grid gap-2">
+                <input type="hidden" name="tenant" value={slug} />
+                <label className="f" style={{ margin: 0 }}><span>{t('addonNote')}</span><textarea className="input" name="note" rows={2} maxLength={1000} placeholder={t('addonNotePh')} /></label>
+                <div><button className="btn primary">{t('addonCta')}</button></div>
+                <p className="muted small">{t('addonCtaHelp')}</p>
+              </form> : !isAdmin && <p className="small" style={{ color: 'var(--fg2)' }}>{t('addonAskManager')}</p>}
+            </>}
+          {isAdmin && <form action={switchOnNow} className="mt-3"><input type="hidden" name="tenant" value={slug} /><button className="btn">{t('addonSwitchOn')}</button> <span className="muted small">{t('addonAdminOnly')}</span></form>}
+        </div>
       </div>
     </div>
   );

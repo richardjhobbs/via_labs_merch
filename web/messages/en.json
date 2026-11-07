@@ -783,7 +783,7 @@
     "addonPill": "Add-on",
     "addonTitle": "Every compliance requirement, carried down to the people and suppliers who do the work",
     "addonP1": "Bank covenants, brand codes of conduct, audits and corrective actions, certificates and licences, test reports and transaction certificates per order, market rules in the EU and US. They reach the owner or the account manager, then get lost, misread or forgotten on the way to the people who do the work. VIA Merch carries each requirement down to the person or supplier responsible, reminds them in good time, gathers the evidence and prepares the report back.",
-    "addonCta": "Ask VIA Labs to switch it on",
+    "addonCta": "Request the add-on",
     "how1": "Start from a template (bank ESAP, code of conduct, BSCI, WRAP, OEKO-TEX, GOTS, ZDHC, EU and US market rules, local licences) or upload the document itself. The agent reads every obligation; you check it before anything is saved.",
     "how2": "Each requirement has an owner, the evidence that proves it, and when it falls due: every period, for every matching order at a production milestone, or before a certificate or licence expires. It can apply to the company or to every matching supplier.",
     "how3": "Tasks are created ahead of each due date. Owners are emailed when the lead time starts, a week before and the day before, and the agent queues requests to suppliers for approval.",
@@ -1110,7 +1110,17 @@
     "readBtn": "Read the file",
     "readDone": "Read from {file}. Check the fields below, then submit.",
     "readConcern": "Check",
-    "unreadableEvidence": "Nothing could be read from this file. Enter the figure by hand and attach the file."
+    "unreadableEvidence": "Nothing could be read from this file. Enter the figure by hand and attach the file.",
+    "addonCtaHelp": "VIA Labs is notified and replies by email. Nothing changes in your workspace until it is switched on.",
+    "addonNote": "Anything we should know (optional)",
+    "addonNotePh": "For example: our bank needs quarterly ESG reports from January",
+    "addonRequested": "Requested by {name} on {date}.",
+    "addonRequestedNext": "VIA Labs has been notified and will be in touch. You will get an email when it is switched on.",
+    "addonDeclined": "VIA Labs did not switch it on ({date}).",
+    "addonAskManager": "An owner or manager of your company can request it here.",
+    "addonOnlyManagers": "Only an owner or manager can request an add-on.",
+    "addonSwitchOn": "Switch on now",
+    "addonAdminOnly": "VIA Labs staff only. Recorded on the company's ledger."
   },
   "partners": {
     "title": "Compliance records shared by {company}",

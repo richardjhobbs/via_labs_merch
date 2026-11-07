@@ -783,7 +783,7 @@
     "addonPill": "Tiện ích bổ sung",
     "addonTitle": "Mọi yêu cầu tuân thủ, được chuyển xuống đúng những người và nhà cung cấp trực tiếp làm việc",
     "addonP1": "Điều kiện của ngân hàng, quy tắc ứng xử của thương hiệu, kiểm toán và hành động khắc phục, chứng nhận và giấy phép, báo cáo thử nghiệm và chứng nhận giao dịch theo từng đơn hàng, quy định thị trường tại EU và US. Chúng đến tay chủ doanh nghiệp hoặc người quản lý khách hàng, rồi thất lạc, bị hiểu sai hoặc bị quên trên đường xuống những người trực tiếp làm việc. VIA Merch chuyển từng yêu cầu đến đúng người hoặc nhà cung cấp phụ trách, nhắc họ đúng lúc, thu thập bằng chứng và chuẩn bị báo cáo gửi lại.",
-    "addonCta": "Nhờ VIA Labs bật tính năng này",
+    "addonCta": "Yêu cầu tiện ích bổ sung",
     "how1": "Bắt đầu từ một mẫu (ESAP của ngân hàng, quy tắc ứng xử, BSCI, WRAP, OEKO-TEX, GOTS, ZDHC, quy định thị trường EU và US, giấy phép địa phương) hoặc tải lên chính tài liệu. Agent đọc từng nghĩa vụ; bạn kiểm tra trước khi lưu bất cứ điều gì.",
     "how2": "Mỗi yêu cầu có một người phụ trách, bằng chứng chứng minh và thời điểm đến hạn: mỗi kỳ, với mọi đơn hàng phù hợp tại một cột mốc sản xuất, hoặc trước khi chứng nhận hay giấy phép hết hạn. Yêu cầu có thể áp dụng cho công ty hoặc cho mọi nhà cung cấp phù hợp.",
     "how3": "Công việc được tạo trước mỗi ngày đến hạn. Người phụ trách nhận email khi bắt đầu thời gian báo trước, một tuần trước và một ngày trước, và agent đưa các yêu cầu gửi nhà cung cấp vào hàng chờ để duyệt.",
@@ -1110,7 +1110,17 @@
     "readBtn": "Đọc tệp",
     "readDone": "Đã đọc từ {file}. Hãy kiểm tra các trường bên dưới, rồi gửi.",
     "readConcern": "Kiểm tra",
-    "unreadableEvidence": "Không đọc được gì từ tệp này. Hãy nhập số liệu thủ công và đính kèm tệp."
+    "unreadableEvidence": "Không đọc được gì từ tệp này. Hãy nhập số liệu thủ công và đính kèm tệp.",
+    "addonCtaHelp": "VIA Labs sẽ nhận được thông báo và trả lời qua email. Không gì thay đổi trong không gian làm việc của bạn cho đến khi tiện ích được bật.",
+    "addonNote": "Có điều gì chúng tôi nên biết không? (không bắt buộc)",
+    "addonNotePh": "Ví dụ: ngân hàng của chúng tôi cần báo cáo ESG hằng quý từ tháng Một",
+    "addonRequested": "Do {name} yêu cầu vào {date}.",
+    "addonRequestedNext": "VIA Labs đã được thông báo và sẽ liên hệ với bạn. Bạn sẽ nhận được email khi tiện ích được bật.",
+    "addonDeclined": "VIA Labs đã không bật tiện ích này ({date}).",
+    "addonAskManager": "Chủ doanh nghiệp hoặc người quản lý của công ty bạn có thể yêu cầu tại đây.",
+    "addonOnlyManagers": "Chỉ chủ doanh nghiệp hoặc người quản lý mới có thể yêu cầu tiện ích bổ sung.",
+    "addonSwitchOn": "Bật ngay",
+    "addonAdminOnly": "Chỉ dành cho nhân viên VIA Labs. Được ghi vào sổ cái của công ty."
   },
   "partners": {
     "title": "Hồ sơ tuân thủ do {company} chia sẻ",

@@ -16,11 +16,13 @@ export default async function AdminHome({ searchParams }: { searchParams: Promis
   const pre = req ? { name: req.company, slug: slugify(req.company), kind: req.kind || 'buying_office', email: req.email } : null;
   const { data: tenants } = await sb.from('tenants').select('id, slug, name, kind, plan, created_at, memberships(count), invites(count)').order('created_at', { ascending: false });
   const { count: newRequests } = await sb.from('access_requests').select('id', { count: 'exact', head: true }).eq('status', 'new');
+  const { data: addonReqs } = await sb.from('addon_requests').select('id, tenant_id, requested_by_name, requested_at, tenants(name)').eq('status', 'requested').order('requested_at');
   return (
     <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_320px]">
       <div>
         <h1>{t('admin.tenants')}</h1>
         {!!newRequests && <Link href="/admin/requests" className="notice block mt-3">{newRequests} {t('admin.requests').toLowerCase()}</Link>}
+        {(addonReqs || []).map((r) => <Link key={r.id} href={`/admin/tenants/${r.tenant_id}`} className="notice warn block mt-3">ESG &amp; compliance requested by {r.requested_by_name} at {(r.tenants as unknown as { name: string } | null)?.name} · {new Date(r.requested_at).toLocaleDateString('en-GB')}</Link>)}
         <div className="card mt-4 tw" style={{ padding: 0 }}>
           <table className="t"><thead><tr><th>{t('admin.name')}</th><th>{t('admin.kind')}</th><th>{t('admin.plan')}</th><th>{t('admin.members')}</th><th>{t('admin.pending')}</th><th>{t('admin.created')}</th></tr></thead>
             <tbody>{(tenants || []).map((x) => (
