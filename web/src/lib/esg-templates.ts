@@ -5,7 +5,7 @@
 // `site: true` marks work done at a factory site. A factory does it itself; a buying office, trading company,
 // brand or retailer collects it from each of its tier 1 factories instead (applies_to suppliers), so one
 // template serves both sides of the trade.
-import type { Frequency, Trigger } from './esg-shared';
+import { EU_COUNTRIES, type Frequency, type Trigger } from './esg-shared';
 
 type Role = 'owner' | 'manager' | 'merchandiser' | 'qc' | 'compliance' | 'logistics';
 export type TemplateReq = {
@@ -14,7 +14,7 @@ export type TemplateReq = {
   milestone?: 'pp' | 'cut' | 'inline' | 'final' | 'exf' | 'etd' | 'eta'; milestone_offset?: number;
   site?: boolean; suppliers?: string[];            // suppliers: always fan out to these supplier kinds
 };
-export type Template = { id: string; group: 'finance' | 'customer' | 'audit' | 'certification' | 'chemicals' | 'market' | 'licence'; kind: string; name: string; framework: string; summary: string; status?: string; perOrder?: boolean; reqs: TemplateReq[] };
+export type Template = { destinations?: string[]; id: string; group: 'finance' | 'customer' | 'audit' | 'certification' | 'chemicals' | 'market' | 'licence'; kind: string; name: string; framework: string; summary: string; status?: string; perOrder?: boolean; reqs: TemplateReq[] };
 
 const Q: Pick<TemplateReq, 'trigger' | 'frequency' | 'due_days'> = { trigger: 'schedule', frequency: 'quarterly', due_days: 30 };
 const Y: Pick<TemplateReq, 'trigger' | 'frequency' | 'due_days'> = { trigger: 'schedule', frequency: 'annual', due_days: 60 };
@@ -126,18 +126,18 @@ export const TEMPLATES: Template[] = [
     ] },
 
   // ---------------------------------------------------------------- markets
-  { id: 'eu-market', group: 'market', kind: 'regulation', name: 'Selling into the EU', framework: 'REACH, GPSR, Textile Regulation 1007/2011, Forced Labour Regulation 2024/3015', perOrder: true,
+  { id: 'eu-market', destinations: EU_COUNTRIES, group: 'market', kind: 'regulation', name: 'Selling into the EU', framework: 'REACH, GPSR, Textile Regulation 1007/2011, Forced Labour Regulation 2024/3015', perOrder: true,
     status: 'SVHC Candidate List at 253 entries (February 2026). EU Forced Labour Regulation prohibition applies from 14 December 2027. Textile Digital Product Passport not yet required (delegated act expected 2027).',
-    summary: 'For orders going to the EU: chemical restrictions tested, labels right, the SVHC list checked after each update, and forced-labour due diligence records ready.',
+    summary: 'For orders whose destination is in the EU or EEA: chemical restrictions tested, labels right, the SVHC list checked after each update, and forced-labour due diligence records ready.',
     reqs: [
       { ...PO('final', -7), title: 'REACH restriction tests', instruction: 'Accredited test report for the restricted substances that apply (azo dyes, nickel release, PAHs, chromium VI in leather and others).', discipline: 'chemicals', measure: 'evidence', owner_role: 'qc', evidence: 'Test report' },
       { ...PO('pp', 0), title: 'Fibre composition and care label check', instruction: 'Check the fibre names and percentages, care and origin labels against Regulation 1007/2011 and the customer artwork at PP.', discipline: 'governance', measure: 'yes_no', owner_role: 'qc', evidence: 'Approved label artwork, composition test' },
       { trigger: 'schedule', frequency: 'semiannual', due_days: 30, title: 'SVHC Candidate List check', instruction: 'Check materials against the latest SVHC Candidate List and tell customers about any article above 0.1%.', discipline: 'chemicals', measure: 'yes_no', owner_role: 'compliance', evidence: 'Supplier declarations' },
       { ...Y, title: 'Forced labour due diligence file', instruction: 'Keep supply chain maps, supplier declarations and audit evidence that show the goods are not made with forced labour.', discipline: 'labour', measure: 'evidence', owner_role: 'compliance', evidence: 'Due diligence file' },
     ] },
-  { id: 'us-market', group: 'market', kind: 'regulation', name: 'Selling into the US', framework: 'UFLPA, CPSIA, Prop 65, FTC labelling, CPSC eFiling', perOrder: true,
+  { id: 'us-market', destinations: ['US'], group: 'market', kind: 'regulation', name: 'Selling into the US', framework: 'UFLPA, CPSIA, Prop 65, FTC labelling, CPSC eFiling', perOrder: true,
     status: 'UFLPA rebuttable presumption in force, entity list growing (July 2026). CPSC eFiling of certificates reported effective 8 July 2026. Tariffs change often: not covered.',
-    summary: "For orders going to the US: cotton and input traceability, children's product testing, Prop 65 and labelling, and the certificate data for each shipment.",
+    summary: "For orders whose destination is the US: cotton and input traceability, children's product testing, Prop 65 and labelling, and the certificate data for each shipment.",
     reqs: [
       { ...PO('etd', -10), title: 'UFLPA traceability pack', instruction: 'Assemble cotton and yarn traceability back to the raw material, with transaction documents, for the shipment.', discipline: 'traceability', measure: 'evidence', owner_role: 'merchandiser', evidence: 'Traceability documents by tier' },
       { ...PO('final', -7), title: "Children's product test and certificate (CPSIA)", instruction: "For children's products: CPSC-accepted lab test and a Children's Product Certificate. Set the order filter to children's categories.", discipline: 'chemicals', measure: 'evidence', owner_role: 'qc', evidence: 'Test report and CPC' },
@@ -178,3 +178,18 @@ export const TEMPLATES: Template[] = [
 
 export const TEMPLATE_GROUPS = ['finance', 'customer', 'audit', 'certification', 'chemicals', 'market', 'licence'] as const;
 export const templateById = (id: string) => TEMPLATES.find((t) => t.id === id) || null;
+
+// Template text in the reader's language (en is the source above). Proper names and figures stay as written.
+import de from './esg-templates-i18n/de.json';
+import bn from './esg-templates-i18n/bn.json';
+import zh from './esg-templates-i18n/zh.json';
+import vi from './esg-templates-i18n/vi.json';
+import es from './esg-templates-i18n/es.json';
+type Overlay = Record<string, { name: string; summary: string; status?: string; reqs: { title: string; instruction: string; evidence?: string }[] }>;
+const OVERLAYS: Record<string, Overlay> = { de, bn, zh, vi, es };
+
+export function localizeTemplate(tpl: Template, locale: string): Template {
+  const o = OVERLAYS[locale]?.[tpl.id];
+  if (!o || o.reqs.length !== tpl.reqs.length) return tpl;
+  return { ...tpl, name: o.name || tpl.name, summary: o.summary || tpl.summary, status: tpl.status ? o.status || tpl.status : undefined, reqs: tpl.reqs.map((r, i) => ({ ...r, title: o.reqs[i].title || r.title, instruction: o.reqs[i].instruction || r.instruction, evidence: r.evidence ? o.reqs[i].evidence || r.evidence : undefined })) };
+}

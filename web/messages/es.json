@@ -16,7 +16,8 @@
     "admin": "Administración VIA",
     "signout": "Cerrar sesión",
     "threads": "Conversaciones",
-    "esg": "ESG y cumplimiento"
+    "esg": "ESG y cumplimiento",
+    "shared": "Compartido con usted"
   },
   "landing": {
     "kicker": "Para oficinas de compras, marcas, fábricas y empresas comercializadoras",
@@ -190,7 +191,8 @@
     "qc": "Control de calidad",
     "compliance": "Cumplimiento",
     "logistics": "Logística",
-    "viewer": "Lector"
+    "viewer": "Lector",
+    "partner": "Socio"
   },
   "common": {
     "save": "Guardar",
@@ -260,7 +262,8 @@
     "rowDup": "fila {row}, la PO {po} ya existe",
     "viewOrders": "Ver sus pedidos",
     "docHint": "Esta importación necesita una hoja con un pedido por fila. Para una factura proforma, factura u orden de compra con otro formato, use",
-    "docLink": "Añadir desde un documento."
+    "docLink": "Añadir desde un documento.",
+    "destination": "Destino"
   },
   "parties": {
     "title": "Clientes y proveedores",
@@ -1099,6 +1102,38 @@
     "validFrom": "Válido desde",
     "validUntil": "Válido hasta",
     "expiryHelp": "La renovación de este certificado o licencia se programa a partir de la fecha de caducidad que indique, una vez aceptado.",
-    "validRange": "válido del {from} al {to}"
+    "validRange": "válido del {from} al {to}",
+    "orderDestinations": "Solo pedidos con destino a (códigos de país)",
+    "forDestinations": "a {list}",
+    "readTitle": "Leer las cifras de un archivo",
+    "readHelp": "Suba la factura, el registro del contador, el informe de ensayo, el certificado o la licencia. El agente rellena abajo la cifra y las fechas de validez para que usted las revise, y el archivo se adjunta como evidencia al enviar.",
+    "readBtn": "Leer el archivo",
+    "readDone": "Leído desde {file}. Revise los campos de abajo y luego envíe.",
+    "readConcern": "Revisar",
+    "unreadableEvidence": "No se pudo leer nada de este archivo. Introduzca la cifra a mano y adjunte el archivo."
+  },
+  "partners": {
+    "title": "Registros de cumplimiento compartidos por {company}",
+    "sub": "{company} comparte con {party} los registros de cumplimiento que le conciernen: lo que necesitan de usted y los programas que usted fijó para ellos.",
+    "toProvide": "Lo que necesitan de usted",
+    "nothingToProvide": "Por ahora no tiene nada pendiente.",
+    "provided": "Entregado o revisado ({n})",
+    "youSet": "Requisitos que usted fijó",
+    "noneSet": "Su empresa aún no tiene programas.",
+    "privacy": "Usted solo ve estos registros. Todo lo demás del espacio de trabajo de {company} sigue siendo privado para ellos, y cada consulta y envío queda en su registro firmado.",
+    "back": "Registros compartidos",
+    "submitNote": "Lo que envíe llega al equipo de cumplimiento de {company}, que lo revisa. Las versiones anteriores permanecen registradas.",
+    "accessTitle": "Acceso de socios",
+    "accessHelp": "Las personas de esta empresa pueden iniciar sesión para ver los registros de cumplimiento que le conciernen y aportar ellas mismas cifras, documentos y certificados. No ven nada más.",
+    "since": "desde {date}",
+    "remove": "Quitar",
+    "invited": "Invitado",
+    "nobody": "Todavía nadie.",
+    "email": "Correo electrónico",
+    "name": "Nombre",
+    "invite": "Invitar",
+    "onlyManagers": "Solo un propietario o responsable puede cambiar el acceso de socios.",
+    "badEmail": "Introduzca una dirección de correo válida.",
+    "needAddon": "El acceso de socios viene con el complemento de ESG y cumplimiento."
   }
 }

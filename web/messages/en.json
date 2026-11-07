@@ -16,7 +16,8 @@
     "admin": "VIA admin",
     "signout": "Sign out",
     "threads": "Conversations",
-    "esg": "ESG & compliance"
+    "esg": "ESG & compliance",
+    "shared": "Shared with you"
   },
   "landing": {
     "kicker": "For buying offices, brands, factories and trading companies",
@@ -190,7 +191,8 @@
     "qc": "QC",
     "compliance": "Compliance",
     "logistics": "Logistics",
-    "viewer": "Viewer"
+    "viewer": "Viewer",
+    "partner": "Partner"
   },
   "common": {
     "save": "Save",
@@ -260,7 +262,8 @@
     "rowDup": "row {row}, PO {po} already exists",
     "viewOrders": "See your orders",
     "docHint": "This import needs a spreadsheet with one order per row. For a proforma invoice, invoice or purchase order in any other layout, use",
-    "docLink": "Add from a document."
+    "docLink": "Add from a document.",
+    "destination": "Destination"
   },
   "parties": {
     "title": "Customers & suppliers",
@@ -1099,6 +1102,38 @@
     "validFrom": "Valid from",
     "validUntil": "Valid until",
     "expiryHelp": "The renewal of this certificate or licence is scheduled from the expiry date you enter, once it is accepted.",
-    "validRange": "valid {from} to {to}"
+    "validRange": "valid {from} to {to}",
+    "orderDestinations": "Only orders going to (country codes)",
+    "forDestinations": "to {list}",
+    "readTitle": "Read the figures from a file",
+    "readHelp": "Upload the bill, meter log, test report, certificate or licence. The agent fills in the figure and validity dates below for you to check, and the file is attached as evidence when you submit.",
+    "readBtn": "Read the file",
+    "readDone": "Read from {file}. Check the fields below, then submit.",
+    "readConcern": "Check",
+    "unreadableEvidence": "Nothing could be read from this file. Enter the figure by hand and attach the file."
+  },
+  "partners": {
+    "title": "Compliance records shared by {company}",
+    "sub": "{company} shares with {party} the compliance records that concern you: what they need from you, and the programmes you set for them.",
+    "toProvide": "What they need from you",
+    "nothingToProvide": "Nothing is due from you at the moment.",
+    "provided": "Supplied or checked ({n})",
+    "youSet": "Requirements you set",
+    "noneSet": "No programmes from your company yet.",
+    "privacy": "You see only these records. Everything else in {company}'s workspace stays private to them, and every view and submission is on their signed ledger.",
+    "back": "Shared records",
+    "submitNote": "What you submit goes to the compliance team at {company}, who check it. Earlier versions stay on record.",
+    "accessTitle": "Partner access",
+    "accessHelp": "People at this company can sign in to see the compliance records that concern it, and supply figures, documents and certificates themselves. They see nothing else.",
+    "since": "since {date}",
+    "remove": "Remove",
+    "invited": "Invited",
+    "nobody": "Nobody yet.",
+    "email": "Email",
+    "name": "Name",
+    "invite": "Invite",
+    "onlyManagers": "Only an owner or manager can change partner access.",
+    "badEmail": "Enter a valid email address.",
+    "needAddon": "Partner access comes with the ESG and compliance add-on."
   }
 }

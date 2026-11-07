@@ -158,7 +158,7 @@ export async function saveDocument(_prev: ReadState, form: FormData): Promise<Re
     const d = o.data;
     let extra: Record<string, unknown> = {};
     try { extra = JSON.parse(String(form.get('doc_meta') || '{}')); } catch { /* the summary is optional */ }
-    const { data: order, error } = await sb.from('orders').insert({ tenant_id: tenant.id, po: d.po, customer_id: buyer?.id || null, factory_id: seller?.id || null, owner_user_id: user.id, description: d.description || null, qty: Math.round(Number(d.qty)) || null, fob: Number(d.fob) || null, currency: (d.currency || 'USD').toUpperCase(), incoterm: d.incoterm || null, source: 'document', meta: { document: { file, ...extra } } }).select('id').single();
+    const { data: order, error } = await sb.from('orders').insert({ tenant_id: tenant.id, po: d.po, destination: buyer?.country?.toUpperCase() || null, customer_id: buyer?.id || null, factory_id: seller?.id || null, owner_user_id: user.id, description: d.description || null, qty: Math.round(Number(d.qty)) || null, fob: Number(d.fob) || null, currency: (d.currency || 'USD').toUpperCase(), incoterm: d.incoterm || null, source: 'document', meta: { document: { file, ...extra } } }).select('id').single();
     if (error || !order) return { error: error?.message || t('nothing') };
     const plan = planFromEtd(d.etd, seller?.country);
     await sb.from('milestones').insert(MILESTONES.map((k) => ({ tenant_id: tenant.id, order_id: order.id, key: k, owner_kind: OWNERS[k], plan_date: plan[k] })));

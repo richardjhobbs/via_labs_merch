@@ -8,6 +8,7 @@ import { PartyFields } from '../party-fields';
 import { BankSection } from './bank-section';
 import { BANK_COLUMNS, type BankRow } from '@/lib/bank';
 import { ComplianceCard } from '@/components/compliance-card';
+import { PartnerAccess } from '@/components/partner-access';
 
 export default async function EditParty({ params, searchParams }: { params: Promise<{ tenant: string; id: string }>; searchParams: Promise<{ error?: string; saved?: string }> }) {
   const { tenant: slug, id } = await params; const { error, saved } = await searchParams;
@@ -33,6 +34,7 @@ export default async function EditParty({ params, searchParams }: { params: Prom
         <div className="flex gap-2 mt-2"><button className="btn primary">{t('save')}</button><Link className="btn" href={`/app/${slug}/parties`}>{t('cancel')}</Link></div>
       </form>
       <div className="mt-4"><ComplianceCard slug={slug} tenantId={tenant.id} partyId={p.id} /></div>
+      <PartnerAccess slug={slug} tenantId={tenant.id} partyId={p.id} role={membership.id === 'admin' ? 'viewer' : membership.role} />
       <BankSection slug={slug} partyId={p.id} role={membership.id === 'admin' ? 'viewer' : membership.role} accounts={(accounts || []) as unknown as BankRow[]} />
     </div>
   );

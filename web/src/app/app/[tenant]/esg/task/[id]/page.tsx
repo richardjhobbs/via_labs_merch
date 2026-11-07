@@ -7,6 +7,8 @@ import { requireTenant } from '@/lib/tenant';
 import { supabaseServer } from '@/lib/supabase/server';
 import { canLead, esgEnabled, STATE_PILL, taskState } from '@/lib/esg';
 import { assignTask, reviewTask, submitTask } from '../../actions';
+import { EvidenceReader } from './evidence-reader';
+import { hasLlm } from '@/lib/llm';
 
 type Evidence = { name: string; path: string; bytes?: number; sha256?: string };
 
@@ -19,7 +21,7 @@ export default async function Task({ params, searchParams }: { params: Promise<{
     sb.from('tenants').select('settings').eq('id', tenant.id).single(),
     sb.from('esg_tasks').select('*, target:parties!esg_tasks_party_id_fkey(id, name), order:orders(po), esg_requirements(*, parties(name)), esg_programmes(id, name, issuer_name, chain, parties(name))').eq('id', id).eq('tenant_id', tenant.id).maybeSingle(),
     sb.from('esg_submissions').select('*').eq('task_id', id).eq('tenant_id', tenant.id).order('version', { ascending: false }),
-    sb.from('memberships').select('user_id, display_name, role').eq('tenant_id', tenant.id).order('display_name'),
+    sb.from('memberships').select('user_id, display_name, role').eq('tenant_id', tenant.id).neq('role', 'partner').order('display_name'),
   ]);
   if (!esgEnabled(tn?.settings)) redirect(`/app/${slug}/esg`);
   if (!task) notFound();
@@ -52,9 +54,10 @@ export default async function Task({ params, searchParams }: { params: Promise<{
             </dl>
           </div>
 
-          {canSubmit && <form action={submitTask} className="card">
+          {canSubmit && hasLlm() && <EvidenceReader tenant={slug} taskId={id} formId={`submit-${id}`} />}
+          {canSubmit && <form action={submitTask} className="card" id={`submit-${id}`}>
             <h2>{latest ? t('submitNew') : t('submit')}</h2>
-            <input type="hidden" name="tenant" value={slug} /><input type="hidden" name="id" value={id} />
+            <input type="hidden" name="tenant" value={slug} /><input type="hidden" name="id" value={id} /><input type="hidden" name="pending_evidence" defaultValue="" />
             <div className="grid gap-3 mt-3" style={{ gridTemplateColumns: r.measure === 'number' ? '1fr 2fr' : '1fr' }}>
               {r.measure === 'number' && <label className="f"><span>{t('value')}{r.unit ? ` (${r.unit})` : ''}</span><input className="input" name="value_num" inputMode="decimal" required defaultValue={latest?.value_num ?? ''} /></label>}
               {r.measure === 'yes_no' ? <label className="f"><span>{t('answer')}</span><select className="input" name="value_text" defaultValue={latest?.value_text || ''} required><option value="" /><option value="Yes">{t('yes')}</option><option value="No">{t('no')}</option></select></label>

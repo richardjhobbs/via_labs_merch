@@ -8,7 +8,7 @@ export async function Team({ tenantId }: { tenantId: string }) {
   const t = await getTranslations('day');
   const sb = await supabaseServer();
   const [{ data: members }, { data: drafts }, { data: parties }, orders, { data: usage }] = await Promise.all([
-    sb.from('memberships').select('id, role, display_name, initials, title, scopes').eq('tenant_id', tenantId).order('role').order('display_name'),
+    sb.from('memberships').select('id, role, display_name, initials, title, scopes').eq('tenant_id', tenantId).neq('role', 'partner').order('role').order('display_name'),
     sb.from('drafts').select('id, party_id, orders(customer_id)').eq('tenant_id', tenantId).in('status', ['queued', 'escalated']),
     sb.from('parties').select('id, name').eq('tenant_id', tenantId),
     listOrders(tenantId, { status: 'open' }),

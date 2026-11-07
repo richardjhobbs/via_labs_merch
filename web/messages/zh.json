@@ -16,7 +16,8 @@
     "admin": "VIA 管理",
     "signout": "退出登录",
     "threads": "会话",
-    "esg": "ESG 与合规"
+    "esg": "ESG 与合规",
+    "shared": "与您共享"
   },
   "landing": {
     "kicker": "面向采购办、品牌、工厂和贸易公司",
@@ -190,7 +191,8 @@
     "qc": "QC",
     "compliance": "合规",
     "logistics": "物流",
-    "viewer": "只读成员"
+    "viewer": "只读成员",
+    "partner": "合作方"
   },
   "common": {
     "save": "保存",
@@ -260,7 +262,8 @@
     "rowDup": "第 {row} 行，PO {po} 已存在",
     "viewOrders": "查看您的订单",
     "docHint": "此导入需要每行一个订单的表格。其他格式的形式发票、发票或采购订单，请使用",
-    "docLink": "从文件添加。"
+    "docLink": "从文件添加。",
+    "destination": "目的地"
   },
   "parties": {
     "title": "客户与供应商",
@@ -1099,6 +1102,38 @@
     "validFrom": "有效期自",
     "validUntil": "有效期至",
     "expiryHelp": "此证书或许可证的续期，会在被接受之后，按您填写的到期日期安排。",
-    "validRange": "有效期 {from} 至 {to}"
+    "validRange": "有效期 {from} 至 {to}",
+    "orderDestinations": "仅限发往以下地区的订单（国家代码）",
+    "forDestinations": "发往 {list}",
+    "readTitle": "从文件中读取数据",
+    "readHelp": "上传账单、电表记录、检测报告、证书或许可证。智能体会把数据和有效期填入下方供您核对，提交时文件会作为证据一并附上。",
+    "readBtn": "读取文件",
+    "readDone": "已从 {file} 读取。请核对下方字段，然后提交。",
+    "readConcern": "请核对",
+    "unreadableEvidence": "无法从此文件读取任何内容。请手动输入数据并附上文件。"
+  },
+  "partners": {
+    "title": "{company} 共享的合规记录",
+    "sub": "{company} 向 {party} 共享与您相关的合规记录：他们需要您提供什么，以及您为他们设定的项目。",
+    "toProvide": "他们需要您提供的内容",
+    "nothingToProvide": "目前您没有待办事项。",
+    "provided": "已提供或已核查（{n}）",
+    "youSet": "您设定的要求",
+    "noneSet": "您的公司还没有设定项目。",
+    "privacy": "您只能看到这些记录。{company} 工作区中的其他内容对他们保持私密，每次查看和提交都记入他们已签名的台账。",
+    "back": "共享记录",
+    "submitNote": "您提交的内容会交给 {company} 的合规团队核查。早期版本会保留在记录中。",
+    "accessTitle": "合作方访问权限",
+    "accessHelp": "该公司的人员可以登录查看与其相关的合规记录，并自行提供数据、文件和证书。除此之外他们看不到任何内容。",
+    "since": "自 {date} 起",
+    "remove": "移除",
+    "invited": "已邀请",
+    "nobody": "暂无。",
+    "email": "电子邮箱",
+    "name": "姓名",
+    "invite": "邀请",
+    "onlyManagers": "只有所有者或主管可以更改合作方访问权限。",
+    "badEmail": "请输入有效的电子邮箱地址。",
+    "needAddon": "合作方访问权限包含在 ESG 与合规附加服务中。"
   }
 }

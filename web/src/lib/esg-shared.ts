@@ -102,7 +102,9 @@ export function defaultPeriodEnd(freq: Frequency, startsOn: string | null, endsO
 // ------------------------------------------------------------------ who and which orders a requirement covers
 
 export type SupplierFilter = { kinds?: string[]; tiers?: number[]; countries?: string[] };
-export type OrderFilter = { customer_ids?: string[]; factory_countries?: string[]; category?: string };
+export type OrderFilter = { customer_ids?: string[]; factory_countries?: string[]; destinations?: string[]; category?: string };
+// The EU and EEA destinations, for market rules that follow the goods into the EU.
+export const EU_COUNTRIES = ['AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE', 'IS', 'LI', 'NO'];
 
 // No kinds given means tier 1 factories, the usual target of a brand's code of conduct.
 export function matchSupplier(p: { kind: string; tier: number | null; country: string | null }, f: SupplierFilter) {
@@ -113,7 +115,8 @@ export function matchSupplier(p: { kind: string; tier: number | null; country: s
   return true;
 }
 
-export function matchOrder(o: { customer_id: string | null; factory_country: string | null; category: string | null; description: string | null }, f: OrderFilter) {
+export function matchOrder(o: { customer_id: string | null; factory_country: string | null; destination?: string | null; category: string | null; description: string | null }, f: OrderFilter) {
+  if (f.destinations?.length && !f.destinations.includes((o.destination || '').toUpperCase())) return false;
   if (f.customer_ids?.length && !f.customer_ids.includes(o.customer_id || '')) return false;
   if (f.factory_countries?.length && !f.factory_countries.includes((o.factory_country || '').toUpperCase())) return false;
   if (f.category && !`${o.category || ''} ${o.description || ''}`.toLowerCase().includes(f.category.toLowerCase())) return false;

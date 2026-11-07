@@ -91,7 +91,7 @@ export function toolsFor(ctx: AgentCtx) {
       const o = await getOrder(T, po.trim(), sb);
       if (!o) return { error: `No PO ${po} in this company` };
       const h = o.health, ex = exceptionsOf([o])[0];
-      return { ...orderBrief(o), composition: o.composition, category: o.category, sizes: o.sizes, colours: o.colours, incoterm: o.incoterm, route: `${o.pol || '?'} → ${o.pod || '?'}`, in_store: o.instore_date, season: o.season, supply_chain: { factory: o.factory?.name, mill: o.mill?.name, fibre: o.fibre?.name },
+      return { ...orderBrief(o), composition: o.composition, category: o.category, sizes: o.sizes, colours: o.colours, incoterm: o.incoterm, route: `${o.pol || '?'} → ${o.pod || '?'}`, destination_country: o.destination, in_store: o.instore_date, season: o.season, supply_chain: { factory: o.factory?.name, mill: o.mill?.name, fibre: o.fibre?.name },
         critical_path: MILESTONES.map((k) => h.p[k]).filter(Boolean).map((m) => ({ milestone: LABELS[m.key], key: m.key, owner: m.owner, plan: d(m.plan), forecast: d(m.status === 'done' ? m.actual : m.f), reported_expected: d(m.expected), actual: d(m.actual), status: m.status, slip_days: m.status === 'done' ? 0 : m.slip })),
         exception: ex ? { severity: ex.sev, title: ex.title, exposure_usd: ex.exposure, chain: ex.chain.map((c) => c.t), options: ex.opts.map((o) => ({ option: o[0], consequence: o[1] })) } : null };
     }),
@@ -223,7 +223,7 @@ export function toolsFor(ctx: AgentCtx) {
     inputSchema: z.object({}),
     run: wrap('get_team', async () => {
       const [{ data: members }, { data: drafts }, { data: parties }, orders, { data: usage }] = await Promise.all([
-        sb.from('memberships').select('id, role, display_name, title, scopes').eq('tenant_id', T),
+        sb.from('memberships').select('id, role, display_name, title, scopes').eq('tenant_id', T).neq('role', 'partner'),
         sb.from('drafts').select('id, party_id, orders(customer_id)').eq('tenant_id', T).in('status', ['queued', 'escalated']),
         sb.from('parties').select('id, name').eq('tenant_id', T),
         listOrders(T, { status: 'open' }, sb),

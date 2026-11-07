@@ -3,11 +3,11 @@
 // company's own record to rename and edit.
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { getTranslations } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
 import { requireTenant } from '@/lib/tenant';
 import { supabaseServer } from '@/lib/supabase/server';
 import { canLead, esgEnabled } from '@/lib/esg';
-import { TEMPLATES, TEMPLATE_GROUPS } from '@/lib/esg-templates';
+import { TEMPLATES as BASE, TEMPLATE_GROUPS, localizeTemplate } from '@/lib/esg-templates';
 import { addFromTemplate } from '../actions';
 
 const CUSTOMER = ['brand', 'retailer', 'store', 'buying_office', 'trading'];
@@ -15,7 +15,8 @@ const CUSTOMER = ['brand', 'retailer', 'store', 'buying_office', 'trading'];
 export default async function Templates({ params, searchParams }: { params: Promise<{ tenant: string }>; searchParams: Promise<{ error?: string }> }) {
   const { tenant: slug } = await params; const q = await searchParams;
   const { tenant, membership } = await requireTenant(slug);
-  const t = await getTranslations('esg');
+  const [t, locale] = await Promise.all([getTranslations('esg'), getLocale()]);
+  const TEMPLATES = BASE.map((x) => localizeTemplate(x, locale));
   const sb = await supabaseServer();
   const [{ data: tn }, { data: parties }, { data: used }] = await Promise.all([
     sb.from('tenants').select('settings').eq('id', tenant.id).single(),
@@ -47,7 +48,7 @@ export default async function Templates({ params, searchParams }: { params: Prom
                 {x.status && <div className="notice small mt-2"><b>{t('tplStatus')}</b> {x.status}</div>}
                 <ul className="small mt-2 grid gap-1">{x.reqs.map((r) => <li key={r.title} className="flex gap-2 flex-wrap"><span className="pill">{r.trigger === 'per_order' ? t('trig.per_order') : r.trigger === 'expiry' ? t('trig.expiry') : t(`freq.${r.frequency || 'once'}`)}</span>{(r.suppliers || (r.site && tenant.kind !== 'factory')) && <span className="pill agent">{t('eachSupplier')}</span>}<span>{r.title}</span></li>)}</ul>
                 <form action={addFromTemplate} className="mt-3 pt-3 grid gap-2" style={{ borderTop: '1px solid var(--line2)' }}>
-                  <input type="hidden" name="tenant" value={slug} /><input type="hidden" name="template" value={x.id} />
+                  <input type="hidden" name="tenant" value={slug} /><input type="hidden" name="template" value={x.id} /><input type="hidden" name="locale" value={locale} />
                   <label className="f" style={{ margin: 0 }}><span>{t('name')}</span><input className="input sm" name="name" defaultValue={x.name} maxLength={160} /></label>
                   <label className="f" style={{ margin: 0 }}><span>{t('issuer')}</span><select className="input sm" name="issuer_party_id" defaultValue=""><option value="">{t('notOnFile')}</option>{issuers.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select></label>
                   {x.perOrder && !!customers.length && <label className="f" style={{ margin: 0 }}><span>{t('tplCustomers')}</span><select className="input sm" name="customers" multiple size={Math.min(4, customers.length)}>{customers.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select></label>}

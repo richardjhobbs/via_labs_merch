@@ -50,7 +50,7 @@ export async function runEsgPass(tenantId: string, opts: { force?: boolean } = {
   const fresh = toRemind.filter((x) => x.stage > (stageOf.get(x.t.id) || 0));
   let emailed = 0;
   if (fresh.length) {
-    const { data: members } = await sb.from('memberships').select('user_id, role, display_name').eq('tenant_id', tenantId);
+    const { data: members } = await sb.from('memberships').select('user_id, role, display_name').eq('tenant_id', tenantId).neq('role', 'partner');
     const people = new Map<string, { name: string; items: (typeof fresh)[number][] }>();
     for (const x of fresh) {
       const who = x.t.assignee_user_id ? (members || []).filter((m) => m.user_id === x.t.assignee_user_id) : (members || []).filter((m) => m.role === x.t.owner_role);
@@ -69,6 +69,18 @@ export async function runEsgPass(tenantId: string, opts: { force?: boolean } = {
         await sendMail({ to: email, subject, text, html: brandedHtml({ title: subject, paragraphs: [text.split('\n\n')[0], ...lines, 'Open each one to see what is needed and the evidence to attach.'], cta: { label: 'Open ESG & compliance', url: `${APP}/app/${tenant.slug}/esg` } }) });
         emailed++;
       } catch { /* the ledger row below still records the reminder; the day page shows it */ }
+    }
+    // partners: the people at a supplier who supply it themselves, through the shared portal
+    const { data: partners } = await sb.from('memberships').select('user_id, display_name, scopes').eq('tenant_id', tenantId).eq('role', 'partner');
+    for (const pm of partners || []) {
+      const theirs = ((pm.scopes as { parties?: string[] })?.parties) || [];
+      const items = fresh.filter((x) => x.t.supplier_party_id && theirs.includes(x.t.supplier_party_id));
+      if (!items.length) continue;
+      const { data: u } = await sb.auth.admin.getUserById(pm.user_id);
+      if (!u?.user?.email) continue;
+      const lines = items.slice(0, 25).map(({ t }) => `${t.days_left < 0 ? 'OVERDUE' : `${t.trigger === 'expiry' ? 'Expires' : 'Due'} ${t.due}`}: ${t.title}, ${t.po ? `PO ${t.po}` : t.period}`);
+      const subject = `${tenant.name} needs ${items.length} compliance item${items.length === 1 ? '' : 's'} from you`;
+      try { await sendMail({ to: u.user.email, subject, text: `${lines.join('\n')}\n\n${APP}/app/${tenant.slug}/shared`, html: brandedHtml({ title: subject, paragraphs: [...lines, 'Upload the figure, document or certificate on the shared page; it goes straight to their compliance team.'], cta: { label: 'Open the shared records', url: `${APP}/app/${tenant.slug}/shared` } }) }); emailed++; } catch { /* on the ledger below regardless */ }
     }
     for (const x of fresh) {
       await sb.from('esg_tasks').update({ reminded_stage: x.stage, reminded_at: new Date().toISOString() }).eq('id', x.t.id);

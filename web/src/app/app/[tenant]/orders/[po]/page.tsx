@@ -6,7 +6,7 @@ import { getOrder, exceptionsOf } from '@/lib/orders';
 import { LABELS, MILESTONES, isoOf } from '@/lib/core/path';
 import { OrderFile } from '@/components/order-file';
 import { MsCell, HealthPill } from '@/components/milestones';
-import { setMilestone } from '../actions';
+import { setMilestone, setDestination } from '../actions';
 import { ComplianceCard } from '@/components/compliance-card';
 
 export default async function OrderDetail({ params, searchParams }: { params: Promise<{ tenant: string; po: string }>; searchParams: Promise<{ saved?: string; error?: string }> }) {
@@ -44,7 +44,7 @@ export default async function OrderDetail({ params, searchParams }: { params: Pr
           <ComplianceCard slug={slug} tenantId={tenant.id} orderId={o.id} />
           <div className="card small"><h3>{t('order')}</h3><dl className="mt-2 grid gap-1" style={{ gridTemplateColumns: 'auto 1fr', columnGap: 12 }}>
             <dt className="muted">{t('customer')}</dt><dd>{o.customer?.name}</dd><dt className="muted">{t('factory')}</dt><dd>{o.factory?.name}</dd><dt className="muted">Mill</dt><dd>{o.mill?.name || '–'}</dd><dt className="muted">Fibre</dt><dd>{o.fibre?.name || '–'}</dd>
-            <dt className="muted">{t('qty')}</dt><dd>{o.qty?.toLocaleString('en-GB')}</dd><dt className="muted">FOB</dt><dd>{o.currency} {o.fob?.toFixed(2)} · {o.incoterm}</dd><dt className="muted">{t('route')}</dt><dd>{o.pol} → {o.pod}</dd><dt className="muted">{t('instore')}</dt><dd>{o.instore_date}</dd><dt className="muted">{t('composition')}</dt><dd>{o.composition}</dd>
+            <dt className="muted">{t('qty')}</dt><dd>{o.qty?.toLocaleString('en-GB')}</dd><dt className="muted">FOB</dt><dd>{o.currency} {o.fob?.toFixed(2)} · {o.incoterm}</dd><dt className="muted">{t('route')}</dt><dd>{o.pol} → {o.pod}</dd><dt className="muted">{t('destination')}</dt><dd>{canEdit ? <form action={setDestination} className="flex gap-1"><input type="hidden" name="tenant" value={slug} /><input type="hidden" name="order_id" value={o.id} /><input type="hidden" name="po" value={o.po} /><input className="input" name="destination" defaultValue={o.destination || ''} maxLength={2} style={{ width: 52, padding: '2px 6px' }} placeholder="DE" /><button className="btn sm">{t('save')}</button></form> : o.destination}</dd><dt className="muted">{t('instore')}</dt><dd>{o.instore_date}</dd><dt className="muted">{t('composition')}</dt><dd>{o.composition}</dd>
           </dl></div>
           <div className="card small"><h3>{t('sizes')}</h3><div className="mt-2 flex gap-3 flex-wrap">{Object.entries(o.sizes || {}).map(([s, n]) => <span key={s}><b>{s}</b> {n}</span>)}</div><div className="mt-2">{o.colours.map((c) => <span key={c} className="pill mr-1">{c}</span>)}</div></div>
         </div>

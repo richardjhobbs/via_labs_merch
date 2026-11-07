@@ -20,7 +20,7 @@ export default async function Programme({ params, searchParams }: { params: Prom
     sb.from('esg_requirements').select('*').eq('programme_id', id).eq('tenant_id', tenant.id).order('code', { nullsFirst: false }).order('created_at'),
     sb.from('esg_tasks').select('id, requirement_id, period_label, period_end, due_date, status, assignee_user_id, parties(name, short), orders(po)').eq('programme_id', id).eq('tenant_id', tenant.id).order('due_date'),
     sb.from('esg_reports').select('id, period_label, status, created_at, approved_by_name, sent_to, sent_at').eq('programme_id', id).eq('tenant_id', tenant.id).order('created_at', { ascending: false }),
-    sb.from('memberships').select('user_id, display_name, role').eq('tenant_id', tenant.id).order('display_name'),
+    sb.from('memberships').select('user_id, display_name, role').eq('tenant_id', tenant.id).neq('role', 'partner').order('display_name'),
     sb.from('parties').select('id, name, kind').eq('tenant_id', tenant.id).order('name'),
   ]);
   if (!esgEnabled(tn?.settings)) redirect(`/app/${slug}/esg`);
@@ -36,6 +36,7 @@ export default async function Programme({ params, searchParams }: { params: Prom
   const whom = (r: { applies_to: string; supplier_filter: SupplierFilter; order_filter: OrderFilter }) => [
     r.applies_to === 'suppliers' ? t('forSuppliers', { kinds: (r.supplier_filter?.kinds?.length ? r.supplier_filter.kinds : ['factory']).map((k) => tp(`kinds.${k}` as never)).join(', ') }) + (r.supplier_filter?.tiers?.length ? ` · T${r.supplier_filter.tiers.join('/')}` : '') + (r.supplier_filter?.countries?.length ? ` · ${r.supplier_filter.countries.join(', ')}` : '') : null,
     r.order_filter?.customer_ids?.length ? t('forCustomers', { names: r.order_filter.customer_ids.map(partyName).join(', ') }) : null,
+    r.order_filter?.destinations?.length ? t('forDestinations', { list: r.order_filter.destinations.length > 6 ? `${r.order_filter.destinations.slice(0, 5).join(', ')} +${r.order_filter.destinations.length - 5}` : r.order_filter.destinations.join(', ') }) : null,
     r.order_filter?.factory_countries?.length ? r.order_filter.factory_countries.join(', ') : null,
     r.order_filter?.category ? `"${r.order_filter.category}"` : null,
   ].filter(Boolean).join(' · ');
@@ -136,6 +137,7 @@ export default async function Programme({ params, searchParams }: { params: Prom
               </div>
               {!!customers.length && <label className="f"><span>{t('orderCustomers')}</span><select className="input" name="o_customers" multiple size={Math.min(4, customers.length)}>{customers.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}</select></label>}
               <div className="grid gap-2" style={{ gridTemplateColumns: '1fr 1fr' }}>
+                <label className="f"><span>{t('orderDestinations')}</span><input className="input" name="o_destinations" maxLength={200} placeholder="US, GB" /></label>
                 <label className="f"><span>{t('orderCountries')}</span><input className="input" name="o_countries" maxLength={60} placeholder="BD, VN" /></label>
                 <label className="f"><span>{t('orderCategory')}</span><input className="input" name="o_category" maxLength={60} placeholder={t('orderCategoryPh')} /></label>
               </div>

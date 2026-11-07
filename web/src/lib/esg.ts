@@ -73,7 +73,7 @@ export async function generateTasks(tenantId: string, opts: { programmeId?: stri
       // a customer's requirement applies to that customer's orders unless the filter says otherwise
       if (!f.customer_ids?.length && r.esg_programmes.issuer_party_id) f.customer_ids = [r.esg_programmes.issuer_party_id];
       for (const o of orders) {
-        if (!matchOrder({ customer_id: o.customer?.id || null, factory_country: o.factory?.country || null, category: o.category, description: o.description }, f)) continue;
+        if (!matchOrder({ customer_id: o.customer?.id || null, factory_country: o.factory?.country || null, destination: o.destination, category: o.category, description: o.description }, f)) continue;
         const m = o.health.p[r.milestone]; if (!m) continue;
         const anchor = isoOf(m.status === 'done' && m.actual != null ? m.actual : m.f), due = isoOf(m.status === 'done' && m.actual != null ? m.actual + r.milestone_offset : m.f + r.milestone_offset);
         const key = `po|${o.id}`;

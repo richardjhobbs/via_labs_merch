@@ -16,7 +16,8 @@
     "admin": "VIA-Verwaltung",
     "signout": "Abmelden",
     "threads": "Unterhaltungen",
-    "esg": "ESG & Compliance"
+    "esg": "ESG & Compliance",
+    "shared": "Mit Ihnen geteilt"
   },
   "landing": {
     "kicker": "Für Einkaufsbüros, Marken, Fabriken und Handelshäuser",
@@ -190,7 +191,8 @@
     "qc": "QC",
     "compliance": "Compliance",
     "logistics": "Logistik",
-    "viewer": "Leser"
+    "viewer": "Leser",
+    "partner": "Partner"
   },
   "common": {
     "save": "Speichern",
@@ -260,7 +262,8 @@
     "rowDup": "Zeile {row}, Bestellung {po} existiert bereits",
     "viewOrders": "Ihre Aufträge ansehen",
     "docHint": "Dieser Import braucht eine Tabelle mit einem Auftrag pro Zeile. Für eine Proforma-Rechnung, Rechnung oder Bestellung in anderem Format nutzen Sie",
-    "docLink": "Aus einem Dokument hinzufügen."
+    "docLink": "Aus einem Dokument hinzufügen.",
+    "destination": "Zielland"
   },
   "parties": {
     "title": "Kunden & Lieferanten",
@@ -1099,6 +1102,38 @@
     "validFrom": "Gültig ab",
     "validUntil": "Gültig bis",
     "expiryHelp": "Die Erneuerung dieses Zertifikats oder dieser Lizenz wird ab dem eingegebenen Ablaufdatum geplant, sobald es angenommen ist.",
-    "validRange": "gültig von {from} bis {to}"
+    "validRange": "gültig von {from} bis {to}",
+    "orderDestinations": "Nur Bestellungen nach (Ländercodes)",
+    "forDestinations": "nach {list}",
+    "readTitle": "Zahlen aus einer Datei auslesen",
+    "readHelp": "Laden Sie die Rechnung, das Zählerprotokoll, den Prüfbericht, das Zertifikat oder die Lizenz hoch. Der Agent trägt die Zahl und die Gültigkeitsdaten unten zur Prüfung durch Sie ein, und die Datei wird beim Einreichen als Nachweis angehängt.",
+    "readBtn": "Datei auslesen",
+    "readDone": "Aus {file} gelesen. Prüfen Sie die Felder unten und reichen Sie sie dann ein.",
+    "readConcern": "Prüfen",
+    "unreadableEvidence": "Aus dieser Datei konnte nichts gelesen werden. Geben Sie die Zahl von Hand ein und hängen Sie die Datei an."
+  },
+  "partners": {
+    "title": "Compliance-Nachweise, geteilt von {company}",
+    "sub": "{company} teilt mit {party} die Compliance-Nachweise, die Sie betreffen: was von Ihnen benötigt wird und die Programme, die Sie für das Unternehmen festgelegt haben.",
+    "toProvide": "Was von Ihnen benötigt wird",
+    "nothingToProvide": "Im Moment ist von Ihnen nichts fällig.",
+    "provided": "Geliefert oder geprüft ({n})",
+    "youSet": "Von Ihnen festgelegte Anforderungen",
+    "noneSet": "Noch keine Programme Ihres Unternehmens.",
+    "privacy": "Sie sehen nur diese Nachweise. Alles andere im Arbeitsbereich von {company} bleibt dort privat, und jeder Zugriff und jede Einreichung steht im signierten Ledger.",
+    "back": "Geteilte Nachweise",
+    "submitNote": "Was Sie einreichen, geht an das Compliance-Team von {company}, das es prüft. Frühere Versionen bleiben erhalten.",
+    "accessTitle": "Partnerzugang",
+    "accessHelp": "Personen in diesem Unternehmen können sich anmelden, um die Compliance-Nachweise einzusehen, die sie betreffen, und Zahlen, Dokumente und Zertifikate selbst zu liefern. Sie sehen sonst nichts.",
+    "since": "seit {date}",
+    "remove": "Entfernen",
+    "invited": "Eingeladen",
+    "nobody": "Noch niemand.",
+    "email": "E-Mail",
+    "name": "Name",
+    "invite": "Einladen",
+    "onlyManagers": "Nur Inhaber oder Leitung können den Partnerzugang ändern.",
+    "badEmail": "Geben Sie eine gültige E-Mail-Adresse ein.",
+    "needAddon": "Der Partnerzugang gehört zum Zusatzpaket ESG und Compliance."
   }
 }

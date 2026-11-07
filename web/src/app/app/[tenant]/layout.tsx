@@ -12,11 +12,26 @@ import { ViewAs } from '@/components/view-as';
 
 export default async function TenantLayout({ children, params }: { children: React.ReactNode; params: Promise<{ tenant: string }> }) {
   const { tenant: slug } = await params;
-  const { tenant, membership, isAdmin, viewingAs } = await requireTenant(slug);
+  const { tenant, membership, isAdmin, viewingAs } = await requireTenant(slug, { partner: true });
   const t = await getTranslations();
+  // a partner sees the shared compliance portal only: no workspace navigation and no agent
+  if (membership.role === 'partner') return (
+    <div className="min-h-screen grid" style={{ gridTemplateColumns: '220px minmax(0,1fr)' }}>
+      <aside className="rail flex flex-col p-3 gap-1" style={{ borderRight: '1px solid var(--line)', background: '#fff' }}>
+        <div className="flex items-center gap-2 px-2 py-2 mb-2"><Logo merch h={44} /></div>
+        <div className="px-2 pb-2"><b className="small">{tenant.name}</b><div className="muted small">{t('roles.partner')}</div></div>
+        <Rail base={`/app/${slug}`} items={[['shared', t('nav.shared')]]} />
+        <div className="mt-auto px-2 pt-3 small" style={{ borderTop: '1px solid var(--line2)' }}>
+          <div><b>{membership.display_name || 'You'}</b></div>
+          <div className="flex items-center gap-2 mt-2"><LangSwitch compact up /><form action="/auth/signout" method="post"><button className="btn sm">{t('nav.signout')}</button></form></div>
+        </div>
+      </aside>
+      <main className="p-6" style={{ background: 'var(--paper)' }}>{children}</main>
+    </div>
+  );
   const locale = await getLocale();
   const sb = await supabaseServer();
-  const { data: team } = isAdmin ? await sb.from('memberships').select('id, display_name, role').eq('tenant_id', tenant.id).order('role') : { data: null };
+  const { data: team } = isAdmin ? await sb.from('memberships').select('id, display_name, role').eq('tenant_id', tenant.id).neq('role', 'partner').order('role') : { data: null };
   const { data: agent } = await sb.from('agents').select('name').eq('tenant_id', tenant.id).eq('scope_kind', 'tenant').limit(1).maybeSingle();
   const canDecide = ['owner', 'manager'].includes(membership.role);
   const { data: pendingSupport } = canDecide ? await sb.from('support_access').select('id, reason').eq('tenant_id', tenant.id).eq('status', 'requested').limit(1).maybeSingle() : { data: null };

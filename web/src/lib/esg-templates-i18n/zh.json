@@ -1,0 +1,430 @@
+{
+  "bank-esap": {
+    "name": "银行或基金的 ESG 契约条款 (ESAP)",
+    "summary": "银行从其发展融资贷款方转嫁下来的常规环境与社会行动计划 (ESAP) 及 KPI 报告。请根据您的融资协议设定目标。",
+    "reqs": [
+      {
+        "title": "能源使用",
+        "instruction": "根据电表读数和账单,报告本季度的总用电量和燃料用量,以及可再生能源所占比例。",
+        "evidence": "电表读数、水电及燃料账单"
+      },
+      {
+        "title": "用水量和废水水质",
+        "instruction": "报告本季度的取水量,并附上对照排放限值的废水检测结果。",
+        "evidence": "水表记录、具备资质的实验室出具的废水检测报告"
+      },
+      {
+        "title": "温室气体排放 (scope 1 and 2)",
+        "instruction": "根据能源数据计算全年 scope 1 and 2 排放量,并注明所用的计算方法和排放因子。",
+        "evidence": "计算表"
+      },
+      {
+        "title": "事故和工伤误工",
+        "instruction": "报告应记录事故和工伤误工的数量;发生任何死亡或严重事故,须立即报告银行。",
+        "evidence": "事故登记册"
+      },
+      {
+        "title": "工资、工时和申诉",
+        "instruction": "确认已按法定最低工资和加班标准足额发放,并报告平均每周工时以及收到和已关闭的申诉数量。",
+        "evidence": "工资汇总表、考勤记录、申诉台账"
+      },
+      {
+        "title": "年度环境与社会监测报告",
+        "instruction": "按银行要求的格式编制年度 E&S 报告,并由管理层签字。",
+        "evidence": "已签字的年度报告"
+      }
+    ]
+  },
+  "brand-coc": {
+    "name": "品牌行为准则和供应商手册",
+    "summary": "品牌商或零售商的行为准则:签署确认书、有效的社会责任验厂报告、未关闭的整改项、分包商披露,以及将同样的条款传递给您自己的供应商。",
+    "reqs": [
+      {
+        "title": "签署行为准则确认书",
+        "instruction": "签署客户现行的行为准则和供应商手册,并寄回。",
+        "evidence": "已签署的确认书"
+      },
+      {
+        "title": "行为准则传达至供应商",
+        "instruction": "承接该客户订单的每家工厂均须签署行为准则。",
+        "evidence": "工厂签署的确认书"
+      },
+      {
+        "title": "有效的社会责任验厂报告",
+        "instruction": "每个生产场所均须持有在有效期内且被认可的社会责任验厂报告 (BSCI、SMETA、WRAP、SLCP 或客户指定的其他验厂)。",
+        "evidence": "验厂报告及评级"
+      },
+      {
+        "title": "分包商和生产场所披露",
+        "instruction": "披露为该客户生产所用的全部场所和分包商,包括印花、绣花和水洗厂,使用新的场所前须先获得批准。",
+        "evidence": "场所清单"
+      },
+      {
+        "title": "工人申诉机制",
+        "instruction": "提供有效运行的工人申诉渠道,以及案件台账和每个案件的结案情况。",
+        "evidence": "申诉程序和台账"
+      }
+    ]
+  },
+  "brand-rsl": {
+    "name": "品牌受限物质和产品检测",
+    "summary": "客户的受限物质清单和检测手册:每个订单在尾期验货前须提供具备资质的实验室测试报告,以及对面料厂的化学品管理。",
+    "reqs": [
+      {
+        "title": "产品测试报告",
+        "instruction": "在尾期验货前一周,提供该订单的具备资质的实验室报告,涵盖客户的 RSL 和物理性能测试,且结果合格。",
+        "evidence": "具备资质的实验室测试报告"
+      },
+      {
+        "title": "RSL 确认",
+        "instruction": "签署客户现行的受限物质清单。",
+        "evidence": "已签署的 RSL"
+      },
+      {
+        "title": "湿加工环节的化学品清单",
+        "instruction": "每家面料厂和洗水厂须提交其化学品清单,并说明所用每种产品是否符合 MRSL。",
+        "evidence": "化学品清单、ZDHC Gateway 或 InCheck 报告"
+      }
+    ]
+  },
+  "brand-traceability": {
+    "name": "供应链地图和可追溯性",
+    "summary": "每年一次披露 tier 1 至 tier 3,并为每个订单提供纤维和纱线的来源文件。",
+    "reqs": [
+      {
+        "title": "tier 1 至 3 供应商地图",
+        "instruction": "按产品类别披露成衣厂、面料厂以及纱线或纤维供应商,并附地址。",
+        "evidence": "供应商地图"
+      },
+      {
+        "title": "订单来源文件",
+        "instruction": "收集该订单的面料和纱线发票及装箱单,一直追溯到纺纱厂;客户要求时,还须提供纤维来源。",
+        "evidence": "按层级整理的发票和装箱单"
+      }
+    ]
+  },
+  "amfori-bsci": {
+    "name": "amfori BSCI",
+    "summary": "每个场所均持有有效的 BSCI 验厂报告,并按时关闭其中的整改项。上传验厂报告即可逐条添加发现项。",
+    "status": "据报道,amfori BSCI 已于 2026 年 3 月获得 SSCI 认可。验厂报告的有效期取决于评级。",
+    "reqs": [
+      {
+        "title": "BSCI 验厂在有效期内",
+        "instruction": "在当前验厂到期前留足时间预约下一次验厂,并通过自评做好准备。",
+        "evidence": "amfori 平台上的验厂报告"
+      }
+    ]
+  },
+  "smeta": {
+    "name": "SMETA (Sedex)",
+    "summary": "保持 Sedex 自评问卷为最新,并为有要求的客户保持 SMETA 验厂在有效期内。",
+    "reqs": [
+      {
+        "title": "Sedex 自评问卷",
+        "instruction": "在 Sedex 上更新场所自评问卷。",
+        "evidence": "Sedex SAQ"
+      },
+      {
+        "title": "SMETA 验厂在有效期内",
+        "instruction": "保持 SMETA 验厂在客户接受的期限内,并在 Sedex 上关闭其整改项。",
+        "evidence": "SMETA 报告和 CAP"
+      }
+    ]
+  },
+  "wrap": {
+    "name": "WRAP",
+    "summary": "每个场所的 WRAP 证书均在有效期内,并在审核前完成自评。",
+    "status": "据报道,自 2026 年 3 月 1 日起:证书有效期一年,续证需要 90 天的实践期 (复评为 45 天)。仅有单一信息来源。",
+    "reqs": [
+      {
+        "title": "WRAP 证书在有效期内",
+        "instruction": "完成审核前自评,并尽早预约审核,以便在证书到期前完成续证。",
+        "evidence": "WRAP 证书"
+      }
+    ]
+  },
+  "slcp-higg": {
+    "name": "SLCP 和 Higg FEM",
+    "summary": "每年完成 SLCP 社会评估和 Higg FEM 环境模块,经自评和核实后与客户共享。",
+    "status": "Higg FEM 核实协议 1.6 自 2026 年 1 月 1 日起实施。",
+    "reqs": [
+      {
+        "title": "SLCP 核实评估",
+        "instruction": "完成 SLCP 自评及其核实,然后通过 Gateway 与客户共享。",
+        "evidence": "已核实的 SLCP 评估"
+      },
+      {
+        "title": "Higg FEM 自评和核实",
+        "instruction": "完成 Higg FEM,通过核实,并与客户共享已核实的模块。",
+        "evidence": "已核实的 Higg FEM"
+      }
+    ]
+  },
+  "building-safety": {
+    "name": "建筑和消防安全 (RSC, Pakistan Accord)",
+    "summary": "跟踪结构、消防和电气整改直至关闭,安全委员会正常运作,并为检查做好准备。",
+    "status": "Pakistan Accord 已于 2026 年 1 月 1 日续签,自动延期至 2029 年底。",
+    "reqs": [
+      {
+        "title": "整改计划进度",
+        "instruction": "报告每个未关闭的结构、消防和电气发现项的进度,附照片和预计关闭日期。",
+        "evidence": "CAP 状态和照片"
+      },
+      {
+        "title": "安全委员会会议",
+        "instruction": "召开安全委员会会议并保存会议记录。",
+        "evidence": "会议记录"
+      }
+    ]
+  },
+  "better-work": {
+    "name": "ILO Better Work",
+    "summary": "每年的 Better Work 评估及随后的改进计划。",
+    "reqs": [
+      {
+        "title": "Better Work 评估",
+        "instruction": "做好准备并完成年度评估。",
+        "evidence": "评估报告"
+      },
+      {
+        "title": "改进计划进度",
+        "instruction": "更新与 Better Work 商定的改进计划。",
+        "evidence": "进度报告"
+      }
+    ]
+  },
+  "oeko-tex": {
+    "name": "OEKO-TEX STANDARD 100",
+    "summary": "每个产品类别的证书均在有效期内,既包括您自己工厂的证书,也包括其材料用于认证产品的面料厂和辅料供应商的证书。",
+    "status": "2026 年限值 (包括更严格的 PFAS 限值) 自 2026 年 6 月 1 日起适用。",
+    "reqs": [
+      {
+        "title": "OEKO-TEX 证书在有效期内",
+        "instruction": "在每个产品类别的证书到期前办理续证。",
+        "evidence": "OEKO-TEX 证书"
+      },
+      {
+        "title": "供应商的 OEKO-TEX 证书",
+        "instruction": "认证产品所用的每家面料厂和辅料供应商均须持有有效证书。",
+        "evidence": "供应商证书"
+      }
+    ]
+  },
+  "gots": {
+    "name": "GOTS",
+    "summary": "整个供应链的范围证书均在有效期内,且每批认证货物均有交易证书。",
+    "status": "8.0 版自 2027 年 3 月 1 日起强制执行。交易证书按每批货物签发。",
+    "reqs": [
+      {
+        "title": "GOTS 范围证书",
+        "instruction": "保持范围证书在有效期内,并准备好年度检查。",
+        "evidence": "范围证书"
+      },
+      {
+        "title": "供应商范围证书",
+        "instruction": "供应链中的每家面料厂和加工厂均须持有有效的 GOTS 范围证书。",
+        "evidence": "范围证书"
+      },
+      {
+        "title": "GOTS 交易证书",
+        "instruction": "为该批货物申请交易证书,并发给客户。",
+        "evidence": "交易证书"
+      }
+    ]
+  },
+  "textile-exchange": {
+    "name": "GRS, RCS, OCS, RWS (Textile Exchange)",
+    "summary": "再生、有机和羊毛标准:范围证书在有效期内,且每批认证货物均有交易证书。",
+    "reqs": [
+      {
+        "title": "范围证书",
+        "instruction": "您持有的每项标准的范围证书均须保持在有效期内。",
+        "evidence": "范围证书"
+      },
+      {
+        "title": "交易证书",
+        "instruction": "在 Textile Exchange 数据库中为该批货物申请交易证书,并转发给客户。",
+        "evidence": "交易证书"
+      }
+    ]
+  },
+  "better-cotton": {
+    "name": "Better Cotton",
+    "summary": "监管链认证在有效期内,并在 Better Cotton 平台上申报数量。",
+    "status": "已转向经认证的监管链模式。",
+    "reqs": [
+      {
+        "title": "监管链证书",
+        "instruction": "保持监管链认证在有效期内。",
+        "evidence": "证书"
+      },
+      {
+        "title": "数量申报",
+        "instruction": "在平台上申报所采购和销售的 Better Cotton 数量。",
+        "evidence": "平台申报记录"
+      }
+    ]
+  },
+  "zdhc": {
+    "name": "ZDHC 废水和化学品",
+    "summary": "每个湿加工场所 (染色、印花、水洗) 的废水检测和化学品清单,并在 ZDHC Gateway 上共享。",
+    "status": "Gateway 适用 MRSL 3.1;废水和污泥指南第 2 版已于 2025 年 10 月发布。",
+    "reqs": [
+      {
+        "title": "废水检测 (ClearStream)",
+        "instruction": "由认可的实验室对废水和污泥取样,并将报告发布到 Gateway 上。",
+        "evidence": "ClearStream 报告"
+      },
+      {
+        "title": "化学品清单 (InCheck)",
+        "instruction": "上传化学品清单,并取得显示 MRSL 符合情况的 InCheck 报告。",
+        "evidence": "InCheck 报告"
+      }
+    ]
+  },
+  "eu-market": {
+    "name": "销往 EU 市场",
+    "summary": "适用于目的地在 EU 或 EEA 的订单:化学品限制已检测,标签正确,每次更新后核查 SVHC 清单,并备好强迫劳动尽职调查记录。",
+    "status": "SVHC 候选清单共 253 项 (2026 年 2 月)。EU 强迫劳动条例的禁令自 2027 年 12 月 14 日起适用。纺织品数字产品护照尚未强制要求 (预计 2027 年发布授权法案)。",
+    "reqs": [
+      {
+        "title": "REACH 限制物质测试",
+        "instruction": "提供适用的限制物质的认可实验室测试报告 (偶氮染料、镍释放、多环芳烃、皮革中的六价铬等)。",
+        "evidence": "测试报告"
+      },
+      {
+        "title": "纤维成分和洗涤标签核对",
+        "instruction": "在 PP 阶段,对照 Regulation 1007/2011 和客户的标签稿,核对纤维名称和百分比、洗涤标签和原产地标签。",
+        "evidence": "已批准的标签稿、成分检测"
+      },
+      {
+        "title": "SVHC 候选清单核查",
+        "instruction": "对照最新的 SVHC 候选清单核查材料,凡有任何物品含量超过 0.1%,须告知客户。",
+        "evidence": "供应商声明"
+      },
+      {
+        "title": "强迫劳动尽职调查档案",
+        "instruction": "保存供应链地图、供应商声明和验厂证据,以证明货物不是使用强迫劳动生产的。",
+        "evidence": "尽职调查档案"
+      }
+    ]
+  },
+  "us-market": {
+    "name": "销往 US 市场",
+    "summary": "适用于目的地为 US 的订单:棉花和投入品的可追溯性、儿童产品测试、Prop 65 和标签,以及每批货物的证书数据。",
+    "status": "UFLPA 可反驳推定已生效,实体清单仍在扩大 (2026 年 7 月)。据报道,CPSC 证书电子申报 (eFiling) 自 2026 年 7 月 8 日起生效。关税变化频繁:不在涵盖范围内。",
+    "reqs": [
+      {
+        "title": "UFLPA 可追溯性资料包",
+        "instruction": "整理该批货物的棉花和纱线可追溯资料,一直追溯到原材料,并附交易单据。",
+        "evidence": "按层级整理的可追溯文件"
+      },
+      {
+        "title": "儿童产品测试和证书 (CPSIA)",
+        "instruction": "儿童产品须提供 CPSC 认可实验室的测试报告和儿童产品证书 (CPC)。请将订单筛选条件设为儿童类别。",
+        "evidence": "测试报告和 CPC"
+      },
+      {
+        "title": "用于 CPSC eFiling 的证书数据",
+        "instruction": "向进口商提供该批货物的证书数据 (产品、所认证的规则、生产地点和日期、实验室和测试日期)。",
+        "evidence": "证书数据"
+      },
+      {
+        "title": "纤维含量、洗涤和原产地标签 (FTC)",
+        "instruction": "在 PP 阶段核对纤维含量、洗涤、原产地和制造商标识标签。",
+        "evidence": "已批准的标签稿"
+      }
+    ]
+  },
+  "eu-due-diligence": {
+    "name": "客户尽职调查和可持续发展数据请求",
+    "summary": "大型客户依据 EU 和德国供应链法律每年发来的问卷和数据请求:风险、政策、申诉渠道和环境数据。",
+    "status": "CSDDD 已被 Omnibus I 收窄 (2026 年 3 月 18 日生效):适用于员工超过 5,000 人且营业额超过 EUR 1.5bn 的公司,自 2029 年 7 月 26 日起适用。CSRD 适用于员工超过 1,000 人且营业额超过 EUR 450m 的公司;低于该规模的供应商可将数据限于自愿性标准。LkSG 报告义务正被取消。",
+    "reqs": [
+      {
+        "title": "客户可持续发展问卷",
+        "instruction": "根据已有的数据,回答客户的年度尽职调查或可持续发展问卷。",
+        "evidence": "已填写的问卷"
+      },
+      {
+        "title": "人权和环境风险评审",
+        "instruction": "评审自身运营和供应链中的主要人权和环境风险,以及您所采取的应对措施。",
+        "evidence": "风险评审记录"
+      }
+    ]
+  },
+  "uk-msa": {
+    "name": "UK Modern Slavery Act 声明",
+    "summary": "适用于营业额超过 UK 门槛的机构,或向此类机构供货的机构:年度声明及其支撑证据。",
+    "reqs": [
+      {
+        "title": "现代奴役声明",
+        "instruction": "发布由董事签署的年度声明,或向客户提供其编制声明所需的信息。",
+        "evidence": "已签署的声明"
+      }
+    ]
+  },
+  "bd-licences": {
+    "name": "孟加拉国工厂执照和许可证",
+    "summary": "保持孟加拉国成衣厂的各类执照在有效期内:营业执照、工厂执照、消防执照、锅炉证、环境许可,以及其背后的 ETP 记录。",
+    "status": "续期周期因主管部门和类别而异;请根据执照本身设定每项的到期日。",
+    "reqs": [
+      {
+        "title": "营业执照 (Trade licence)",
+        "instruction": "向 City Corporation 或 Union Parishad 办理营业执照续期。",
+        "evidence": "营业执照"
+      },
+      {
+        "title": "工厂执照 (DIFE)",
+        "instruction": "向 DIFE 办理工厂执照续期。",
+        "evidence": "工厂执照"
+      },
+      {
+        "title": "消防执照",
+        "instruction": "向消防与民防局 (Fire Service and Civil Defence) 办理消防执照续期。",
+        "evidence": "消防执照"
+      },
+      {
+        "title": "锅炉证",
+        "instruction": "预约年度锅炉检验并办理证书续期。",
+        "evidence": "锅炉证"
+      },
+      {
+        "title": "环境许可证 (DoE)",
+        "instruction": "向环境部 (Department of Environment) 办理环境许可续期。",
+        "evidence": "环境许可证"
+      },
+      {
+        "title": "ETP 运行记录",
+        "instruction": "保存本月的 ETP 运行日志、化学品用量和流量读数。",
+        "evidence": "ETP 日志"
+      }
+    ]
+  },
+  "site-licences": {
+    "name": "场所执照和许可证 (任何国家)",
+    "summary": "任何生产场所都须持有的执照,适用于越南、中国、印度、巴基斯坦、柬埔寨、土耳其等地。请按当地许可证的名称重命名。",
+    "reqs": [
+      {
+        "title": "营业执照或工厂执照",
+        "instruction": "办理营业执照或工厂经营执照续期。",
+        "evidence": "执照"
+      },
+      {
+        "title": "消防安全批文",
+        "instruction": "保持消防安全批文或检查合格证书在有效期内。",
+        "evidence": "证书"
+      },
+      {
+        "title": "环保或排污许可证",
+        "instruction": "保持环保许可证或污染物排放许可证在有效期内。",
+        "evidence": "许可证"
+      },
+      {
+        "title": "环境监测报告",
+        "instruction": "提交许可证要求的定期监测报告。",
+        "evidence": "监测报告"
+      }
+    ]
+  }
+}

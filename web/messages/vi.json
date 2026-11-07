@@ -16,7 +16,8 @@
     "admin": "Quản trị VIA",
     "signout": "Đăng xuất",
     "threads": "Hội thoại",
-    "esg": "ESG & tuân thủ"
+    "esg": "ESG & tuân thủ",
+    "shared": "Được chia sẻ với bạn"
   },
   "landing": {
     "kicker": "Dành cho văn phòng mua hàng, thương hiệu, nhà máy và công ty thương mại",
@@ -190,7 +191,8 @@
     "qc": "QC",
     "compliance": "Tuân thủ",
     "logistics": "Logistics",
-    "viewer": "Người xem"
+    "viewer": "Người xem",
+    "partner": "Đối tác"
   },
   "common": {
     "save": "Lưu",
@@ -260,7 +262,8 @@
     "rowDup": "dòng {row}, PO {po} đã tồn tại",
     "viewOrders": "Xem đơn hàng của bạn",
     "docHint": "Cách nhập này cần bảng tính mỗi dòng một đơn hàng. Với hóa đơn chiếu lệ, hóa đơn hoặc đơn đặt hàng ở định dạng khác, hãy dùng",
-    "docLink": "Thêm từ tài liệu."
+    "docLink": "Thêm từ tài liệu.",
+    "destination": "Điểm đến"
   },
   "parties": {
     "title": "Khách hàng & nhà cung cấp",
@@ -1099,6 +1102,38 @@
     "validFrom": "Có hiệu lực từ",
     "validUntil": "Có hiệu lực đến",
     "expiryHelp": "Việc gia hạn chứng nhận hoặc giấy phép này được lên lịch từ ngày hết hạn bạn nhập, sau khi được chấp nhận.",
-    "validRange": "có hiệu lực từ {from} đến {to}"
+    "validRange": "có hiệu lực từ {from} đến {to}",
+    "orderDestinations": "Chỉ các đơn hàng đi đến (mã quốc gia)",
+    "forDestinations": "đến {list}",
+    "readTitle": "Đọc số liệu từ tệp",
+    "readHelp": "Tải lên hóa đơn, nhật ký công tơ, báo cáo kiểm nghiệm, chứng chỉ hoặc giấy phép. Agent sẽ điền số liệu và ngày hiệu lực bên dưới để bạn kiểm tra, và tệp được đính kèm làm bằng chứng khi bạn gửi.",
+    "readBtn": "Đọc tệp",
+    "readDone": "Đã đọc từ {file}. Hãy kiểm tra các trường bên dưới, rồi gửi.",
+    "readConcern": "Kiểm tra",
+    "unreadableEvidence": "Không đọc được gì từ tệp này. Hãy nhập số liệu thủ công và đính kèm tệp."
+  },
+  "partners": {
+    "title": "Hồ sơ tuân thủ do {company} chia sẻ",
+    "sub": "{company} chia sẻ với {party} các hồ sơ tuân thủ liên quan đến bạn: họ cần gì từ bạn, và các chương trình bạn đặt ra cho họ.",
+    "toProvide": "Họ cần gì từ bạn",
+    "nothingToProvide": "Hiện không có gì đến hạn từ bạn.",
+    "provided": "Đã cung cấp hoặc đã kiểm tra ({n})",
+    "youSet": "Yêu cầu bạn đặt ra",
+    "noneSet": "Công ty của bạn chưa có chương trình nào.",
+    "privacy": "Bạn chỉ thấy các hồ sơ này. Mọi thứ khác trong không gian làm việc của {company} vẫn riêng tư với họ, và mọi lượt xem và gửi đều nằm trong sổ ghi đã ký của họ.",
+    "back": "Hồ sơ được chia sẻ",
+    "submitNote": "Những gì bạn gửi sẽ đến nhóm tuân thủ của {company}, nơi kiểm tra chúng. Các phiên bản trước vẫn được lưu lại.",
+    "accessTitle": "Quyền truy cập của đối tác",
+    "accessHelp": "Người của công ty này có thể đăng nhập để xem các hồ sơ tuân thủ liên quan đến họ, và tự cung cấp số liệu, tài liệu và chứng chỉ. Họ không thấy gì khác.",
+    "since": "từ {date}",
+    "remove": "Xóa",
+    "invited": "Đã mời",
+    "nobody": "Chưa có ai.",
+    "email": "Email",
+    "name": "Tên",
+    "invite": "Mời",
+    "onlyManagers": "Chỉ chủ doanh nghiệp hoặc quản lý mới có thể đổi quyền truy cập của đối tác.",
+    "badEmail": "Hãy nhập địa chỉ email hợp lệ.",
+    "needAddon": "Quyền truy cập của đối tác đi kèm gói bổ sung ESG và tuân thủ."
   }
 }

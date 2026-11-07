@@ -1,0 +1,430 @@
+{
+  "bank-esap": {
+    "name": "Cam kết ESG với ngân hàng hoặc quỹ (ESAP)",
+    "summary": "Kế hoạch hành động môi trường và xã hội (ESAP) cùng báo cáo KPI thường gặp mà ngân hàng chuyển xuống từ bên cho vay tài chính phát triển. Đặt chỉ tiêu theo hợp đồng tín dụng của bạn.",
+    "reqs": [
+      {
+        "title": "Sử dụng năng lượng",
+        "instruction": "Báo cáo tổng lượng điện và nhiên liệu đã dùng trong quý, dựa trên chỉ số công tơ và hóa đơn, cùng tỷ lệ từ nguồn tái tạo.",
+        "evidence": "Chỉ số công tơ, hóa đơn điện và nhiên liệu"
+      },
+      {
+        "title": "Sử dụng nước và chất lượng nước thải",
+        "instruction": "Báo cáo lượng nước khai thác trong quý và đính kèm kết quả thử nghiệm nước thải so với giới hạn xả thải.",
+        "evidence": "Nhật ký đồng hồ nước, báo cáo thử nghiệm nước thải của phòng thí nghiệm được công nhận"
+      },
+      {
+        "title": "Phát thải khí nhà kính (scope 1 and 2)",
+        "instruction": "Tính phát thải scope 1 and 2 trong năm từ số liệu năng lượng, nêu rõ phương pháp và hệ số phát thải đã dùng.",
+        "evidence": "Bảng tính"
+      },
+      {
+        "title": "Tai nạn và thương tích mất ngày công",
+        "instruction": "Báo cáo số vụ tai nạn phải ghi nhận và thương tích mất ngày công; mọi trường hợp tử vong hoặc sự cố nghiêm trọng phải báo ngay cho ngân hàng.",
+        "evidence": "Sổ đăng ký tai nạn"
+      },
+      {
+        "title": "Tiền lương, giờ làm và khiếu nại",
+        "instruction": "Xác nhận đã trả lương tối thiểu và tiền làm thêm giờ theo luật, báo cáo số giờ làm trung bình mỗi tuần và số khiếu nại đã nhận và đã giải quyết.",
+        "evidence": "Tổng hợp bảng lương, dữ liệu chấm công, sổ khiếu nại"
+      },
+      {
+        "title": "Báo cáo giám sát môi trường và xã hội hằng năm",
+        "instruction": "Lập báo cáo E&S hằng năm theo mẫu ngân hàng yêu cầu và để ban lãnh đạo ký.",
+        "evidence": "Báo cáo năm có chữ ký"
+      }
+    ]
+  },
+  "brand-coc": {
+    "name": "Bộ quy tắc ứng xử của nhãn hàng và sổ tay nhà cung cấp",
+    "summary": "Bộ quy tắc ứng xử của nhãn hàng hoặc nhà bán lẻ: ký xác nhận, đánh giá xã hội còn hiệu lực, hành động khắc phục còn mở, công khai nhà thầu phụ, và áp dụng cùng điều khoản cho các nhà cung cấp của bạn.",
+    "reqs": [
+      {
+        "title": "Ký xác nhận bộ quy tắc ứng xử",
+        "instruction": "Ký bộ quy tắc ứng xử và sổ tay nhà cung cấp hiện hành của khách hàng rồi gửi lại.",
+        "evidence": "Bản xác nhận đã ký"
+      },
+      {
+        "title": "Chuyển bộ quy tắc ứng xử cho nhà cung cấp",
+        "instruction": "Mỗi nhà máy làm đơn hàng của khách hàng này ký bộ quy tắc ứng xử.",
+        "evidence": "Bản xác nhận có chữ ký của nhà máy"
+      },
+      {
+        "title": "Đánh giá xã hội còn hiệu lực",
+        "instruction": "Duy trì một đánh giá xã hội được chấp nhận (BSCI, SMETA, WRAP, SLCP hoặc loại khách hàng chỉ định) còn hiệu lực tại mọi cơ sở sản xuất.",
+        "evidence": "Báo cáo đánh giá và xếp hạng"
+      },
+      {
+        "title": "Công khai nhà thầu phụ và cơ sở sản xuất",
+        "instruction": "Công khai mọi cơ sở và nhà thầu phụ dùng cho khách hàng này, kể cả in, thêu và giặt, và phải được duyệt trước khi dùng cơ sở mới.",
+        "evidence": "Danh sách cơ sở"
+      },
+      {
+        "title": "Cơ chế khiếu nại của người lao động",
+        "instruction": "Chứng minh có kênh khiếu nại hoạt động cho người lao động, kèm sổ ghi các vụ việc và cách giải quyết từng vụ.",
+        "evidence": "Quy trình và sổ khiếu nại"
+      }
+    ]
+  },
+  "brand-rsl": {
+    "name": "Chất cấm hạn chế của nhãn hàng và kiểm nghiệm sản phẩm",
+    "summary": "Danh mục chất bị hạn chế (RSL) và sổ tay kiểm nghiệm của khách hàng: báo cáo thử nghiệm của phòng thí nghiệm được công nhận cho mỗi đơn hàng trước khi kiểm hàng cuối, và quản lý hóa chất tại các nhà máy dệt nhuộm.",
+    "reqs": [
+      {
+        "title": "Báo cáo thử nghiệm sản phẩm",
+        "instruction": "Gửi báo cáo của phòng thí nghiệm được công nhận, đạt yêu cầu, bao gồm RSL của khách hàng và các thử nghiệm vật lý cho đơn hàng, một tuần trước khi kiểm hàng cuối.",
+        "evidence": "Báo cáo thử nghiệm của phòng thí nghiệm được công nhận"
+      },
+      {
+        "title": "Xác nhận RSL",
+        "instruction": "Ký danh mục chất bị hạn chế hiện hành của khách hàng.",
+        "evidence": "RSL đã ký"
+      },
+      {
+        "title": "Danh mục hóa chất tại khâu xử lý ướt",
+        "instruction": "Mỗi nhà máy dệt nhuộm và xưởng giặt gửi danh mục hóa chất kèm xác nhận tuân thủ MRSL cho từng sản phẩm đã dùng.",
+        "evidence": "Danh mục hóa chất, báo cáo ZDHC Gateway hoặc InCheck"
+      }
+    ]
+  },
+  "brand-traceability": {
+    "name": "Lập sơ đồ chuỗi cung ứng và truy xuất nguồn gốc",
+    "summary": "Công khai từ cấp 1 đến cấp 3 mỗi năm một lần, và chứng từ nguồn gốc xơ và sợi cho từng đơn hàng.",
+    "reqs": [
+      {
+        "title": "Sơ đồ nhà cung cấp cấp 1 đến 3",
+        "instruction": "Công khai nhà máy may, nhà máy vải và nhà cung cấp sợi hoặc xơ cho từng nhóm sản phẩm, kèm địa chỉ.",
+        "evidence": "Sơ đồ nhà cung cấp"
+      },
+      {
+        "title": "Chứng từ nguồn gốc đơn hàng",
+        "instruction": "Thu thập hóa đơn và phiếu đóng gói của vải và sợi truy ngược đến nhà máy kéo sợi cho đơn hàng, và nguồn gốc xơ khi khách hàng yêu cầu.",
+        "evidence": "Hóa đơn và phiếu đóng gói theo từng cấp"
+      }
+    ]
+  },
+  "amfori-bsci": {
+    "name": "amfori BSCI",
+    "summary": "Đánh giá BSCI còn hiệu lực tại mỗi cơ sở, và các hành động khắc phục từ đợt đánh giá được đóng đúng hạn. Tải báo cáo đánh giá lên để thêm từng phát hiện.",
+    "status": "amfori BSCI được báo cáo là đã được SSCI công nhận, tháng 3 năm 2026. Thời hạn hiệu lực của đánh giá phụ thuộc vào xếp hạng.",
+    "reqs": [
+      {
+        "title": "Đánh giá BSCI còn hiệu lực",
+        "instruction": "Đặt lịch đánh giá tiếp theo thật sớm trước khi đợt hiện tại hết hạn và chuẩn bị bằng bản tự đánh giá.",
+        "evidence": "Báo cáo đánh giá trên nền tảng amfori"
+      }
+    ]
+  },
+  "smeta": {
+    "name": "SMETA (Sedex)",
+    "summary": "Bản tự đánh giá trên Sedex luôn cập nhật và đánh giá SMETA còn hiệu lực cho những khách hàng yêu cầu.",
+    "reqs": [
+      {
+        "title": "Bảng câu hỏi tự đánh giá Sedex",
+        "instruction": "Cập nhật bản tự đánh giá của cơ sở trên Sedex.",
+        "evidence": "Sedex SAQ"
+      },
+      {
+        "title": "Đánh giá SMETA còn hiệu lực",
+        "instruction": "Duy trì một đánh giá SMETA trong thời hạn khách hàng chấp nhận và đóng các hành động khắc phục của nó trên Sedex.",
+        "evidence": "Báo cáo SMETA và CAP"
+      }
+    ]
+  },
+  "wrap": {
+    "name": "WRAP",
+    "summary": "Chứng nhận WRAP còn hiệu lực tại mỗi cơ sở, với bản tự đánh giá hoàn thành trước đợt đánh giá.",
+    "status": "Được báo cáo áp dụng từ ngày 1 tháng 3 năm 2026: chứng nhận có hiệu lực một năm, gia hạn cần 90 ngày thực hành (45 ngày đối với tái chứng nhận). Chỉ có một nguồn.",
+    "reqs": [
+      {
+        "title": "Chứng nhận WRAP còn hiệu lực",
+        "instruction": "Hoàn thành bản tự đánh giá trước đợt đánh giá và đặt lịch đánh giá đủ sớm để gia hạn trước khi hết hạn.",
+        "evidence": "Chứng nhận WRAP"
+      }
+    ]
+  },
+  "slcp-higg": {
+    "name": "SLCP và Higg FEM",
+    "summary": "Đánh giá xã hội SLCP và mô-đun môi trường Higg FEM hằng năm, tự đánh giá rồi được xác minh, chia sẻ với khách hàng.",
+    "status": "Quy trình xác minh Higg FEM phiên bản 1.6 áp dụng từ ngày 1 tháng 1 năm 2026.",
+    "reqs": [
+      {
+        "title": "Đánh giá SLCP đã xác minh",
+        "instruction": "Hoàn thành bản tự đánh giá SLCP và bước xác minh, rồi chia sẻ với khách hàng trên Gateway.",
+        "evidence": "Đánh giá SLCP đã xác minh"
+      },
+      {
+        "title": "Tự đánh giá và xác minh Higg FEM",
+        "instruction": "Hoàn thành Higg FEM, cho xác minh và chia sẻ mô-đun đã xác minh với khách hàng.",
+        "evidence": "Higg FEM đã xác minh"
+      }
+    ]
+  },
+  "building-safety": {
+    "name": "An toàn công trình và phòng cháy chữa cháy (RSC, Pakistan Accord)",
+    "summary": "Khắc phục các tồn tại về kết cấu, phòng cháy chữa cháy và điện được theo dõi đến khi đóng, ủy ban an toàn hoạt động hiệu quả, và chuẩn bị sẵn cho các đợt kiểm tra.",
+    "status": "Pakistan Accord được gia hạn ngày 1 tháng 1 năm 2026, tự động kéo dài đến hết năm 2029.",
+    "reqs": [
+      {
+        "title": "Tiến độ kế hoạch khắc phục",
+        "instruction": "Báo cáo tiến độ từng phát hiện còn mở về kết cấu, phòng cháy chữa cháy và điện, kèm ảnh và ngày dự kiến đóng.",
+        "evidence": "Trạng thái CAP và ảnh"
+      },
+      {
+        "title": "Họp ủy ban an toàn",
+        "instruction": "Tổ chức họp ủy ban an toàn và lưu biên bản.",
+        "evidence": "Biên bản họp"
+      }
+    ]
+  },
+  "better-work": {
+    "name": "ILO Better Work",
+    "summary": "Đánh giá Better Work hằng năm và kế hoạch cải thiện sau đó.",
+    "reqs": [
+      {
+        "title": "Đánh giá Better Work",
+        "instruction": "Chuẩn bị và hoàn thành đợt đánh giá hằng năm.",
+        "evidence": "Báo cáo đánh giá"
+      },
+      {
+        "title": "Tiến độ kế hoạch cải thiện",
+        "instruction": "Cập nhật kế hoạch cải thiện đã thống nhất với Better Work.",
+        "evidence": "Báo cáo tiến độ"
+      }
+    ]
+  },
+  "oeko-tex": {
+    "name": "OEKO-TEX STANDARD 100",
+    "summary": "Chứng nhận còn hiệu lực cho từng nhóm mặt hàng, từ chính cơ sở của bạn và từ các nhà máy vải và nhà cung cấp phụ liệu có nguyên liệu dùng trong sản phẩm được chứng nhận.",
+    "status": "Các giới hạn năm 2026, gồm giới hạn PFAS chặt hơn, áp dụng từ ngày 1 tháng 6 năm 2026.",
+    "reqs": [
+      {
+        "title": "Chứng nhận OEKO-TEX còn hiệu lực",
+        "instruction": "Gia hạn chứng nhận cho từng nhóm mặt hàng trước khi hết hạn.",
+        "evidence": "Chứng nhận OEKO-TEX"
+      },
+      {
+        "title": "Chứng nhận OEKO-TEX của nhà cung cấp",
+        "instruction": "Giữ chứng nhận còn hiệu lực của từng nhà máy vải và nhà cung cấp phụ liệu dùng trong sản phẩm được chứng nhận.",
+        "evidence": "Chứng nhận của nhà cung cấp"
+      }
+    ]
+  },
+  "gots": {
+    "name": "GOTS",
+    "summary": "Chứng nhận phạm vi còn hiệu lực trong toàn chuỗi, và chứng nhận giao dịch cho mỗi lô hàng được chứng nhận.",
+    "status": "Phiên bản 8.0 bắt buộc từ ngày 1 tháng 3 năm 2027. Chứng nhận giao dịch cấp theo từng lô hàng.",
+    "reqs": [
+      {
+        "title": "Chứng nhận phạm vi GOTS",
+        "instruction": "Giữ chứng nhận phạm vi còn hiệu lực; chuẩn bị cho đợt kiểm tra hằng năm.",
+        "evidence": "Chứng nhận phạm vi"
+      },
+      {
+        "title": "Chứng nhận phạm vi của nhà cung cấp",
+        "instruction": "Giữ chứng nhận phạm vi GOTS còn hiệu lực của từng nhà máy vải và đơn vị gia công trong chuỗi.",
+        "evidence": "Chứng nhận phạm vi"
+      },
+      {
+        "title": "Chứng nhận giao dịch GOTS",
+        "instruction": "Đăng ký chứng nhận giao dịch cho lô hàng và gửi cho khách hàng.",
+        "evidence": "Chứng nhận giao dịch"
+      }
+    ]
+  },
+  "textile-exchange": {
+    "name": "GRS, RCS, OCS, RWS (Textile Exchange)",
+    "summary": "Các tiêu chuẩn tái chế, hữu cơ và len: chứng nhận phạm vi còn hiệu lực và chứng nhận giao dịch cho mỗi lô hàng được chứng nhận.",
+    "reqs": [
+      {
+        "title": "Chứng nhận phạm vi",
+        "instruction": "Giữ chứng nhận phạm vi còn hiệu lực cho từng tiêu chuẩn bạn đang nắm giữ.",
+        "evidence": "Chứng nhận phạm vi"
+      },
+      {
+        "title": "Chứng nhận giao dịch",
+        "instruction": "Yêu cầu chứng nhận giao dịch cho lô hàng trong cơ sở dữ liệu của Textile Exchange và chuyển tiếp.",
+        "evidence": "Chứng nhận giao dịch"
+      }
+    ]
+  },
+  "better-cotton": {
+    "name": "Better Cotton",
+    "summary": "Chứng nhận chuỗi hành trình sản phẩm còn hiệu lực và sản lượng được kê khai trên Better Cotton Platform.",
+    "status": "Đã chuyển sang mô hình chuỗi hành trình sản phẩm có chứng nhận.",
+    "reqs": [
+      {
+        "title": "Chứng nhận chuỗi hành trình sản phẩm",
+        "instruction": "Giữ chứng nhận chuỗi hành trình sản phẩm còn hiệu lực.",
+        "evidence": "Chứng nhận"
+      },
+      {
+        "title": "Kê khai sản lượng",
+        "instruction": "Kê khai sản lượng Better Cotton đã mua và đã bán trên nền tảng.",
+        "evidence": "Bản kê khai trên nền tảng"
+      }
+    ]
+  },
+  "zdhc": {
+    "name": "Nước thải và hóa chất ZDHC",
+    "summary": "Thử nghiệm nước thải và danh mục hóa chất tại mọi cơ sở xử lý ướt (nhuộm, in, giặt), chia sẻ trên ZDHC Gateway.",
+    "status": "MRSL 3.1 được áp dụng trên Gateway; Hướng dẫn về nước thải và bùn thải phiên bản 2 công bố tháng 10 năm 2025.",
+    "reqs": [
+      {
+        "title": "Thử nghiệm nước thải (ClearStream)",
+        "instruction": "Để phòng thí nghiệm được phê duyệt lấy mẫu nước thải và bùn thải, và đăng báo cáo lên Gateway.",
+        "evidence": "Báo cáo ClearStream"
+      },
+      {
+        "title": "Danh mục hóa chất (InCheck)",
+        "instruction": "Tải danh mục hóa chất lên và nhận báo cáo InCheck kèm xác nhận tuân thủ MRSL.",
+        "evidence": "Báo cáo InCheck"
+      }
+    ]
+  },
+  "eu-market": {
+    "name": "Bán hàng vào EU",
+    "summary": "Cho các đơn hàng có điểm đến tại EU hoặc EEA: đã thử nghiệm các chất hạn chế hóa học, nhãn đúng quy định, kiểm tra danh sách SVHC sau mỗi lần cập nhật, và hồ sơ thẩm định lao động cưỡng bức sẵn sàng.",
+    "status": "Danh sách ứng viên SVHC có 253 mục (tháng 2 năm 2026). Lệnh cấm theo Quy định EU về lao động cưỡng bức áp dụng từ ngày 14 tháng 12 năm 2027. Hộ chiếu sản phẩm số cho hàng dệt may chưa bắt buộc (dự kiến ban hành văn bản ủy quyền năm 2027).",
+    "reqs": [
+      {
+        "title": "Thử nghiệm hạn chế theo REACH",
+        "instruction": "Báo cáo thử nghiệm của phòng thí nghiệm được công nhận cho các chất bị hạn chế áp dụng (thuốc nhuộm azo, thôi nhiễm niken, PAH, crom VI trong da và các chất khác).",
+        "evidence": "Báo cáo thử nghiệm"
+      },
+      {
+        "title": "Kiểm tra thành phần xơ sợi và nhãn hướng dẫn bảo quản",
+        "instruction": "Kiểm tra tên và tỷ lệ xơ sợi, nhãn hướng dẫn bảo quản và nhãn xuất xứ theo Quy định 1007/2011 và thiết kế nhãn của khách hàng tại PP.",
+        "evidence": "Thiết kế nhãn đã duyệt, thử nghiệm thành phần"
+      },
+      {
+        "title": "Kiểm tra danh sách ứng viên SVHC",
+        "instruction": "Đối chiếu nguyên liệu với danh sách ứng viên SVHC mới nhất và thông báo cho khách hàng về mọi sản phẩm vượt 0,1%.",
+        "evidence": "Bản kê khai của nhà cung cấp"
+      },
+      {
+        "title": "Hồ sơ thẩm định lao động cưỡng bức",
+        "instruction": "Lưu sơ đồ chuỗi cung ứng, bản kê khai của nhà cung cấp và bằng chứng đánh giá cho thấy hàng hóa không được sản xuất bằng lao động cưỡng bức.",
+        "evidence": "Hồ sơ thẩm định"
+      }
+    ]
+  },
+  "us-market": {
+    "name": "Bán hàng vào Mỹ",
+    "summary": "Cho các đơn hàng có điểm đến là Mỹ: truy xuất nguồn gốc bông và nguyên liệu đầu vào, thử nghiệm sản phẩm trẻ em, Prop 65 và ghi nhãn, và dữ liệu chứng nhận cho từng lô hàng.",
+    "status": "Giả định có thể bác bỏ theo UFLPA đang có hiệu lực, danh sách thực thể ngày càng dài (tháng 7 năm 2026). Việc nộp chứng nhận điện tử CPSC (eFiling) được báo cáo có hiệu lực từ ngày 8 tháng 7 năm 2026. Thuế quan thay đổi thường xuyên: không nằm trong phạm vi.",
+    "reqs": [
+      {
+        "title": "Bộ hồ sơ truy xuất nguồn gốc UFLPA",
+        "instruction": "Tập hợp hồ sơ truy xuất nguồn gốc bông và sợi truy ngược đến nguyên liệu thô, kèm chứng từ giao dịch, cho lô hàng.",
+        "evidence": "Chứng từ truy xuất nguồn gốc theo từng cấp"
+      },
+      {
+        "title": "Thử nghiệm và chứng nhận sản phẩm trẻ em (CPSIA)",
+        "instruction": "Với sản phẩm trẻ em: thử nghiệm tại phòng thí nghiệm được CPSC chấp nhận và Giấy chứng nhận sản phẩm trẻ em (CPC). Đặt bộ lọc đơn hàng theo các nhóm hàng trẻ em.",
+        "evidence": "Báo cáo thử nghiệm và CPC"
+      },
+      {
+        "title": "Dữ liệu chứng nhận cho CPSC eFiling",
+        "instruction": "Gửi cho nhà nhập khẩu dữ liệu chứng nhận của lô hàng (sản phẩm, quy định được chứng nhận, nơi và ngày sản xuất, phòng thí nghiệm và ngày thử nghiệm).",
+        "evidence": "Dữ liệu chứng nhận"
+      },
+      {
+        "title": "Nhãn thành phần xơ sợi, hướng dẫn bảo quản và xuất xứ (FTC)",
+        "instruction": "Kiểm tra nhãn thành phần xơ sợi, hướng dẫn bảo quản, xuất xứ và nhận diện nhà sản xuất tại PP.",
+        "evidence": "Thiết kế nhãn đã duyệt"
+      }
+    ]
+  },
+  "eu-due-diligence": {
+    "name": "Thẩm định của khách hàng và yêu cầu dữ liệu bền vững",
+    "summary": "Các bảng câu hỏi và yêu cầu dữ liệu hằng năm mà khách hàng lớn gửi theo luật chuỗi cung ứng của EU và Đức: rủi ro, chính sách, kênh khiếu nại và số liệu môi trường.",
+    "status": "CSDDD được thu hẹp bởi Omnibus I (có hiệu lực ngày 18 tháng 3 năm 2026): doanh nghiệp trên 5.000 nhân viên và 1,5 tỷ EUR, áp dụng từ ngày 26 tháng 7 năm 2029. CSRD áp dụng cho doanh nghiệp trên 1.000 nhân viên và 450 triệu EUR; nhà cung cấp dưới ngưỡng đó có thể giới hạn dữ liệu theo tiêu chuẩn tự nguyện. Việc báo cáo theo LkSG đang được bãi bỏ.",
+    "reqs": [
+      {
+        "title": "Bảng câu hỏi bền vững của khách hàng",
+        "instruction": "Trả lời bảng câu hỏi thẩm định hoặc bền vững hằng năm của khách hàng từ các số liệu đã có trong hồ sơ.",
+        "evidence": "Bảng câu hỏi đã hoàn thành"
+      },
+      {
+        "title": "Rà soát rủi ro nhân quyền và môi trường",
+        "instruction": "Rà soát các rủi ro chính về nhân quyền và môi trường trong hoạt động và chuỗi cung ứng của bạn, và những gì bạn làm để xử lý.",
+        "evidence": "Bản rà soát rủi ro"
+      }
+    ]
+  },
+  "uk-msa": {
+    "name": "Tuyên bố theo Đạo luật Nô lệ Hiện đại của Anh",
+    "summary": "Cho các tổ chức vượt ngưỡng doanh thu của Anh, hoặc cung cấp cho tổ chức đó: tuyên bố hằng năm và bằng chứng đi kèm.",
+    "reqs": [
+      {
+        "title": "Tuyên bố về nô lệ hiện đại",
+        "instruction": "Công bố tuyên bố hằng năm có chữ ký của một giám đốc, hoặc gửi cho khách hàng thông tin họ cần cho tuyên bố của họ.",
+        "evidence": "Tuyên bố có chữ ký"
+      }
+    ]
+  },
+  "bd-licences": {
+    "name": "Giấy phép nhà máy tại Bangladesh",
+    "summary": "Giữ còn hiệu lực các giấy phép của một nhà máy may tại Bangladesh: giấy phép kinh doanh, giấy phép nhà máy, phòng cháy chữa cháy, nồi hơi, giấy phép môi trường và hồ sơ ETP đi kèm.",
+    "status": "Thời hạn gia hạn khác nhau tùy cơ quan và loại giấy phép; đặt ngày hết hạn theo chính giấy phép.",
+    "reqs": [
+      {
+        "title": "Giấy phép kinh doanh",
+        "instruction": "Gia hạn giấy phép kinh doanh với City Corporation hoặc Union Parishad.",
+        "evidence": "Giấy phép kinh doanh"
+      },
+      {
+        "title": "Giấy phép nhà máy (DIFE)",
+        "instruction": "Gia hạn giấy phép nhà máy với DIFE.",
+        "evidence": "Giấy phép nhà máy"
+      },
+      {
+        "title": "Giấy phép phòng cháy chữa cháy",
+        "instruction": "Gia hạn giấy phép phòng cháy chữa cháy với Cơ quan Cứu hỏa và Phòng vệ Dân sự.",
+        "evidence": "Giấy phép phòng cháy chữa cháy"
+      },
+      {
+        "title": "Giấy chứng nhận nồi hơi",
+        "instruction": "Đặt lịch kiểm định nồi hơi hằng năm và gia hạn giấy chứng nhận.",
+        "evidence": "Giấy chứng nhận nồi hơi"
+      },
+      {
+        "title": "Giấy chứng nhận cho phép về môi trường (DoE)",
+        "instruction": "Gia hạn giấy phép môi trường với Cục Môi trường.",
+        "evidence": "Giấy chứng nhận cho phép về môi trường"
+      },
+      {
+        "title": "Hồ sơ vận hành ETP",
+        "instruction": "Lưu nhật ký vận hành ETP, lượng hóa chất sử dụng và chỉ số lưu lượng trong tháng.",
+        "evidence": "Nhật ký ETP"
+      }
+    ]
+  },
+  "site-licences": {
+    "name": "Giấy phép của cơ sở sản xuất (mọi quốc gia)",
+    "summary": "Các giấy phép mà mọi cơ sở sản xuất phải có, cho Việt Nam, Trung Quốc, Ấn Độ, Pakistan, Campuchia, Thổ Nhĩ Kỳ và các nơi khác. Đổi tên cho khớp với giấy phép tại địa phương của bạn.",
+    "reqs": [
+      {
+        "title": "Giấy phép kinh doanh hoặc giấy phép nhà máy",
+        "instruction": "Gia hạn giấy phép kinh doanh hoặc giấy phép hoạt động của nhà máy.",
+        "evidence": "Giấy phép"
+      },
+      {
+        "title": "Chấp thuận về an toàn phòng cháy chữa cháy",
+        "instruction": "Giữ văn bản chấp thuận hoặc giấy chứng nhận kiểm tra về an toàn phòng cháy chữa cháy còn hiệu lực.",
+        "evidence": "Giấy chứng nhận"
+      },
+      {
+        "title": "Giấy phép môi trường hoặc giấy phép xả thải",
+        "instruction": "Giữ giấy phép môi trường hoặc giấy phép xả chất ô nhiễm còn hiệu lực.",
+        "evidence": "Giấy phép"
+      },
+      {
+        "title": "Báo cáo quan trắc môi trường",
+        "instruction": "Nộp báo cáo quan trắc định kỳ mà giấy phép yêu cầu.",
+        "evidence": "Báo cáo quan trắc"
+      }
+    ]
+  }
+}

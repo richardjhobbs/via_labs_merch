@@ -37,9 +37,15 @@ A customer programme's per-order rules apply to that customer's orders by defaul
 | Factory licences and permits (Bangladesh, and any country) | Local authorities | `licence`; expiry per licence, monthly ETP records | Bangladesh licences; Site licences |
 | Internal policies (HR, anti-bribery, environmental policy reviews) | Ourselves | `internal`; schedule | Add by hand |
 
+## Partners, destination, evidence reading (added 7 November 2026)
+
+- **Partners.** An owner or manager invites people at a customer or supplier from that party's page (role `partner`, scoped to the party; migration 0011). They sign in to a portal that shows only the compliance tasks for their company and the programmes their company set, with approved reports. They supply figures, documents and certificates themselves; the submission is checked by the compliance lead like any other. The database enforces the scope: `merch.my_tenants()` excludes partners, so every member policy shuts them out, and `partner_task_ok()` opens only their records. They also get reminder emails for what their company owes.
+- **Destination.** Orders carry a destination country (import column `Destination`, the buyer's country on a document, editable on the order). Market rules filter by it: the EU template applies to EU and EEA destinations, the US template to US ones.
+- **Reading evidence.** On a task, upload a bill, meter log, test report, certificate or licence; the agent reads the figure and validity dates into the form, flags mismatches, and the file is attached as evidence. The person checks and submits.
+- **Templates in six languages**, added in the reader's language.
+- **Ledger guard.** `ledger_append` accepts only members of the company (or a support grant), with the actor id equal to the caller.
+
 ## Not covered yet
 
-- Destination country on an order: market rules filter by customer, factory country or category today. Add `orders.destination` when import or the PO document gives it.
-- Party-scoped read access for brands and factories to see the compliance records that concern them (merchandiser-records rule 7).
-- Reading figures straight from uploaded evidence (a utility bill, a test report): the agent records values reported in messages today.
 - Tariffs, duties and customs valuation: out of scope.
+- Partners reading evidence with the agent: the portal takes uploads; reading values from them is for the company's own team.
