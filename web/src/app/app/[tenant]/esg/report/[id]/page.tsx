@@ -58,7 +58,7 @@ export default async function Report({ params, searchParams }: { params: Promise
       <div className="card mt-4 tw" style={{ padding: 0 }}>
         <table className="t"><thead><tr><th>{t('code')}</th><th>{t('requirement')}</th><th>{t('period')}</th><th>{t('target')}</th><th>{t('value')}</th><th>{t('status')}</th><th>{t('evidence')}</th></tr></thead><tbody>
           {rows.map((r) => (
-            <tr key={r.task_id}><td className="mono small">{r.code}</td><td className="small"><Link href={`/app/${slug}/esg/task/${r.task_id}`}>{r.title}</Link>{r.note && <div className="muted">{r.note}</div>}</td><td className="small">{r.period}</td>
+            <tr key={r.task_id}><td className="mono small">{r.code}</td><td className="small"><Link href={`/app/${slug}/esg/task/${r.task_id}`}>{r.title}</Link>{(r.party || r.po) && <div className="muted">{[r.party, r.po && `PO ${r.po}`].filter(Boolean).join(' · ')}</div>}{r.valid_until && <div className="muted">{t('validRange', { from: '…', to: r.valid_until })}</div>}{r.note && <div className="muted">{r.note}</div>}</td><td className="small">{r.period}</td>
               <td className="small">{r.target ?? r.target_note ?? ''}{r.target != null && r.unit ? ` ${r.unit}` : ''}{r.baseline != null && <div className="muted">{t('baseline')} {r.baseline}</div>}</td>
               <td className="small"><b>{valueOf(r)}</b>{r.version && r.version > 1 ? <span className="muted"> v{r.version}</span> : null}</td>
               <td><span className={`pill ${r.status === 'accepted' ? 'ok' : r.status === 'submitted' ? 'agent' : r.status === 'waived' ? '' : 'crit'}`}>{t(`tstatus.${r.status}` as never)}</span>{r.reviewed_by && <div className="muted small">{r.reviewed_by}</div>}</td>

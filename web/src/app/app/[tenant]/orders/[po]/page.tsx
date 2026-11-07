@@ -7,6 +7,7 @@ import { LABELS, MILESTONES, isoOf } from '@/lib/core/path';
 import { OrderFile } from '@/components/order-file';
 import { MsCell, HealthPill } from '@/components/milestones';
 import { setMilestone } from '../actions';
+import { ComplianceCard } from '@/components/compliance-card';
 
 export default async function OrderDetail({ params, searchParams }: { params: Promise<{ tenant: string; po: string }>; searchParams: Promise<{ saved?: string; error?: string }> }) {
   const { tenant: slug, po } = await params; const { saved, error } = await searchParams;
@@ -40,6 +41,7 @@ export default async function OrderDetail({ params, searchParams }: { params: Pr
             <div className="mt-3 grid gap-2">{ex.opts.map((op, j) => <div key={j} className="small" style={{ padding: '8px 10px', border: '1px solid var(--line2)', borderRadius: 6 }}><b>{op[0]}</b>{j === 0 && <span className="pill agent ml-2">Mira recommends</span>}<div className="muted">{op[1]}</div></div>)}</div></div>}
         </div>
         <div className="grid gap-4 self-start">
+          <ComplianceCard slug={slug} tenantId={tenant.id} orderId={o.id} />
           <div className="card small"><h3>{t('order')}</h3><dl className="mt-2 grid gap-1" style={{ gridTemplateColumns: 'auto 1fr', columnGap: 12 }}>
             <dt className="muted">{t('customer')}</dt><dd>{o.customer?.name}</dd><dt className="muted">{t('factory')}</dt><dd>{o.factory?.name}</dd><dt className="muted">Mill</dt><dd>{o.mill?.name || '–'}</dd><dt className="muted">Fibre</dt><dd>{o.fibre?.name || '–'}</dd>
             <dt className="muted">{t('qty')}</dt><dd>{o.qty?.toLocaleString('en-GB')}</dd><dt className="muted">FOB</dt><dd>{o.currency} {o.fob?.toFixed(2)} · {o.incoterm}</dd><dt className="muted">{t('route')}</dt><dd>{o.pol} → {o.pod}</dd><dt className="muted">{t('instore')}</dt><dd>{o.instore_date}</dd><dt className="muted">{t('composition')}</dt><dd>{o.composition}</dd>

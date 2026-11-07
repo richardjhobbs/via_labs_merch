@@ -7,6 +7,7 @@ import { updateParty } from '../actions';
 import { PartyFields } from '../party-fields';
 import { BankSection } from './bank-section';
 import { BANK_COLUMNS, type BankRow } from '@/lib/bank';
+import { ComplianceCard } from '@/components/compliance-card';
 
 export default async function EditParty({ params, searchParams }: { params: Promise<{ tenant: string; id: string }>; searchParams: Promise<{ error?: string; saved?: string }> }) {
   const { tenant: slug, id } = await params; const { error, saved } = await searchParams;
@@ -31,6 +32,7 @@ export default async function EditParty({ params, searchParams }: { params: Prom
         <PartyFields defaults={{ name: p.name, kind: p.kind, country: p.country, city: p.city, address: (p.meta as { address?: string })?.address, lang: p.lang, tier: p.tier, channel_pref: p.channel_pref, contact_name: c?.name, contact_email: c?.email, contact_phone: c?.phone }} />
         <div className="flex gap-2 mt-2"><button className="btn primary">{t('save')}</button><Link className="btn" href={`/app/${slug}/parties`}>{t('cancel')}</Link></div>
       </form>
+      <div className="mt-4"><ComplianceCard slug={slug} tenantId={tenant.id} partyId={p.id} /></div>
       <BankSection slug={slug} partyId={p.id} role={membership.id === 'admin' ? 'viewer' : membership.role} accounts={(accounts || []) as unknown as BankRow[]} />
     </div>
   );

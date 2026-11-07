@@ -270,13 +270,13 @@ export function toolsFor(ctx: AgentCtx) {
   const esgOn = async () => esgEnabled((await sb.from('tenants').select('settings').eq('id', T).single()).data?.settings);
   const get_compliance = betaZodTool({
     name: 'get_compliance',
-    description: 'ESG and compliance reporting the company owes its lenders, funds, customers or certifiers: open tasks with requirement, programme, period, due date, owner role and state (overdue, due, upcoming, review, returned). Use for "what ESG reporting is due", "what does the bank need from us this quarter", "is the water figure in".',
+    description: 'Compliance work the company owes its lenders, customers, certifiers, auditors and authorities: ESG reporting, codes of conduct, audits and corrective actions, certificates and licences to renew, test reports and transaction certificates per PO. Open tasks with requirement, programme, period or PO, supplier, due date, owner role and state (overdue, due, upcoming, review, returned). Use for "what compliance is due", "what does the bank need this quarter", "which certificates expire soon", "is the test report in for 48812".',
     inputSchema: z.object({ programme: z.string().optional().describe('programme name text to filter by') }),
     run: wrap('get_compliance', async (a) => {
       if (!(await esgOn())) return { error: 'ESG and compliance is not switched on for this company. VIA Labs can enable the add-on.' };
       let L = await esgSnapshot(T, sb);
       if (a.programme) L = L.filter((x) => x.programme.toLowerCase().includes(a.programme!.toLowerCase()));
-      return L.slice(0, 40).map((x) => ({ task_id: x.id, programme: x.programme, code: x.code, title: x.title, discipline: x.discipline, owner_role: x.owner_role, period: x.period, due: x.due, days_left: x.days_left, status: x.status, state: x.state, measure: x.measure, unit: x.unit, target: x.target, supplier_provides: !!x.supplier_party_id }));
+      return L.slice(0, 40).map((x) => ({ task_id: x.id, programme: x.programme, code: x.code, title: x.title, discipline: x.discipline, owner_role: x.owner_role, period: x.period, due: x.due, days_left: x.days_left, status: x.status, state: x.state, measure: x.measure, unit: x.unit, target: x.target, kind: x.trigger, severity: x.severity, supplier: x.party, po: x.po, supplier_provides: !!x.supplier_party_id }));
     }),
   });
 

@@ -62,7 +62,7 @@ export async function runEsgPass(tenantId: string, opts: { force?: boolean } = {
       const { data: u } = await sb.auth.admin.getUserById(uid);
       const email = u?.user?.email;
       if (!email) continue;
-      const lines = p.items.sort((a, b) => a.t.days_left - b.t.days_left).map(({ t }) => `${t.days_left < 0 ? `OVERDUE ${-t.days_left} day${t.days_left === -1 ? '' : 's'}` : t.days_left === 0 ? 'Due today' : `Due ${t.due} (${t.days_left} day${t.days_left === 1 ? '' : 's'})`}: ${t.code ? `${t.code} ` : ''}${t.title}, ${t.period} · ${t.programme}`);
+      const lines = p.items.sort((a, b) => a.t.days_left - b.t.days_left).slice(0, 25).map(({ t }) => `${t.days_left < 0 ? `OVERDUE ${-t.days_left} day${t.days_left === -1 ? '' : 's'}` : t.days_left === 0 ? 'Due today' : `${t.trigger === 'expiry' ? 'Expires' : 'Due'} ${t.due} (${t.days_left} day${t.days_left === 1 ? '' : 's'})`}: ${t.code ? `${t.code} ` : ''}${t.title}, ${t.po ? `PO ${t.po}` : t.period}${t.party ? ` · ${t.party}` : ''} · ${t.programme}`);
       const subject = `${tenant.name}: ${p.items.length} compliance report${p.items.length === 1 ? '' : 's'} to prepare`;
       const text = `${p.name ? `${p.name.split(' ')[0]}, these` : 'These'} ESG and compliance items are yours.\n\n${lines.join('\n')}\n\nOpen each one to see what is needed and the evidence to attach.`;
       try {
@@ -72,7 +72,7 @@ export async function runEsgPass(tenantId: string, opts: { force?: boolean } = {
     }
     for (const x of fresh) {
       await sb.from('esg_tasks').update({ reminded_stage: x.stage, reminded_at: new Date().toISOString() }).eq('id', x.t.id);
-      await sb.rpc('ledger_append', { p_tenant: tenantId, p_channel: 'Email', p_actor: 'VIA Merch', p_actor_user: null, p_counterparty: x.t.owner_role, p_stream: 'Compliance and CSR', p_order: null, p_what: `Reminder (${x.stage === 1 ? 'lead time' : x.stage === 2 ? 'one week' : x.t.days_left < 0 ? 'overdue' : 'due tomorrow'}): ${x.t.code ? `${x.t.code} ` : ''}${x.t.title}, ${x.t.period}, due ${x.t.due} · ${x.t.programme}`, p_gate: 'Logged', p_gated: false, p_ref: { esg_task: x.t.id } });
+      await sb.rpc('ledger_append', { p_tenant: tenantId, p_channel: 'Email', p_actor: 'VIA Merch', p_actor_user: null, p_counterparty: x.t.owner_role, p_stream: 'Compliance and CSR', p_order: null, p_what: `Reminder (${x.stage === 1 ? 'lead time' : x.stage === 2 ? 'one week' : x.t.days_left < 0 ? 'overdue' : 'due tomorrow'}): ${x.t.code ? `${x.t.code} ` : ''}${x.t.title}, ${x.t.po ? `PO ${x.t.po}` : x.t.period}${x.t.party ? ` (${x.t.party})` : ''}, due ${x.t.due} · ${x.t.programme}`, p_gate: 'Logged', p_gated: false, p_ref: { esg_task: x.t.id } });
     }
   }
 
@@ -86,10 +86,10 @@ export async function runEsgPass(tenantId: string, opts: { force?: boolean } = {
     if (due.length) {
       const { data: parties } = await sb.from('parties').select('id, name').in('id', due.map((t) => t.supplier_party_id!));
       const nameOf = (id: string) => parties?.find((p) => p.id === id)?.name || id;
-      const brief = `Compliance pass. Nobody is waiting on this conversation. Our ESG reporting needs figures or evidence that a supplier holds. For each item, queue exactly one draft with queue_draft: stream "Compliance and CSR", to the supplier named, in their own language with an English rendering in body_en, priority 2 (1 if overdue). Ask for the figure for the period stated, how it was measured, and the evidence named, by a date three working days before our due date. Be courteous and specific. Then stop.
+      const brief = `Compliance pass. Nobody is waiting on this conversation. Our ESG reporting needs figures or evidence that a supplier holds. For each item, queue exactly one draft with queue_draft: stream "Compliance and CSR", to the supplier named, in their own language with an English rendering in body_en, priority 2 (1 if overdue). Ask for the figure, document or certificate for the period, PO or renewal stated, how it was measured where relevant, and the evidence named, by a date three working days before our due date. Be courteous and specific. Then stop.
 
 Items:
-${due.map((t, n) => `${n + 1}. ${nameOf(t.supplier_party_id!)}: ${t.code ? `${t.code} ` : ''}${t.title} for ${t.period}${t.unit ? ` (unit ${t.unit})` : ''}; our report is due ${t.due}${t.days_left < 0 ? ' and is overdue' : ''}. Programme: ${t.programme}.`).join('\n')}`;
+${due.map((t, n) => `${n + 1}. ${nameOf(t.supplier_party_id!)}: ${t.code ? `${t.code} ` : ''}${t.title} for ${t.po ? `PO ${t.po}` : t.trigger === 'expiry' ? 'renewal of the certificate or licence' : t.period}${t.unit ? ` (unit ${t.unit})` : ''}; our report is due ${t.due}${t.days_left < 0 ? ' and is overdue' : ''}. Programme: ${t.programme}.`).join('\n')}`;
       const r = await runAgent({ tenantId, trigger: 'schedule', messages: [{ role: 'user', content: brief }] });
       if (r.drafts.length) {
         await sb.from('esg_tasks').update({ supplier_asked_at: new Date().toISOString() }).in('id', due.map((t) => t.id));

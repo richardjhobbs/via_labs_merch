@@ -29,7 +29,7 @@ export default async function Esg({ params, searchParams }: { params: Promise<{ 
     <Link href={`/app/${slug}/esg/task/${x.id}`} className="block no-underline small" style={{ borderTop: '1px solid var(--line2)', padding: '9px 0', color: 'inherit' }}>
       <div className="flex items-center gap-2 flex-wrap"><span className={`pill ${STATE_PILL[x.state]}`}>{t(`state.${x.state}`)}</span><span className="pill">{t(`disc.${x.discipline}` as never)}</span><span className="muted">{x.period}</span><span className="muted ml-auto">{x.days_left < 0 ? t('daysOver', { n: -x.days_left }) : t('dueIn', { date: x.due, n: x.days_left })}</span></div>
       <div className="mt-1 font-medium">{x.code ? <span className="mono muted">{x.code} </span> : null}{x.title}</div>
-      <div className="muted">{x.programme} · {t('roleOwner', { role: tr(x.owner_role as never) })}</div>
+      <div className="muted">{x.po ? `PO ${x.po} · ` : ''}{x.party && !x.po ? `${x.party} · ` : ''}{x.programme} · {t('roleOwner', { role: tr(x.owner_role as never) })}</div>
     </Link>
   );
   return (
@@ -69,7 +69,8 @@ export default async function Esg({ params, searchParams }: { params: Promise<{ 
           </div>
         </div>
         {lead ? <div className="grid gap-4 self-start">
-          <div className="card"><h2>{t('docTitle')}</h2><p className="muted small mt-1 mb-3">{t('docHelp')}</p><Link className="btn primary" href={`/app/${slug}/esg/document`}>{t('docLink')}</Link></div>
+          <div className="card"><h2>{t('tplTitle')}</h2><p className="muted small mt-1 mb-3">{t('tplHelp')}</p><Link className="btn primary" href={`/app/${slug}/esg/templates`}>{t('tplLink')}</Link></div>
+          <div className="card"><h2>{t('docTitle')}</h2><p className="muted small mt-1 mb-3">{t('docHelp')}</p><Link className="btn" href={`/app/${slug}/esg/document`}>{t('docLink')}</Link></div>
           <form action={addProgramme} className="card">
             <h2 className="mb-3">{t('addProgramme')}</h2><input type="hidden" name="tenant" value={slug} />
             <label className="f"><span>{t('name')}</span><input className="input" name="name" required minLength={3} maxLength={160} placeholder={t('namePh')} /></label>

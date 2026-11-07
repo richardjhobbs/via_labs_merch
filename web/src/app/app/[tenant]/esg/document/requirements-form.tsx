@@ -4,14 +4,15 @@
 import { useActionState, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { readRequirements, saveRequirements, type ReadReqState } from '../actions';
-import { DISCIPLINES, FREQUENCIES, MEASURES, OWNER_ROLES, PROGRAMME_KINDS } from '@/lib/esg-shared';
+import { LABELS } from '@/lib/core/path';
+import { DISCIPLINES, FREQUENCIES, MEASURES, ORDER_MILESTONES, OWNER_ROLES, PROGRAMME_KINDS, SEVERITIES, SUPPLIER_KINDS, TRIGGERS } from '@/lib/esg-shared';
 
 type Party = { id: string; name: string; kind: string };
 type Draft = NonNullable<ReadReqState['draft']>;
 const SUPPLIER = ['factory', 'mill', 'fibre', 'forwarder', 'carrier', 'lab', 'auditor', 'other'];
 
 function Review({ tenant, draft, parties, onReset }: { tenant: string; draft: Draft; parties: Party[]; onReset: () => void }) {
-  const t = useTranslations('esg'), tr = useTranslations('roles');
+  const t = useTranslations('esg'), tr = useTranslations('roles'), tp = useTranslations('parties');
   const [state, action, pending] = useActionState<ReadReqState, FormData>(saveRequirements, {});
   const [keep, setKeep] = useState(() => draft.doc.requirements.map(() => true));
   const p = draft.doc.programme;
@@ -50,13 +51,19 @@ function Review({ tenant, draft, parties, onReset }: { tenant: string; draft: Dr
                 {inp(n('unit'), t('unit'), r.unit, 24)}
                 {inp(n('target'), t('target'), r.target, 24, { inputMode: 'decimal' })}
                 {inp(n('baseline'), t('baseline'), r.baseline, 24, { inputMode: 'decimal' })}
+                <label className="f"><span>{t('trigger')}</span><select className="input" name={n('trigger')} defaultValue={r.trigger}>{TRIGGERS.map((x) => <option key={x} value={x}>{t(`trig.${x}`)}</option>)}</select></label>
+                <label className="f"><span>{t('milestone')}</span><select className="input" name={n('milestone')} defaultValue={r.milestone || ''}><option value="" />{ORDER_MILESTONES.map((m) => <option key={m} value={m}>{LABELS[m]}</option>)}</select></label>
+                {inp(n('milestone_offset'), t('milestoneOffset'), r.milestone_offset ?? 0, 4, { type: 'number', min: -365, max: 365 })}
+                <label className="f"><span>{t('severity')}</span><select className="input" name={n('severity')} defaultValue={r.severity || ''}><option value="" />{SEVERITIES.map((x) => <option key={x} value={x}>{t(`sev.${x}`)}</option>)}</select></label>
+                <label className="f"><span>{t('appliesTo')}</span><select className="input" name={n('applies_to')} defaultValue={r.applies_to}><option value="company">{t('applies.company')}</option><option value="suppliers">{t('applies.suppliers')}</option></select></label>
                 <label className="f"><span>{t('frequency')}</span><select className="input" name={n('frequency')} defaultValue={r.frequency}>{FREQUENCIES.map((f) => <option key={f} value={f}>{t(`freq.${f}`)}</option>)}</select></label>
-                {inp(n('first_period_end'), t('firstPeriodEnd'), r.first_period_end, 10, { type: 'date', required: true })}
+                {inp(n('first_period_end'), t('firstPeriodEnd'), r.first_period_end, 10, { type: 'date' })}
                 {inp(n('due_days'), t('dueDays'), r.due_days ?? 30, 3, { type: 'number', min: 0, max: 180 })}
-                {inp(n('lead_days'), t('leadDays'), 21, 3, { type: 'number', min: 1, max: 120 })}
+                {inp(n('lead_days'), t('leadDays'), r.trigger === 'expiry' ? 90 : 21, 3, { type: 'number', min: 1, max: 365 })}
                 <label className="f"><span>{t('ownerRole')}</span><select className="input" name={n('owner_role')} defaultValue={r.owner_role}>{OWNER_ROLES.map((x) => <option key={x} value={x}>{tr(x)}</option>)}</select></label>
                 <label className="f"><span>{t('supplier')}</span><select className="input" name={n('supplier_party_id')} defaultValue={draft.supplierMatches[i] || ''}><option value="">{r.supplier ? t('supplierNotOnFile', { name: r.supplier }) : t('noSupplier')}</option>{suppliers.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}</select></label>
               </div>
+              {r.applies_to === 'suppliers' && <div className="flex gap-3 flex-wrap small mb-2"><span className="muted">{t('supplierKinds')}:</span>{SUPPLIER_KINDS.map((k) => <label key={k} className="flex items-center gap-1"><input type="checkbox" name={n('s_kinds')} value={k} defaultChecked={(r.supplier_kinds?.length ? r.supplier_kinds : ['factory']).includes(k)} />{tp(`kinds.${k}`)}</label>)}</div>}
               <div className="grid gap-2 md:grid-cols-2">{inp(n('target_note'), t('targetNote'), r.target_note, 240)}{inp(n('evidence'), t('evidence'), r.evidence, 400)}</div>
             </>}
             {!keep[i] && <div className="small mt-1">{r.code ? `${r.code} ` : ''}{r.title}</div>}

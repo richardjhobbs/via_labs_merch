@@ -10,8 +10,10 @@ import { supabaseAdmin, supabaseServer } from '@/lib/supabase/server';
 import { requireTenant } from '@/lib/tenant';
 import { extract, hasLlm, recordUsage } from '@/lib/llm';
 import { documentContent, findParty } from '@/lib/documents';
-import { DISCIPLINES, EVIDENCE_BUCKET, FREQUENCIES, MEASURES, OWNER_ROLES, PROGRAMME_KINDS, READ_REQUIREMENTS_SYSTEM, RequirementsSchema, canApproveReport, canLead, defaultPeriodEnd, esgEnabled, generateTasks, type ReadRequirements } from '@/lib/esg';
+import { APPLIES, DISCIPLINES, EVIDENCE_BUCKET, FREQUENCIES, MEASURES, ORDER_MILESTONES, OWNER_ROLES, PROGRAMME_KINDS, SEVERITIES, TRIGGERS, READ_REQUIREMENTS_SYSTEM, RequirementsSchema, canApproveReport, canLead, defaultPeriodEnd, esgEnabled, generateTasks, type ReadRequirements } from '@/lib/esg';
 import { draftSummary, gatherRows } from '@/lib/esg-report';
+import { templateById } from '@/lib/esg-templates';
+import { isoOf, today } from '@/lib/core/path';
 
 const STREAM = 'Compliance and CSR';
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
@@ -61,17 +63,31 @@ export async function setProgrammeStatus(form: FormData) {
 
 // ------------------------------------------------------------------ requirements
 
-const Requirement = z.object({ code: opt(40), title: z.string().trim().min(3).max(200), instruction: opt(2000), discipline: z.enum(DISCIPLINES), measure: z.enum(MEASURES), unit: opt(24), target: num, target_note: opt(240), baseline: num, frequency: z.enum(FREQUENCIES), first_period_end: isoDate, due_days: z.coerce.number().int().min(0).max(180), lead_days: z.coerce.number().int().min(1).max(120), owner_role: z.enum(OWNER_ROLES), owner_user_id: opt(40), supplier_party_id: opt(40), evidence: opt(400) });
+const Requirement = z.object({ code: opt(40), title: z.string().trim().min(3).max(200), instruction: opt(2000), discipline: z.enum(DISCIPLINES), measure: z.enum(MEASURES), unit: opt(24), target: num, target_note: opt(240), baseline: num, trigger: z.enum(TRIGGERS).default('schedule'), frequency: z.enum(FREQUENCIES), first_period_end: isoDate.optional().or(z.literal('')).transform((v) => v || null), due_days: z.coerce.number().int().min(0).max(180), lead_days: z.coerce.number().int().min(1).max(365), owner_role: z.enum(OWNER_ROLES), owner_user_id: opt(40), supplier_party_id: opt(40), evidence: opt(400), applies_to: z.enum(APPLIES).default('company'), milestone: z.enum(ORDER_MILESTONES).optional().or(z.literal('')).transform((v) => v || null), milestone_offset: z.coerce.number().int().min(-365).max(365).default(0), severity: z.enum(SEVERITIES).optional().or(z.literal('')).transform((v) => v || null) });
+const list = (form: FormData, k: string) => form.getAll(k).map(String).filter(Boolean);
+const codes = (v: FormDataEntryValue | null) => String(v || '').toUpperCase().split(/[\s,;]+/).filter((c) => /^[A-Z]{2}$/.test(c));
+
+// One requirement from a form (prefix namespaces rows in the document review), with its trigger, scope and filters.
+function requirementFrom(form: FormData, prefix = '') {
+  const r = fields(Requirement, form, prefix);
+  if (!r.success) return null;
+  const d = r.data;
+  if (d.trigger === 'per_order' && !d.milestone) return null;
+  if (d.trigger !== 'per_order' && !d.first_period_end) return null;
+  const supplier_filter = d.applies_to === 'suppliers' ? { kinds: list(form, prefix + 's_kinds'), tiers: list(form, prefix + 's_tiers').map(Number).filter((n) => [1, 2, 3].includes(n)), countries: codes(form.get(prefix + 's_countries')) } : {};
+  const order_filter = d.trigger === 'per_order' ? { customer_ids: list(form, prefix + 'o_customers'), factory_countries: codes(form.get(prefix + 'o_countries')), ...(String(form.get(prefix + 'o_category') || '').trim() ? { category: String(form.get(prefix + 'o_category')).trim().slice(0, 60) } : {}) } : {};
+  return { ...d, frequency: d.trigger === 'schedule' ? d.frequency : 'once', supplier_filter, order_filter, supplier_party_id: d.applies_to === 'suppliers' ? null : d.supplier_party_id };
+}
 
 export async function addRequirement(form: FormData) {
   const c = await ctx(form); const t = await getTranslations('esg');
   const pid = String(form.get('programme_id')), path = `/app/${c.slug}/esg/${pid}`;
   if (!canLead(c.membership.role)) back(path, { error: t('onlyLeads') });
-  const r = fields(Requirement, form);
-  if (!r.success) back(path, { error: t('checkForm') });
-  const { data, error } = await c.sb.from('esg_requirements').insert({ tenant_id: c.tenant.id, programme_id: pid, ...r.data! }).select('id').single();
+  const r = requirementFrom(form);
+  if (!r) back(path, { error: t('checkRequirement') });
+  const { data, error } = await c.sb.from('esg_requirements').insert({ tenant_id: c.tenant.id, programme_id: pid, ...r! }).select('id').single();
   if (error || !data) back(path, { error: error?.message || 'failed' });
-  await c.log(`Added requirement ${r.data!.code ? `${r.data!.code} ` : ''}${r.data!.title} (${r.data!.frequency}, ${r.data!.owner_role})`, { esg_requirement: data!.id, esg_programme: pid });
+  await c.log(`Added requirement ${r!.code ? `${r!.code} ` : ''}${r!.title} (${r!.trigger === 'schedule' ? r!.frequency : r!.trigger === 'per_order' ? `each PO at ${r!.milestone}` : 'on expiry'}, ${r!.applies_to === 'suppliers' ? 'each supplier' : r!.owner_role})`, { esg_requirement: data!.id, esg_programme: pid });
   const n = await generateTasks(c.tenant.id, { programmeId: pid, sb: c.sb });
   revalidatePath(path); back(path, { saved: '1', created: String(n) });
 }
@@ -117,7 +133,7 @@ export async function readRequirements(_prev: ReadReqState, form: FormData): Pro
   // fill what the document left open with defaults the person can change in the review
   const ISO = /^\d{4}-\d{2}-\d{2}$/;
   for (const k of ['starts_on', 'ends_on'] as const) if (doc.programme[k] && !ISO.test(doc.programme[k]!)) doc.programme[k] = null;
-  doc.requirements = doc.requirements.map((r) => ({ ...r, first_period_end: r.first_period_end && ISO.test(r.first_period_end) ? r.first_period_end : defaultPeriodEnd(r.frequency, doc!.programme.starts_on, doc!.programme.ends_on), due_days: r.due_days ?? (r.frequency === 'once' ? 0 : 30) }));
+  doc.requirements = doc.requirements.map((r) => ({ ...r, first_period_end: r.first_period_end && ISO.test(r.first_period_end) ? r.first_period_end : r.trigger === 'per_order' ? null : defaultPeriodEnd(r.trigger === 'expiry' ? 'once' : r.frequency, doc!.programme.starts_on, doc!.programme.ends_on), milestone: r.trigger === 'per_order' ? r.milestone || 'final' : null, milestone_offset: r.milestone_offset ?? 0, due_days: r.due_days ?? (r.frequency === 'once' ? 0 : 30) }));
   const { data: parties } = await c.sb.from('parties').select('id, name').eq('tenant_id', c.tenant.id);
   return { draft: { file: file.name.slice(0, 200), doc, issuerMatch: findParty(parties || [], doc.programme.issuer), supplierMatches: doc.requirements.map((r) => findParty(parties || [], r.supplier)) } };
 }
@@ -134,9 +150,9 @@ export async function saveRequirements(_prev: ReadReqState, form: FormData): Pro
   const reqs = [];
   for (let i = 0; i < Math.min(n, 120); i++) {
     if (form.get(`r${i}_use`) !== 'on') continue;
-    const r = fields(Requirement, form, `r${i}_`);
-    if (!r.success) return { error: t('checkRow', { n: i + 1 }) };
-    reqs.push(r.data);
+    const r = requirementFrom(form, `r${i}_`);
+    if (!r) return { error: t('checkRow', { n: i + 1 }) };
+    reqs.push(r);
   }
   if (!reqs.length) return { error: t('noneKept') };
   const { data: prog, error } = await c.sb.from('esg_programmes').insert({ tenant_id: c.tenant.id, ...p.data, source: 'document', source_file: file }).select('id').single();
@@ -154,10 +170,14 @@ export async function submitTask(form: FormData) {
   const c = await ctx(form); const t = await getTranslations('esg');
   const id = String(form.get('id')), path = `/app/${c.slug}/esg/task/${id}`;
   if (c.membership.role === 'viewer') back(path, { error: t('viewer') });
-  const { data: task } = await c.sb.from('esg_tasks').select('id, status, period_label, esg_requirements(code, title, measure, unit)').eq('id', id).eq('tenant_id', c.tenant.id).maybeSingle();
+  const { data: task } = await c.sb.from('esg_tasks').select('id, status, period_label, esg_requirements(code, title, measure, unit, trigger)').eq('id', id).eq('tenant_id', c.tenant.id).maybeSingle();
   if (!task) redirect(`/app/${c.slug}/esg`);
   if (['accepted', 'waived'].includes(task.status)) back(path, { error: t('closed') });
-  const req = task.esg_requirements as unknown as { code: string | null; title: string; measure: string; unit: string | null };
+  const req = task.esg_requirements as unknown as { code: string | null; title: string; measure: string; unit: string | null; trigger: string };
+  const vf = String(form.get('valid_from') || ''), vu = String(form.get('valid_until') || '');
+  const valid_from = isoDate.safeParse(vf).success ? vf : null, valid_until = isoDate.safeParse(vu).success ? vu : null;
+  if (req.trigger === 'expiry' && !valid_until) back(path, { error: t('needExpiry') });
+  if (valid_from && valid_until && valid_from > valid_until) back(path, { error: t('badPeriod') });
   const rawNum = String(form.get('value_num') || '').trim().replace(/,/g, '');
   const value_num = rawNum ? Number(rawNum) : null;
   if (rawNum && isNaN(value_num!)) back(path, { error: t('badNumber') });
@@ -182,11 +202,11 @@ export async function submitTask(form: FormData) {
     evidence.push({ name: f.name.slice(0, 160), path: objectPath, bytes: f.size, sha256 });
   }
   const version = (prev?.version || 0) + 1;
-  const { data: sub, error } = await c.sb.from('esg_submissions').insert({ tenant_id: c.tenant.id, task_id: id, version, value_num, value_text, note, evidence, source: 'manual', submitted_by_name: c.actor }).select('id').single();
+  const { data: sub, error } = await c.sb.from('esg_submissions').insert({ tenant_id: c.tenant.id, task_id: id, version, value_num, value_text, note, evidence, valid_from, valid_until, source: 'manual', submitted_by_name: c.actor }).select('id').single();
   if (error || !sub) back(path, { error: error?.message || 'failed' });
   await c.sb.from('esg_tasks').update({ status: 'submitted', latest_submission_id: sub!.id }).eq('id', id);
   const shown = value_num != null ? `${value_num}${req.unit ? ` ${req.unit}` : ''}` : value_text ? `"${value_text.slice(0, 60)}"` : '';
-  await c.log(`Submitted v${version} for ${req.code ? `${req.code} ` : ''}${req.title}, ${task.period_label}${shown ? `: ${shown}` : ''}${evidence.length ? `, ${evidence.length} evidence file${evidence.length === 1 ? '' : 's'}` : ''}`, { esg_task: id, esg_submission: sub!.id });
+  await c.log(`Submitted v${version} for ${req.code ? `${req.code} ` : ''}${req.title}, ${task.period_label}${shown ? `: ${shown}` : ''}${evidence.length ? `, ${evidence.length} evidence file${evidence.length === 1 ? '' : 's'}` : ''}${valid_until ? `, valid until ${valid_until}` : ''}`, { esg_task: id, esg_submission: sub!.id });
   revalidatePath(path); back(path, { saved: 'submitted' });
 }
 
@@ -204,6 +224,8 @@ export async function reviewTask(form: FormData) {
   await c.sb.from('esg_tasks').update({ status, review_note: note, reviewed_by: c.user.id, reviewed_by_name: c.actor, reviewed_at: new Date().toISOString(), ...(decision === 'return' || decision === 'reopen' ? { reminded_stage: 0 } : {}) }).eq('id', id);
   const r = task.esg_requirements as unknown as { code: string | null; title: string };
   await c.log(`${decision === 'accept' ? 'Accepted' : decision === 'return' ? 'Returned' : decision === 'waive' ? 'Waived' : 'Reopened'} ${r.code ? `${r.code} ` : ''}${r.title}, ${task.period_label}${note ? `: ${note}` : ''}`, { esg_task: id }, decision === 'accept' ? `APPROVED · ${c.actor}` : decision === 'return' ? `REJECTED · ${c.actor}` : 'Logged');
+  // an accepted certificate or licence starts the clock on its renewal
+  if (decision === 'accept') await generateTasks(c.tenant.id, { sb: c.sb });
   revalidatePath(path); back(path, { saved: decision });
 }
 
@@ -286,4 +308,43 @@ export async function markReportSent(form: FormData) {
   if (error || !rep) back(path, { error: error?.message || 'failed' });
   await c.log(`Compliance report ${rep!.period_label} sent to ${sentTo}`, { esg_report: id }, 'Logged', sentTo);
   revalidatePath(path); back(path, { saved: 'sent' });
+}
+
+// ------------------------------------------------------------------ templates
+
+// Start a programme from the library. Site work is done by the company itself when it is a factory, and
+// collected from each tier 1 factory otherwise. First tasks fall due from the start date.
+export async function addFromTemplate(form: FormData) {
+  const c = await ctx(form); const t = await getTranslations('esg');
+  const base = `/app/${c.slug}/esg/templates`;
+  if (!canLead(c.membership.role)) back(base, { error: t('onlyLeads') });
+  const tpl = templateById(String(form.get('template')));
+  if (!tpl) back(base, { error: t('checkForm') });
+  const start = String(form.get('starts_on') || '');
+  const startsOn = isoDate.safeParse(start).success ? start : isoOf(today());
+  const issuer = String(form.get('issuer_party_id') || '') || null;
+  const customers = list(form, 'customers');
+  const isFactory = c.tenant.kind === 'factory';
+  const name = String(form.get('name') || '').trim().slice(0, 160) || tpl!.name;
+  const { data: prog, error } = await c.sb.from('esg_programmes').insert({ tenant_id: c.tenant.id, name, kind: tpl!.kind, framework: tpl!.framework, issuer_party_id: issuer, issuer_name: issuer ? null : String(form.get('issuer_name') || '').trim().slice(0, 160) || null, starts_on: startsOn, source: 'template', template: tpl!.id, notes: tpl!.status ? `Status at template date (7 Nov 2026): ${tpl!.status}` : null }).select('id').single();
+  if (error || !prog) back(base, { error: error?.message || 'failed' });
+  const startPlus = (d: number) => isoOf(Math.max(today(), Math.floor(Date.parse(startsOn) / 864e5)) + d);
+  const rows = tpl!.reqs.map((r) => {
+    const trigger = r.trigger || 'schedule', frequency = r.frequency || 'once';
+    const fanOut = r.suppliers || (r.site && !isFactory ? ['factory'] : null);
+    return {
+      tenant_id: c.tenant.id, programme_id: prog!.id, title: r.title, instruction: r.instruction, discipline: r.discipline, measure: r.measure, unit: r.unit || null, evidence: r.evidence || null,
+      owner_role: fanOut && r.owner_role === 'compliance' && !isFactory ? 'merchandiser' : r.owner_role,
+      trigger, frequency: trigger === 'schedule' ? frequency : 'once', due_days: r.due_days ?? (trigger === 'schedule' ? 30 : 0), lead_days: r.lead_days ?? 21,
+      first_period_end: trigger === 'per_order' ? null : trigger === 'expiry' ? startPlus(30) : defaultPeriodEnd(frequency, startsOn, null),
+      milestone: r.milestone || null, milestone_offset: r.milestone_offset || 0,
+      applies_to: fanOut ? 'suppliers' : 'company', supplier_filter: fanOut ? { kinds: fanOut } : {},
+      order_filter: trigger === 'per_order' && customers.length ? { customer_ids: customers } : {},
+    };
+  });
+  const { error: e2 } = await c.sb.from('esg_requirements').insert(rows);
+  if (e2) back(base, { error: e2.message });
+  await c.log(`Started compliance programme ${name} from the ${tpl!.name} template: ${rows.length} requirements`, { esg_programme: prog!.id, template: tpl!.id });
+  const created = await generateTasks(c.tenant.id, { programmeId: prog!.id, sb: c.sb });
+  redirect(`/app/${c.slug}/esg/${prog!.id}?saved=1&created=${created}`);
 }

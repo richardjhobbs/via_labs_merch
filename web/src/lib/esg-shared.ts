@@ -4,10 +4,16 @@ import { dayOf, isoOf, today } from '@/lib/core/path';
 export const DISCIPLINES = ['energy', 'emissions', 'water', 'chemicals', 'waste', 'health_safety', 'labour', 'community', 'governance', 'traceability', 'other'] as const;
 export const FREQUENCIES = ['once', 'monthly', 'quarterly', 'semiannual', 'annual'] as const;
 export const MEASURES = ['number', 'yes_no', 'evidence', 'text'] as const;
-export const PROGRAMME_KINDS = ['loan', 'customer', 'certification', 'regulation', 'internal'] as const;
+export const PROGRAMME_KINDS = ['loan', 'customer', 'certification', 'audit', 'regulation', 'licence', 'industry', 'internal'] as const;
+export const TRIGGERS = ['schedule', 'per_order', 'expiry'] as const;
+export const APPLIES = ['company', 'suppliers'] as const;
+export const SEVERITIES = ['critical', 'major', 'minor'] as const;
+export const SUPPLIER_KINDS = ['factory', 'mill', 'fibre', 'forwarder', 'carrier', 'lab', 'auditor', 'other'] as const;
+export const ORDER_MILESTONES = ['fabric', 'labdip', 'fit', 'pp', 'cut', 'inline', 'final', 'exf', 'etd', 'eta'] as const;
+export type Trigger = (typeof TRIGGERS)[number];
 export const OWNER_ROLES = ['owner', 'manager', 'merchandiser', 'qc', 'compliance', 'logistics'] as const;
 export type Frequency = (typeof FREQUENCIES)[number];
-export const HORIZON_DAYS = 120;            // tasks exist this far ahead of their due date
+export const HORIZON_DAYS = 120;            // tasks exist this far ahead of their due date (longer for a long renewal lead)
 
 // Who may set up programmes and requirements, and accept what was reported.
 export const canLead = (role: string) => ['owner', 'manager', 'compliance'].includes(role);
@@ -92,3 +98,26 @@ export function defaultPeriodEnd(freq: Frequency, startsOn: string | null, endsO
   const yy = y + Math.floor((endMonth - 1) / 12), mm = ((endMonth - 1) % 12) + 1;
   return `${yy}-${String(mm).padStart(2, '0')}-${String(new Date(Date.UTC(yy, mm, 0)).getUTCDate()).padStart(2, '0')}`;
 }
+
+// ------------------------------------------------------------------ who and which orders a requirement covers
+
+export type SupplierFilter = { kinds?: string[]; tiers?: number[]; countries?: string[] };
+export type OrderFilter = { customer_ids?: string[]; factory_countries?: string[]; category?: string };
+
+// No kinds given means tier 1 factories, the usual target of a brand's code of conduct.
+export function matchSupplier(p: { kind: string; tier: number | null; country: string | null }, f: SupplierFilter) {
+  const kinds = f.kinds?.length ? f.kinds : ['factory'];
+  if (!kinds.includes(p.kind)) return false;
+  if (f.tiers?.length && !f.tiers.includes(p.tier ?? -1)) return false;
+  if (f.countries?.length && !f.countries.includes((p.country || '').toUpperCase())) return false;
+  return true;
+}
+
+export function matchOrder(o: { customer_id: string | null; factory_country: string | null; category: string | null; description: string | null }, f: OrderFilter) {
+  if (f.customer_ids?.length && !f.customer_ids.includes(o.customer_id || '')) return false;
+  if (f.factory_countries?.length && !f.factory_countries.includes((o.factory_country || '').toUpperCase())) return false;
+  if (f.category && !`${o.category || ''} ${o.description || ''}`.toLowerCase().includes(f.category.toLowerCase())) return false;
+  return true;
+}
+
+export const expiryLabel = (iso: string) => `Expiry ${iso}`;
