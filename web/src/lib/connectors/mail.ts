@@ -35,8 +35,12 @@ export async function channelToken(sb: Client, ch: Channel, refresh: (rt: string
 const FREE_MAIL = new Set(['gmail.com', 'googlemail.com', 'yahoo.com', 'yahoo.co.uk', 'hotmail.com', 'outlook.com', 'live.com', 'msn.com', 'icloud.com', 'me.com', 'aol.com', 'proton.me', 'protonmail.com', 'qq.com', '163.com', '126.com', 'sina.com', 'yeah.net', 'foxmail.com', 'aliyun.com', 'naver.com', 'yandex.com', 'gmx.de', 'web.de', 'mail.ru', 'rediffmail.com']);
 
 
-export async function knownSenders(sb: Client, tenantId: string) {
-  const { data } = await sb.from('contacts').select('id, party_id, email').eq('tenant_id', tenantId).not('email', 'is', null);
+// Contact emails and company domains (free-mail domains excluded) for the company, or for one party.
+// Used to filter what comes in and to bound what the agent may search for.
+export async function senderList(sb: Client, tenantId: string, partyId?: string | null) {
+  let q = sb.from('contacts').select('id, party_id, email').eq('tenant_id', tenantId).not('email', 'is', null);
+  if (partyId) q = q.eq('party_id', partyId);
+  const { data } = await q;
   const byEmail = new Map<string, { party_id: string; contact_id: string }>();
   const byDomain = new Map<string, Set<string>>();
   for (const c of data || []) {
@@ -44,13 +48,24 @@ export async function knownSenders(sb: Client, tenantId: string) {
     byEmail.set(e, { party_id: c.party_id, contact_id: c.id });
     const d = e.split('@')[1]; if (!FREE_MAIL.has(d)) { if (!byDomain.has(d)) byDomain.set(d, new Set()); byDomain.get(d)!.add(c.party_id); }
   }
-  return (addr: string): { party_id: string | null; known: boolean } => {
-    const hit = byEmail.get(addr); if (hit) return { party_id: hit.party_id, known: true };
-    const parties = byDomain.get(addr.split('@')[1] || '');
+  const match = (addr: string): { party_id: string | null; known: boolean } => {
+    const a = addr.trim().toLowerCase();
+    const hit = byEmail.get(a); if (hit) return { party_id: hit.party_id, known: true };
+    const parties = byDomain.get(a.split('@')[1] || '');
     if (parties) return { party_id: parties.size === 1 ? [...parties][0] : null, known: true };
     return { party_id: null, known: false };
   };
+  // search terms: domains cover everyone at a company, so only list emails whose domain is free mail
+  const terms = [...byDomain.keys(), ...[...byEmail.keys()].filter((e) => !byDomain.has(e.split('@')[1]))];
+  return { match, terms };
 }
+
+export async function knownSenders(sb: Client, tenantId: string) { return (await senderList(sb, tenantId)).match; }
+
+export const addresses = (v: string) => (v.match(/[^\s<>,;"']+@[^\s<>,;"']+/g) || []).map((a) => a.toLowerCase());
+
+export type FoundMail = { mailbox: string; date: string; from: string; to: string; subject: string; text: string; attachments: string[] };
+export type SearchInput = { terms: string[]; words?: string; after?: string; before?: string; max: number };
 
 // One pass over a mailbox: new messages since the stored history id, filtered, into the inbound pipeline.
 // Keep the new part of a reply: cut at the quoted chain.

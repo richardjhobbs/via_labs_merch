@@ -5,7 +5,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { hasTokenKey } from '@/lib/crypto';
 import { ingestInbound } from '@/lib/agents/inbound';
-import { ReauthError, channelToken, knownSenders, newPart, type Channel, type MailConfig, type Reply } from './mail';
+import { ReauthError, channelToken, knownSenders, newPart, type Channel, type MailConfig, type Reply, type FoundMail, type SearchInput } from './mail';
 
 type Client = SupabaseClient<any, 'merch', any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
@@ -120,4 +120,24 @@ export async function sendReply(sb: Client, ch: Channel, r: Reply, body: string)
   await graph(token, `/messages/${d.id}`, { method: 'PATCH', body: JSON.stringify(patch) });
   await graph(token, `/messages/${d.id}/send`, { method: 'POST', body: '{}' });
   return { id: d.id, threadId: d.conversationId || r.thread_id || '' };
+}
+
+// ------------------------------------------------------------------ search (older mail, on demand)
+
+// Outlook search (KQL) over the member's own mailbox, bounded to the given correspondents. Nothing is stored.
+export async function searchOutlook(sb: Client, ch: Channel, s: SearchInput, allowed: (addr: string) => boolean): Promise<FoundMail[]> {
+  const token = await accessToken(sb, ch);
+  const who = s.terms.slice(0, 30).map((t) => `participants:${t}`).join(' OR ');
+  const clean = (s.words || '').replace(/["():]/g, ' ').trim();
+  const kql = [`(${who})`, clean ? `(${clean})` : '', s.after ? `received>=${s.after}` : '', s.before ? `received<${s.before}` : ''].filter(Boolean).join(' AND ');
+  const r = await graph<{ value: GraphMsg[] }>(token, `/messages?$search=${encodeURIComponent(`"${kql}"`)}&$top=${s.max * 2}&$select=id,receivedDateTime,subject,from,toRecipients,ccRecipients,hasAttachments,body`);
+  const out: FoundMail[] = [];
+  for (const m of r.value || []) {
+    if (out.length >= s.max) break;
+    const people = [m.from, ...(m.toRecipients || []), ...((m as { ccRecipients?: Addr[] }).ccRecipients || [])].map(addr).filter(Boolean);
+    if (!people.some(allowed)) continue;
+    const attachments = m.hasAttachments ? ((await graph<{ value: { name: string }[] }>(token, `/messages/${m.id}/attachments?$select=name`).catch(() => ({ value: [] }))).value || []).map((a) => a.name) : [];
+    out.push({ mailbox: ch.account || '', date: m.receivedDateTime.slice(0, 16).replace('T', ' '), from: addr(m.from), to: (m.toRecipients || []).map(addr).join(', '), subject: m.subject || '', text: newPart(m.body?.content || '').slice(0, 2500), attachments });
+  }
+  return out;
 }

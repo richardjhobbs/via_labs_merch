@@ -10,7 +10,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { open, hasTokenKey } from '@/lib/crypto';
 import { ingestInbound } from '@/lib/agents/inbound';
-import { ReauthError, channelToken, knownSenders, newPart, type Auth, type Channel, type MailConfig, type Reply } from './mail';
+import { ReauthError, channelToken, knownSenders, newPart, addresses, type Auth, type Channel, type MailConfig, type Reply, type FoundMail, type SearchInput } from './mail';
 export type { Channel } from './mail';
 
 export { sealAuth } from './mail';
@@ -25,7 +25,7 @@ export function googleConfigured() { return !!process.env.GOOGLE_CLIENT_ID && !!
 
 export function authUrl(o: { state: string; challenge: string; redirectUri: string; loginHint?: string }) {
   const u = new URL('https://accounts.google.com/o/oauth2/v2/auth');
-  u.search = new URLSearchParams({ client_id: process.env.GOOGLE_CLIENT_ID!, redirect_uri: o.redirectUri, response_type: 'code', scope: GMAIL_SCOPES.join(' '), access_type: 'offline', prompt: 'consent', include_granted_scopes: 'false', state: o.state, code_challenge: o.challenge, code_challenge_method: 'S256', ...(o.loginHint ? { login_hint: o.loginHint } : {}) }).toString();
+  u.search = new URLSearchParams({ client_id: process.env.GOOGLE_CLIENT_ID!, redirect_uri: o.redirectUri, response_type: 'code', scope: GMAIL_SCOPES.join(' '), access_type: 'offline', prompt: 'consent', include_granted_scopes: 'true', state: o.state, code_challenge: o.challenge, code_challenge_method: 'S256', ...(o.loginHint ? { login_hint: o.loginHint } : {}) }).toString();
   return u.toString();
 }
 
@@ -177,3 +177,24 @@ export async function sendReply(sb: Client, ch: Channel, r: Reply, body: string)
   return gmail<{ id: string; threadId: string }>(token, '/messages/send', { method: 'POST', body: JSON.stringify({ raw: b64url(Buffer.from(raw, 'utf8')), ...(r.thread_id ? { threadId: r.thread_id } : {}) }) });
 }
 
+
+// ------------------------------------------------------------------ search (older mail, on demand)
+
+// Gmail search over the member's own mailbox, bounded to the given correspondents. Nothing is stored.
+export async function searchGmail(sb: Client, ch: Channel, s: SearchInput, allowed: (addr: string) => boolean): Promise<FoundMail[]> {
+  const token = await accessToken(sb, ch);
+  const who = s.terms.slice(0, 30).flatMap((t) => [`from:${t}`, `to:${t}`, `cc:${t}`]).join(' ');
+  const clean = (s.words || '').replace(/[{}()"]/g, ' ').trim();
+  const q = [`{${who}}`, clean, s.after ? `after:${s.after.replace(/-/g, '/')}` : '', s.before ? `before:${s.before.replace(/-/g, '/')}` : ''].filter(Boolean).join(' ');
+  const list = await gmail<{ messages?: { id: string }[] }>(token, `/messages?${new URLSearchParams({ q, maxResults: String(s.max * 2) })}`);
+  const out: FoundMail[] = [];
+  for (const { id } of list.messages || []) {
+    if (out.length >= s.max) break;
+    const m = await gmail<GMsg>(token, `/messages/${id}?format=full`);
+    const p = m.payload;
+    const people = [hdr(p, 'From'), hdr(p, 'To'), hdr(p, 'Cc')].flatMap(addresses);
+    if (!people.some(allowed)) continue;
+    out.push({ mailbox: ch.account || '', date: new Date(Number(m.internalDate || 0)).toISOString().slice(0, 16).replace('T', ' '), from: hdr(p, 'From'), to: hdr(p, 'To'), subject: hdr(p, 'Subject'), text: newPart(bodyText(p)).slice(0, 2500), attachments: attachmentsOf(p).map((a) => a.name) });
+  }
+  return out;
+}
