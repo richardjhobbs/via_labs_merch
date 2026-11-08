@@ -61,7 +61,6 @@ export function Assistant({ slug, agentName, lang, live, labels }: { slug: strin
   const base = `/app/${slug}`;
   const screen = path === base ? 'day' : path.startsWith(`${base}/orders/`) ? 'order' : path.startsWith(`${base}/orders`) ? 'orders' : path.startsWith(`${base}/parties`) ? 'parties' : path.startsWith(`${base}/esg`) ? 'esg' : path.startsWith(`${base}/queue`) ? 'queue' : path.startsWith(`${base}/ledger`) ? 'ledger' : 'other';
   const po = screen === 'order' ? decodeURIComponent(path.split('/').pop() || '') : '';
-  const suggestions = [screen === 'order' ? `${labels.s_order} (${po})` : labels[`s_${screen}`] || labels.s_day, labels.s_any1, labels.s_any2].filter(Boolean);
 
   // Typing stays open while the agent works: a message sent meanwhile is shown at once,
   // marked queued, and goes to the agent (joined with any others) when the current reply lands.
@@ -133,9 +132,6 @@ export function Assistant({ slug, agentName, lang, live, labels }: { slug: strin
           </div>
         ))}
         {pending && <div className="msg ai muted">{labels.working}</div>}
-        {!pending && live && (
-          <div className="sug">{suggestions.map((s) => <button key={s} onClick={() => ask(s.replace(/ \(.*\)$/, screen === 'order' ? ` ${po}` : ''))}>{s}</button>)}</div>
-        )}
       </div>
       {micError && <div className="small px-3" style={{ color: 'var(--crit)' }}>{micError}</div>}
       <form onSubmit={(e) => { e.preventDefault(); endDictationForSend(); ask(q); }}>
