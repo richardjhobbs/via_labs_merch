@@ -148,7 +148,9 @@
     "decided": "今日已处理",
     "approvedNote": "渠道连接后，已批准的草稿会自动发出；在此之前，由 VIA Labs 与您一起发送。",
     "source": "回复对象",
-    "openThread": "打开会话"
+    "openThread": "打开会话",
+    "viaEmail": "发送邮件至 {to}，发件邮箱 {from}",
+    "manual": "{channel}：未连接，由人工发送"
   },
   "admin": {
     "title": "VIA 管理",

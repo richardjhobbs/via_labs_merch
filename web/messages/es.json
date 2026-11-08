@@ -148,7 +148,9 @@
     "decided": "Decididos hoy",
     "approvedNote": "Los borradores aprobados se envían cuando el canal está conectado; hasta entonces, VIA Labs los envía con usted.",
     "source": "En respuesta a",
-    "openThread": "Abrir la conversación"
+    "openThread": "Abrir la conversación",
+    "viaEmail": "Correo a {to}, enviado desde {from}",
+    "manual": "{channel}: no conectado, lo envía una persona"
   },
   "admin": {
     "title": "Administración VIA",
