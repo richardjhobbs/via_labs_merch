@@ -13,7 +13,9 @@ export async function POST(req: NextRequest) {
   const body = await req.text();
   // Resend sends svix-* headers or, on newer webhooks, the Standard Webhooks names webhook-*; same signature
   const h = (n: string) => req.headers.get(`svix-${n}`) || req.headers.get(`webhook-${n}`);
-  if (!verifySvix(body, { id: h('id'), ts: h('timestamp'), sig: h('signature') })) return NextResponse.json({ error: 'bad signature' }, { status: 401 });
+  const sigOk = verifySvix(body, { id: h('id'), ts: h('timestamp'), sig: h('signature') });
+  if (!sigOk) console.warn('[resend-inbound] signature refused', JSON.stringify({ svix: !!req.headers.get('svix-id'), std: !!req.headers.get('webhook-id'), age_s: Math.round(Date.now() / 1000 - Number(h('timestamp'))), sigs: (h('signature') || '').split(' ').map((x) => x.split(',')[0]), bytes: body.length, secret_len: (process.env.RESEND_WEBHOOK_SECRET || '').length }));
+  if (!sigOk) return NextResponse.json({ error: 'bad signature' }, { status: 401 });
   let evt: { type?: string; data?: { email_id?: string; to?: string[]; cc?: string[]; from?: string; attachments?: { filename?: string; content_type?: string }[] } };
   try { evt = JSON.parse(body); } catch { return NextResponse.json({ error: 'bad json' }, { status: 400 }); }
   if (evt.type !== 'email.received' || !evt.data?.email_id) return NextResponse.json({ ok: true, ignored: 'type' });
