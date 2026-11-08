@@ -5,7 +5,7 @@ import { getTranslations } from 'next-intl/server';
 import { requireTenant } from '@/lib/tenant';
 import { supabaseServer } from '@/lib/supabase/server';
 import { CONNECTORS, CATEGORIES, STATUS_LABEL, type ConnectorCategory } from '@/lib/connectors/catalog';
-import { BrandIcon } from '@/components/brand-icon';
+import { BrandIcon, BrandCluster, BrandRow } from '@/components/brand-icon';
 import { googleConfigured } from '@/lib/connectors/google';
 import { microsoftConfigured } from '@/lib/connectors/microsoft';
 import { driveConfigured } from '@/lib/connectors/drive';
@@ -14,6 +14,11 @@ import { forwardConfigured } from '@/lib/connectors/forward';
 import { CopyButton } from '@/components/copy-button';
 
 type Ch = { id: string; kind: string; name: string; status: string; account: string | null; owner_user_id: string | null; last_sync_at: string | null; error: string | null; config: { connector?: string; filter?: string; label?: string | null; connected_by?: string } };
+// platform logos shown with each step of the guide
+const GUIDE_ICONS: Record<string, [string, string][] | undefined> = {
+  s1: [['Gmail', '/brands/gmail.svg'], ['Microsoft 365', '/brands/microsoft.svg'], ['Google Drive', '/brands/googledrive.svg'], ['WhatsApp Business', '/brands/whatsapp.svg'], ['WeCom', '/brands/wecom.png'], ['Zalo OA', '/brands/zalo.svg']],
+  s2: [['Zalo', '/brands/zalo.svg'], ['WeChat', '/brands/wechat.svg'], ['WhatsApp', '/brands/whatsapp.svg'], ['Telegram', '/brands/telegram.svg']],
+};
 const GERR = ['notReady', 'support', 'viewer', 'state', 'denied', 'scopes', 'refresh', 'failed', 'label', 'forbidden', 'adminConsent', 'folder'] as const;
 const M365_ERR = ['adminConsent', 'folder'];
 
@@ -56,7 +61,7 @@ export default async function Connections({ params, searchParams }: { params: Pr
         <h2 style={{ fontSize: 16 }}>{t('guide.title')}</h2>
         <ol className="grid gap-3 mt-3 md:grid-cols-2" style={{ listStyle: 'none', padding: 0 }}>
           {(['s1', 's2', 's3', 's4'] as const).map((k, i) => (
-            <li key={k} className="flex gap-3 small"><span className="pill agent" style={{ alignSelf: 'flex-start' }}>{i + 1}</span><div><div className="font-medium">{t(`guide.${k}Title`)}</div><div className="mt-1" style={{ color: 'var(--fg2)' }}>{t(`guide.${k}`)}</div></div></li>
+            <li key={k} className="flex gap-3 small"><span className="pill agent" style={{ alignSelf: 'flex-start' }}>{i + 1}</span><div><div className="font-medium">{t(`guide.${k}Title`)}</div>{GUIDE_ICONS[k] && <div className="mt-1"><BrandRow items={GUIDE_ICONS[k]!} /></div>}<div className="mt-1" style={{ color: 'var(--fg2)' }}>{t(`guide.${k}`)}</div></div></li>
           ))}
         </ol>
         <p className="small mt-3 font-medium">{t('guide.promise')}</p>
@@ -67,7 +72,7 @@ export default async function Connections({ params, searchParams }: { params: Pr
         <div className="grid gap-3 mt-4 md:grid-cols-2">
           {live.map((c) => (
             <div key={c.id} className="flex gap-3 p-3" style={{ border: '1px solid var(--line)', borderRadius: 10 }}>
-              <BrandIcon name={c.name} logo={c.logo} size={36} />
+              {c.logos ? <BrandCluster logos={c.logos} names={c.vendor || c.name} size={36} /> : <BrandIcon name={c.name} logo={c.logo} size={36} />}
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 flex-wrap"><span className="font-medium">{c.name}</span>{c.vendor && <span className="muted small">{c.vendor}</span>}<span className={`pill ${(connected.has(c.id) || (c.id === 'forward' && myForward)) ? 'ok' : c.status === 'via' ? 'agent' : ''} ml-auto`}>{(connected.has(c.id) || (c.id === 'forward' && myForward)) ? t('connected') : STATUS_LABEL[c.status]}</span></div>
                 <div className="small mt-1" style={{ color: 'var(--fg2)' }}>{c.use}</div>

@@ -298,7 +298,7 @@ function Board() {
 
 // Every connector in the catalogue, scrolling under the board on the same dark ground.
 export function ConnectorBanner({ label }: { label: string }) {
-  const items = CONNECTORS.filter((c) => c.id !== 'via-agent');
+  const items = CONNECTORS.filter((c) => c.id !== 'via-agent' && c.id !== 'forward');   // forwarding is a route, not a product
   const row = (hidden: boolean) => (
     <ul className="sb-marquee-row" aria-hidden={hidden || undefined}>
       {items.map((c) => (
