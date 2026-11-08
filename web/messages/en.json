@@ -364,7 +364,8 @@
       "dupPo": "PO {po} already exists.",
       "checkParties": "Check the customer and supplier: each needs a name of at least two characters.",
       "nothing": "Nothing to save. Tick at least one box.",
-      "orDrive": "or"
+      "orDrive": "or",
+      "introProfile": "A factory or supplier profile works too: it becomes a supplier with its contact person."
     },
     "bank": {
       "title": "Bank details",

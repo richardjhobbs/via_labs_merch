@@ -364,7 +364,8 @@
       "dupPo": "La PO {po} ya existe.",
       "checkParties": "Revise el cliente y el proveedor: cada uno necesita un nombre de al menos dos caracteres.",
       "nothing": "No hay nada que guardar. Marque al menos una casilla.",
-      "orDrive": "o"
+      "orDrive": "o",
+      "introProfile": "También sirve el perfil de una fábrica o proveedor: se añade como proveedor con su persona de contacto."
     },
     "bank": {
       "title": "Datos bancarios",

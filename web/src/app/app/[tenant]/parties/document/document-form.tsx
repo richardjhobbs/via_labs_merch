@@ -12,7 +12,7 @@ type Existing = { id: string; name: string };
 
 function Side({ prefix, title, party, kind, match, isUs, existing, children }: { prefix: string; title: string; party: ReadDoc['buyer']; kind: string; match: string | null; isUs: boolean; existing: Existing[]; children?: ReactNode }) {
   const t = useTranslations('parties.doc');
-  const [use, setUse] = useState(!isUs);
+  const [use, setUse] = useState(!isUs && !!party.name);   // a side the document does not show starts unticked
   const [link, setLink] = useState(match || '');
   const defaults: PartyDefaults = { name: party.name, kind, country: party.country, city: party.city, address: party.address, contact_name: party.contact_name, contact_email: party.email, contact_phone: party.phone };
   return (
@@ -58,8 +58,8 @@ function Bank({ bank, confirmed }: { bank: NonNullable<ReadDoc['bank']>; confirm
 function Review({ tenant, draft, existing, canBank, onReset }: { tenant: string; draft: DocDraft; existing: Existing[]; canBank: boolean; onReset: () => void }) {
   const t = useTranslations('parties.doc');
   const [state, action, pending] = useActionState<ReadState, FormData>(saveDocument, {});
-  const [makeOrder, setMakeOrder] = useState(true);
   const { doc } = draft;
+  const [makeOrder, setMakeOrder] = useState(doc.type !== 'company_profile');   // a profile has no order to create
   const money = (n: number | null) => (n == null ? '' : `${doc.currency || ''} ${n.toLocaleString('en', { maximumFractionDigits: 4 })}`.trim());
   const qty = doc.lines.reduce((a, l) => a + (l.qty || 0), 0);
   const single = doc.lines.length === 1 ? doc.lines[0] : null;

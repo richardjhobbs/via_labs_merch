@@ -17,7 +17,7 @@ export default async function AddFromDocument({ params }: { params: Promise<{ te
     <div className="max-w-4xl">
       <Link href={`/app/${slug}/parties`} className="small">← {t('title')}</Link>
       <h1 className="mt-2">{t('doc.title')}</h1>
-      <p className="muted mt-1 mb-4" style={{ maxWidth: '70ch' }}>{t('doc.intro')}</p>
+      <p className="muted mt-1 mb-4" style={{ maxWidth: '70ch' }}>{t('doc.intro')} {t('doc.introProfile')}</p>
       <DocumentForm tenant={slug} existing={existing || []} canBank={membership.id !== 'admin' && canAddBank(membership.role)} />
     </div>
   );

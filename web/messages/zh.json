@@ -364,7 +364,8 @@
       "dupPo": "PO {po} 已存在。",
       "checkParties": "请核对客户和供应商：名称至少需要两个字符。",
       "nothing": "没有可保存的内容。请至少勾选一项。",
-      "orDrive": "或"
+      "orDrive": "或",
+      "introProfile": "工厂或供应商简介也可以：会作为供应商连同联系人一起添加。"
     },
     "bank": {
       "title": "银行信息",

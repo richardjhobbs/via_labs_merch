@@ -364,7 +364,8 @@
       "dupPo": "PO {po} đã tồn tại.",
       "checkParties": "Hãy kiểm tra khách hàng và nhà cung cấp: tên cần có ít nhất hai ký tự.",
       "nothing": "Không có gì để lưu. Hãy đánh dấu ít nhất một ô.",
-      "orDrive": "hoặc"
+      "orDrive": "hoặc",
+      "introProfile": "Hồ sơ nhà máy hoặc nhà cung cấp cũng được: hồ sơ sẽ thành một nhà cung cấp kèm người liên hệ."
     },
     "bank": {
       "title": "Thông tin ngân hàng",

@@ -364,7 +364,8 @@
       "dupPo": "Bestellung {po} existiert bereits.",
       "checkParties": "Prüfen Sie Kunde und Lieferant: Beide brauchen einen Namen mit mindestens zwei Zeichen.",
       "nothing": "Nichts zu speichern. Setzen Sie mindestens ein Häkchen.",
-      "orDrive": "oder"
+      "orDrive": "oder",
+      "introProfile": "Ein Fabrik- oder Lieferantenprofil geht auch: daraus wird ein Lieferant mit seiner Kontaktperson."
     },
     "bank": {
       "title": "Bankdaten",

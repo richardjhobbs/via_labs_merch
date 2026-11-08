@@ -9,7 +9,7 @@ import type { DocumentInput } from './llm';
 const S = z.string();
 const DocPartyRaw = z.object({ name: S, address: S, city: S, country: S, contact_name: S, email: S, phone: S });
 export const DocSchema = z.object({
-  type: z.enum(['proforma_invoice', 'invoice', 'purchase_order', 'other']),
+  type: z.enum(['proforma_invoice', 'invoice', 'purchase_order', 'company_profile', 'other']),
   number: S, date: S, currency: S,
   seller: DocPartyRaw,
   buyer: DocPartyRaw,
