@@ -132,6 +132,8 @@ export async function syncGmail(sb: Client, ch: Channel, deadline: number) {
     const { data: seen } = ids.length ? await sb.from('messages').select('external_id').eq('channel_id', ch.id).in('external_id', ids.map((x) => x.id)) : { data: [] };
     const done = new Set((seen || []).map((s) => s.external_id));
     let lastDone: string | null = null;
+    // counts only, never addresses or subjects: skipped mail leaves no trace beyond a reason code
+    const reasons: Record<string, number> = {};
     for (const { id, hid } of ids) {
       if (Date.now() > deadline - 3000) { complete = false; break; }
       if (done.has(id)) { lastDone = hid; continue; }
@@ -140,7 +142,8 @@ export async function syncGmail(sb: Client, ch: Channel, deadline: number) {
       const labels = meta?.labelIds || [];
       const from = addrOf(hdr(meta?.payload, 'From'));
       const match = byLabel ? { party_id: known(from).party_id, known: true } : known(from);
-      if (!meta || labels.some((l) => ['SENT', 'DRAFT', 'SPAM', 'TRASH'].includes(l)) || from === (ch.account || '').toLowerCase() || !match.known) { out.skipped++; lastDone = hid; continue; }
+      const why = !meta ? 'gone' : labels.some((l) => ['SENT', 'DRAFT', 'SPAM', 'TRASH'].includes(l)) ? 'sent_or_spam' : from === (ch.account || '').toLowerCase() ? 'own_address' : !match.known ? 'unknown_sender' : null;
+      if (why) { out.skipped++; reasons[why] = (reasons[why] || 0) + 1; lastDone = hid; continue; }
 
       const m = await gmail<GMsg>(token, `/messages/${id}?format=full`);
       const p = m.payload;
@@ -155,7 +158,8 @@ export async function syncGmail(sb: Client, ch: Channel, deadline: number) {
       lastDone = hid;
     }
     const next = complete ? latest : lastDone;
-    await sb.from('channels').update({ last_sync_at: new Date().toISOString(), error: null, config: { ...cfg, ...(next ? { history_id: next } : {}) } }).eq('id', ch.id);
+    const last_pass = { at: new Date().toISOString(), mode: byLabel ? 'label' : 'known', new: ids.length, already: ids.filter((x) => done.has(x.id)).length, ingested: out.ingested, skipped: reasons };
+    await sb.from('channels').update({ last_sync_at: new Date().toISOString(), error: null, config: { ...cfg, ...(next ? { history_id: next } : {}), ...(ids.length ? { last_pass } : {}) } }).eq('id', ch.id);
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     if (e instanceof ReauthError) await sb.from('channels').update({ status: 'reauth', error: msg, last_sync_at: new Date().toISOString() }).eq('id', ch.id);
