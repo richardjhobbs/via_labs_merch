@@ -128,7 +128,31 @@
     "reject": "Reject",
     "more": "and {n} more in the queue",
     "decided": "Decided and logged.",
-    "conversation": "Conversation"
+    "conversation": "Conversation",
+    "alerts": {
+      "title": "To check ({n})",
+      "sub": "Dates that are due with nothing heard, and replies that have not gone out. Each clears by itself when the gap closes.",
+      "kind": {
+        "silence": "No news",
+        "unsent": "Not sent",
+        "send_failed": "Send failed"
+      },
+      "escalated": "Manager told",
+      "silence": "{label} is due {date} and nothing has come in from {party} for {n} days.",
+      "silenceNever": "{label} is due {date} and nothing has come in from {party} yet.",
+      "unsent": "An approved reply to {party} has not been marked sent.",
+      "failed": "A reply to {party} could not be sent: {error}",
+      "chase": "Ask VIA to chase {party}",
+      "update": "Update the date",
+      "openQueue": "Open the queue",
+      "dismiss": "Dismiss",
+      "why": {
+        "heard": "Heard on another channel",
+        "onTrack": "Confirmed on track",
+        "notNeeded": "Not needed"
+      },
+      "tip": "If they told you on Zalo, WeChat, WhatsApp or by phone, forward it to your VIA address or update the date; this clears by itself."
+    }
   },
   "queue": {
     "title": "Approval queue",
@@ -549,6 +573,18 @@
       "errors": {
         "notReady": "Forwarding is not switched on yet. VIA Labs is completing the mail setup."
       }
+    },
+    "guide": {
+      "title": "How VIA makes sure nothing is missed",
+      "s1Title": "Connect what can be connected",
+      "s1": "Gmail or Outlook and Google Drive now; a WhatsApp Business number, WeCom or a Zalo Official Account on request. These come in and go out automatically.",
+      "s2Title": "Forward what lives on personal phones",
+      "s2": "Messages in personal Zalo, WeChat or WhatsApp: share them to your forwarding address. Two taps, and VIA files them against the right PO.",
+      "s3Title": "Silence becomes an alert",
+      "s3": "VIA watches every date on every PO. When a milestone is due and nothing has come in from the factory, mill or customer for 5 days, it tells you on My day and by email and offers to chase. After 24 hours it tells your manager.",
+      "s4Title": "Replies sent by hand are tracked",
+      "s4": "Approved replies that go out from your own chat app stay under To send by hand until you mark them sent. After 4 hours you get a reminder; after a day your manager does.",
+      "promise": "Anything due either came in, or VIA asks about it. It cannot slip past unnoticed."
     }
   },
   "ledger": {

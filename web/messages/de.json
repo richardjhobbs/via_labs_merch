@@ -128,7 +128,31 @@
     "reject": "Ablehnen",
     "more": "und {n} weitere in den Freigaben",
     "decided": "Entschieden und protokolliert.",
-    "conversation": "Unterhaltung"
+    "conversation": "Unterhaltung",
+    "alerts": {
+      "title": "Zu prüfen ({n})",
+      "sub": "Fällige Termine ohne Nachricht und Antworten, die noch nicht raus sind. Jeder Punkt erledigt sich von selbst, sobald die Lücke geschlossen ist.",
+      "kind": {
+        "silence": "Keine Nachricht",
+        "unsent": "Nicht gesendet",
+        "send_failed": "Senden fehlgeschlagen"
+      },
+      "escalated": "Manager informiert",
+      "silence": "{label} ist am {date} fällig, und von {party} kam seit {n} Tagen nichts.",
+      "silenceNever": "{label} ist am {date} fällig, und von {party} kam noch nichts.",
+      "unsent": "Eine freigegebene Antwort an {party} ist noch nicht als gesendet markiert.",
+      "failed": "Eine Antwort an {party} konnte nicht gesendet werden: {error}",
+      "chase": "VIA bei {party} nachfassen lassen",
+      "update": "Datum aktualisieren",
+      "openQueue": "Warteschlange öffnen",
+      "dismiss": "Verwerfen",
+      "why": {
+        "heard": "Über einen anderen Kanal erfahren",
+        "onTrack": "Im Plan bestätigt",
+        "notNeeded": "Nicht nötig"
+      },
+      "tip": "Wenn man es Ihnen über Zalo, WeChat, WhatsApp oder telefonisch gesagt hat, leiten Sie es an Ihre VIA-Adresse weiter oder aktualisieren Sie das Datum; dann erledigt sich dies von selbst."
+    }
   },
   "queue": {
     "title": "Freigaben",
@@ -549,6 +573,18 @@
       "errors": {
         "notReady": "Die Weiterleitung ist noch nicht freigeschaltet. VIA Labs schließt die Mail-Einrichtung ab."
       }
+    },
+    "guide": {
+      "title": "So stellt VIA sicher, dass nichts verloren geht",
+      "s1Title": "Verbinden, was sich verbinden lässt",
+      "s1": "Gmail oder Outlook und Google Drive sofort; eine WhatsApp-Business-Nummer, WeCom oder ein Zalo Official Account auf Anfrage. Diese laufen automatisch ein und aus.",
+      "s2Title": "Weiterleiten, was auf privaten Telefonen liegt",
+      "s2": "Nachrichten in privatem Zalo, WeChat oder WhatsApp: an Ihre Weiterleitungsadresse teilen. Zwei Fingertipps, und VIA ordnet sie dem richtigen PO zu.",
+      "s3Title": "Stille wird zur Warnung",
+      "s3": "VIA beobachtet jedes Datum jedes PO. Ist ein Meilenstein fällig und kam 5 Tage lang nichts von Fabrik, Weberei oder Kunde, meldet VIA das unter Mein Tag und per E-Mail und bietet an nachzufassen. Nach 24 Stunden erfährt es Ihr Manager.",
+      "s4Title": "Von Hand gesendete Antworten werden verfolgt",
+      "s4": "Freigegebene Antworten, die aus Ihrer eigenen Chat-App rausgehen, bleiben unter Von Hand senden, bis Sie sie als gesendet markieren. Nach 4 Stunden kommt eine Erinnerung, nach einem Tag an Ihren Manager.",
+      "promise": "Alles Fällige ist entweder eingegangen, oder VIA fragt nach. Es kann nicht unbemerkt durchrutschen."
     }
   },
   "ledger": {

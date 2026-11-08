@@ -128,7 +128,31 @@
     "reject": "Rechazar",
     "more": "y {n} más en la cola",
     "decided": "Decidido y registrado.",
-    "conversation": "Conversación"
+    "conversation": "Conversación",
+    "alerts": {
+      "title": "Para revisar ({n})",
+      "sub": "Fechas que vencen sin noticias y respuestas que no han salido. Cada una se cierra sola cuando se resuelve.",
+      "kind": {
+        "silence": "Sin noticias",
+        "unsent": "Sin enviar",
+        "send_failed": "Error de envío"
+      },
+      "escalated": "Responsable avisado",
+      "silence": "{label} vence el {date} y no ha llegado nada de {party} en {n} días.",
+      "silenceNever": "{label} vence el {date} y aún no ha llegado nada de {party}.",
+      "unsent": "Una respuesta aprobada a {party} no se ha marcado como enviada.",
+      "failed": "No se pudo enviar una respuesta a {party}: {error}",
+      "chase": "Pedir a VIA que reclame a {party}",
+      "update": "Actualizar la fecha",
+      "openQueue": "Abrir la cola",
+      "dismiss": "Descartar",
+      "why": {
+        "heard": "Lo supe por otro canal",
+        "onTrack": "Confirmado en plazo",
+        "notNeeded": "No hace falta"
+      },
+      "tip": "Si se lo dijeron por Zalo, WeChat, WhatsApp o por teléfono, reenvíelo a su dirección de VIA o actualice la fecha; esto se cerrará solo."
+    }
   },
   "queue": {
     "title": "Cola de aprobación",
@@ -549,6 +573,18 @@
       "errors": {
         "notReady": "El reenvío aún no está activado. VIA Labs está completando la configuración del correo."
       }
+    },
+    "guide": {
+      "title": "Cómo se asegura VIA de que no se pierda nada",
+      "s1Title": "Conecte lo que se pueda conectar",
+      "s1": "Gmail u Outlook y Google Drive ya; un número de WhatsApp Business, WeCom o una cuenta oficial de Zalo bajo solicitud. Entran y salen automáticamente.",
+      "s2Title": "Reenvíe lo que vive en teléfonos personales",
+      "s2": "Los mensajes de Zalo, WeChat o WhatsApp personales: compártalos a su dirección de reenvío. Dos toques y VIA los archiva en el PO correcto.",
+      "s3Title": "El silencio se convierte en alerta",
+      "s3": "VIA vigila cada fecha de cada PO. Cuando vence un hito y no ha llegado nada de la fábrica, la tejeduría o el cliente en 5 días, se lo indica en Mi día y por correo y le ofrece reclamar. A las 24 horas avisa a su responsable.",
+      "s4Title": "Las respuestas enviadas a mano se siguen",
+      "s4": "Las respuestas aprobadas que salen desde su propia app de chat quedan en Para enviar a mano hasta que las marque como enviadas. A las 4 horas recibe un recordatorio; al día siguiente, su responsable.",
+      "promise": "Lo que vence o ya llegó, o VIA pregunta por ello. No puede pasar desapercibido."
     }
   },
   "ledger": {

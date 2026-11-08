@@ -128,7 +128,31 @@
     "reject": "Từ chối",
     "more": "và {n} mục khác trong hàng chờ",
     "decided": "Đã quyết định và ghi sổ.",
-    "conversation": "Hội thoại"
+    "conversation": "Hội thoại",
+    "alerts": {
+      "title": "Cần kiểm tra ({n})",
+      "sub": "Các mốc đến hạn mà chưa có tin, và các trả lời chưa được gửi. Mỗi mục tự biến mất khi khoảng trống được lấp.",
+      "kind": {
+        "silence": "Chưa có tin",
+        "unsent": "Chưa gửi",
+        "send_failed": "Gửi thất bại"
+      },
+      "escalated": "Đã báo quản lý",
+      "silence": "{label} đến hạn {date} và đã {n} ngày không có gì từ {party}.",
+      "silenceNever": "{label} đến hạn {date} và chưa có gì từ {party}.",
+      "unsent": "Một trả lời đã duyệt gửi {party} chưa được đánh dấu đã gửi.",
+      "failed": "Không gửi được trả lời cho {party}: {error}",
+      "chase": "Nhờ VIA nhắc {party}",
+      "update": "Cập nhật ngày",
+      "openQueue": "Mở hàng chờ",
+      "dismiss": "Bỏ qua",
+      "why": {
+        "heard": "Đã biết qua kênh khác",
+        "onTrack": "Đã xác nhận đúng tiến độ",
+        "notNeeded": "Không cần"
+      },
+      "tip": "Nếu họ đã báo qua Zalo, WeChat, WhatsApp hoặc điện thoại, hãy chuyển tiếp tới địa chỉ VIA của bạn hoặc cập nhật ngày; mục này sẽ tự biến mất."
+    }
   },
   "queue": {
     "title": "Hàng chờ duyệt",
@@ -549,6 +573,18 @@
       "errors": {
         "notReady": "Chức năng chuyển tiếp chưa được bật. VIA Labs đang hoàn tất thiết lập thư."
       }
+    },
+    "guide": {
+      "title": "Cách VIA đảm bảo không bỏ sót điều gì",
+      "s1Title": "Kết nối những gì có thể kết nối",
+      "s1": "Gmail hoặc Outlook và Google Drive ngay bây giờ; số WhatsApp Business, WeCom hoặc Zalo Official Account theo yêu cầu. Các kênh này nhận và gửi tự động.",
+      "s2Title": "Chuyển tiếp những gì nằm trên điện thoại cá nhân",
+      "s2": "Tin nhắn trong Zalo, WeChat hoặc WhatsApp cá nhân: chia sẻ tới địa chỉ chuyển tiếp của bạn. Hai lần chạm, VIA sẽ xếp vào đúng PO.",
+      "s3Title": "Im lặng trở thành cảnh báo",
+      "s3": "VIA theo dõi mọi mốc thời gian của mọi PO. Khi một mốc sắp đến hạn mà 5 ngày không có gì từ nhà máy, xưởng vải hoặc khách hàng, VIA báo bạn ở Ngày của tôi và qua email, và đề nghị nhắc họ. Sau 24 giờ VIA báo cho quản lý của bạn.",
+      "s4Title": "Trả lời gửi thủ công cũng được theo dõi",
+      "s4": "Các trả lời đã duyệt cần gửi từ ứng dụng chat của bạn sẽ nằm trong Cần gửi thủ công cho đến khi bạn đánh dấu đã gửi. Sau 4 giờ bạn được nhắc; sau một ngày quản lý của bạn được nhắc.",
+      "promise": "Việc đến hạn hoặc đã có tin, hoặc VIA sẽ hỏi. Không thể lặng lẽ bị bỏ sót."
     }
   },
   "ledger": {

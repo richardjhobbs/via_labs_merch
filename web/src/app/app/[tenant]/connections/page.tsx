@@ -52,6 +52,16 @@ export default async function Connections({ params, searchParams }: { params: Pr
       {sp.gsaved && <div className="notice mt-4">{t('gmail.saved')}</div>}
       {gerr && <div className="notice crit mt-4">{t(`${errNs}.errors.${gerr}` as 'gmail.errors.failed', { error: sp.gmsg || '', label: sp.glabel || '' })}</div>}
 
+      <div className="card mt-6" style={{ borderLeft: '3px solid var(--accent)' }}>
+        <h2 style={{ fontSize: 16 }}>{t('guide.title')}</h2>
+        <ol className="grid gap-3 mt-3 md:grid-cols-2" style={{ listStyle: 'none', padding: 0 }}>
+          {(['s1', 's2', 's3', 's4'] as const).map((k, i) => (
+            <li key={k} className="flex gap-3 small"><span className="pill agent" style={{ alignSelf: 'flex-start' }}>{i + 1}</span><div><div className="font-medium">{t(`guide.${k}Title`)}</div><div className="mt-1" style={{ color: 'var(--fg2)' }}>{t(`guide.${k}`)}</div></div></li>
+          ))}
+        </ol>
+        <p className="small mt-3 font-medium">{t('guide.promise')}</p>
+      </div>
+
       <div className="card mt-6">
         <div className="flex items-center justify-between flex-wrap gap-2"><h2 style={{ fontSize: 16 }}>{t('available')}</h2><span className="muted small">{t('availableNote')}</span></div>
         <div className="grid gap-3 mt-4 md:grid-cols-2">

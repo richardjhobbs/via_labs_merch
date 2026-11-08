@@ -128,7 +128,31 @@
     "reject": "驳回",
     "more": "队列中还有 {n} 项",
     "decided": "已处理并记入台账。",
-    "conversation": "会话"
+    "conversation": "会话",
+    "alerts": {
+      "title": "待确认（{n}）",
+      "sub": "已到期却没有消息的日期，以及尚未发出的回复。缺口补上后会自动消除。",
+      "kind": {
+        "silence": "没有消息",
+        "unsent": "未发送",
+        "send_failed": "发送失败"
+      },
+      "escalated": "已通知主管",
+      "silence": "{label} 应于 {date} 完成，{party} 已 {n} 天没有任何消息。",
+      "silenceNever": "{label} 应于 {date} 完成，{party} 还没有任何消息。",
+      "unsent": "给 {party} 的一条已批准回复尚未标记为已发送。",
+      "failed": "给 {party} 的回复发送失败：{error}",
+      "chase": "让 VIA 催问 {party}",
+      "update": "更新日期",
+      "openQueue": "打开待审队列",
+      "dismiss": "忽略",
+      "why": {
+        "heard": "已通过其他渠道得知",
+        "onTrack": "已确认按期",
+        "notNeeded": "不需要"
+      },
+      "tip": "如果对方是通过 Zalo、微信、WhatsApp 或电话告诉您的，请转发到您的 VIA 地址或更新日期，此项会自动消除。"
+    }
   },
   "queue": {
     "title": "审批队列",
@@ -549,6 +573,18 @@
       "errors": {
         "notReady": "转发功能尚未开通。VIA Labs 正在完成邮件设置。"
       }
+    },
+    "guide": {
+      "title": "VIA 如何确保不遗漏任何事情",
+      "s1Title": "能连接的都连接上",
+      "s1": "现在就可连接 Gmail 或 Outlook 和 Google Drive；WhatsApp Business 号码、企业微信或 Zalo 官方账号可按需开通。这些渠道收发全自动。",
+      "s2Title": "个人手机上的消息，转发过来",
+      "s2": "个人 Zalo、微信或 WhatsApp 里的消息，分享到您的转发地址即可。点两下，VIA 就会归到对应的 PO。",
+      "s3Title": "没有消息，本身就是提醒",
+      "s3": "VIA 盯着每个 PO 的每个日期。某个节点临近或已到期，而工厂、面料厂或客户已有 5 天没有任何消息时，VIA 会在“我的一天”和邮件中提醒您，并可代为催问。24 小时后会通知您的主管。",
+      "s4Title": "手动发送的回复也有跟踪",
+      "s4": "需要从您自己的聊天应用发出的已批准回复，会一直留在“需手动发送”中，直到您标记为已发送。4 小时后提醒您，一天后提醒您的主管。",
+      "promise": "到期的事项要么已经收到，要么 VIA 会主动询问，不会悄无声息地被漏掉。"
     }
   },
   "ledger": {

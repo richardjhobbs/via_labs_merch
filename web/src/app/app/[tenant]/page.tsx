@@ -1,5 +1,6 @@
 // My day: the approval queue and the numbers that matter for this person.
 import Link from 'next/link';
+import { chaseAlert, dismissAlert } from './alert-actions';
 import { getTranslations } from 'next-intl/server';
 import { requireTenant, scopeOf } from '@/lib/tenant';
 import { Team } from './team';
@@ -16,14 +17,18 @@ export default async function MyDay({ params, searchParams }: { params: Promise<
   const [t, te] = await Promise.all([getTranslations('day'), getTranslations('esg')]);
   const sb = await supabaseServer();
   const scope = scopeOf(membership), manager = ['owner', 'manager'].includes(membership.role);
-  const [{ data: queuedRows }, { count: approvedToday }, orders, { data: scopeNames }, { data: tnRow }, esgAll] = await Promise.all([
+  const [{ data: queuedRows }, { count: approvedToday }, orders, { data: scopeNames }, { data: tnRow }, esgAll, { data: alertRows }] = await Promise.all([
     sb.from('drafts').select('id, seq, priority, stream, title, impact, body, lang, gate_level, created_at, party_id, orders(po, customer_id), parties(name), source:messages!drafts_source_message_id_fkey(thread_id)').eq('tenant_id', tenant.id).in('status', ['queued', 'escalated']).order('priority').order('seq'),
     sb.from('drafts').select('id', { count: 'exact', head: true }).eq('tenant_id', tenant.id).eq('status', 'sent').gte('decided_at', new Date(new Date().setHours(0, 0, 0, 0)).toISOString()),
     listOrders(tenant.id, { status: 'open', customers: scope }),
     scope ? sb.from('parties').select('name').in('id', scope) : Promise.resolve({ data: null }),
     sb.from('tenants').select('settings').eq('id', tenant.id).single(),
     esgSnapshot(tenant.id, sb),
+    sb.from('alerts').select('id, kind, order_id, party_id, milestone, due_date, detail, assignee_user_id, created_at, escalated_at').eq('tenant_id', tenant.id).eq('status', 'open').order('created_at', { ascending: false }).limit(50),
   ]);
+  // the safety net: mine first; managers see everyone's; scoped people see their customers' orders
+  const orderIds = new Set(orders.map((o) => o.id));
+  const alerts = (alertRows || []).filter((a) => (manager || a.assignee_user_id === user.id || !a.assignee_user_id) && (!a.order_id || orderIds.has(a.order_id))).sort((x, y) => Number(y.assignee_user_id === user.id) - Number(x.assignee_user_id === user.id));
   const esgOn = esgEnabled(tnRow?.settings);
   const esgDue = esgOn ? esgAll.filter((x) => ['overdue', 'due', 'returned'].includes(x.state) && (manager || isMine(x, user.id, membership.role))) : [];
   const prepared = (queuedRows || []).filter((d) => !scope || (d.party_id && scope.includes(d.party_id)) || scope.includes((d.orders as unknown as { customer_id: string } | null)?.customer_id || ''));
@@ -46,6 +51,31 @@ export default async function MyDay({ params, searchParams }: { params: Promise<
       </div>
       {q.saved && <div className="notice ok mt-4">{t('decided')}</div>}
       {q.error && <div className="notice crit mt-4">{q.error}</div>}
+      {!!alerts.length && <div className="card mt-4" style={{ borderLeft: '3px solid var(--crit)' }}>
+        <h2>{t('alerts.title', { n: alerts.length })}</h2>
+        <p className="muted small mt-1">{t('alerts.sub')}</p>
+        {alerts.slice(0, 8).map((a) => { const d = (a.detail || {}) as { po?: string; party?: string; label?: string; days_silent?: number | null; error?: string }; return (
+          <div key={a.id} className="small" style={{ borderTop: '1px solid var(--line2)', paddingTop: 10, marginTop: 10 }}>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className={`pill ${a.kind === 'silence' ? 'warn' : 'crit'}`}>{t(`alerts.kind.${a.kind}`)}</span>
+              {d.po && <Link className="pill" href={`/app/${slug}/orders/${encodeURIComponent(d.po)}`}>PO {d.po}</Link>}
+              {a.escalated_at && <span className="pill crit">{t('alerts.escalated')}</span>}
+            </div>
+            <div className="mt-1">{a.kind === 'silence' ? (d.days_silent != null ? t('alerts.silence', { label: d.label || '', date: a.due_date || '', party: d.party || '', n: d.days_silent }) : t('alerts.silenceNever', { label: d.label || '', date: a.due_date || '', party: d.party || '' })) : a.kind === 'unsent' ? t('alerts.unsent', { party: d.party || '' }) : t('alerts.failed', { party: d.party || '', error: d.error || '' })}</div>
+            <div className="flex gap-2 mt-2 flex-wrap items-center">
+              {a.kind === 'silence' ? <>
+                <form action={chaseAlert}><input type="hidden" name="tenant" value={slug} /><input type="hidden" name="id" value={a.id} /><button className="btn primary sm">{t('alerts.chase', { party: d.party || '' })}</button></form>
+                {d.po && <Link className="btn sm" href={`/app/${slug}/orders/${encodeURIComponent(d.po)}`}>{t('alerts.update')}</Link>}
+              </> : <Link className="btn primary sm" href={`/app/${slug}/queue`}>{t('alerts.openQueue')}</Link>}
+              <form action={dismissAlert} className="flex gap-2 items-center"><input type="hidden" name="tenant" value={slug} /><input type="hidden" name="id" value={a.id} />
+                <select name="why" className="input" style={{ maxWidth: 200, padding: '4px 8px' }}>{['heard', 'onTrack', 'notNeeded'].map((k) => <option key={k} value={k}>{t(`alerts.why.${k}`)}</option>)}</select>
+                <button className="btn sm">{t('alerts.dismiss')}</button>
+              </form>
+            </div>
+            {a.kind === 'silence' && <div className="muted mt-1">{t('alerts.tip')}</div>}
+          </div>); })}
+        {alerts.length > 8 && <div className="muted small mt-2">{t('more', { n: alerts.length - 8 })}</div>}
+      </div>}
       <div className="grid gap-4 mt-4" style={{ gridTemplateColumns: '1.4fr 1fr' }}>
         <div className="card">
           <div className="flex items-center gap-2 flex-wrap"><span className="pill agent">{agentName.slice(0, 1)}</span><h2>{t('prepared', { name: agentName, n: queued })}</h2><span className="muted small ml-auto">{lp ? t('preparedAt', { time: new Date(lp).toLocaleTimeString('en-GB', { timeZone: tenant.tz, hour: '2-digit', minute: '2-digit' }) }) : ''}</span></div>
