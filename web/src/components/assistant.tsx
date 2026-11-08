@@ -18,6 +18,36 @@ export function Assistant({ slug, agentName, lang, live, labels }: { slug: strin
   const [pending, start] = useTransition();
   const logRef = useRef<HTMLDivElement>(null);
 
+  // Dictation: the browser's own speech recognition (Chrome, Edge, Safari), in the interface language.
+  // The button only shows where the browser supports it; Chrome sends the audio to Google to transcribe.
+  type Rec = { lang: string; continuous: boolean; interimResults: boolean; start: () => void; stop: () => void; onresult: ((e: { resultIndex: number; results: ArrayLike<{ isFinal: boolean; 0: { transcript: string } }> }) => void) | null; onend: (() => void) | null; onerror: ((e: { error: string }) => void) | null };
+  const [canSpeak, setCanSpeak] = useState(false);
+  const [listening, setListening] = useState(false);
+  const [micError, setMicError] = useState('');
+  const recRef = useRef<Rec | null>(null);
+  useEffect(() => { const w = window as unknown as { SpeechRecognition?: unknown; webkitSpeechRecognition?: unknown }; setCanSpeak(!!(w.SpeechRecognition || w.webkitSpeechRecognition)); }, []);
+  const SPEECH_LANG: Record<string, string> = { en: 'en-GB', de: 'de-DE', bn: 'bn-BD', zh: 'zh-CN', vi: 'vi-VN', es: 'es-ES' };
+  function stopDictation() { recRef.current?.stop(); }
+  function toggleDictation() {
+    if (listening) return stopDictation();
+    const w = window as unknown as { SpeechRecognition?: new () => Rec; webkitSpeechRecognition?: new () => Rec };
+    const Ctor = w.SpeechRecognition || w.webkitSpeechRecognition;
+    if (!Ctor) return;
+    const rec = new Ctor();
+    rec.lang = SPEECH_LANG[lang] || lang; rec.continuous = true; rec.interimResults = true;
+    const before = q.trim() ? q.trim() + ' ' : '';
+    let finals = '';
+    rec.onresult = (e) => {
+      let interim = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) { const r = e.results[i]; if (r.isFinal) finals += r[0].transcript; else interim += r[0].transcript; }
+      setQ((before + finals + interim).replace(/\s+/g, ' ').trimStart());
+    };
+    rec.onerror = (e) => { if (e.error === 'not-allowed' || e.error === 'service-not-allowed') setMicError(labels.micDenied); else if (e.error !== 'no-speech' && e.error !== 'aborted') setMicError(e.error); };
+    rec.onend = () => { setListening(false); recRef.current = null; };
+    setMicError(''); recRef.current = rec; rec.start(); setListening(true);
+  }
+  useEffect(() => () => recRef.current?.stop(), []);
+
   useEffect(() => { try { const s = sessionStorage.getItem(key); if (s) setTurns(JSON.parse(s)); setOpen(sessionStorage.getItem(key + '_open') === '1'); } catch {} }, [key]);
   useEffect(() => { try { sessionStorage.setItem(key, JSON.stringify(turns.slice(-30))); } catch {} ; logRef.current?.scrollTo({ top: 1e6 }); }, [turns, key]);
   useEffect(() => { try { sessionStorage.setItem(key + '_open', open ? '1' : '0'); } catch {} }, [open, key]);
@@ -101,8 +131,14 @@ export function Assistant({ slug, agentName, lang, live, labels }: { slug: strin
           <div className="sug">{suggestions.map((s) => <button key={s} onClick={() => ask(s.replace(/ \(.*\)$/, screen === 'order' ? ` ${po}` : ''))}>{s}</button>)}</div>
         )}
       </div>
-      <form onSubmit={(e) => { e.preventDefault(); ask(q); }}>
-        <input className="input flex-1" value={q} onChange={(e) => setQ(e.target.value)} placeholder={labels.placeholder} disabled={!live} autoFocus />
+      {micError && <div className="small px-3" style={{ color: 'var(--crit)' }}>{micError}</div>}
+      <form onSubmit={(e) => { e.preventDefault(); stopDictation(); ask(q); }}>
+        <input className="input flex-1" value={q} onChange={(e) => setQ(e.target.value)} placeholder={listening ? labels.listening : labels.placeholder} disabled={!live} autoFocus />
+        {canSpeak && live && (
+          <button type="button" className="btn" onClick={toggleDictation} aria-pressed={listening} aria-label={listening ? labels.micStop : labels.mic} title={listening ? labels.micStop : labels.mic} style={listening ? { borderColor: 'var(--crit)', color: 'var(--crit)' } : undefined}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{listening ? <rect x="7" y="7" width="10" height="10" rx="1.5" fill="currentColor" /> : <><rect x="9" y="3" width="6" height="11" rx="3" /><path d="M5 11a7 7 0 0 0 14 0M12 18v3" /></>}</svg>
+          </button>
+        )}
         <button className="btn primary" disabled={!live || !q.trim()}>{labels.send}</button>
       </form>
     </div>

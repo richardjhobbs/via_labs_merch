@@ -576,7 +576,11 @@
     "s_ledger": "Was hat der Agent heute getan?",
     "s_any1": "Die Fabrik wegen des Stofftermins anmahnen",
     "s_any2": "WIP-Notiz an einen Kunden entwerfen",
-    "s_esg": "Welche Compliance-Berichte sind fällig?"
+    "s_esg": "Welche Compliance-Berichte sind fällig?",
+    "mic": "Diktieren",
+    "micStop": "Diktat beenden",
+    "micDenied": "Das Mikrofon ist blockiert. Erlauben Sie es für diese Seite in den Browser-Einstellungen und versuchen Sie es erneut.",
+    "listening": "Ich höre zu ... sprechen Sie jetzt"
   },
   "viewas": {
     "label": "Ansicht als",

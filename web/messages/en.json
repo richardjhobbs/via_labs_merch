@@ -576,7 +576,11 @@
     "s_ledger": "What did the agent do today?",
     "s_any1": "Chase the factory for the fabric date",
     "s_any2": "Draft a WIP note to a customer",
-    "s_esg": "What compliance reporting is due?"
+    "s_esg": "What compliance reporting is due?",
+    "mic": "Dictate",
+    "micStop": "Stop dictation",
+    "micDenied": "The microphone is blocked. Allow it for this site in the browser's settings, then try again.",
+    "listening": "Listening... speak now"
   },
   "viewas": {
     "label": "View as",

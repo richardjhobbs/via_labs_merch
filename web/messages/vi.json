@@ -576,7 +576,11 @@
     "s_ledger": "Hôm nay agent đã làm gì?",
     "s_any1": "Nhắc nhà máy ngày giao vải",
     "s_any2": "Soạn ghi chú WIP gửi khách hàng",
-    "s_esg": "Báo cáo tuân thủ nào sắp đến hạn?"
+    "s_esg": "Báo cáo tuân thủ nào sắp đến hạn?",
+    "mic": "Đọc để nhập",
+    "micStop": "Dừng đọc",
+    "micDenied": "Micrô đang bị chặn. Hãy cho phép trang này dùng micrô trong cài đặt trình duyệt rồi thử lại.",
+    "listening": "Đang nghe... hãy nói"
   },
   "viewas": {
     "label": "Xem dưới vai trò",

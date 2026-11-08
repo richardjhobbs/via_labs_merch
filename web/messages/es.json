@@ -576,7 +576,11 @@
     "s_ledger": "¿Qué hizo hoy el agente?",
     "s_any1": "Pida a la fábrica la fecha del tejido",
     "s_any2": "Redacte una nota de WIP para un cliente",
-    "s_esg": "¿Qué informes de cumplimiento vencen?"
+    "s_esg": "¿Qué informes de cumplimiento vencen?",
+    "mic": "Dictar",
+    "micStop": "Detener el dictado",
+    "micDenied": "El micrófono está bloqueado. Permítalo para este sitio en la configuración del navegador e inténtelo de nuevo.",
+    "listening": "Escuchando... hable ahora"
   },
   "viewas": {
     "label": "Ver como",
