@@ -34,7 +34,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true, ignored: 'sender' });
   }
 
-  const e = await receivedEmail(evt.data.email_id);
+  let e: Awaited<ReturnType<typeof receivedEmail>>;
+  try { e = await receivedEmail(evt.data.email_id); }
+  catch (err) {
+    // most often a sending-only RESEND_API_KEY: say so on the Connections card, and fail so Resend retries
+    const msg = err instanceof Error ? err.message : String(err);
+    await sb.from('channels').update({ error: /401|403/.test(msg) ? 'The mail service key cannot read received mail. VIA Labs needs to switch it to full access.' : msg.slice(0, 300) }).eq('id', ch.id);
+    return NextResponse.json({ error: 'could not read the message yet' }, { status: 503 });
+  }
   const raw = (e.text && e.text.trim()) || (e.html ? htmlToText(e.html) : '');
   const subject = (e.subject || '').replace(/^(fwd?|fw|tr|wg|转发)\s*:\s*/i, '').trim() || null;
   const attachments = (e.attachments || evt.data.attachments || []).map((a) => ({ name: a.filename || 'file', mime: a.content_type || '' }));
