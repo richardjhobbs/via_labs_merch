@@ -44,7 +44,7 @@ export default async function Task({ params, searchParams }: { params: Promise<{
       {q.saved && <div className="notice ok mt-3">{t(`done_${q.saved}` as never)}</div>}
       {task.status === 'returned' && task.review_note && <div className="notice warn mt-3"><b>{t('returnedBy', { name: task.reviewed_by_name || '' })}</b> {task.review_note}</div>}
 
-      <div className="grid gap-5 mt-4" style={{ gridTemplateColumns: 'minmax(0,1fr) 300px' }}>
+      <div className="split mt-4" style={{ '--side': '300px' } as React.CSSProperties}>
         <div className="grid gap-4 self-start" style={{ minWidth: 0 }}>
           <div className="card">
             <h2>{t('whatNeeded')}</h2>

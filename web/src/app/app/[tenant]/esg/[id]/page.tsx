@@ -65,7 +65,7 @@ export default async function Programme({ params, searchParams }: { params: Prom
           {lead && <form action={setProgrammeStatus} className="ml-auto flex gap-2"><input type="hidden" name="tenant" value={slug} /><input type="hidden" name="id" value={id} /><input type="hidden" name="status" value={p.status === 'active' ? 'closed' : 'active'} /><button className="btn sm">{p.status === 'active' ? t('close') : t('activate')}</button></form>}</div>
       </div>
 
-      <div className="grid gap-5 mt-5" style={{ gridTemplateColumns: 'minmax(0,1fr) 320px' }}>
+      <div className="split mt-5" style={{ '--side': '320px' } as React.CSSProperties}>
         <div className="grid gap-5 self-start" style={{ minWidth: 0 }}>
           {groups.map(([d, list]) => (
             <div key={d}>

@@ -36,8 +36,8 @@ export default async function Parties({ params, searchParams }: { params: Promis
       <h1>{t('title')}</h1><p className="muted small mt-1" style={{ maxWidth: '70ch' }}>{t('sub')}</p>
       {error && <div className="notice crit mt-3">{error}</div>}
       {saved && <div className="notice mt-3">{t('saved')}</div>}
-      <div className="grid gap-5 mt-4" style={{ gridTemplateColumns: 'minmax(0,1fr) 280px' }}>
-        <div className="grid gap-5" style={{ minWidth: 0 }}>
+      <div className="split mt-4" style={{ '--side': '280px' } as React.CSSProperties}>
+        <div className="grid gap-5" style={{ minWidth: 0, gridTemplateColumns: 'minmax(0,1fr)' }}>
           <div><h2 className="mb-2">{t('customers')} <span className="muted">({customers.length})</span></h2><Table rows={customers} /></div>
           <div><h2 className="mb-2">{t('suppliers')} <span className="muted">({suppliers.length})</span></h2><Table rows={suppliers} supplier /><p className="muted small mt-2">{t('tierHelp')}</p></div>
         </div>

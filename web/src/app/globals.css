@@ -39,6 +39,11 @@ table.t th { text-align: left; font-size: 11px; letter-spacing: .06em; text-tran
 table.t td { padding: 8px 10px; border-bottom: 1px solid var(--line2); vertical-align: top; }
 table.t tr.click { cursor: pointer; } table.t tr.click:hover td { background: var(--paper); }
 .tw { overflow-x: auto; }
+/* Main column plus side panel. Below 1280 px the panel moves under the main column instead of covering it;
+   min-width 0 lets wide tables scroll inside their card rather than push past the column. */
+.split { display: grid; gap: 20px; grid-template-columns: minmax(0, 1fr); }
+.split > * { min-width: 0; }
+@media (min-width: 1280px) { .split { grid-template-columns: minmax(0, 1fr) var(--side, 300px); } }
 .rail a { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 6px; color: var(--fg2); text-decoration: none; }
 .rail a.on, .rail a:hover { background: var(--accent-soft); color: var(--accent); }
 .notice { padding: 10px 12px; border-radius: 8px; background: var(--accent-soft); color: var(--accent); font-size: 13px; }

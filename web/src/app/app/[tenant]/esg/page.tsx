@@ -45,7 +45,7 @@ export default async function Esg({ params, searchParams }: { params: Promise<{ 
         <div className={`kpi ${review.length ? 'warn' : ''}`}><div className="n">{review.length}</div><div className="l">{t('kReview')}</div></div>
         <div className="kpi"><div className="n">{(programmes || []).filter((p) => p.status === 'active').length}</div><div className="l">{t('kProgrammes')}</div></div>
       </div>
-      <div className="grid gap-5 mt-5" style={{ gridTemplateColumns: 'minmax(0,1fr) 300px' }}>
+      <div className="split mt-5" style={{ '--side': '300px' } as React.CSSProperties}>
         <div className="grid gap-5 self-start" style={{ minWidth: 0 }}>
           <div className="card">
             <h2>{manager ? t('allDue') : t('yours')}</h2>

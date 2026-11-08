@@ -22,7 +22,7 @@ export default async function OrderDetail({ params, searchParams }: { params: Pr
       <Link href={`/app/${slug}/orders`} className="small">← {t('title')}</Link>
       <div className="flex items-baseline gap-3 mt-2 flex-wrap"><h1 className="mono">{o.po}</h1><HealthPill h={o.health} /><span className="muted">{o.style} · {o.description}</span></div>
       {saved && <div className="notice mt-3">{t('saved')}</div>}{error && <div className="notice crit mt-3">{error}</div>}
-      <div className="grid gap-4 mt-4" style={{ gridTemplateColumns: 'minmax(0,1fr) 300px' }}>
+      <div className="split mt-4" style={{ '--side': '300px' } as React.CSSProperties}>
         <div className="grid gap-4">
           <div className="card tw" style={{ padding: 0 }}>
             <div className="p-4 pb-2"><h2>{t('criticalPath')}</h2><p className="muted small">{t('pathNote')}</p></div>
