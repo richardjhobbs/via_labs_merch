@@ -103,7 +103,7 @@ const T = (d: string) => z.string().describe(`${d}; empty string if the document
 export const RequirementsSchema = z.object({
   programme: z.object({
     name: T('programme name'),
-    kind: z.enum(PROGRAMME_KINDS).describe('loan: bank or fund finance; customer: a brand or retailer code of conduct, supplier manual, checklist or RSL; certification: a standard the company holds; audit: an audit report or corrective action plan; regulation: a law; licence: permits and licences from local authorities; industry: an industry scheme or questionnaire (Higg, SLCP, ZDHC, Sedex); internal: own policy'),
+    kind: z.string().describe('one of loan, customer, certification, audit, regulation, licence, industry, internal. loan: bank or fund finance; customer: a brand or retailer code of conduct, supplier manual, checklist or RSL; certification: a standard the company holds; audit: an audit report or corrective action plan; regulation: a law; licence: permits and licences from local authorities; industry: an industry scheme or questionnaire (Higg, SLCP, ZDHC, Sedex); internal: own policy'),
     issuer: T('who imposes the requirements and receives the reports: the bank, fund, brand, certifier, auditor or authority'),
     chain: T('the money or authority chain, e.g. "IFC → HSBC Bangladesh → borrower" or "Brand → buying office → factory"'),
     framework: T('framework or standard named'),
@@ -116,42 +116,68 @@ export const RequirementsSchema = z.object({
     code: T("the issuer's clause or finding number"),
     title: z.string(),
     instruction: z.string().describe('what has to be done and reported, in plain words for the person doing it'),
-    discipline: z.enum(DISCIPLINES),
-    measure: z.enum(MEASURES),
+    discipline: z.string().describe(`one of ${DISCIPLINES.join(', ')}`),
+    measure: z.string().describe(`one of ${MEASURES.join(', ')}`),
     unit: T('unit of the figure'),
     target: T('target figure as a plain number'),
     target_note: T('target in words'),
     baseline: T('baseline figure as a plain number'),
-    trigger: z.enum(TRIGGERS).describe('schedule: reported every period or once by a deadline; per_order: for every purchase order or shipment; expiry: a certificate, licence or permit kept valid and renewed before it expires'),
-    frequency: z.enum(FREQUENCIES),
+    trigger: z.string().describe('one of schedule, per_order, expiry. schedule: reported every period or once by a deadline; per_order: for every purchase order or shipment; expiry: a certificate, licence or permit kept valid and renewed before it expires'),
+    frequency: z.string().describe(`one of ${FREQUENCIES.join(', ')}; for per_order and expiry requirements use once`),
     first_period_end: T('YYYY-MM-DD: end of the first period (schedule), the deadline (once), or the current expiry date (expiry)'),
     due_days: T('days after the period end the report is due, as a plain number'),
-    milestone: z.enum([...ORDER_MILESTONES, 'none']).describe('per_order only: the production milestone it is tied to (pp sample, cut, inline, final inspection, exf ex-factory, etd shipment, eta arrival); none otherwise'),
+    milestone: z.string().describe('one of fabric, labdip, fit, pp, cut, inline, final, exf, etd, eta, none. per_order only: the production milestone it is tied to (pp sample, cut, inline, final inspection, exf ex-factory, etd shipment, eta arrival); none otherwise'),
     milestone_offset: T('per_order only: days after the milestone it is due, negative for before, as a plain number'),
-    applies_to: z.enum(APPLIES).describe('company when we report it once; suppliers when each of our suppliers or factories must provide it'),
-    supplier_kinds: z.array(z.enum(SUPPLIER_KINDS)).describe('applies_to suppliers: which kinds (factory, mill, fibre...); empty otherwise'),
-    severity: z.enum([...SEVERITIES, 'none']).describe('for audit findings, corrective actions and graded checklist items; none otherwise'),
-    owner_role: z.enum(OWNER_ROLES),
+    applies_to: z.string().describe('one of company, suppliers. company when we report it once; suppliers when each of our suppliers or factories must provide it'),
+    supplier_kinds: z.array(z.string()).describe('each one of factory, mill, fibre, forwarder, carrier, lab, auditor, other. applies_to suppliers: which kinds (factory, mill, fibre...); empty otherwise'),
+    severity: z.string().describe('one of critical, major, minor, none. for audit findings, corrective actions and graded checklist items; none otherwise'),
+    owner_role: z.string().describe(`one of ${OWNER_ROLES.join(', ')}`),
     evidence: T('what proves it'),
     supplier: T('a single supplier that must provide this figure, if the document names one'),
   })),
 });
 type RawRequirements = z.infer<typeof RequirementsSchema>;
-type Raw = RawRequirements['requirements'][number];
+type Prog = (typeof PROGRAMME_KINDS)[number];
 export type ReadRequirements = {
-  programme: { [K in keyof RawRequirements['programme']]: K extends 'kind' ? RawRequirements['programme']['kind'] : string | null };
-  requirements: (Omit<Raw, 'code' | 'unit' | 'target' | 'target_note' | 'baseline' | 'first_period_end' | 'due_days' | 'milestone' | 'milestone_offset' | 'supplier_kinds' | 'severity' | 'evidence' | 'supplier'> & {
-    code: string | null; unit: string | null; target: number | null; target_note: string | null; baseline: number | null; first_period_end: string | null; due_days: number | null;
-    milestone: (typeof ORDER_MILESTONES)[number] | null; milestone_offset: number | null; supplier_kinds: (typeof SUPPLIER_KINDS)[number][] | null; severity: (typeof SEVERITIES)[number] | null; evidence: string | null; supplier: string | null;
-  })[];
+  programme: { name: string | null; kind: Prog; issuer: string | null; chain: string | null; framework: string | null; reference: string | null; purpose: string | null; starts_on: string | null; ends_on: string | null };
+  requirements: {
+    code: string | null; title: string; instruction: string; discipline: (typeof DISCIPLINES)[number]; measure: (typeof MEASURES)[number]; unit: string | null; target: number | null; target_note: string | null; baseline: number | null;
+    trigger: Trigger; frequency: Frequency; first_period_end: string | null; due_days: number | null; milestone: (typeof ORDER_MILESTONES)[number] | null; milestone_offset: number | null;
+    applies_to: (typeof APPLIES)[number]; supplier_kinds: (typeof SUPPLIER_KINDS)[number][] | null; severity: (typeof SEVERITIES)[number] | null; owner_role: (typeof OWNER_ROLES)[number]; evidence: string | null; supplier: string | null;
+  }[];
 };
+// Map free text from the model onto an allowed value: exact or close match, a few common synonyms, else the fallback.
+const SYN: Record<string, string> = { semi_annual: 'semiannual', biannual: 'semiannual', half_yearly: 'semiannual', every_six_months: 'semiannual', six_monthly: 'semiannual', yearly: 'annual', annually: 'annual', every_year: 'annual', month: 'monthly', every_month: 'monthly', quarter: 'quarterly', every_quarter: 'quarterly', one_off: 'once', one_time: 'once', each_order: 'once', per_order: 'once', on_expiry: 'once', ongoing: 'once', order: 'per_order', each_po: 'per_order', per_shipment: 'per_order', each_shipment: 'per_order', renewal: 'expiry', before_expiry: 'expiry', certificate: 'expiry', company: 'company', us: 'company', supplier: 'suppliers', each_supplier: 'suppliers', health_and_safety: 'health_safety', safety: 'health_safety', labor: 'labour', social: 'labour', environment: 'other', chemical: 'chemicals', yes_or_no: 'yes_no', boolean: 'yes_no', document: 'evidence', figure: 'number', statement: 'text', final_inspection: 'final', pp_sample: 'pp', ex_factory: 'exf', shipment: 'etd', loan_or_finance: 'loan', brand: 'customer', standard: 'certification', law: 'regulation', permit: 'licence', license: 'licence', scheme: 'industry', policy: 'internal', c: 'critical', m: 'major', high: 'critical', medium: 'major', low: 'minor' };
+function pick<T extends string>(v: string, allowed: readonly T[], fallback: T): T {
+  const k = String(v || '').toLowerCase().trim().replace(/[\s/-]+/g, '_');
+  if ((allowed as readonly string[]).includes(k)) return k as T;
+  const syn = SYN[k];
+  if (syn && (allowed as readonly string[]).includes(syn)) return syn as T;
+  const near = allowed.find((a) => k.startsWith(a) || a.startsWith(k) && k.length >= 3);
+  return near || fallback;
+}
 const str = (v: string) => (v && v.trim() ? v.trim() : null);
 const num = (v: string) => { const n = Number(String(v || '').replace(/[, ]/g, '')); return v && v.trim() && isFinite(n) ? n : null; };
 export function normalizeRequirements(raw: RawRequirements): ReadRequirements {
   const p = raw.programme;
   return {
-    programme: { name: str(p.name), kind: p.kind, issuer: str(p.issuer), chain: str(p.chain), framework: str(p.framework), reference: str(p.reference), purpose: str(p.purpose), starts_on: str(p.starts_on), ends_on: str(p.ends_on) },
-    requirements: raw.requirements.map((r) => ({ ...r, code: str(r.code), unit: str(r.unit), target: num(r.target), target_note: str(r.target_note), baseline: num(r.baseline), first_period_end: str(r.first_period_end), due_days: num(r.due_days), milestone: r.milestone === 'none' ? null : r.milestone, milestone_offset: num(r.milestone_offset), supplier_kinds: r.supplier_kinds.length ? r.supplier_kinds : null, severity: r.severity === 'none' ? null : r.severity, evidence: str(r.evidence), supplier: str(r.supplier) })),
+    programme: { name: str(p.name), kind: pick(p.kind, PROGRAMME_KINDS, 'customer'), issuer: str(p.issuer), chain: str(p.chain), framework: str(p.framework), reference: str(p.reference), purpose: str(p.purpose), starts_on: str(p.starts_on), ends_on: str(p.ends_on) },
+    requirements: raw.requirements.map((r) => {
+      // a frequency like "each order" or "on expiry" says what the trigger is when the trigger itself is vague
+      const fk = String(r.frequency || '').toLowerCase();
+      const trigger = pick(r.trigger, TRIGGERS, /order|shipment|po\b/.test(fk) ? 'per_order' : /expir|renew|valid|in date/.test(fk) ? 'expiry' : 'schedule');
+      const milestone = r.milestone && r.milestone.toLowerCase() !== 'none' ? pick(r.milestone, ORDER_MILESTONES, 'final') : null;
+      const severity = r.severity && r.severity.toLowerCase() !== 'none' ? pick(r.severity, SEVERITIES, 'major') : null;
+      const kinds = [...new Set((r.supplier_kinds || []).map((k) => pick(k, SUPPLIER_KINDS, 'other')))];
+      return {
+        code: str(r.code), title: r.title, instruction: r.instruction, discipline: pick(r.discipline, DISCIPLINES, 'other'), measure: pick(r.measure, MEASURES, 'evidence'),
+        unit: str(r.unit), target: num(r.target), target_note: str(r.target_note), baseline: num(r.baseline),
+        trigger, frequency: trigger === 'schedule' ? pick(r.frequency, FREQUENCIES, 'annual') : 'once',
+        first_period_end: str(r.first_period_end), due_days: num(r.due_days), milestone: trigger === 'per_order' ? milestone || 'final' : null, milestone_offset: num(r.milestone_offset),
+        applies_to: pick(r.applies_to, APPLIES, 'company'), supplier_kinds: kinds.length ? kinds : null, severity, owner_role: pick(r.owner_role, OWNER_ROLES, 'compliance'),
+        evidence: str(r.evidence), supplier: str(r.supplier),
+      };
+    }),
   };
 }
 
