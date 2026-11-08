@@ -12,7 +12,7 @@ export default async function AddFromDocument({ params }: { params: Promise<{ te
   if (membership.role === 'viewer') redirect(`/app/${slug}/parties`);
   const t = await getTranslations('parties');
   const sb = await supabaseServer();
-  const { data: existing } = await sb.from('parties').select('id, name').eq('tenant_id', tenant.id).order('name');
+  const { data: existing } = await sb.from('parties').select('id, name').eq('tenant_id', tenant.id).is('archived_at', null).order('name');
   return (
     <div className="max-w-4xl">
       <Link href={`/app/${slug}/parties`} className="small">← {t('title')}</Link>

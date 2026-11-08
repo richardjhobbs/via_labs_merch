@@ -10,6 +10,7 @@ import { googleConfigured, syncGmail } from '@/lib/connectors/google';
 import { microsoftConfigured, syncOutlook } from '@/lib/connectors/microsoft';
 import { sendPending } from '@/lib/connectors/outbound';
 import { CHANNEL_COLS, type Channel } from '@/lib/connectors/mail';
+import { purgeArchived } from '@/lib/party-lifecycle';
 import { nextEsgTenant, runEsgPass } from '@/lib/agents/esg-pass';
 
 export const maxDuration = 55;
@@ -70,6 +71,8 @@ export async function POST(req: NextRequest) {
     catch (e) { done.failed++; errors.push(`esg: ${e instanceof Error ? e.message : String(e)}`); }
   }
 
+  // once an hour: delete customers and suppliers archived more than 183 days ago
+  if (new Date().getUTCMinutes() === 17 && left() > 10_000) { try { done.purged = await purgeArchived(sb, t0 + BUDGET_MS); } catch (e) { done.failed++; errors.push(`purge: ${e instanceof Error ? e.message : String(e)}`); } }
   const { data: depth } = await sb.rpc('queue_depth');
   return NextResponse.json({ ok: true, at: new Date().toISOString(), ms: Date.now() - t0, done, errors: errors.slice(0, 3), llm: hasLlm(), depth });
 }

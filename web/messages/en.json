@@ -439,7 +439,33 @@
       "gone": "This account has already been decided.",
       "checkBank": "Check the bank details: an account number needs at least four characters."
     },
-    "finance": "Finance"
+    "finance": "Finance",
+    "remove": {
+      "notAllowed": "Only an owner or manager can archive or delete a customer or supplier.",
+      "hasActivity": "This one has orders, messages or other records, so it can only be archived.",
+      "archivedNote": "Archived on {date}. It will be deleted automatically on {purge} unless restored.",
+      "restoreTitle": "Restore",
+      "archiveTitle": "Archive",
+      "deleteTitle": "Delete",
+      "restoreHelp": "Restoring puts it back in lists and pickers, and mail from its contacts is read again.",
+      "restore": "Restore",
+      "archiveHelp": "Linked records: {records}. Archiving hides it from lists and pickers and stops mail from its contacts being read. It is deleted automatically after 6 months unless restored; its orders and messages stay, without the link.",
+      "deleteHelp": "No orders, messages or other records point to it, so it can be deleted now. This cannot be undone.",
+      "confirmArchive": "Archive {name}",
+      "confirmDelete": "Delete {name} permanently",
+      "archive": "Archive",
+      "delete": "Delete permanently",
+      "archivedList": "Archived ({n})",
+      "purgeOn": "deleted on {date}",
+      "kinds": {
+        "orders": "orders {n}",
+        "messages": "messages {n}",
+        "drafts": "drafts {n}",
+        "compliance": "compliance records {n}",
+        "bank": "bank accounts {n}",
+        "supply": "linked suppliers {n}"
+      }
+    }
   },
   "connections": {
     "title": "Connections",

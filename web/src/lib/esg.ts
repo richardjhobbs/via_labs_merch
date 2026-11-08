@@ -40,7 +40,7 @@ export async function generateTasks(tenantId: string, opts: { programmeId?: stri
   const needOrders = reqs.some((r) => r.trigger === 'per_order');
   const needExpiry = reqs.some((r) => r.trigger === 'expiry');
   const [{ data: parties }, orders, { data: accepted }, { data: openOrderTasks }] = await Promise.all([
-    needSuppliers ? sb.from('parties').select('id, kind, tier, country').eq('tenant_id', tenantId) : Promise.resolve({ data: [] }),
+    needSuppliers ? sb.from('parties').select('id, kind, tier, country').eq('tenant_id', tenantId).is('archived_at', null) : Promise.resolve({ data: [] }),
     needOrders ? listOrders(tenantId, { status: 'open' }, sb) : Promise.resolve([]),
     needExpiry ? sb.from('esg_tasks').select('requirement_id, party_id, sub:esg_submissions!esg_tasks_latest_fk(valid_until)').eq('tenant_id', tenantId).eq('status', 'accepted').in('requirement_id', reqs.filter((r) => r.trigger === 'expiry').map((r) => r.id)) : Promise.resolve({ data: [] }),
     needOrders ? sb.from('esg_tasks').select('id, requirement_id, key, due_date, period_end').eq('tenant_id', tenantId).in('status', ['open', 'returned']).not('order_id', 'is', null) : Promise.resolve({ data: [] }),

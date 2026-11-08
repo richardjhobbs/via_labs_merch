@@ -21,7 +21,7 @@ export default async function Programme({ params, searchParams }: { params: Prom
     sb.from('esg_tasks').select('id, requirement_id, period_label, period_end, due_date, status, assignee_user_id, parties(name, short), orders(po)').eq('programme_id', id).eq('tenant_id', tenant.id).order('due_date'),
     sb.from('esg_reports').select('id, period_label, status, created_at, approved_by_name, sent_to, sent_at').eq('programme_id', id).eq('tenant_id', tenant.id).order('created_at', { ascending: false }),
     sb.from('memberships').select('user_id, display_name, role').eq('tenant_id', tenant.id).neq('role', 'partner').order('display_name'),
-    sb.from('parties').select('id, name, kind').eq('tenant_id', tenant.id).order('name'),
+    sb.from('parties').select('id, name, kind').eq('tenant_id', tenant.id).is('archived_at', null).order('name'),
   ]);
   if (!esgEnabled(tn?.settings)) redirect(`/app/${slug}/esg`);
   if (!p) notFound();

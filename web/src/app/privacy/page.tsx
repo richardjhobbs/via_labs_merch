@@ -56,7 +56,7 @@ const S: LegalSection[] = [
   ] },
   { h: 'Where data is kept, and for how long', p: [
     'Company data is stored in Singapore. Some providers above may process data in other countries; where they do, they do so under their contractual and legal safeguards.',
-    'We keep a company\'s data for as long as its agreement with us is active, or as set out in that agreement. When a company leaves, or asks us to, we delete its data, except the minimum we must keep for legal, tax or accounting reasons. The ledger is append-only while an account is active, so that a company can rely on its record of decisions.',
+    'We keep a company\'s data for as long as its agreement with us is active, or as set out in that agreement. When a company leaves, or asks us to, we delete its data, except the minimum we must keep for legal, tax or accounting reasons. A customer or supplier that a company archives is deleted automatically 6 months later (its orders and messages stay, without the link), and one with no activity can be deleted at once. The ledger is append-only while an account is active, so that a company can rely on its record of decisions.',
   ] },
   { h: 'Your choices and rights', p: [
     'You can ask to see, correct, export or delete personal data about you, or object to how it is used, by writing to contact@getvia.xyz. Where your data is in a company\'s workspace, we will work with that company, which decides on its records. You can disconnect any mailbox or service at any time. If you are in a country with a data-protection authority, including Singapore\'s Personal Data Protection Commission, you may also complain to it.',

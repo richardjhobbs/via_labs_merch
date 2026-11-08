@@ -439,7 +439,33 @@
       "gone": "此账户已经处理过了。",
       "checkBank": "请核对银行信息：账号至少需要四个字符。"
     },
-    "finance": "金融机构"
+    "finance": "金融机构",
+    "remove": {
+      "notAllowed": "只有 owner 或 manager 可以归档或删除客户或供应商。",
+      "hasActivity": "该记录已有订单、消息或其他记录，只能归档。",
+      "archivedNote": "已于 {date} 归档。如不恢复，将于 {purge} 自动删除。",
+      "restoreTitle": "恢复",
+      "archiveTitle": "归档",
+      "deleteTitle": "删除",
+      "restoreHelp": "恢复后，它会重新出现在列表和选择框中，其联系人的邮件也会重新被读取。",
+      "restore": "恢复",
+      "archiveHelp": "关联记录：{records}。归档后，它会从列表和选择框中隐藏，其联系人的邮件不再被读取。如不恢复，6 个月后自动删除；其订单和消息会保留，但不再关联。",
+      "deleteHelp": "没有任何订单、消息或其他记录关联到它，现在可以删除。删除后无法恢复。",
+      "confirmArchive": "归档 {name}",
+      "confirmDelete": "永久删除 {name}",
+      "archive": "归档",
+      "delete": "永久删除",
+      "archivedList": "已归档（{n}）",
+      "purgeOn": "将于 {date} 删除",
+      "kinds": {
+        "orders": "订单 {n}",
+        "messages": "消息 {n}",
+        "drafts": "草稿 {n}",
+        "compliance": "合规记录 {n}",
+        "bank": "银行账户 {n}",
+        "supply": "关联供应商 {n}"
+      }
+    }
   },
   "connections": {
     "title": "连接",

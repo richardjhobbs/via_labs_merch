@@ -24,7 +24,7 @@ export async function runAgent(input: RunInput): Promise<RunResult> {
   const [{ data: tenant }, { data: agent }, { data: parties }, { data: gates }] = await Promise.all([
     sb.from('tenants').select('id, name, kind, locale, tz, currency').eq('id', input.tenantId).single(),
     sb.from('agents').select('id, name, model, languages, prompt_overrides').eq('tenant_id', input.tenantId).eq('scope_kind', 'tenant').eq('enabled', true).limit(1).maybeSingle(),
-    sb.from('parties').select('id, name, short, kind, country, lang, channel_pref, tier, meta').eq('tenant_id', input.tenantId).order('kind').order('name'),
+    sb.from('parties').select('id, name, short, kind, country, lang, channel_pref, tier, meta').eq('tenant_id', input.tenantId).is('archived_at', null).order('kind').order('name'),
     sb.from('gates').select('stream, level, locked').eq('tenant_id', input.tenantId).order('stream'),
   ]);
   if (!tenant) throw new Error('tenant not found');

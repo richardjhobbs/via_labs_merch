@@ -16,7 +16,7 @@ export default async function Esg({ params, searchParams }: { params: Promise<{ 
   const [{ data: tn }, { data: programmes }, { data: parties }, tasks, { data: lastReq }] = await Promise.all([
     sb.from('tenants').select('settings').eq('id', tenant.id).single(),
     sb.from('esg_programmes').select('id, name, kind, issuer_name, chain, status, ends_on, parties(name), esg_requirements(count)').eq('tenant_id', tenant.id).order('status').order('created_at', { ascending: false }),
-    sb.from('parties').select('id, name, kind').eq('tenant_id', tenant.id).order('name'),
+    sb.from('parties').select('id, name, kind').eq('tenant_id', tenant.id).is('archived_at', null).order('name'),
     esgSnapshot(tenant.id, sb),
     sb.from('addon_requests').select('status, requested_by_name, requested_at, decided_at, decision_note').eq('tenant_id', tenant.id).eq('addon', 'esg').order('requested_at', { ascending: false }).limit(1).maybeSingle(),
   ]);

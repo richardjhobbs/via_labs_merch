@@ -439,7 +439,33 @@
       "gone": "Über dieses Konto wurde bereits entschieden.",
       "checkBank": "Prüfen Sie die Bankdaten: Eine Kontonummer braucht mindestens vier Zeichen."
     },
-    "finance": "Finanzen"
+    "finance": "Finanzen",
+    "remove": {
+      "notAllowed": "Nur ein Owner oder Manager kann einen Kunden oder Lieferanten archivieren oder löschen.",
+      "hasActivity": "Hier gibt es Aufträge, Nachrichten oder andere Einträge, daher kann nur archiviert werden.",
+      "archivedNote": "Archiviert am {date}. Wird am {purge} automatisch gelöscht, sofern nicht wiederhergestellt.",
+      "restoreTitle": "Wiederherstellen",
+      "archiveTitle": "Archivieren",
+      "deleteTitle": "Löschen",
+      "restoreHelp": "Beim Wiederherstellen erscheint der Eintrag wieder in Listen und Auswahlfeldern, und Mails seiner Kontakte werden wieder gelesen.",
+      "restore": "Wiederherstellen",
+      "archiveHelp": "Verknüpfte Einträge: {records}. Archivieren blendet ihn in Listen und Auswahlfeldern aus und stoppt das Lesen von Mails seiner Kontakte. Nach 6 Monaten wird er automatisch gelöscht, sofern nicht wiederhergestellt; Aufträge und Nachrichten bleiben ohne Verknüpfung erhalten.",
+      "deleteHelp": "Keine Aufträge, Nachrichten oder anderen Einträge verweisen darauf, daher kann jetzt gelöscht werden. Das lässt sich nicht rückgängig machen.",
+      "confirmArchive": "{name} archivieren",
+      "confirmDelete": "{name} endgültig löschen",
+      "archive": "Archivieren",
+      "delete": "Endgültig löschen",
+      "archivedList": "Archiviert ({n})",
+      "purgeOn": "gelöscht am {date}",
+      "kinds": {
+        "orders": "Aufträge {n}",
+        "messages": "Nachrichten {n}",
+        "drafts": "Entwürfe {n}",
+        "compliance": "Compliance-Einträge {n}",
+        "bank": "Bankkonten {n}",
+        "supply": "verknüpfte Lieferanten {n}"
+      }
+    }
   },
   "connections": {
     "title": "Verbindungen",

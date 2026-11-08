@@ -439,7 +439,33 @@
       "gone": "Tài khoản này đã được xử lý.",
       "checkBank": "Hãy kiểm tra thông tin ngân hàng: số tài khoản cần ít nhất bốn ký tự."
     },
-    "finance": "Tài chính"
+    "finance": "Tài chính",
+    "remove": {
+      "notAllowed": "Chỉ owner hoặc manager mới có thể lưu trữ hoặc xóa khách hàng hay nhà cung cấp.",
+      "hasActivity": "Mục này đã có đơn hàng, tin nhắn hoặc hồ sơ khác, nên chỉ có thể lưu trữ.",
+      "archivedNote": "Đã lưu trữ ngày {date}. Sẽ tự động bị xóa vào {purge} nếu không khôi phục.",
+      "restoreTitle": "Khôi phục",
+      "archiveTitle": "Lưu trữ",
+      "deleteTitle": "Xóa",
+      "restoreHelp": "Khôi phục sẽ đưa mục này trở lại danh sách và ô chọn, và thư từ người liên hệ của nó sẽ được đọc lại.",
+      "restore": "Khôi phục",
+      "archiveHelp": "Hồ sơ liên kết: {records}. Lưu trữ sẽ ẩn mục này khỏi danh sách và ô chọn, và ngừng đọc thư từ người liên hệ của nó. Mục này tự động bị xóa sau 6 tháng nếu không khôi phục; đơn hàng và tin nhắn vẫn được giữ, không còn liên kết.",
+      "deleteHelp": "Không có đơn hàng, tin nhắn hay hồ sơ nào liên kết với mục này, nên có thể xóa ngay. Không thể hoàn tác.",
+      "confirmArchive": "Lưu trữ {name}",
+      "confirmDelete": "Xóa vĩnh viễn {name}",
+      "archive": "Lưu trữ",
+      "delete": "Xóa vĩnh viễn",
+      "archivedList": "Đã lưu trữ ({n})",
+      "purgeOn": "xóa vào {date}",
+      "kinds": {
+        "orders": "đơn hàng {n}",
+        "messages": "tin nhắn {n}",
+        "drafts": "bản nháp {n}",
+        "compliance": "hồ sơ tuân thủ {n}",
+        "bank": "tài khoản ngân hàng {n}",
+        "supply": "nhà cung cấp liên kết {n}"
+      }
+    }
   },
   "connections": {
     "title": "Kết nối",

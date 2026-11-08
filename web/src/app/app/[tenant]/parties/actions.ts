@@ -9,6 +9,7 @@ import { extract, hasLlm, recordUsage } from '@/lib/llm';
 import { MILESTONES, OWNERS, planFromEtd } from '@/lib/core/path';
 import { bankFrom, canAddBank, maskAccount, sameAccount } from '@/lib/bank';
 import { pickedFile } from '@/lib/connectors/drive';
+import { activityOf, deleteParty, purgeDate } from '@/lib/party-lifecycle';
 import { DocSchema, documentContent, findParty, normalizeDoc, sameCompany, type DocDraft } from '@/lib/documents';
 
 const KINDS = ['brand', 'retailer', 'store', 'buying_office', 'trading', 'factory', 'mill', 'fibre', 'forwarder', 'carrier', 'lab', 'auditor', 'other', 'bank', 'funder'] as const;
@@ -177,4 +178,46 @@ export async function saveDocument(_prev: ReadState, form: FormData): Promise<Re
   }
   revalidatePath(`/app/${slug}/parties`);
   redirect(after(`/app/${slug}/parties?saved=1`));
+}
+
+// Remove a customer or supplier. Owners and managers only. With no activity it is deleted at once; with
+// activity it is archived: hidden, restorable, and deleted automatically after ARCHIVE_DAYS. Ledger rows both ways.
+export async function removeParty(form: FormData) {
+  const slug = String(form.get('tenant')), id = String(form.get('id')), mode = String(form.get('mode'));
+  const me = await requireTenant(slug);
+  const t = await getTranslations('parties.remove');
+  if (me.membership.id === 'admin' || !['owner', 'manager'].includes(me.membership.role)) redirect(`/app/${slug}/parties/${id}?error=${encodeURIComponent(t('notAllowed'))}`);
+  const sb = supabaseAdmin();
+  const { data: p } = await sb.from('parties').select('id, name, kind, archived_at').eq('tenant_id', me.tenant.id).eq('id', id).maybeSingle();
+  if (!p) redirect(`/app/${slug}/parties`);
+  const who = me.membership.display_name || me.user.email || 'member';
+  const act = await activityOf(sb, me.tenant.id, id);
+  if (mode === 'delete') {
+    if (act.total > 0) redirect(`/app/${slug}/parties/${id}?error=${encodeURIComponent(t('hasActivity'))}`);
+    await deleteParty(sb, me.tenant.id, id);
+    await sb.rpc('ledger_append', { p_tenant: me.tenant.id, p_channel: 'Console', p_actor: who, p_actor_user: me.user.id, p_counterparty: p.name, p_stream: 'Setup', p_order: null, p_what: `Deleted ${p.kind} ${p.name} (no orders, messages or other records)`, p_gate: 'DELETED', p_gated: true, p_ref: {} });
+    revalidatePath(`/app/${slug}/parties`);
+    redirect(`/app/${slug}/parties?saved=1`);
+  }
+  if (!p.archived_at) {
+    const at = new Date().toISOString();
+    await sb.from('parties').update({ archived_at: at, archived_by: me.user.id }).eq('id', id).eq('tenant_id', me.tenant.id);
+    await sb.rpc('ledger_append', { p_tenant: me.tenant.id, p_channel: 'Console', p_actor: who, p_actor_user: me.user.id, p_counterparty: p.name, p_stream: 'Setup', p_order: null, p_what: `Archived ${p.kind} ${p.name}; deleted automatically on ${purgeDate(at)} unless restored`, p_gate: 'ARCHIVED', p_gated: true, p_ref: { activity: act.by } });
+  }
+  revalidatePath(`/app/${slug}/parties`);
+  redirect(`/app/${slug}/parties?saved=1`);
+}
+
+export async function restoreParty(form: FormData) {
+  const slug = String(form.get('tenant')), id = String(form.get('id'));
+  const me = await requireTenant(slug);
+  if (me.membership.id === 'admin' || !['owner', 'manager'].includes(me.membership.role)) redirect(`/app/${slug}/parties/${id}`);
+  const sb = supabaseAdmin();
+  const { data: p } = await sb.from('parties').select('name, kind').eq('tenant_id', me.tenant.id).eq('id', id).maybeSingle();
+  if (p) {
+    await sb.from('parties').update({ archived_at: null, archived_by: null }).eq('id', id).eq('tenant_id', me.tenant.id);
+    await sb.rpc('ledger_append', { p_tenant: me.tenant.id, p_channel: 'Console', p_actor: me.membership.display_name || me.user.email, p_actor_user: me.user.id, p_counterparty: p.name, p_stream: 'Setup', p_order: null, p_what: `Restored ${p.kind} ${p.name} from the archive`, p_gate: 'RESTORED', p_gated: true, p_ref: {} });
+  }
+  revalidatePath(`/app/${slug}/parties`);
+  redirect(`/app/${slug}/parties/${id}?saved=1`);
 }

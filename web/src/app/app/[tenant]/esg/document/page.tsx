@@ -15,7 +15,7 @@ export default async function ReadRequirementsPage({ params }: { params: Promise
   const sb = await supabaseServer();
   const [{ data: tn }, { data: parties }] = await Promise.all([
     sb.from('tenants').select('settings').eq('id', tenant.id).single(),
-    sb.from('parties').select('id, name, kind').eq('tenant_id', tenant.id).order('name'),
+    sb.from('parties').select('id, name, kind').eq('tenant_id', tenant.id).is('archived_at', null).order('name'),
   ]);
   if (!esgEnabled(tn?.settings) || !canLead(membership.role)) redirect(`/app/${slug}/esg`);
   return (

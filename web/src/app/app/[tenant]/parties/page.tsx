@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { purgeDate } from '@/lib/party-lifecycle';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { requireTenant } from '@/lib/tenant';
 import { supabaseServer } from '@/lib/supabase/server';
@@ -15,13 +16,14 @@ export default async function Parties({ params, searchParams }: { params: Promis
   const [t, locale] = await Promise.all([getTranslations('parties'), getLocale()]);
   const sb = await supabaseServer();
   const [{ data: parties }, { data: orders }, { data: pendingBank }] = await Promise.all([
-    sb.from('parties').select('id, kind, name, short, country, city, tier, lang, channel_pref, score, meta, contacts(name, role, email, phone)').eq('tenant_id', tenant.id).order('kind').order('name'),
+    sb.from('parties').select('id, kind, name, short, country, city, tier, lang, channel_pref, score, meta, archived_at, contacts(name, role, email, phone)').eq('tenant_id', tenant.id).order('kind').order('name'),
     sb.from('orders').select('customer_id, factory_id, mill_id, fibre_id').eq('tenant_id', tenant.id).eq('status', 'open'),
     sb.from('party_bank_accounts').select('party_id').eq('tenant_id', tenant.id).eq('status', 'pending'),
   ]);
   const bankToConfirm = new Set((pendingBank || []).map((b) => b.party_id));
   const count = (id: string) => (orders || []).filter((o) => [o.customer_id, o.factory_id, o.mill_id, o.fibre_id].includes(id)).length;
-  const customers = (parties || []).filter((p) => CUSTOMER.has(p.kind)), suppliers = (parties || []).filter((p) => !CUSTOMER.has(p.kind));
+  const active = (parties || []).filter((p) => !p.archived_at), archived = (parties || []).filter((p) => p.archived_at);
+  const customers = active.filter((p) => CUSTOMER.has(p.kind)), suppliers = active.filter((p) => !CUSTOMER.has(p.kind));
   const canEdit = membership.role !== 'viewer';
   const tierLabel = (n: number) => (n === 1 || n === 2 || n === 3 ? t(`tier${n}`) : `T${n}`);
   const Table = ({ rows, supplier }: { rows: typeof customers; supplier?: boolean }) => (
@@ -40,6 +42,9 @@ export default async function Parties({ params, searchParams }: { params: Promis
         <div className="grid gap-5" style={{ minWidth: 0, gridTemplateColumns: 'minmax(0,1fr)' }}>
           <div><h2 className="mb-2">{t('customers')} <span className="muted">({customers.length})</span></h2><Table rows={customers} /></div>
           <div><h2 className="mb-2">{t('suppliers')} <span className="muted">({suppliers.length})</span></h2><Table rows={suppliers} supplier /><p className="muted small mt-2">{t('tierHelp')}</p></div>
+          {archived.length > 0 && <details className="card small"><summary style={{ cursor: 'pointer' }}>{t('remove.archivedList', { n: archived.length })}</summary>
+            <ul className="mt-2 grid gap-1">{archived.map((p) => <li key={p.id} className="flex items-center gap-2 flex-wrap"><Link href={`/app/${slug}/parties/${p.id}`}>{p.name}</Link><span className="muted">{t(`kinds.${p.kind}`)} · {t('remove.purgeOn', { date: purgeDate(p.archived_at!) })}</span></li>)}</ul>
+          </details>}
         </div>
         {canEdit && <div className="grid gap-4 self-start">
           <div className="card">

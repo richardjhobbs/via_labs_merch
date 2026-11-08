@@ -38,7 +38,7 @@ const FREE_MAIL = new Set(['gmail.com', 'googlemail.com', 'yahoo.com', 'yahoo.co
 // Contact emails and company domains (free-mail domains excluded) for the company, or for one party.
 // Used to filter what comes in and to bound what the agent may search for.
 export async function senderList(sb: Client, tenantId: string, partyId?: string | null) {
-  let q = sb.from('contacts').select('id, party_id, email').eq('tenant_id', tenantId).not('email', 'is', null);
+  let q = sb.from('contacts').select('id, party_id, email, parties!inner(archived_at)').eq('tenant_id', tenantId).not('email', 'is', null).is('parties.archived_at', null);   // archived parties no longer let mail in
   if (partyId) q = q.eq('party_id', partyId);
   const { data } = await q;
   const byEmail = new Map<string, { party_id: string; contact_id: string }>();

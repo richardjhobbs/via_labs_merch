@@ -439,7 +439,33 @@
       "gone": "Esta cuenta ya se ha decidido.",
       "checkBank": "Revise los datos bancarios: el número de cuenta necesita al menos cuatro caracteres."
     },
-    "finance": "Finanzas"
+    "finance": "Finanzas",
+    "remove": {
+      "notAllowed": "Solo un owner o manager puede archivar o eliminar un cliente o proveedor.",
+      "hasActivity": "Tiene pedidos, mensajes u otros registros, así que solo se puede archivar.",
+      "archivedNote": "Archivado el {date}. Se eliminará automáticamente el {purge} si no se restaura.",
+      "restoreTitle": "Restaurar",
+      "archiveTitle": "Archivar",
+      "deleteTitle": "Eliminar",
+      "restoreHelp": "Al restaurarlo vuelve a las listas y selectores, y se vuelve a leer el correo de sus contactos.",
+      "restore": "Restaurar",
+      "archiveHelp": "Registros vinculados: {records}. Archivar lo oculta de las listas y selectores y deja de leer el correo de sus contactos. Se elimina automáticamente a los 6 meses si no se restaura; sus pedidos y mensajes se conservan, sin el vínculo.",
+      "deleteHelp": "Ningún pedido, mensaje u otro registro apunta a él, así que se puede eliminar ahora. No se puede deshacer.",
+      "confirmArchive": "Archivar {name}",
+      "confirmDelete": "Eliminar {name} definitivamente",
+      "archive": "Archivar",
+      "delete": "Eliminar definitivamente",
+      "archivedList": "Archivados ({n})",
+      "purgeOn": "se elimina el {date}",
+      "kinds": {
+        "orders": "pedidos {n}",
+        "messages": "mensajes {n}",
+        "drafts": "borradores {n}",
+        "compliance": "registros de cumplimiento {n}",
+        "bank": "cuentas bancarias {n}",
+        "supply": "proveedores vinculados {n}"
+      }
+    }
   },
   "connections": {
     "title": "Conexiones",

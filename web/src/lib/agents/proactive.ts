@@ -62,7 +62,7 @@ ${items.slice(0, MAX_ITEMS).map((i, n) => `${n + 1}. PO ${i.po} — ${i.kind}: $
 export async function seedSampleInbound(tenantId: string) {
   const sb = supabaseAdmin();
   const orders = await listOrders(tenantId, { status: 'open' }, sb);
-  const { data: parties } = await sb.from('parties').select('id, name, kind, meta').eq('tenant_id', tenantId);
+  const { data: parties } = await sb.from('parties').select('id, name, kind, meta').eq('tenant_id', tenantId).is('archived_at', null);
   const byCode = (c: string) => parties?.find((p) => (p.meta as { code?: string })?.code === c);
   const poOf = (factoryCode: string, not?: string[]) => orders.find((o) => (o.factory as { id: string } | null)?.id === byCode(factoryCode)?.id && !(not || []).includes(o.po))?.po;
   const hx = byCode('HX'), nl = byCode('NL'), da = byCode('DA');
