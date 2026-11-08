@@ -19,6 +19,8 @@ export function brandedHtml({ title, paragraphs, cta, footnote }: { title: strin
 }
 
 export async function sendMail({ to, subject, text, html }: { to: string; subject: string; text: string; html?: string }) {
+  // sample and test people (reserved domains: .example, .invalid, .test, .localhost, example.com/net/org) are never emailed
+  if (/@([^@]+\.)?(example|invalid|test|localhost)$|@(.+\.)?example\.(com|net|org)$/i.test(to.trim())) { console.info('[mail] reserved test address, not sent:', subject); return { skipped: true }; }
   const key = process.env.RESEND_API_KEY;
   if (!key) { console.warn('[mail] RESEND_API_KEY missing; not sent:', subject); return { skipped: true }; }
   const r = await fetch('https://api.resend.com/emails', {
