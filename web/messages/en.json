@@ -1183,6 +1183,9 @@
     "failed": "Google's file picker did not open. Check that pop-ups and third-party cookies are allowed for this site, then try again.",
     "notFound": "That file could not be opened from Google Drive. Pick it again.",
     "tooBig": "That file is larger than 4 MB.",
-    "badType": "That kind of Google file cannot be read. Pick a Google Sheet, a Google Doc, a PDF, a photo or a spreadsheet."
+    "badType": "That kind of Google file cannot be read. Pick a Google Sheet, a Google Doc, a PDF, a photo or a spreadsheet.",
+    "myDrive": "My Drive",
+    "sharedWithMe": "Shared with me",
+    "sharedDrives": "Shared drives"
   }
 }

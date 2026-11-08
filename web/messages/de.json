@@ -1183,6 +1183,9 @@
     "failed": "Die Google-Dateiauswahl hat sich nicht geöffnet. Erlauben Sie Pop-ups und Drittanbieter-Cookies für diese Seite und versuchen Sie es erneut.",
     "notFound": "Diese Datei konnte nicht aus Google Drive geöffnet werden. Wählen Sie sie erneut.",
     "tooBig": "Diese Datei ist größer als 4 MB.",
-    "badType": "Diese Art von Google-Datei kann nicht gelesen werden. Wählen Sie eine Google-Tabelle, ein Google-Dokument, ein PDF, ein Foto oder eine Tabelle."
+    "badType": "Diese Art von Google-Datei kann nicht gelesen werden. Wählen Sie eine Google-Tabelle, ein Google-Dokument, ein PDF, ein Foto oder eine Tabelle.",
+    "myDrive": "Meine Ablage",
+    "sharedWithMe": "Für mich freigegeben",
+    "sharedDrives": "Geteilte Ablagen"
   }
 }

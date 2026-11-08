@@ -1183,6 +1183,9 @@
     "failed": "Trình chọn tệp của Google không mở. Hãy cho phép cửa sổ bật lên và cookie bên thứ ba cho trang này rồi thử lại.",
     "notFound": "Không mở được tệp đó từ Google Drive. Hãy chọn lại.",
     "tooBig": "Tệp lớn hơn 4 MB.",
-    "badType": "Không đọc được loại tệp Google này. Hãy chọn Google Sheet, Google Doc, PDF, ảnh hoặc bảng tính."
+    "badType": "Không đọc được loại tệp Google này. Hãy chọn Google Sheet, Google Doc, PDF, ảnh hoặc bảng tính.",
+    "myDrive": "Drive của tôi",
+    "sharedWithMe": "Được chia sẻ với tôi",
+    "sharedDrives": "Bộ nhớ dùng chung"
   }
 }

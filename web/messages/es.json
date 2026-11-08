@@ -1183,6 +1183,9 @@
     "failed": "El selector de archivos de Google no se abrió. Permita ventanas emergentes y cookies de terceros para este sitio e inténtelo de nuevo.",
     "notFound": "No se pudo abrir ese archivo desde Google Drive. Elíjalo de nuevo.",
     "tooBig": "El archivo supera los 4 MB.",
-    "badType": "No se puede leer ese tipo de archivo de Google. Elija una hoja de Google, un documento de Google, un PDF, una foto o una hoja de cálculo."
+    "badType": "No se puede leer ese tipo de archivo de Google. Elija una hoja de Google, un documento de Google, un PDF, una foto o una hoja de cálculo.",
+    "myDrive": "Mi unidad",
+    "sharedWithMe": "Compartido conmigo",
+    "sharedDrives": "Unidades compartidas"
   }
 }

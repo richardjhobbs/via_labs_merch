@@ -1183,6 +1183,9 @@
     "failed": "Google 文件选择器没有打开。请确认本网站允许弹出窗口和第三方 Cookie，然后重试。",
     "notFound": "无法从 Google Drive 打开该文件，请重新选择。",
     "tooBig": "该文件超过 4 MB。",
-    "badType": "无法读取这类 Google 文件。请选择 Google 表格、Google 文档、PDF、图片或电子表格。"
+    "badType": "无法读取这类 Google 文件。请选择 Google 表格、Google 文档、PDF、图片或电子表格。",
+    "myDrive": "我的云端硬盘",
+    "sharedWithMe": "与我共享",
+    "sharedDrives": "共享云端硬盘"
   }
 }
