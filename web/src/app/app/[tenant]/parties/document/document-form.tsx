@@ -101,16 +101,16 @@ export function DocumentForm({ tenant, existing, canBank }: { tenant: string; ex
   const t = useTranslations('parties.doc');
   const [state, action, pending] = useActionState<ReadState, FormData>(readDocument, {});
   const [dismissed, setDismissed] = useState<DocDraft | null>(null);
-  const formRef = useRef<HTMLFormElement>(null), fileRef = useRef<HTMLInputElement>(null);
+  const formRef = useRef<HTMLFormElement>(null), fileRef = useRef<HTMLInputElement>(null), driveRef = useRef<HTMLInputElement>(null);
   const [picked, setPicked] = useState({ id: '', name: '' });
   if (state.draft && state.draft !== dismissed) return <Review key={state.draft.file} tenant={tenant} draft={state.draft} existing={existing} canBank={canBank} onReset={() => setDismissed(state.draft!)} />;
   return (
     <form action={action} className="card" ref={formRef}>
       <input type="hidden" name="tenant" value={tenant} />
-      <input type="hidden" name="drive_file_id" value={picked.id} />
-      <label className="f"><span>{t('file')}</span><input ref={fileRef} className="input" type="file" name="file" accept=".xls,.xlsx,.xlsm,.csv,.pdf,.png,.jpg,.jpeg,.webp" onChange={() => setPicked({ id: '', name: '' })} /></label>
+      <input type="hidden" name="drive_file_id" ref={driveRef} defaultValue="" />
+      <label className="f"><span>{t('file')}</span><input ref={fileRef} className="input" type="file" name="file" accept=".xls,.xlsx,.xlsm,.csv,.pdf,.png,.jpg,.jpeg,.webp" onChange={() => { if (driveRef.current) driveRef.current.value = ''; setPicked({ id: '', name: '' }); }} /></label>
       <div className="flex items-center gap-2 flex-wrap mb-3"><span className="small muted">{t('orDrive')}</span>
-        <DrivePicker tenant={tenant} kind="doc" disabled={pending} onPick={(f) => { if (fileRef.current) fileRef.current.value = ''; setPicked(f); setTimeout(() => formRef.current?.requestSubmit(), 0); }} />
+        <DrivePicker tenant={tenant} kind="doc" disabled={pending} onPick={(f) => { if (fileRef.current) fileRef.current.value = ''; if (driveRef.current) driveRef.current.value = f.id; setPicked(f); formRef.current?.requestSubmit(); }} />
         {picked.name && <span className="small">{picked.name}</span>}
       </div>
       {state.error && <div className="notice crit mb-3">{state.error}</div>}
