@@ -11,7 +11,9 @@ export const maxDuration = 30;
 export async function POST(req: NextRequest) {
   if (!forwardConfigured()) return NextResponse.json({ ok: false, reason: 'not configured' }, { status: 503 });
   const body = await req.text();
-  if (!verifySvix(body, { id: req.headers.get('svix-id'), ts: req.headers.get('svix-timestamp'), sig: req.headers.get('svix-signature') })) return NextResponse.json({ error: 'bad signature' }, { status: 401 });
+  // Resend sends svix-* headers or, on newer webhooks, the Standard Webhooks names webhook-*; same signature
+  const h = (n: string) => req.headers.get(`svix-${n}`) || req.headers.get(`webhook-${n}`);
+  if (!verifySvix(body, { id: h('id'), ts: h('timestamp'), sig: h('signature') })) return NextResponse.json({ error: 'bad signature' }, { status: 401 });
   let evt: { type?: string; data?: { email_id?: string; to?: string[]; cc?: string[]; from?: string; attachments?: { filename?: string; content_type?: string }[] } };
   try { evt = JSON.parse(body); } catch { return NextResponse.json({ error: 'bad json' }, { status: 400 }); }
   if (evt.type !== 'email.received' || !evt.data?.email_id) return NextResponse.json({ ok: true, ignored: 'type' });

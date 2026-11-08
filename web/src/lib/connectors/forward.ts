@@ -26,10 +26,10 @@ export function newForwardAddress() {
 
 // Svix signature check (Resend webhooks): HMAC-SHA256 of "id.timestamp.body" with the base64 secret after "whsec_".
 export function verifySvix(body: string, h: { id: string | null; ts: string | null; sig: string | null }) {
-  const secret = process.env.RESEND_WEBHOOK_SECRET || '';
+  const secret = (process.env.RESEND_WEBHOOK_SECRET || '').trim().replace(/^["']|["']$/g, '');
   if (!secret || !h.id || !h.ts || !h.sig) return false;
   if (Math.abs(Date.now() / 1000 - Number(h.ts)) > 300) return false;
-  const key = Buffer.from(secret.replace(/^whsec_/, ''), 'base64');
+  const key = Buffer.from(secret.replace(/^whsec_/, ''), 'base64');   // same scheme for svix-* and the Standard Webhooks webhook-* headers
   const want = createHmac('sha256', key).update(`${h.id}.${h.ts}.${body}`).digest();
   return h.sig.split(' ').some((part) => {
     const [v, s] = part.split(',');
