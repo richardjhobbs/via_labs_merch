@@ -72,7 +72,7 @@ export async function syncOutlook(sb: Client, ch: Channel, deadline: number) {
     const folder = cfg.filter === 'label' && cfg.label_id ? cfg.label_id : 'inbox';
     const q = `$filter=${encodeURIComponent(`receivedDateTime ge ${cfg.since}`)}&$orderby=${encodeURIComponent('receivedDateTime asc')}&$top=25&$select=id,receivedDateTime,subject,from,replyTo,internetMessageId,conversationId,hasAttachments,isDraft`;
     const r = await graph<{ value: GraphMsg[] }>(token, `/mailFolders/${folder}/messages?${q}`);
-    const known = cfg.filter === 'label' ? null : await knownSenders(sb, ch.tenant_id);
+    const known = await knownSenders(sb, ch.tenant_id);
     const list = r.value || [];
     const { data: seen } = list.length ? await sb.from('messages').select('external_id').eq('channel_id', ch.id).in('external_id', list.map((m) => m.id)) : { data: [] };
     const done = new Set([...(seen || []).map((s) => s.external_id as string), ...(cfg.at_since || [])]);
@@ -83,7 +83,7 @@ export async function syncOutlook(sb: Client, ch: Channel, deadline: number) {
       if (done.has(m.id)) { mark(m); continue; }
       out.fetched++;
       const from = addr(m.from);
-      const match = known ? known(from) : { party_id: null, known: true };
+      const match = cfg.filter === 'label' ? { party_id: known(from).party_id, known: true } : known(from);
       if (m.isDraft || !from || from === (ch.account || '').toLowerCase() || !match.known) { out.skipped++; mark(m); continue; }
       const full = await graph<GraphMsg>(token, `/messages/${m.id}?$select=uniqueBody,body,toRecipients`);
       const text = newPart(full.uniqueBody?.content?.trim() || full.body?.content || '');

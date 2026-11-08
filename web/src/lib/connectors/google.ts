@@ -104,14 +104,20 @@ export async function syncGmail(sb: Client, ch: Channel, deadline: number) {
     const labelId = cfg.filter === 'label' && cfg.label_id ? cfg.label_id : 'INBOX';
 
     // collect new message ids in history order, up to a cap
-    type H = { id: string; messagesAdded?: { message: { id: string; labelIds?: string[] } }[] };
+    type H = { id: string; messagesAdded?: { message: { id: string; labelIds?: string[] } }[]; labelsAdded?: { message: { id: string }; labelIds?: string[] }[] };
+    const byLabel = labelId !== 'INBOX';
     const ids: { id: string; hid: string }[] = [];
     let pageToken: string | undefined, latest = cfg.history_id, complete = true;
     try {
       do {
-        const q = new URLSearchParams({ startHistoryId: cfg.history_id, historyTypes: 'messageAdded', labelId, maxResults: '100', ...(pageToken ? { pageToken } : {}) });
+        // with a chosen label, a message labelled by hand later counts too (labelAdded), not only one labelled on arrival
+        const q = new URLSearchParams({ startHistoryId: cfg.history_id, labelId, maxResults: '100', ...(pageToken ? { pageToken } : {}) });
+        q.append('historyTypes', 'messageAdded'); if (byLabel) q.append('historyTypes', 'labelAdded');
         const r = await gmail<{ history?: H[]; historyId: string; nextPageToken?: string }>(token, `/history?${q}`);
-        for (const h of r.history || []) for (const a of h.messagesAdded || []) if (!ids.some((x) => x.id === a.message.id)) ids.push({ id: a.message.id, hid: h.id });
+        for (const h of r.history || []) {
+          const added = [...(h.messagesAdded || []).map((a) => a.message.id), ...(h.labelsAdded || []).filter((a) => (a.labelIds || []).includes(labelId)).map((a) => a.message.id)];
+          for (const id of added) if (!ids.some((x) => x.id === id)) ids.push({ id, hid: h.id });
+        }
         latest = r.historyId; pageToken = r.nextPageToken;
       } while (pageToken && ids.length < 40);
       if (pageToken) complete = false;
@@ -121,7 +127,8 @@ export async function syncGmail(sb: Client, ch: Channel, deadline: number) {
       throw e;
     }
 
-    const known = cfg.filter === 'label' ? null : await knownSenders(sb, ch.tenant_id);
+    // known senders decide what is read in 'known' mode; in label mode they only link the sender to a party
+    const known = await knownSenders(sb, ch.tenant_id);
     const { data: seen } = ids.length ? await sb.from('messages').select('external_id').eq('channel_id', ch.id).in('external_id', ids.map((x) => x.id)) : { data: [] };
     const done = new Set((seen || []).map((s) => s.external_id));
     let lastDone: string | null = null;
@@ -132,7 +139,7 @@ export async function syncGmail(sb: Client, ch: Channel, deadline: number) {
       const meta = await gmail<GMsg>(token, `/messages/${id}?format=metadata&metadataHeaders=From&metadataHeaders=Reply-To`).catch((e) => { if ((e as { status?: number }).status === 404) return null; throw e; });
       const labels = meta?.labelIds || [];
       const from = addrOf(hdr(meta?.payload, 'From'));
-      const match = known ? known(from) : { party_id: null, known: true };
+      const match = byLabel ? { party_id: known(from).party_id, known: true } : known(from);
       if (!meta || labels.some((l) => ['SENT', 'DRAFT', 'SPAM', 'TRASH'].includes(l)) || from === (ch.account || '').toLowerCase() || !match.known) { out.skipped++; lastDone = hid; continue; }
 
       const m = await gmail<GMsg>(token, `/messages/${id}?format=full`);
