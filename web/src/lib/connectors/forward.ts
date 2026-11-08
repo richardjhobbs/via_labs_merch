@@ -25,8 +25,8 @@ export function newForwardAddress() {
 }
 
 // Svix signature check (Resend webhooks): HMAC-SHA256 of "id.timestamp.body" with the base64 secret after "whsec_".
-export function verifySvix(body: string, h: { id: string | null; ts: string | null; sig: string | null }) {
-  const secret = (process.env.RESEND_WEBHOOK_SECRET || '').trim().replace(/^["']|["']$/g, '');
+export function verifySvix(body: string, h: { id: string | null; ts: string | null; sig: string | null }, secretOverride?: string | null) {
+  const secret = (secretOverride ?? process.env.RESEND_WEBHOOK_SECRET ?? '').trim().replace(/^["']|["']$/g, '');
   if (!secret || !h.id || !h.ts || !h.sig) return false;
   // Resend replays keep the original signature and timestamp, so allow a day; each email id is stored once
   if (Math.abs(Date.now() / 1000 - Number(h.ts)) > 86_400) return false;
@@ -65,4 +65,23 @@ export async function allowedSenders(sb: Client, tenantId: string, userId: strin
     sb.from('channels').select('account').eq('tenant_id', tenantId).eq('owner_user_id', userId).in('kind', ['email_gmail', 'email_m365']).eq('status', 'connected'),
   ]);
   return new Set([u?.user?.email, ...(boxes || []).map((b) => b.account)].filter(Boolean).map((x) => String(x).toLowerCase()));
+}
+
+// The signing secret as Resend holds it for this endpoint, read with the full-access key. Used when the stored
+// RESEND_WEBHOOK_SECRET does not match (mistyped, or the secret was rotated), and cached for the instance.
+let liveSecret: { value: string | null; at: number } | null = null;
+export async function liveSigningSecret(endpoint: string) {
+  if (liveSecret && Date.now() - liveSecret.at < 10 * 60_000) return liveSecret.value;
+  try {
+    const r = await fetch('https://api.resend.com/webhooks', { headers: { authorization: `Bearer ${process.env.RESEND_API_KEY}` } });
+    const j = await r.json() as { data?: { id: string; endpoint: string }[] };
+    const mine = (j.data || []).find((w) => w.endpoint === endpoint);
+    let value: string | null = null;
+    if (mine) {
+      const d = await (await fetch(`https://api.resend.com/webhooks/${mine.id}`, { headers: { authorization: `Bearer ${process.env.RESEND_API_KEY}` } })).json() as { signing_secret?: string; secret?: string };
+      value = d.signing_secret || d.secret || null;
+    }
+    liveSecret = { value, at: Date.now() };
+    return value;
+  } catch { return null; }
 }

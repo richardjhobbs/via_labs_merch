@@ -4,7 +4,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase/server';
 import { ingestInbound } from '@/lib/agents/inbound';
-import { addrOf, allowedSenders, appOf, forwardConfigured, htmlToText, inboundDomain, receivedEmail, verifySvix } from '@/lib/connectors/forward';
+import { addrOf, allowedSenders, appOf, forwardConfigured, htmlToText, inboundDomain, liveSigningSecret, receivedEmail, verifySvix } from '@/lib/connectors/forward';
 
 export const maxDuration = 30;
 
@@ -13,7 +13,10 @@ export async function POST(req: NextRequest) {
   const body = await req.text();
   // Resend sends svix-* headers or, on newer webhooks, the Standard Webhooks names webhook-*; same signature
   const h = (n: string) => req.headers.get(`svix-${n}`) || req.headers.get(`webhook-${n}`);
-  const sigOk = verifySvix(body, { id: h('id'), ts: h('timestamp'), sig: h('signature') });
+  const hdrs = { id: h('id'), ts: h('timestamp'), sig: h('signature') };
+  // stored secret first; if it does not match, the secret Resend holds for this endpoint right now
+  let sigOk = verifySvix(body, hdrs);
+  if (!sigOk) { const live = await liveSigningSecret(`${req.nextUrl.origin}/api/webhooks/resend-inbound`); if (live) sigOk = verifySvix(body, hdrs, live); }
   if (!sigOk) console.warn('[resend-inbound] signature refused', JSON.stringify({ svix: !!req.headers.get('svix-id'), std: !!req.headers.get('webhook-id'), age_s: Math.round(Date.now() / 1000 - Number(h('timestamp'))), sigs: (h('signature') || '').split(' ').map((x) => x.split(',')[0]), bytes: body.length, secret_len: (process.env.RESEND_WEBHOOK_SECRET || '').length }));
   if (!sigOk) return NextResponse.json({ error: 'bad signature' }, { status: 401 });
   let evt: { type?: string; data?: { email_id?: string; to?: string[]; cc?: string[]; from?: string; attachments?: { filename?: string; content_type?: string }[] } };
