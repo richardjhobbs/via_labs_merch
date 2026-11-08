@@ -580,7 +580,10 @@
     "mic": "Đọc để nhập",
     "micStop": "Dừng đọc",
     "micDenied": "Micrô đang bị chặn. Hãy cho phép trang này dùng micrô trong cài đặt trình duyệt rồi thử lại.",
-    "listening": "Đang nghe... hãy nói"
+    "listening": "Đang nghe... hãy nói",
+    "micService": "Dịch vụ giọng nói không phản hồi. Trình duyệt hoặc cửa sổ này có thể đang chặn: Brave, cửa sổ Khách và Ẩn danh, và một số trình chặn quảng cáo. Hãy thử cửa sổ Chrome hoặc Edge thông thường.",
+    "micDevice": "Không tìm thấy micrô, hoặc Windows đang chặn. Kiểm tra Cài đặt → Quyền riêng tư → Micrô.",
+    "micSilence": "Không nghe thấy giọng nói. Bấm vào micrô và nói lại."
   },
   "viewas": {
     "label": "Xem dưới vai trò",
@@ -1151,5 +1154,16 @@
     "onlyManagers": "Chỉ chủ doanh nghiệp hoặc quản lý mới có thể đổi quyền truy cập của đối tác.",
     "badEmail": "Hãy nhập địa chỉ email hợp lệ.",
     "needAddon": "Quyền truy cập của đối tác đi kèm gói bổ sung ESG và tuân thủ."
+  },
+  "legal": {
+    "privacyTitle": "Chính sách quyền riêng tư",
+    "termsTitle": "Điều khoản dịch vụ",
+    "updated": "Cập nhật lần cuối {date}",
+    "englishGoverns": "Trang này bằng tiếng Anh, và văn bản tiếng Anh là bản có hiệu lực.",
+    "contact": "Câu hỏi hoặc yêu cầu:",
+    "signIn": "Đăng nhập",
+    "trustLink": "Tin cậy",
+    "privacyLink": "Quyền riêng tư",
+    "termsLink": "Điều khoản"
   }
 }

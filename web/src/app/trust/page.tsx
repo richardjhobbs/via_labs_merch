@@ -6,7 +6,7 @@ import { LangSwitch } from '@/components/lang-switch';
 // Public confidentiality statement. Every claim here is enforced in code or policy; keep the two in step
 // (supabase/migrations/0006_support_access.sql, src/lib/tenant.ts, src/lib/support.ts).
 export default async function Trust() {
-  const t = await getTranslations('trust');
+  const [t, tl] = await Promise.all([getTranslations('trust'), getTranslations('legal')]);
   const sections = ['isolation', 'staff', 'support', 'agents', 'partners', 'models', 'infra', 'signin', 'yours'] as const;
   return (
     <main className="min-h-screen" style={{ background: 'var(--paper)' }}>
@@ -28,7 +28,7 @@ export default async function Trust() {
         </div>
         <p className="muted small mt-10">{t('updated')} · {t('contact')} <a href="mailto:contact@getvia.xyz">contact@getvia.xyz</a></p>
       </article>
-      <footer className="max-w-3xl mx-auto px-6 py-8 muted small">© VIA Labs Pte Ltd · getvia.xyz</footer>
+      <footer className="max-w-3xl mx-auto px-6 py-8 muted small">© VIA Labs Pte Ltd · getvia.xyz · <Link href="/privacy">{tl('privacyLink')}</Link> · <Link href="/terms">{tl('termsLink')}</Link></footer>
     </main>
   );
 }

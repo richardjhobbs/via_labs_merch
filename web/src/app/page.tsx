@@ -77,7 +77,7 @@ export default async function Landing() {
         </ul>
         <Link href="/trust" className="btn sm mt-4">{t('landing.trust.link')}</Link>
       </section>
-      <footer className="max-w-5xl mx-auto px-6 py-8 muted small">© VIA Labs Pte Ltd · getvia.xyz · <Link href="/trust">{t('landing.trust.footer')}</Link></footer>
+      <footer className="max-w-5xl mx-auto px-6 py-8 muted small">© VIA Labs Pte Ltd · getvia.xyz · <Link href="/trust">{t('landing.trust.footer')}</Link> · <Link href="/privacy">{t('legal.privacyLink')}</Link> · <Link href="/terms">{t('legal.termsLink')}</Link></footer>
     </main>
   );
 }

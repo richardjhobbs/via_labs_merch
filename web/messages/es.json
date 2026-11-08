@@ -580,7 +580,10 @@
     "mic": "Dictar",
     "micStop": "Detener el dictado",
     "micDenied": "El micrófono está bloqueado. Permítalo para este sitio en la configuración del navegador e inténtelo de nuevo.",
-    "listening": "Escuchando... hable ahora"
+    "listening": "Escuchando... hable ahora",
+    "micService": "El servicio de voz no respondió. Este navegador o ventana puede bloquearlo: Brave, las ventanas de invitado e incógnito y algunos bloqueadores lo hacen. Pruebe en una ventana normal de Chrome o Edge.",
+    "micDevice": "No se encontró ningún micrófono, o Windows lo está bloqueando. Revise Configuración → Privacidad → Micrófono.",
+    "micSilence": "No se oyó voz. Haga clic en el micrófono y vuelva a hablar."
   },
   "viewas": {
     "label": "Ver como",
@@ -1151,5 +1154,16 @@
     "onlyManagers": "Solo un propietario o responsable puede cambiar el acceso de socios.",
     "badEmail": "Introduzca una dirección de correo válida.",
     "needAddon": "El acceso de socios viene con el complemento de ESG y cumplimiento."
+  },
+  "legal": {
+    "privacyTitle": "Política de privacidad",
+    "termsTitle": "Términos del servicio",
+    "updated": "Última actualización: {date}",
+    "englishGoverns": "Esta página está en inglés y el texto en inglés es el que se aplica.",
+    "contact": "Preguntas o solicitudes:",
+    "signIn": "Iniciar sesión",
+    "trustLink": "Confianza",
+    "privacyLink": "Privacidad",
+    "termsLink": "Términos"
   }
 }

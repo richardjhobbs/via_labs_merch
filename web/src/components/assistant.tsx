@@ -42,7 +42,11 @@ export function Assistant({ slug, agentName, lang, live, labels }: { slug: strin
       for (let i = e.resultIndex; i < e.results.length; i++) { const r = e.results[i]; if (r.isFinal) finals += r[0].transcript; else interim += r[0].transcript; }
       setQ((before + finals + interim).replace(/\s+/g, ' ').trimStart());
     };
-    rec.onerror = (e) => { if (e.error === 'not-allowed' || e.error === 'service-not-allowed') setMicError(labels.micDenied); else if (e.error !== 'no-speech' && e.error !== 'aborted') setMicError(e.error); };
+    rec.onerror = (e) => {
+      // say what went wrong: some browsers (Brave, Guest or Incognito windows, some blockers) refuse the speech service silently
+      const msg = e.error === 'not-allowed' ? labels.micDenied : e.error === 'service-not-allowed' || e.error === 'network' ? labels.micService : e.error === 'audio-capture' ? labels.micDevice : e.error === 'no-speech' ? labels.micSilence : e.error === 'aborted' ? '' : `${labels.micService} (${e.error})`;
+      setMicError(msg);
+    };
     rec.onend = () => { setListening(false); recRef.current = null; };
     setMicError(''); recRef.current = rec; rec.start(); setListening(true);
   }

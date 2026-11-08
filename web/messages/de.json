@@ -580,7 +580,10 @@
     "mic": "Diktieren",
     "micStop": "Diktat beenden",
     "micDenied": "Das Mikrofon ist blockiert. Erlauben Sie es für diese Seite in den Browser-Einstellungen und versuchen Sie es erneut.",
-    "listening": "Ich höre zu ... sprechen Sie jetzt"
+    "listening": "Ich höre zu ... sprechen Sie jetzt",
+    "micService": "Der Sprachdienst hat nicht geantwortet. Dieser Browser oder dieses Fenster blockiert ihn möglicherweise, etwa Brave, Gast- und Inkognito-Fenster oder manche Werbeblocker. Versuchen Sie ein normales Chrome- oder Edge-Fenster.",
+    "micDevice": "Kein Mikrofon gefunden, oder Windows blockiert es. Prüfen Sie Einstellungen → Datenschutz → Mikrofon.",
+    "micSilence": "Keine Sprache erkannt. Klicken Sie auf das Mikrofon und sprechen Sie erneut."
   },
   "viewas": {
     "label": "Ansicht als",
@@ -1151,5 +1154,16 @@
     "onlyManagers": "Nur Inhaber oder Leitung können den Partnerzugang ändern.",
     "badEmail": "Geben Sie eine gültige E-Mail-Adresse ein.",
     "needAddon": "Der Partnerzugang gehört zum Zusatzpaket ESG und Compliance."
+  },
+  "legal": {
+    "privacyTitle": "Datenschutzerklärung",
+    "termsTitle": "Nutzungsbedingungen",
+    "updated": "Zuletzt aktualisiert: {date}",
+    "englishGoverns": "Diese Seite ist auf Englisch; maßgeblich ist der englische Text.",
+    "contact": "Fragen oder Anfragen:",
+    "signIn": "Anmelden",
+    "trustLink": "Vertrauen",
+    "privacyLink": "Datenschutz",
+    "termsLink": "Bedingungen"
   }
 }

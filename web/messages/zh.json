@@ -580,7 +580,10 @@
     "mic": "语音输入",
     "micStop": "停止语音输入",
     "micDenied": "麦克风已被阻止。请在浏览器设置中允许本网站使用麦克风，然后重试。",
-    "listening": "正在聆听……请说话"
+    "listening": "正在聆听……请说话",
+    "micService": "语音服务没有响应。此浏览器或窗口可能阻止了它：Brave、访客和无痕窗口以及部分广告拦截器会这样。请在普通的 Chrome 或 Edge 窗口中重试。",
+    "micDevice": "未找到麦克风，或 Windows 阻止了它。请检查 设置 → 隐私 → 麦克风。",
+    "micSilence": "没有听到语音。请点击麦克风后再说一次。"
   },
   "viewas": {
     "label": "查看身份",
@@ -1151,5 +1154,16 @@
     "onlyManagers": "只有所有者或主管可以更改合作方访问权限。",
     "badEmail": "请输入有效的电子邮箱地址。",
     "needAddon": "合作方访问权限包含在 ESG 与合规附加服务中。"
+  },
+  "legal": {
+    "privacyTitle": "隐私政策",
+    "termsTitle": "服务条款",
+    "updated": "最后更新：{date}",
+    "englishGoverns": "本页为英文，以英文文本为准。",
+    "contact": "问题或请求：",
+    "signIn": "登录",
+    "trustLink": "信任",
+    "privacyLink": "隐私",
+    "termsLink": "条款"
   }
 }
