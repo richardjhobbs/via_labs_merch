@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
   const hdrs = { id: h('id'), ts: h('timestamp'), sig: h('signature') };
   // stored secret first; if it does not match, the secret Resend holds for this endpoint right now
   let sigOk = verifySvix(body, hdrs);
-  if (!sigOk) { const live = await liveSigningSecret(`${req.nextUrl.origin}/api/webhooks/resend-inbound`); if (live) sigOk = verifySvix(body, hdrs, live); }
+  if (!sigOk) { const live = await liveSigningSecret(`${req.nextUrl.origin}/api/webhooks/resend-inbound`); if (live) sigOk = verifySvix(body, hdrs, live); if (sigOk) console.warn('[resend-inbound] RESEND_WEBHOOK_SECRET does not match Resend; verified with the live secret'); }
   if (!sigOk) console.warn('[resend-inbound] signature refused', JSON.stringify({ svix: !!req.headers.get('svix-id'), std: !!req.headers.get('webhook-id'), age_s: Math.round(Date.now() / 1000 - Number(h('timestamp'))), sigs: (h('signature') || '').split(' ').map((x) => x.split(',')[0]), bytes: body.length, secret_len: (process.env.RESEND_WEBHOOK_SECRET || '').length }));
   if (!sigOk) return NextResponse.json({ error: 'bad signature' }, { status: 401 });
   let evt: { type?: string; data?: { email_id?: string; to?: string[]; cc?: string[]; from?: string; attachments?: { filename?: string; content_type?: string }[] } };
