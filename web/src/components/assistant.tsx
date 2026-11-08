@@ -20,7 +20,7 @@ export function Assistant({ slug, agentName, lang, live, labels }: { slug: strin
 
   // Dictation: the browser's own speech recognition (Chrome, Edge, Safari), in the interface language.
   // The button only shows where the browser supports it; Chrome sends the audio to Google to transcribe.
-  type Rec = { lang: string; continuous: boolean; interimResults: boolean; start: () => void; stop: () => void; onresult: ((e: { resultIndex: number; results: ArrayLike<{ isFinal: boolean; 0: { transcript: string } }> }) => void) | null; onend: (() => void) | null; onerror: ((e: { error: string }) => void) | null };
+  type Rec = { lang: string; continuous: boolean; interimResults: boolean; start: () => void; stop: () => void; abort: () => void; onresult: ((e: { resultIndex: number; results: ArrayLike<{ isFinal: boolean; 0: { transcript: string } }> }) => void) | null; onend: (() => void) | null; onerror: ((e: { error: string }) => void) | null };
   const [canSpeak, setCanSpeak] = useState(false);
   const [listening, setListening] = useState(false);
   const [micError, setMicError] = useState('');
@@ -28,6 +28,8 @@ export function Assistant({ slug, agentName, lang, live, labels }: { slug: strin
   useEffect(() => { const w = window as unknown as { SpeechRecognition?: unknown; webkitSpeechRecognition?: unknown }; setCanSpeak(!!(w.SpeechRecognition || w.webkitSpeechRecognition)); }, []);
   const SPEECH_LANG: Record<string, string> = { en: 'en-GB', de: 'de-DE', bn: 'bn-BD', zh: 'zh-CN', vi: 'vi-VN', es: 'es-ES' };
   function stopDictation() { recRef.current?.stop(); }
+  // on send: drop the recogniser without letting its last result refill the box after it was cleared
+  function endDictationForSend() { const r = recRef.current; if (!r) return; r.onresult = null; r.onerror = null; r.abort(); }
   function toggleDictation() {
     if (listening) return stopDictation();
     const w = window as unknown as { SpeechRecognition?: new () => Rec; webkitSpeechRecognition?: new () => Rec };
@@ -136,7 +138,7 @@ export function Assistant({ slug, agentName, lang, live, labels }: { slug: strin
         )}
       </div>
       {micError && <div className="small px-3" style={{ color: 'var(--crit)' }}>{micError}</div>}
-      <form onSubmit={(e) => { e.preventDefault(); stopDictation(); ask(q); }}>
+      <form onSubmit={(e) => { e.preventDefault(); endDictationForSend(); ask(q); }}>
         <input className="input flex-1" value={q} onChange={(e) => setQ(e.target.value)} placeholder={listening ? labels.listening : labels.placeholder} disabled={!live} autoFocus />
         {canSpeak && live && (
           <button type="button" className="btn" onClick={toggleDictation} aria-pressed={listening} aria-label={listening ? labels.micStop : labels.mic} title={listening ? labels.micStop : labels.mic} style={listening ? { borderColor: 'var(--crit)', color: 'var(--crit)' } : undefined}>
