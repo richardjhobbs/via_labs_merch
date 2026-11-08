@@ -150,7 +150,29 @@
     "source": "En respuesta a",
     "openThread": "Abrir la conversación",
     "viaEmail": "Correo a {to}, enviado desde {from}",
-    "manual": "{channel}: no conectado, lo envía una persona"
+    "manual": "{channel}: no conectado, lo envía una persona",
+    "toSend": "Para enviar a mano",
+    "toSendNote": "Respuestas aprobadas a mensajes que llegaron por reenvío o sin un canal conectado. Envíe cada una desde su app de chat o su correo y márquela como enviada.",
+    "ms": {
+      "copy": "Copiar",
+      "copied": "Copiado",
+      "whatsapp": "Abrir en WhatsApp",
+      "zalo": "Abrir en Zalo (texto copiado)",
+      "share": "Compartir…",
+      "email": "Abrir en el correo",
+      "markSent": "Marcar como enviada",
+      "via": {
+        "zalo": "Zalo",
+        "wechat": "WeChat",
+        "wecom": "WeCom",
+        "whatsapp": "WhatsApp",
+        "telegram": "Telegram",
+        "line": "Line",
+        "email": "Correo",
+        "phone": "Llamada",
+        "other": "Otro"
+      }
+    }
   },
   "admin": {
     "title": "Administración VIA",
@@ -485,6 +507,21 @@
       "errors": {
         "notReady": "Google Drive aún no está activado. VIA Labs está completando la configuración.",
         "scopes": "Permita el acceso a los archivos que elija en la pantalla de Google e inténtelo de nuevo."
+      }
+    },
+    "forward": {
+      "yours": "Su dirección de reenvío",
+      "copy": "Copiar",
+      "copied": "Copiado",
+      "last": "Último reenvío {time}",
+      "none": "Aún no se ha reenviado nada",
+      "renew": "Nueva dirección",
+      "off": "Desactivar",
+      "note": "Guárdela como contacto en su teléfono. Solo se acepta correo de su propio correo de acceso o de su buzón conectado; lo demás se ignora. Una dirección nueva sustituye a esta.",
+      "create": "Crear mi dirección de reenvío",
+      "notReady": "El reenvío aún no está activado. VIA Labs está completando la configuración del correo.",
+      "errors": {
+        "notReady": "El reenvío aún no está activado. VIA Labs está completando la configuración del correo."
       }
     }
   },

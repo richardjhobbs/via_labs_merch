@@ -8,6 +8,7 @@ import { supabaseAdmin } from '@/lib/supabase/server';
 import { findLabelId, revoke } from '@/lib/connectors/google';
 import { findFolderId } from '@/lib/connectors/microsoft';
 import { CHANNEL_COLS, type Channel, type MailConfig } from '@/lib/connectors/mail';
+import { forwardConfigured, newForwardAddress } from '@/lib/connectors/forward';
 
 async function load(slug: string, id: string) {
   const me = await requireTenant(slug);
@@ -16,7 +17,7 @@ async function load(slug: string, id: string) {
   const allowed = !!ch && me.membership.id !== 'admin' && (ch.owner_user_id === me.user.id || ['owner', 'manager'].includes(me.membership.role));
   return { me, sb, ch: ch as Channel | null, allowed, who: me.membership.display_name || me.user.email || 'member' };
 }
-const box = (ch: Channel) => (ch.kind === 'email_m365' ? 'Microsoft 365' : ch.config?.connector === 'gdrive' ? 'Google Drive' : 'Gmail');
+const box = (ch: Channel) => (ch.kind === 'email_m365' ? 'Microsoft 365' : ch.config?.connector === 'gdrive' ? 'Google Drive' : ch.kind === 'email_inbound' ? 'Forwarding address' : 'Gmail');
 const back = (slug: string, q: string) => { revalidatePath(`/app/${slug}/connections`); redirect(`/app/${slug}/connections?${q}`); };
 
 export async function saveMailbox(form: FormData) {
@@ -44,6 +45,22 @@ export async function disconnectMailbox(form: FormData) {
   // whole grant to the app and would also cut their Gmail connection. Microsoft has no per-token revoke.
   if (ch.kind === 'email_gmail') await revoke(ch.auth_enc);
   await sb.from('channels').update({ status: 'off', auth_enc: null, error: null }).eq('id', id);
-  await sb.rpc('ledger_append', { p_tenant: me.tenant.id, p_channel: 'Console', p_actor: who, p_actor_user: me.user.id, p_counterparty: null, p_stream: 'Setup', p_order: null, p_what: `Disconnected ${box(ch)} ${ch.account}${ch.kind === 'email_gmail' ? '; Google access revoked' : '; stored sign-in deleted'}`, p_gate: 'SETUP', p_gated: true, p_ref: {} });
+  await sb.rpc('ledger_append', { p_tenant: me.tenant.id, p_channel: 'Console', p_actor: who, p_actor_user: me.user.id, p_counterparty: null, p_stream: 'Setup', p_order: null, p_what: `Disconnected ${box(ch)} ${ch.account}${ch.kind === 'email_gmail' ? '; Google access revoked' : ch.kind === 'email_inbound' ? '; the address no longer accepts mail' : '; stored sign-in deleted'}`, p_gate: 'SETUP', p_gated: true, p_ref: {} });
+  back(slug, 'gsaved=1');
+}
+
+// Forwarding address: one per member, created on request; a new one replaces the old (the old stops working).
+export async function createForwardAddress(form: FormData) {
+  const slug = String(form.get('tenant'));
+  const me = await requireTenant(slug);
+  if (me.membership.id === 'admin' || me.membership.role === 'viewer') return back(slug, 'gerror=viewer');
+  if (!forwardConfigured()) return back(slug, 'gerror=notReady&gp=forward');
+  const sb = supabaseAdmin();
+  await sb.from('channels').update({ status: 'off' }).eq('tenant_id', me.tenant.id).eq('owner_user_id', me.user.id).eq('kind', 'email_inbound').eq('status', 'connected');
+  const account = newForwardAddress();
+  const who = me.membership.display_name || me.user.email || 'member';
+  const { error } = await sb.from('channels').insert({ tenant_id: me.tenant.id, kind: 'email_inbound', name: account, account, owner_user_id: me.user.id, status: 'connected', scope: 'Messages the member forwards from chat apps', config: { connector: 'forward', connected_by: who } });
+  if (error) return back(slug, `gerror=failed&gmsg=${encodeURIComponent(error.message.slice(0, 160))}`);
+  await sb.rpc('ledger_append', { p_tenant: me.tenant.id, p_channel: 'Console', p_actor: who, p_actor_user: me.user.id, p_counterparty: null, p_stream: 'Setup', p_order: null, p_what: `Created a forwarding address for chat messages (accepts mail only from ${who}'s own addresses)`, p_gate: 'SETUP', p_gated: true, p_ref: {} });
   back(slug, 'gsaved=1');
 }

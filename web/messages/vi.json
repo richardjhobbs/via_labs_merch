@@ -150,7 +150,29 @@
     "source": "Trả lời cho",
     "openThread": "Mở hội thoại",
     "viaEmail": "Email tới {to}, gửi từ {from}",
-    "manual": "{channel}: chưa kết nối, một người sẽ gửi"
+    "manual": "{channel}: chưa kết nối, một người sẽ gửi",
+    "toSend": "Cần gửi thủ công",
+    "toSendNote": "Các trả lời đã duyệt cho tin nhắn đến qua chuyển tiếp hoặc không có kênh kết nối. Hãy gửi từng tin từ ứng dụng chat hoặc email của bạn, rồi đánh dấu đã gửi.",
+    "ms": {
+      "copy": "Sao chép",
+      "copied": "Đã sao chép",
+      "whatsapp": "Mở trong WhatsApp",
+      "zalo": "Mở trong Zalo (đã sao chép nội dung)",
+      "share": "Chia sẻ…",
+      "email": "Mở trong email",
+      "markSent": "Đánh dấu đã gửi",
+      "via": {
+        "zalo": "Zalo",
+        "wechat": "WeChat",
+        "wecom": "WeCom",
+        "whatsapp": "WhatsApp",
+        "telegram": "Telegram",
+        "line": "Line",
+        "email": "Email",
+        "phone": "Gọi điện",
+        "other": "Khác"
+      }
+    }
   },
   "admin": {
     "title": "Quản trị VIA",
@@ -485,6 +507,21 @@
       "errors": {
         "notReady": "Google Drive chưa được bật. VIA Labs đang hoàn tất thiết lập.",
         "scopes": "Hãy cho phép truy cập các tệp bạn chọn trên màn hình Google rồi thử lại."
+      }
+    },
+    "forward": {
+      "yours": "Địa chỉ chuyển tiếp của bạn",
+      "copy": "Sao chép",
+      "copied": "Đã sao chép",
+      "last": "Chuyển tiếp gần nhất {time}",
+      "none": "Chưa chuyển tiếp gì",
+      "renew": "Địa chỉ mới",
+      "off": "Tắt",
+      "note": "Hãy lưu địa chỉ này thành một liên hệ trên điện thoại. Chỉ nhận thư từ email đăng nhập của bạn hoặc hộp thư đã kết nối; thư khác gửi tới sẽ bị bỏ qua. Địa chỉ mới sẽ thay thế địa chỉ này.",
+      "create": "Tạo địa chỉ chuyển tiếp của tôi",
+      "notReady": "Chức năng chuyển tiếp chưa được bật. VIA Labs đang hoàn tất thiết lập thư.",
+      "errors": {
+        "notReady": "Chức năng chuyển tiếp chưa được bật. VIA Labs đang hoàn tất thiết lập thư."
       }
     }
   },

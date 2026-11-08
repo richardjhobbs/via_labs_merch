@@ -150,7 +150,29 @@
     "source": "In reply to",
     "openThread": "Open the conversation",
     "viaEmail": "Email to {to}, sent from {from}",
-    "manual": "{channel}: not connected, a person sends it"
+    "manual": "{channel}: not connected, a person sends it",
+    "toSend": "To send by hand",
+    "toSendNote": "Approved replies to messages that came in by forwarding or with no connected channel. Send each from your chat app or mail, then mark it sent.",
+    "ms": {
+      "copy": "Copy",
+      "copied": "Copied",
+      "whatsapp": "Open in WhatsApp",
+      "zalo": "Open in Zalo (text copied)",
+      "share": "Share…",
+      "email": "Open in mail",
+      "markSent": "Mark as sent",
+      "via": {
+        "zalo": "Zalo",
+        "wechat": "WeChat",
+        "wecom": "WeCom",
+        "whatsapp": "WhatsApp",
+        "telegram": "Telegram",
+        "line": "Line",
+        "email": "Email",
+        "phone": "Phone call",
+        "other": "Other"
+      }
+    }
   },
   "admin": {
     "title": "VIA admin",
@@ -485,6 +507,21 @@
       "errors": {
         "notReady": "Google Drive is not switched on yet. VIA Labs is completing the setup.",
         "scopes": "Allow access to the files you choose on the Google screen, then try again."
+      }
+    },
+    "forward": {
+      "yours": "Your forwarding address",
+      "copy": "Copy",
+      "copied": "Copied",
+      "last": "Last message forwarded {time}",
+      "none": "Nothing forwarded yet",
+      "renew": "New address",
+      "off": "Turn off",
+      "note": "Save it as a contact on your phone. Only mail from your own sign-in email or connected mailbox is accepted; anything else sent to it is ignored. A new address replaces this one.",
+      "create": "Create my forwarding address",
+      "notReady": "Forwarding is not switched on yet. VIA Labs is completing the mail setup.",
+      "errors": {
+        "notReady": "Forwarding is not switched on yet. VIA Labs is completing the mail setup."
       }
     }
   },

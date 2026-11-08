@@ -150,7 +150,29 @@
     "source": "Als Antwort auf",
     "openThread": "Unterhaltung öffnen",
     "viaEmail": "E-Mail an {to}, gesendet von {from}",
-    "manual": "{channel}: nicht verbunden, eine Person sendet sie"
+    "manual": "{channel}: nicht verbunden, eine Person sendet sie",
+    "toSend": "Von Hand senden",
+    "toSendNote": "Freigegebene Antworten auf weitergeleitete Nachrichten oder solche ohne verbundenen Kanal. Senden Sie jede aus Ihrer Chat-App oder Ihrem Mailprogramm und markieren Sie sie dann als gesendet.",
+    "ms": {
+      "copy": "Kopieren",
+      "copied": "Kopiert",
+      "whatsapp": "In WhatsApp öffnen",
+      "zalo": "In Zalo öffnen (Text kopiert)",
+      "share": "Teilen …",
+      "email": "Im Mailprogramm öffnen",
+      "markSent": "Als gesendet markieren",
+      "via": {
+        "zalo": "Zalo",
+        "wechat": "WeChat",
+        "wecom": "WeCom",
+        "whatsapp": "WhatsApp",
+        "telegram": "Telegram",
+        "line": "Line",
+        "email": "E-Mail",
+        "phone": "Anruf",
+        "other": "Andere"
+      }
+    }
   },
   "admin": {
     "title": "VIA-Verwaltung",
@@ -485,6 +507,21 @@
       "errors": {
         "notReady": "Google Drive ist noch nicht freigeschaltet. VIA Labs schließt die Einrichtung ab.",
         "scopes": "Erlauben Sie auf der Google-Seite den Zugriff auf die gewählten Dateien und versuchen Sie es erneut."
+      }
+    },
+    "forward": {
+      "yours": "Ihre Weiterleitungsadresse",
+      "copy": "Kopieren",
+      "copied": "Kopiert",
+      "last": "Zuletzt weitergeleitet {time}",
+      "none": "Noch nichts weitergeleitet",
+      "renew": "Neue Adresse",
+      "off": "Ausschalten",
+      "note": "Speichern Sie sie als Kontakt auf Ihrem Telefon. Angenommen wird nur Mail von Ihrer eigenen Anmelde-E-Mail oder Ihrem verbundenen Postfach; alles andere wird ignoriert. Eine neue Adresse ersetzt diese.",
+      "create": "Meine Weiterleitungsadresse erstellen",
+      "notReady": "Die Weiterleitung ist noch nicht freigeschaltet. VIA Labs schließt die Mail-Einrichtung ab.",
+      "errors": {
+        "notReady": "Die Weiterleitung ist noch nicht freigeschaltet. VIA Labs schließt die Mail-Einrichtung ab."
       }
     }
   },

@@ -150,7 +150,29 @@
     "source": "回复对象",
     "openThread": "打开会话",
     "viaEmail": "发送邮件至 {to}，发件邮箱 {from}",
-    "manual": "{channel}：未连接，由人工发送"
+    "manual": "{channel}：未连接，由人工发送",
+    "toSend": "需手动发送",
+    "toSendNote": "通过转发收到、或没有已连接渠道的消息，其回复已获批准。请在您的聊天应用或邮箱中逐条发送，然后标记为已发送。",
+    "ms": {
+      "copy": "复制",
+      "copied": "已复制",
+      "whatsapp": "在 WhatsApp 中打开",
+      "zalo": "在 Zalo 中打开（文字已复制）",
+      "share": "分享…",
+      "email": "在邮箱中打开",
+      "markSent": "标记为已发送",
+      "via": {
+        "zalo": "Zalo",
+        "wechat": "微信",
+        "wecom": "企业微信",
+        "whatsapp": "WhatsApp",
+        "telegram": "Telegram",
+        "line": "Line",
+        "email": "邮件",
+        "phone": "电话",
+        "other": "其他"
+      }
+    }
   },
   "admin": {
     "title": "VIA 管理",
@@ -485,6 +507,21 @@
       "errors": {
         "notReady": "Google Drive 尚未开通。VIA Labs 正在完成设置。",
         "scopes": "请在 Google 页面允许访问您选择的文件，然后重试。"
+      }
+    },
+    "forward": {
+      "yours": "您的转发地址",
+      "copy": "复制",
+      "copied": "已复制",
+      "last": "最近转发 {time}",
+      "none": "尚未转发任何内容",
+      "renew": "新地址",
+      "off": "关闭",
+      "note": "请在手机上把它存为联系人。只接受来自您本人登录邮箱或已连接邮箱的邮件，其他发到此地址的邮件会被忽略。新地址会取代这个地址。",
+      "create": "创建我的转发地址",
+      "notReady": "转发功能尚未开通。VIA Labs 正在完成邮件设置。",
+      "errors": {
+        "notReady": "转发功能尚未开通。VIA Labs 正在完成邮件设置。"
       }
     }
   },

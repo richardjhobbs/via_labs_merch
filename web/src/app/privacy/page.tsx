@@ -36,6 +36,9 @@ const S: LegalSection[] = [
   { h: 'Microsoft 365 data', p: [
     'A person can connect their own Outlook mailbox by signing in with Microsoft. VIA Merch asks to read mail, send mail and keep access while the connection stays on (offline access). Mail is handled exactly as described for Gmail above: only new mail from known customers and suppliers or one chosen folder, searches of older mail only when the person asks and without storing the results, and replies only after approval. Disconnecting deletes the stored token; you can also remove the app from your Microsoft account settings.',
   ] },
+  { h: 'Forwarded messages', p: [
+    'Each member can create a personal forwarding address and forward messages to it from chat apps on their phone, such as Zalo, WeChat or WhatsApp. VIA Merch accepts mail at that address only from the member\'s own sign-in email or connected mailbox; anything else sent to it is ignored and not stored. A forwarded message becomes part of the company\'s order record, like an email from a connected mailbox. Replies to forwarded messages are sent by the member from their own app; VIA Merch does not connect to personal chat accounts.',
+  ] },
   { h: 'How the AI agent uses data', p: [
     'To read a message, answer a question or prepare a draft, the agent sends the relevant part of the company\'s record to an AI model provider and receives the result. The standard provider is Anthropic (Claude). Companies based in regions where Claude is not offered may run on another provider, which is named in their agreement. We use these providers only on terms under which they do not train their models on the data we send, and we never use company data or connected-account data to train models ourselves.',
     'Nothing the agent drafts is sent without a person\'s approval, except routine message types that the company itself has set the agent to send. Prices, claims and order confirmations always need a person.',
@@ -46,7 +49,7 @@ const S: LegalSection[] = [
       'Supabase (database, sign-in and file storage, hosted in Singapore).',
       'Vercel (application hosting; our application runs in its Singapore region).',
       'Anthropic, and any other model provider named in a company\'s agreement (AI processing as described above).',
-      'Resend (delivery of sign-in codes, invitations and notifications by email).',
+      'Resend (delivery of sign-in codes, invitations and notifications by email, and receiving the messages a member forwards to their own VIA forwarding address).',
       'Google and Microsoft, when a person connects their account, to read and send the mail described above.',
     ],
     'We may also disclose data where the law requires it, or to protect the rights and safety of our users or of VIA Labs. Dictation in the Ask box uses your browser\'s own speech recognition; in Chrome and Edge the audio goes to the browser maker to be transcribed, not to VIA Labs.',

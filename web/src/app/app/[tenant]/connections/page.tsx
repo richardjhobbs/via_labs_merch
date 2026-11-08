@@ -9,7 +9,9 @@ import { BrandIcon } from '@/components/brand-icon';
 import { googleConfigured } from '@/lib/connectors/google';
 import { microsoftConfigured } from '@/lib/connectors/microsoft';
 import { driveConfigured } from '@/lib/connectors/drive';
-import { saveMailbox, disconnectMailbox } from './actions';
+import { saveMailbox, disconnectMailbox, createForwardAddress } from './actions';
+import { forwardConfigured } from '@/lib/connectors/forward';
+import { CopyButton } from '@/components/copy-button';
 
 type Ch = { id: string; kind: string; name: string; status: string; account: string | null; owner_user_id: string | null; last_sync_at: string | null; error: string | null; config: { connector?: string; filter?: string; label?: string | null; connected_by?: string } };
 const GERR = ['notReady', 'support', 'viewer', 'state', 'denied', 'scopes', 'refresh', 'failed', 'label', 'forbidden', 'adminConsent', 'folder'] as const;
@@ -26,6 +28,7 @@ export default async function Connections({ params, searchParams }: { params: Pr
   const connected = new Set(channels.filter((c) => c.status === 'connected').flatMap((c) => (c.config?.connector === 'gdrive' ? ['drive', 'sheets'] : [c.config?.connector || c.kind])));
   const drives = channels.filter((c) => c.config?.connector === 'gdrive' && c.status !== 'off');
   const dv = sp.gp === 'drive';
+  const myForward = channels.find((c) => c.kind === 'email_inbound' && c.status === 'connected' && c.owner_user_id === user.id);
   const canEdit = (c: Ch) => membership.id !== 'admin' && (c.owner_user_id === user.id || ['owner', 'manager'].includes(membership.role));
   const canConnect = membership.id !== 'admin' && membership.role !== 'viewer';
   // mail connectors with a working runtime: catalogue id -> channel kind, OAuth route, strings namespace
@@ -35,7 +38,7 @@ export default async function Connections({ params, searchParams }: { params: Pr
   };
   const ms = sp.gp === 'microsoft';
   const gerr = GERR.find((k) => k === sp.gerror);
-  const errNs = gerr && (M365_ERR.includes(gerr) || (ms && ['notReady', 'refresh'].includes(gerr))) ? 'm365' : gerr && dv && ['notReady', 'scopes'].includes(gerr) ? 'gdrive' : 'gmail';
+  const errNs: 'gmail' | 'm365' | 'gdrive' | 'forward' = gerr && (M365_ERR.includes(gerr) || (ms && ['notReady', 'refresh'].includes(gerr))) ? 'm365' : gerr && dv && ['notReady', 'scopes'].includes(gerr) ? 'gdrive' : gerr === 'notReady' && sp.gp === 'forward' ? 'forward' : 'gmail';
   const when = (iso: string) => new Date(iso).toLocaleString('en-GB', { timeZone: tenant.tz, day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
   const groups = (Object.keys(CATEGORIES) as ConnectorCategory[]).map((cat) => ({ cat, items: CONNECTORS.filter((c) => c.category === cat) })).filter((g) => g.items.length);
   const live = CONNECTORS.filter((c) => c.status !== 'request');
@@ -56,7 +59,7 @@ export default async function Connections({ params, searchParams }: { params: Pr
             <div key={c.id} className="flex gap-3 p-3" style={{ border: '1px solid var(--line)', borderRadius: 10 }}>
               <BrandIcon name={c.name} logo={c.logo} size={36} />
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 flex-wrap"><span className="font-medium">{c.name}</span>{c.vendor && <span className="muted small">{c.vendor}</span>}<span className={`pill ${connected.has(c.id) ? 'ok' : c.status === 'via' ? 'agent' : ''} ml-auto`}>{connected.has(c.id) ? t('connected') : STATUS_LABEL[c.status]}</span></div>
+                <div className="flex items-center gap-2 flex-wrap"><span className="font-medium">{c.name}</span>{c.vendor && <span className="muted small">{c.vendor}</span>}<span className={`pill ${(connected.has(c.id) || (c.id === 'forward' && myForward)) ? 'ok' : c.status === 'via' ? 'agent' : ''} ml-auto`}>{(connected.has(c.id) || (c.id === 'forward' && myForward)) ? t('connected') : STATUS_LABEL[c.status]}</span></div>
                 <div className="small mt-1" style={{ color: 'var(--fg2)' }}>{c.use}</div>
                 <details className="mt-2 small"><summary className="muted" style={{ cursor: 'pointer' }}>{t('howTo')} · {c.auth}</summary><ol className="mt-2 pl-5 grid gap-1" style={{ listStyle: 'decimal' }}>{c.steps.map((s, i) => <li key={i}>{s}</li>)}</ol>{c.docs && <a className="muted" href={c.docs} target="_blank" rel="noopener">{t('docs')}</a>}</details>
                 {c.id === 'drive' && <>
@@ -73,6 +76,19 @@ export default async function Connections({ params, searchParams }: { params: Pr
                   ))}
                   <p className="muted small mt-2">{t('gdrive.note')}</p>
                   {canConnect && !drives.some((m) => m.owner_user_id === user.id && m.status === 'connected') && (driveConfigured() ? <a className="btn sm primary mt-2" href={`/api/connect/google?tenant=${slug}&want=drive`}>{t('gdrive.connect')}</a> : <><button className="btn sm mt-2" disabled>{t('gdrive.connect')}</button><p className="muted small mt-1">{t('gdrive.errors.notReady')}</p></>)}
+                </>}
+                {c.id === 'forward' && <>
+                  {myForward && <div className="mt-3 p-2 small" style={{ border: '1px solid var(--line)', borderRadius: 8 }}>
+                    <div className="muted">{t('forward.yours')}</div>
+                    <div className="flex items-center gap-2 flex-wrap mt-1"><span className="mono font-medium" style={{ wordBreak: 'break-all' }}>{myForward.account}</span><CopyButton text={myForward.account || ''} label={t('forward.copy')} done={t('forward.copied')} /></div>
+                    <div className="muted mt-1">{myForward.last_sync_at ? t('forward.last', { time: when(myForward.last_sync_at) }) : t('forward.none')}</div>
+                    <div className="flex gap-2 mt-2">
+                      <form action={createForwardAddress}><input type="hidden" name="tenant" value={slug} /><button className="btn sm">{t('forward.renew')}</button></form>
+                      <form action={disconnectMailbox}><input type="hidden" name="tenant" value={slug} /><input type="hidden" name="id" value={myForward.id} /><button className="btn sm red">{t('forward.off')}</button></form>
+                    </div>
+                  </div>}
+                  <p className="muted small mt-2">{t('forward.note')}</p>
+                  {canConnect && !myForward && (forwardConfigured() ? <form action={createForwardAddress}><input type="hidden" name="tenant" value={slug} /><button className="btn sm primary mt-2">{t('forward.create')}</button></form> : <><button className="btn sm mt-2" disabled>{t('forward.create')}</button><p className="muted small mt-1">{t('forward.notReady')}</p></>)}
                 </>}
                 {c.id === 'sheets' && <p className="muted small mt-2">{t('gdrive.sheetsNote')}</p>}
                 {MAIL[c.id] && (() => { const mc = MAIL[c.id], boxes = channels.filter((m) => m.kind === mc.kind && m.status !== 'off'); return <>
