@@ -148,7 +148,9 @@
     "decided": "Đã quyết định hôm nay",
     "approvedNote": "Bản nháp đã duyệt sẽ được gửi khi kênh được kết nối; trước đó VIA Labs cùng bạn gửi đi.",
     "source": "Trả lời cho",
-    "openThread": "Mở hội thoại"
+    "openThread": "Mở hội thoại",
+    "viaEmail": "Email tới {to}, gửi từ {from}",
+    "manual": "{channel}: chưa kết nối, một người sẽ gửi"
   },
   "admin": {
     "title": "Quản trị VIA",

@@ -155,17 +155,20 @@ export function toolsFor(ctx: AgentCtx) {
 
   const queue_draft = betaZodTool({
     name: 'queue_draft',
-    description: 'Create an outbound message draft and put it in the approval queue. It is NOT sent. Write in the merchandiser\'s voice: short, firm, specific dates and PO numbers. If the recipient works in another language, write the message in their language and put an English rendering in body_en.',
-    inputSchema: z.object({ stream: z.enum(STREAMS), po: z.string().optional().describe('PO number or empty'), party: z.string().describe('customer or supplier the message goes to (name or code)'), title: z.string().describe('one-line summary'), body: z.string().describe('the full message in the recipient\'s language'), body_en: z.string().optional().describe('English rendering when body is not English'), lang: z.string().optional().describe('ISO code of body, e.g. zh'), impact: z.string().optional().describe('why it matters: dates, money, risk'), priority: z.number().int().min(1).max(3).optional().describe('1 urgent, 2 normal, 3 low') }),
+    description: 'Create an outbound message draft and put it in the approval queue. It is NOT sent. Write in the merchandiser\'s voice: short, firm, specific dates and PO numbers. If the recipient works in another language, write the message in their language and put the full English translation in body_en; when the body is English, leave body_en out.',
+    inputSchema: z.object({ stream: z.enum(STREAMS), po: z.string().optional().describe('PO number or empty'), party: z.string().describe('customer or supplier the message goes to (name or code)'), title: z.string().describe('one-line summary'), body: z.string().describe('the full message in the recipient\'s language'), body_en: z.string().optional().describe('full English translation when body is not English; omit when body is English'), lang: z.string().optional().describe('ISO code of body, e.g. zh'), impact: z.string().optional().describe('why it matters: dates, money, risk'), priority: z.number().int().min(1).max(3).optional().describe('1 urgent, 2 normal, 3 low') }),
     run: wrap('queue_draft', async (a) => {
       const p = await partyByRef(T, a.party);
+      // an English body is its own English version; anything else needs a real translation, not a note
+      const lang = a.lang || p?.lang || 'en';
+      const body_en = lang === 'en' ? a.body : a.body_en && !/^same as/i.test(a.body_en.trim()) ? a.body_en : null;
       const o = a.po ? (await sb.from('orders').select('id').eq('tenant_id', T).eq('po', a.po).maybeSingle()).data : null;
       const g = await gateOf(T, a.stream);
       const { data: contact } = p ? await sb.from('contacts').select('id').eq('party_id', p.id).order('is_primary', { ascending: false }).limit(1).maybeSingle() : { data: null };
-      const { data: dr, error } = await sb.from('drafts').insert({ tenant_id: T, agent_id: ctx.agentId, role: 'merchandiser', priority: a.priority || 2, stream: a.stream, order_id: o?.id || null, party_id: p?.id || null, contact_id: contact?.id || null, source_message_id: ctx.sourceMessageId || null, title: a.title, impact: a.impact || null, body: a.body, body_en: a.body_en || null, lang: a.lang || p?.lang || 'en', gate_level: g.level }).select('id, seq').single();
+      const { data: dr, error } = await sb.from('drafts').insert({ tenant_id: T, agent_id: ctx.agentId, role: 'merchandiser', priority: a.priority || 2, stream: a.stream, order_id: o?.id || null, party_id: p?.id || null, contact_id: contact?.id || null, source_message_id: ctx.sourceMessageId || null, title: a.title, impact: a.impact || null, body: a.body, body_en, lang, gate_level: g.level }).select('id, seq').single();
       if (error || !dr) throw new Error(error?.message || 'draft failed');
       ctx.drafts.push({ id: dr.id, seq: dr.seq, title: a.title, stream: a.stream, gate_level: g.level, party: p?.name || null, po: a.po || null });
-      await sb.rpc('ledger_append', { p_tenant: T, p_channel: p?.channel_pref || 'Draft', p_actor: actorOf(ctx), p_actor_user: ctx.userId, p_counterparty: p?.name || a.party, p_stream: a.stream, p_order: o?.id || null, p_what: `Draft Q-${dr.seq}: ${a.title}`, p_gate: `L${g.level}${g.locked != null ? ' · capped' : ''}`, p_gated: true, p_ref: { draft_id: dr.id } });
+      await sb.rpc('ledger_append', { p_tenant: T, p_channel: 'Draft', p_actor: actorOf(ctx), p_actor_user: ctx.userId, p_counterparty: p?.name || a.party, p_stream: a.stream, p_order: o?.id || null, p_what: `Draft Q-${dr.seq}: ${a.title}`, p_gate: `L${g.level}${g.locked != null ? ' · capped' : ''}`, p_gated: true, p_ref: { draft_id: dr.id } });
       return { id: dr.id, ref: `Q-${dr.seq}`, queued: true, autonomy: `L${g.level}`, note: g.level >= 2 && g.locked == null ? 'Routine stream at L2: request_approval may send it.' : 'A person must approve before it is sent.' };
     }),
   });

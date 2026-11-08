@@ -148,7 +148,9 @@
     "decided": "Decided today",
     "approvedNote": "Approved drafts go out when the channel is connected; until then VIA Labs sends them with you.",
     "source": "In reply to",
-    "openThread": "Open the conversation"
+    "openThread": "Open the conversation",
+    "viaEmail": "Email to {to}, sent from {from}",
+    "manual": "{channel}: not connected, a person sends it"
   },
   "admin": {
     "title": "VIA admin",

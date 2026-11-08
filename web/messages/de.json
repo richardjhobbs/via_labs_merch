@@ -148,7 +148,9 @@
     "decided": "Heute entschieden",
     "approvedNote": "Freigegebene Entwürfe gehen raus, sobald der Kanal verbunden ist; bis dahin sendet VIA Labs sie mit Ihnen.",
     "source": "Als Antwort auf",
-    "openThread": "Unterhaltung öffnen"
+    "openThread": "Unterhaltung öffnen",
+    "viaEmail": "E-Mail an {to}, gesendet von {from}",
+    "manual": "{channel}: nicht verbunden, eine Person sendet sie"
   },
   "admin": {
     "title": "VIA-Verwaltung",

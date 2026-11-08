@@ -35,7 +35,7 @@ VIA Merch, the live product at merch.getvia.xyz: agents for merchandising teams 
 
 ## Env vars
 
-See `web/.env.example`. Secrets live only in the Vercel project `via-labs-merch`.
+See `web/.env.example`. Secrets live only in the Vercel project `via-labs-merch-sanj`, the one that serves merch.getvia.xyz (the projects `via-labs-merch` and `via-labs-merch-5xr1` build from the same repo but serve nothing live).
 
 ## Notion build log
 
