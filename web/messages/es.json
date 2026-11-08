@@ -265,7 +265,8 @@
     "viewOrders": "Ver sus pedidos",
     "docHint": "Esta importación necesita una hoja con un pedido por fila. Para una factura proforma, factura u orden de compra con otro formato, use",
     "docLink": "Añadir desde un documento.",
-    "destination": "Destino"
+    "destination": "Destino",
+    "orDrive": "o"
   },
   "parties": {
     "title": "Clientes y proveedores",
@@ -362,7 +363,8 @@
       "needOrder": "Un pedido necesita un número de PO y una fecha de embarque.",
       "dupPo": "La PO {po} ya existe.",
       "checkParties": "Revise el cliente y el proveedor: cada uno necesita un nombre de al menos dos caracteres.",
-      "nothing": "No hay nada que guardar. Marque al menos una casilla."
+      "nothing": "No hay nada que guardar. Marque al menos una casilla.",
+      "orDrive": "o"
     },
     "bank": {
       "title": "Datos bancarios",
@@ -472,6 +474,16 @@
         "refresh": "Microsoft no concedió acceso permanente. Vuelva a conectar y acepte todos los permisos solicitados.",
         "adminConsent": "El administrador de Microsoft de su empresa debe aprobar VIA Merch una vez antes de que pueda conectar. Pida a TI que lo apruebe e inténtelo de nuevo.",
         "folder": "Este buzón no tiene ninguna carpeta de Outlook llamada \"{label}\"."
+      }
+    },
+    "gdrive": {
+      "connect": "Conectar Google Drive",
+      "done": "Google Drive conectado: {account}. Elija archivos en Pedidos → Importar hoja de cálculo o en Añadir desde un documento.",
+      "note": "VIA abre solo los archivos que usted elige en el selector de Google; el resto de su Drive sigue siendo privado.",
+      "sheetsNote": "Usa su conexión con Google Drive: en Pedidos → Importar hoja de cálculo, elija una hoja de Google.",
+      "errors": {
+        "notReady": "Google Drive aún no está activado. VIA Labs está completando la configuración.",
+        "scopes": "Permita el acceso a los archivos que elija en la pantalla de Google e inténtelo de nuevo."
       }
     }
   },
@@ -753,7 +765,7 @@
     "tools": {
       "gmail": "Lee las PO, aprobaciones y preguntas del correo y sus adjuntos. Redacta respuestas; solo envía después de que usted apruebe.",
       "m365": "Lee el correo de Outlook y los archivos de SharePoint. Redacta respuestas; solo envía después de que usted apruebe.",
-      "sheets": "Lee informes de WIP y hojas de pedidos compartidas. Actualiza filas después de que usted apruebe.",
+      "sheets": "Importa las hojas de pedidos que elige en Google Drive como PO e hitos.",
       "upload": "Lee las fichas técnicas, PO, facturas y fotos que usted sube. Los archivos se añaden al expediente del pedido.",
       "whatsapp": "Lee mensajes, fotos y notas de voz de las fábricas. Responde en el idioma de la fábrica después de que usted apruebe.",
       "wecom": "Lee el chat de la fábrica, incluido WeChat enlazado. Envía recordatorios y respuestas después de que usted apruebe.",
@@ -1156,5 +1168,20 @@
     "trustLink": "Confianza",
     "privacyLink": "Privacidad",
     "termsLink": "Términos"
+  },
+  "drive": {
+    "pickSheet": "Elegir una hoja de Google",
+    "pickDoc": "Elegir de Google Drive",
+    "opening": "Abriendo Google Drive...",
+    "titleSheet": "Elija la hoja de pedidos",
+    "titleDoc": "Elija un documento",
+    "notConnected": "Conecte primero Google Drive.",
+    "connectLink": "Ir a Conexiones",
+    "notReady": "Google Drive aún no está activado. VIA Labs está completando la configuración.",
+    "viewer": "Los lectores no pueden importar archivos.",
+    "failed": "El selector de archivos de Google no se abrió. Permita ventanas emergentes y cookies de terceros para este sitio e inténtelo de nuevo.",
+    "notFound": "No se pudo abrir ese archivo desde Google Drive. Elíjalo de nuevo.",
+    "tooBig": "El archivo supera los 4 MB.",
+    "badType": "No se puede leer ese tipo de archivo de Google. Elija una hoja de Google, un documento de Google, un PDF, una foto o una hoja de cálculo."
   }
 }

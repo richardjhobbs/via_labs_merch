@@ -265,7 +265,8 @@
     "viewOrders": "See your orders",
     "docHint": "This import needs a spreadsheet with one order per row. For a proforma invoice, invoice or purchase order in any other layout, use",
     "docLink": "Add from a document.",
-    "destination": "Destination"
+    "destination": "Destination",
+    "orDrive": "or"
   },
   "parties": {
     "title": "Customers & suppliers",
@@ -362,7 +363,8 @@
       "needOrder": "An order needs a PO number and a ship date.",
       "dupPo": "PO {po} already exists.",
       "checkParties": "Check the customer and supplier: each needs a name of at least two characters.",
-      "nothing": "Nothing to save. Tick at least one box."
+      "nothing": "Nothing to save. Tick at least one box.",
+      "orDrive": "or"
     },
     "bank": {
       "title": "Bank details",
@@ -472,6 +474,16 @@
         "refresh": "Microsoft did not give lasting access. Connect again and accept all the permissions asked.",
         "adminConsent": "Your company's Microsoft admin must approve VIA Merch once before you can connect. Ask IT to approve it, then try again.",
         "folder": "This mailbox has no Outlook folder called \"{label}\"."
+      }
+    },
+    "gdrive": {
+      "connect": "Connect Google Drive",
+      "done": "Google Drive connected: {account}. Pick files on Orders → Import spreadsheet, or on Add from a document.",
+      "note": "VIA opens only the files you pick in Google's file picker; the rest of your Drive stays private.",
+      "sheetsNote": "Uses your Google Drive connection: on Orders → Import spreadsheet, choose a Google Sheet.",
+      "errors": {
+        "notReady": "Google Drive is not switched on yet. VIA Labs is completing the setup.",
+        "scopes": "Allow access to the files you choose on the Google screen, then try again."
       }
     }
   },
@@ -753,7 +765,7 @@
     "tools": {
       "gmail": "Reads POs, approvals and questions in the mail and its attachments. Drafts replies; sends only after you approve.",
       "m365": "Reads Outlook mail and SharePoint files. Drafts replies; sends only after you approve.",
-      "sheets": "Reads WIP reports and shared order sheets. Updates rows after you approve.",
+      "sheets": "Imports the order sheets you pick in Google Drive into POs and milestones.",
       "upload": "Reads tech packs, POs, invoices and photos you drop in. Files go onto the order record.",
       "whatsapp": "Reads messages, photos and voice notes from factories. Replies in the factory’s language after you approve.",
       "wecom": "Reads factory chat, including bridged WeChat. Sends chasers and replies after you approve.",
@@ -1156,5 +1168,20 @@
     "trustLink": "Trust",
     "privacyLink": "Privacy",
     "termsLink": "Terms"
+  },
+  "drive": {
+    "pickSheet": "Choose a Google Sheet",
+    "pickDoc": "Choose from Google Drive",
+    "opening": "Opening Google Drive...",
+    "titleSheet": "Choose the order sheet",
+    "titleDoc": "Choose a document",
+    "notConnected": "Connect Google Drive first.",
+    "connectLink": "Go to Connections",
+    "notReady": "Google Drive is not switched on yet. VIA Labs is completing the setup.",
+    "viewer": "Viewers cannot import files.",
+    "failed": "Google's file picker did not open. Check that pop-ups and third-party cookies are allowed for this site, then try again.",
+    "notFound": "That file could not be opened from Google Drive. Pick it again.",
+    "tooBig": "That file is larger than 4 MB.",
+    "badType": "That kind of Google file cannot be read. Pick a Google Sheet, a Google Doc, a PDF, a photo or a spreadsheet."
   }
 }

@@ -8,12 +8,12 @@ import { providerOf } from '../providers';
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ provider: string }> }) {
   const { provider } = await params;
-  const p = providerOf(provider);
   const q = req.nextUrl.searchParams;
-  let saved: { state: string; verifier: string; slug: string } | null = null;
+  let saved: { state: string; verifier: string; slug: string; want?: string | null } | null = null;
   try { saved = JSON.parse(req.cookies.get('merch_oauth')?.value || 'null'); } catch {}
+  const p = providerOf(provider, saved?.want);
   const slug = saved?.slug || '';
-  const back = (s: string) => { const r = NextResponse.redirect(new URL(slug ? `/app/${slug}/connections?${s}&gp=${provider}` : '/app', req.nextUrl.origin)); r.cookies.set('merch_oauth', '', { path: `/api/connect/${provider}`, maxAge: 0 }); return r; };
+  const back = (s: string) => { const r = NextResponse.redirect(new URL(slug ? `/app/${slug}/connections?${s}&gp=${saved?.want === 'drive' ? 'drive' : provider}` : '/app', req.nextUrl.origin)); r.cookies.set('merch_oauth', '', { path: `/api/connect/${provider}`, maxAge: 0 }); return r; };
   if (!p || !saved || !q.get('state') || q.get('state') !== saved.state) return back('gerror=state');
   if (q.get('error')) {
     // Microsoft: the company's admin has to approve the app before members can connect
@@ -35,12 +35,12 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ prov
     const { data: existing } = await sb.from('channels').select('id, config').eq('tenant_id', me.tenant.id).eq('kind', p.kind).ilike('account', account).maybeSingle();
     const prev = (existing?.config || {}) as MailConfig;
     const config: MailConfig = { connector: p.connector, filter: prev.filter || 'known', label: prev.label || null, label_id: prev.label_id || null, ...cursor, connected_by: me.membership.display_name || me.user.email || undefined };
-    const row = { tenant_id: me.tenant.id, kind: p.kind, name: account, account, owner_user_id: me.user.id, status: 'connected', scope: 'Read new mail from known senders; send after approval', auth_enc: sealAuth({ ...t, refresh_token: t.refresh_token }), config, error: null, last_sync_at: new Date().toISOString() };
+    const row = { tenant_id: me.tenant.id, kind: p.kind, name: account, account, owner_user_id: me.user.id, status: 'connected', scope: p.kind === 'sheets' ? 'Open picked files only' : 'Read new mail from known senders; send after approval', auth_enc: sealAuth({ ...t, refresh_token: t.refresh_token }), config, error: null, last_sync_at: new Date().toISOString() };
     const { error } = existing ? await sb.from('channels').update(row).eq('id', existing.id) : await sb.from('channels').insert(row);
     if (error) throw new Error(error.message);
     const who = me.membership.display_name || me.user.email || 'member';
     const where = config.filter === 'label' ? `the ${p.kind === 'email_m365' ? 'folder' : 'label'} ${config.label}` : 'known customers and suppliers';
-    await sb.rpc('ledger_append', { p_tenant: me.tenant.id, p_channel: 'Console', p_actor: who, p_actor_user: me.user.id, p_counterparty: null, p_stream: 'Setup', p_order: null, p_what: `${existing ? 'Reconnected' : 'Connected'} ${p.label} ${account}: reads new mail from ${where}, sends only approved replies`, p_gate: 'SETUP', p_gated: true, p_ref: {} });
+    await sb.rpc('ledger_append', { p_tenant: me.tenant.id, p_channel: 'Console', p_actor: who, p_actor_user: me.user.id, p_counterparty: null, p_stream: 'Setup', p_order: null, p_what: `${existing ? 'Reconnected' : 'Connected'} ${p.label} ${account}: ${p.ledger.replace('{where}', where)}`, p_gate: 'SETUP', p_gated: true, p_ref: {} });
     return back(`gconnected=${encodeURIComponent(account)}`);
   } catch (e) {
     return back(`gerror=failed&gmsg=${encodeURIComponent((e instanceof Error ? e.message : String(e)).slice(0, 160))}`);

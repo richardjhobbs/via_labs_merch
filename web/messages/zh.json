@@ -265,7 +265,8 @@
     "viewOrders": "查看您的订单",
     "docHint": "此导入需要每行一个订单的表格。其他格式的形式发票、发票或采购订单，请使用",
     "docLink": "从文件添加。",
-    "destination": "目的地"
+    "destination": "目的地",
+    "orDrive": "或"
   },
   "parties": {
     "title": "客户与供应商",
@@ -362,7 +363,8 @@
       "needOrder": "订单需要 PO 号和出货日期。",
       "dupPo": "PO {po} 已存在。",
       "checkParties": "请核对客户和供应商：名称至少需要两个字符。",
-      "nothing": "没有可保存的内容。请至少勾选一项。"
+      "nothing": "没有可保存的内容。请至少勾选一项。",
+      "orDrive": "或"
     },
     "bank": {
       "title": "银行信息",
@@ -472,6 +474,16 @@
         "refresh": "Microsoft 未授予长期访问权限。请重新连接并接受所请求的全部权限。",
         "adminConsent": "贵公司的 Microsoft 管理员需先批准一次 VIA Merch，您才能连接。请联系 IT 批准后重试。",
         "folder": "此邮箱没有名为“{label}”的 Outlook 文件夹。"
+      }
+    },
+    "gdrive": {
+      "connect": "连接 Google Drive",
+      "done": "Google Drive 已连接：{account}。可在 订单 → 导入表格 或 从文件添加 中选择文件。",
+      "note": "VIA 只打开您在 Google 文件选择器中选择的文件，Drive 中的其他内容保持私密。",
+      "sheetsNote": "使用您的 Google Drive 连接：在 订单 → 导入表格 中选择 Google 表格。",
+      "errors": {
+        "notReady": "Google Drive 尚未开通。VIA Labs 正在完成设置。",
+        "scopes": "请在 Google 页面允许访问您选择的文件，然后重试。"
       }
     }
   },
@@ -753,7 +765,7 @@
     "tools": {
       "gmail": "读取邮件及附件中的 PO、审批和问题。起草回复；经您批准后才发送。",
       "m365": "读取 Outlook 邮件和 SharePoint 文件。起草回复；经您批准后才发送。",
-      "sheets": "读取 WIP 报表和共享订单表。经您批准后更新相应行。",
+      "sheets": "把您在 Google Drive 中选择的订单表导入为 PO 和节点。",
       "upload": "读取您上传的工艺单、PO、发票和照片。文件归入订单记录。",
       "whatsapp": "读取工厂发来的消息、照片和语音。经您批准后，用工厂的语言回复。",
       "wecom": "读取工厂聊天，包括互通的微信。经您批准后发送催单和回复。",
@@ -1156,5 +1168,20 @@
     "trustLink": "信任",
     "privacyLink": "隐私",
     "termsLink": "条款"
+  },
+  "drive": {
+    "pickSheet": "选择 Google 表格",
+    "pickDoc": "从 Google Drive 选择",
+    "opening": "正在打开 Google Drive……",
+    "titleSheet": "选择订单表",
+    "titleDoc": "选择文件",
+    "notConnected": "请先连接 Google Drive。",
+    "connectLink": "前往连接页面",
+    "notReady": "Google Drive 尚未开通。VIA Labs 正在完成设置。",
+    "viewer": "查看者不能导入文件。",
+    "failed": "Google 文件选择器没有打开。请确认本网站允许弹出窗口和第三方 Cookie，然后重试。",
+    "notFound": "无法从 Google Drive 打开该文件，请重新选择。",
+    "tooBig": "该文件超过 4 MB。",
+    "badType": "无法读取这类 Google 文件。请选择 Google 表格、Google 文档、PDF、图片或电子表格。"
   }
 }

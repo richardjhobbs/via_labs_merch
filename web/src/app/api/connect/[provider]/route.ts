@@ -10,7 +10,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ prov
   const slug = req.nextUrl.searchParams.get('tenant') || '';
   const me = await requireTenant(slug);
   const back = (q: string) => NextResponse.redirect(new URL(`/app/${slug}/connections?${q}`, req.nextUrl.origin));
-  const p = providerOf(provider);
+  const want = req.nextUrl.searchParams.get('want') === 'drive' ? 'drive' : null;
+  const p = providerOf(provider, want);
   if (!p) return back('gerror=failed');
   if (!p.configured()) return back(`gerror=notReady&gp=${provider}`);
   if (me.membership.id === 'admin') return back('gerror=support');
@@ -19,6 +20,6 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ prov
   const challenge = createHash('sha256').update(verifier).digest('base64url');
   const redirectUri = new URL(`/api/connect/${provider}/callback`, req.nextUrl.origin).toString();
   const res = NextResponse.redirect(p.authUrl({ state, challenge, redirectUri, loginHint: me.user.email || undefined }));
-  res.cookies.set('merch_oauth', JSON.stringify({ state, verifier, slug }), { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: `/api/connect/${provider}`, maxAge: 600 });
+  res.cookies.set('merch_oauth', JSON.stringify({ state, verifier, slug, want }), { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: `/api/connect/${provider}`, maxAge: 600 });
   return res;
 }

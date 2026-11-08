@@ -1,6 +1,7 @@
 'use client';
 // Add from a document: upload, then a review of what was read. Nothing is saved until the person presses Save.
-import { useActionState, useState, type ReactNode } from 'react';
+import { useActionState, useRef, useState, type ReactNode } from 'react';
+import { DrivePicker } from '@/components/drive-picker';
 import { useTranslations } from 'next-intl';
 import { readDocument, saveDocument, type ReadState } from '../actions';
 import { PartyFields, type PartyDefaults } from '../party-fields';
@@ -100,11 +101,18 @@ export function DocumentForm({ tenant, existing, canBank }: { tenant: string; ex
   const t = useTranslations('parties.doc');
   const [state, action, pending] = useActionState<ReadState, FormData>(readDocument, {});
   const [dismissed, setDismissed] = useState<DocDraft | null>(null);
+  const formRef = useRef<HTMLFormElement>(null), fileRef = useRef<HTMLInputElement>(null);
+  const [picked, setPicked] = useState({ id: '', name: '' });
   if (state.draft && state.draft !== dismissed) return <Review key={state.draft.file} tenant={tenant} draft={state.draft} existing={existing} canBank={canBank} onReset={() => setDismissed(state.draft!)} />;
   return (
-    <form action={action} className="card">
+    <form action={action} className="card" ref={formRef}>
       <input type="hidden" name="tenant" value={tenant} />
-      <label className="f"><span>{t('file')}</span><input className="input" type="file" name="file" accept=".xls,.xlsx,.xlsm,.csv,.pdf,.png,.jpg,.jpeg,.webp" required /></label>
+      <input type="hidden" name="drive_file_id" value={picked.id} />
+      <label className="f"><span>{t('file')}</span><input ref={fileRef} className="input" type="file" name="file" accept=".xls,.xlsx,.xlsm,.csv,.pdf,.png,.jpg,.jpeg,.webp" onChange={() => setPicked({ id: '', name: '' })} /></label>
+      <div className="flex items-center gap-2 flex-wrap mb-3"><span className="small muted">{t('orDrive')}</span>
+        <DrivePicker tenant={tenant} kind="doc" disabled={pending} onPick={(f) => { if (fileRef.current) fileRef.current.value = ''; setPicked(f); setTimeout(() => formRef.current?.requestSubmit(), 0); }} />
+        {picked.name && <span className="small">{picked.name}</span>}
+      </div>
       {state.error && <div className="notice crit mb-3">{state.error}</div>}
       <button className="btn primary" disabled={pending}>{pending ? t('reading') : t('read')}</button>
     </form>

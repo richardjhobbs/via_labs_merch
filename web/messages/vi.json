@@ -265,7 +265,8 @@
     "viewOrders": "Xem đơn hàng của bạn",
     "docHint": "Cách nhập này cần bảng tính mỗi dòng một đơn hàng. Với hóa đơn chiếu lệ, hóa đơn hoặc đơn đặt hàng ở định dạng khác, hãy dùng",
     "docLink": "Thêm từ tài liệu.",
-    "destination": "Điểm đến"
+    "destination": "Điểm đến",
+    "orDrive": "hoặc"
   },
   "parties": {
     "title": "Khách hàng & nhà cung cấp",
@@ -362,7 +363,8 @@
       "needOrder": "Đơn hàng cần số PO và ngày giao hàng.",
       "dupPo": "PO {po} đã tồn tại.",
       "checkParties": "Hãy kiểm tra khách hàng và nhà cung cấp: tên cần có ít nhất hai ký tự.",
-      "nothing": "Không có gì để lưu. Hãy đánh dấu ít nhất một ô."
+      "nothing": "Không có gì để lưu. Hãy đánh dấu ít nhất một ô.",
+      "orDrive": "hoặc"
     },
     "bank": {
       "title": "Thông tin ngân hàng",
@@ -472,6 +474,16 @@
         "refresh": "Microsoft không cấp quyền truy cập lâu dài. Hãy kết nối lại và chấp nhận mọi quyền được yêu cầu.",
         "adminConsent": "Quản trị viên Microsoft của công ty bạn cần phê duyệt VIA Merch một lần trước khi bạn kết nối. Hãy nhờ bộ phận IT phê duyệt rồi thử lại.",
         "folder": "Hộp thư này không có thư mục Outlook nào tên \"{label}\"."
+      }
+    },
+    "gdrive": {
+      "connect": "Kết nối Google Drive",
+      "done": "Đã kết nối Google Drive: {account}. Chọn tệp ở Đơn hàng → Nhập bảng tính, hoặc ở Thêm từ tài liệu.",
+      "note": "VIA chỉ mở các tệp bạn chọn trong trình chọn tệp của Google; phần còn lại của Drive vẫn riêng tư.",
+      "sheetsNote": "Dùng kết nối Google Drive của bạn: ở Đơn hàng → Nhập bảng tính, chọn một Google Sheet.",
+      "errors": {
+        "notReady": "Google Drive chưa được bật. VIA Labs đang hoàn tất thiết lập.",
+        "scopes": "Hãy cho phép truy cập các tệp bạn chọn trên màn hình Google rồi thử lại."
       }
     }
   },
@@ -753,7 +765,7 @@
     "tools": {
       "gmail": "Đọc PO, phê duyệt và câu hỏi trong thư và tệp đính kèm. Soạn trả lời; chỉ gửi sau khi bạn duyệt.",
       "m365": "Đọc thư Outlook và tệp SharePoint. Soạn trả lời; chỉ gửi sau khi bạn duyệt.",
-      "sheets": "Đọc báo cáo WIP và bảng đơn hàng dùng chung. Cập nhật các dòng sau khi bạn duyệt.",
+      "sheets": "Nhập các bảng đơn hàng bạn chọn trong Google Drive thành PO và mốc tiến độ.",
       "upload": "Đọc tech pack, PO, hóa đơn và ảnh bạn tải lên. Tệp được lưu vào hồ sơ đơn hàng.",
       "whatsapp": "Đọc tin nhắn, ảnh và tin nhắn thoại từ nhà máy. Trả lời bằng ngôn ngữ của nhà máy sau khi bạn duyệt.",
       "wecom": "Đọc chat với nhà máy, kể cả WeChat được kết nối qua cầu nối. Gửi tin nhắc việc và trả lời sau khi bạn duyệt.",
@@ -1156,5 +1168,20 @@
     "trustLink": "Tin cậy",
     "privacyLink": "Quyền riêng tư",
     "termsLink": "Điều khoản"
+  },
+  "drive": {
+    "pickSheet": "Chọn một Google Sheet",
+    "pickDoc": "Chọn từ Google Drive",
+    "opening": "Đang mở Google Drive...",
+    "titleSheet": "Chọn bảng đơn hàng",
+    "titleDoc": "Chọn một tài liệu",
+    "notConnected": "Hãy kết nối Google Drive trước.",
+    "connectLink": "Đến trang Kết nối",
+    "notReady": "Google Drive chưa được bật. VIA Labs đang hoàn tất thiết lập.",
+    "viewer": "Người xem không thể nhập tệp.",
+    "failed": "Trình chọn tệp của Google không mở. Hãy cho phép cửa sổ bật lên và cookie bên thứ ba cho trang này rồi thử lại.",
+    "notFound": "Không mở được tệp đó từ Google Drive. Hãy chọn lại.",
+    "tooBig": "Tệp lớn hơn 4 MB.",
+    "badType": "Không đọc được loại tệp Google này. Hãy chọn Google Sheet, Google Doc, PDF, ảnh hoặc bảng tính."
   }
 }

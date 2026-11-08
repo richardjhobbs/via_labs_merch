@@ -6,7 +6,7 @@ import { seal, open } from '@/lib/crypto';
 type Client = SupabaseClient<any, 'merch', any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 export type Auth = { refresh_token: string; access_token?: string; expires_at?: number };
-export type MailConfig = { connector: 'gmail' | 'm365'; filter?: 'known' | 'label'; label?: string | null; label_id?: string | null; connected_by?: string; [k: string]: unknown };
+export type MailConfig = { connector: 'gmail' | 'm365' | 'gdrive'; filter?: 'known' | 'label'; label?: string | null; label_id?: string | null; connected_by?: string; [k: string]: unknown };
 export type Channel = { id: string; tenant_id: string; kind: string; status: string; account: string | null; owner_user_id: string | null; auth_enc: string | null; config: MailConfig; last_sync_at: string | null };
 // thread_id: Gmail thread id; provider_id: the original message's id in the provider (Graph reply target)
 export type Reply = { to: string; subject: string | null; message_id: string | null; references: string | null; thread_id: string | null; provider_id?: string | null };

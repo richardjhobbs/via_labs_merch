@@ -16,7 +16,7 @@ async function load(slug: string, id: string) {
   const allowed = !!ch && me.membership.id !== 'admin' && (ch.owner_user_id === me.user.id || ['owner', 'manager'].includes(me.membership.role));
   return { me, sb, ch: ch as Channel | null, allowed, who: me.membership.display_name || me.user.email || 'member' };
 }
-const box = (ch: Channel) => (ch.kind === 'email_m365' ? 'Microsoft 365' : 'Gmail');
+const box = (ch: Channel) => (ch.kind === 'email_m365' ? 'Microsoft 365' : ch.config?.connector === 'gdrive' ? 'Google Drive' : 'Gmail');
 const back = (slug: string, q: string) => { revalidatePath(`/app/${slug}/connections`); redirect(`/app/${slug}/connections?${q}`); };
 
 export async function saveMailbox(form: FormData) {
@@ -40,7 +40,9 @@ export async function disconnectMailbox(form: FormData) {
   const slug = String(form.get('tenant')), id = String(form.get('id'));
   const { me, sb, ch, allowed, who } = await load(slug, id);
   if (!ch || !allowed) return back(slug, 'gerror=forbidden');
-  if (ch.kind === 'email_gmail') await revoke(ch.auth_enc); // Microsoft has no per-token revoke; the sealed token is deleted
+  // Gmail: revoke at Google. Drive: only delete the token, because revoking at Google can end the person's
+  // whole grant to the app and would also cut their Gmail connection. Microsoft has no per-token revoke.
+  if (ch.kind === 'email_gmail') await revoke(ch.auth_enc);
   await sb.from('channels').update({ status: 'off', auth_enc: null, error: null }).eq('id', id);
   await sb.rpc('ledger_append', { p_tenant: me.tenant.id, p_channel: 'Console', p_actor: who, p_actor_user: me.user.id, p_counterparty: null, p_stream: 'Setup', p_order: null, p_what: `Disconnected ${box(ch)} ${ch.account}${ch.kind === 'email_gmail' ? '; Google access revoked' : '; stored sign-in deleted'}`, p_gate: 'SETUP', p_gated: true, p_ref: {} });
   back(slug, 'gsaved=1');

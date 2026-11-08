@@ -8,6 +8,7 @@ import { CONNECTORS, CATEGORIES, STATUS_LABEL, type ConnectorCategory } from '@/
 import { BrandIcon } from '@/components/brand-icon';
 import { googleConfigured } from '@/lib/connectors/google';
 import { microsoftConfigured } from '@/lib/connectors/microsoft';
+import { driveConfigured } from '@/lib/connectors/drive';
 import { saveMailbox, disconnectMailbox } from './actions';
 
 type Ch = { id: string; kind: string; name: string; status: string; account: string | null; owner_user_id: string | null; last_sync_at: string | null; error: string | null; config: { connector?: string; filter?: string; label?: string | null; connected_by?: string } };
@@ -21,7 +22,10 @@ export default async function Connections({ params, searchParams }: { params: Pr
   const sb = await supabaseServer();
   const { data } = await sb.from('channels').select('id, kind, name, status, account, owner_user_id, last_sync_at, error, config').eq('tenant_id', tenant.id).order('created_at');
   const channels = (data || []) as Ch[];
-  const connected = new Set(channels.filter((c) => c.status === 'connected').map((c) => c.config?.connector || c.kind));
+  // one Google Drive connection serves both the Drive and the Sheets entries
+  const connected = new Set(channels.filter((c) => c.status === 'connected').flatMap((c) => (c.config?.connector === 'gdrive' ? ['drive', 'sheets'] : [c.config?.connector || c.kind])));
+  const drives = channels.filter((c) => c.config?.connector === 'gdrive' && c.status !== 'off');
+  const dv = sp.gp === 'drive';
   const canEdit = (c: Ch) => membership.id !== 'admin' && (c.owner_user_id === user.id || ['owner', 'manager'].includes(membership.role));
   const canConnect = membership.id !== 'admin' && membership.role !== 'viewer';
   // mail connectors with a working runtime: catalogue id -> channel kind, OAuth route, strings namespace
@@ -31,7 +35,7 @@ export default async function Connections({ params, searchParams }: { params: Pr
   };
   const ms = sp.gp === 'microsoft';
   const gerr = GERR.find((k) => k === sp.gerror);
-  const errNs = gerr && (M365_ERR.includes(gerr) || (ms && ['notReady', 'refresh'].includes(gerr))) ? 'm365' : 'gmail';
+  const errNs = gerr && (M365_ERR.includes(gerr) || (ms && ['notReady', 'refresh'].includes(gerr))) ? 'm365' : gerr && dv && ['notReady', 'scopes'].includes(gerr) ? 'gdrive' : 'gmail';
   const when = (iso: string) => new Date(iso).toLocaleString('en-GB', { timeZone: tenant.tz, day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
   const groups = (Object.keys(CATEGORIES) as ConnectorCategory[]).map((cat) => ({ cat, items: CONNECTORS.filter((c) => c.category === cat) })).filter((g) => g.items.length);
   const live = CONNECTORS.filter((c) => c.status !== 'request');
@@ -41,7 +45,7 @@ export default async function Connections({ params, searchParams }: { params: Pr
       <h1>{t('title')}</h1>
       <p className="muted mt-1" style={{ maxWidth: '70ch' }}>{t('sub')}</p>
 
-      {sp.gconnected && <div className="notice mt-4">{t(ms ? 'm365.done' : 'gmail.done', { account: sp.gconnected })}</div>}
+      {sp.gconnected && <div className="notice mt-4">{t(ms ? 'm365.done' : dv ? 'gdrive.done' : 'gmail.done', { account: sp.gconnected })}</div>}
       {sp.gsaved && <div className="notice mt-4">{t('gmail.saved')}</div>}
       {gerr && <div className="notice crit mt-4">{t(`${errNs}.errors.${gerr}` as 'gmail.errors.failed', { error: sp.gmsg || '', label: sp.glabel || '' })}</div>}
 
@@ -55,6 +59,22 @@ export default async function Connections({ params, searchParams }: { params: Pr
                 <div className="flex items-center gap-2 flex-wrap"><span className="font-medium">{c.name}</span>{c.vendor && <span className="muted small">{c.vendor}</span>}<span className={`pill ${connected.has(c.id) ? 'ok' : c.status === 'via' ? 'agent' : ''} ml-auto`}>{connected.has(c.id) ? t('connected') : STATUS_LABEL[c.status]}</span></div>
                 <div className="small mt-1" style={{ color: 'var(--fg2)' }}>{c.use}</div>
                 <details className="mt-2 small"><summary className="muted" style={{ cursor: 'pointer' }}>{t('howTo')} · {c.auth}</summary><ol className="mt-2 pl-5 grid gap-1" style={{ listStyle: 'decimal' }}>{c.steps.map((s, i) => <li key={i}>{s}</li>)}</ol>{c.docs && <a className="muted" href={c.docs} target="_blank" rel="noopener">{t('docs')}</a>}</details>
+                {c.id === 'drive' && <>
+                  {drives.map((m) => (
+                    <div key={m.id} className="mt-3 p-2 small" style={{ border: '1px solid var(--line)', borderRadius: 8 }}>
+                      <div className="flex items-center gap-2 flex-wrap"><span className="font-medium">{m.account}</span><span className={`pill ${m.status === 'connected' ? 'ok' : 'warn'}`}>{m.status === 'connected' ? t('connected') : t('gmail.reauth')}</span></div>
+                      <div className="muted mt-1">{m.config?.connected_by ? t('gmail.by', { name: m.config.connected_by }) : ''}</div>
+                      {m.error && m.status === 'connected' && <div className="mt-1" style={{ color: 'var(--crit)' }}>{m.error}</div>}
+                      {canEdit(m) && <div className="flex gap-2 mt-2">
+                        {m.status !== 'connected' && <a className="btn sm" href={`/api/connect/google?tenant=${slug}&want=drive`}>{t('gmail.reconnect')}</a>}
+                        <form action={disconnectMailbox}><input type="hidden" name="tenant" value={slug} /><input type="hidden" name="id" value={m.id} /><button className="btn sm red">{t('gmail.disconnect')}</button></form>
+                      </div>}
+                    </div>
+                  ))}
+                  <p className="muted small mt-2">{t('gdrive.note')}</p>
+                  {canConnect && !drives.some((m) => m.owner_user_id === user.id && m.status === 'connected') && (driveConfigured() ? <a className="btn sm primary mt-2" href={`/api/connect/google?tenant=${slug}&want=drive`}>{t('gdrive.connect')}</a> : <><button className="btn sm mt-2" disabled>{t('gdrive.connect')}</button><p className="muted small mt-1">{t('gdrive.errors.notReady')}</p></>)}
+                </>}
+                {c.id === 'sheets' && <p className="muted small mt-2">{t('gdrive.sheetsNote')}</p>}
                 {MAIL[c.id] && (() => { const mc = MAIL[c.id], boxes = channels.filter((m) => m.kind === mc.kind && m.status !== 'off'); return <>
                   {boxes.map((m) => (
                     <div key={m.id} className="mt-3 p-2 small" style={{ border: '1px solid var(--line)', borderRadius: 8 }}>

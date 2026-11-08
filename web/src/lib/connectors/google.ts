@@ -23,12 +23,17 @@ export type GmailConfig = MailConfig & { connector: 'gmail'; history_id?: string
 
 export function googleConfigured() { return !!process.env.GOOGLE_CLIENT_ID && !!process.env.GOOGLE_CLIENT_SECRET && hasTokenKey(); }
 
-export function authUrl(o: { state: string; challenge: string; redirectUri: string; loginHint?: string }) {
+export const DRIVE_SCOPES = ['https://www.googleapis.com/auth/drive.file'];
+
+// Gmail asks for the mail scopes; Drive asks for drive.file alone, as its own grant, so each connection
+// holds only the permission it uses.
+export function authUrl(o: { state: string; challenge: string; redirectUri: string; loginHint?: string; scopes?: string[] }) {
   const u = new URL('https://accounts.google.com/o/oauth2/v2/auth');
-  u.search = new URLSearchParams({ client_id: process.env.GOOGLE_CLIENT_ID!, redirect_uri: o.redirectUri, response_type: 'code', scope: GMAIL_SCOPES.join(' '), access_type: 'offline', prompt: 'consent', include_granted_scopes: 'true', state: o.state, code_challenge: o.challenge, code_challenge_method: 'S256', ...(o.loginHint ? { login_hint: o.loginHint } : {}) }).toString();
+  u.search = new URLSearchParams({ client_id: process.env.GOOGLE_CLIENT_ID!, redirect_uri: o.redirectUri, response_type: 'code', scope: (o.scopes || GMAIL_SCOPES).join(' '), access_type: 'offline', prompt: 'consent', include_granted_scopes: 'false', state: o.state, code_challenge: o.challenge, code_challenge_method: 'S256', ...(o.loginHint ? { login_hint: o.loginHint } : {}) }).toString();
   return u.toString();
 }
 
+export async function googleToken(params: Record<string, string>) { return tokenCall(params); }
 async function tokenCall(params: Record<string, string>) {
   const r = await fetch('https://oauth2.googleapis.com/token', { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ client_id: process.env.GOOGLE_CLIENT_ID!, client_secret: process.env.GOOGLE_CLIENT_SECRET!, ...params }) });
   const j = await r.json().catch(() => ({}));

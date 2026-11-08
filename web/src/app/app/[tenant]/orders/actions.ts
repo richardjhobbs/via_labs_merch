@@ -3,7 +3,8 @@ import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { revalidatePath } from 'next/cache';
 import * as XLSX from 'xlsx';
-import { supabaseServer } from '@/lib/supabase/server';
+import { supabaseServer, supabaseAdmin } from '@/lib/supabase/server';
+import { pickedFile } from '@/lib/connectors/drive';
 import { requireTenant } from '@/lib/tenant';
 import { LABELS, MILESTONES, OWNERS, planFromEtd, type MilestoneKey } from '@/lib/core/path';
 
@@ -34,7 +35,14 @@ export async function importOrders(_prev: { ok: boolean; message: string }, form
   const { tenant, membership, user } = await requireTenant(slug);
   const t = await getTranslations('orders');
   if (membership.role === 'viewer') return { ok: false, message: t('importViewer') };
-  const file = form.get('file') as File | null;
+  // a Google Sheet chosen in Drive is exported as .xlsx and imported exactly like an upload
+  let file = form.get('file') as File | null;
+  const driveId = String(form.get('drive_file_id') || '');
+  if ((!file || !file.size) && driveId) {
+    const r = await pickedFile(supabaseAdmin(), tenant.id, user.id, driveId);
+    if ('error' in r) return { ok: false, message: (await getTranslations('drive'))(r.error) };
+    file = r.file;
+  }
   if (!file || !file.size) return { ok: false, message: t('importNoFile') };
   if (file.size > 4_000_000) return { ok: false, message: t('importTooBig') };
   const wb = XLSX.read(Buffer.from(await file.arrayBuffer()), { type: 'buffer', cellDates: false });
@@ -67,7 +75,7 @@ export async function importOrders(_prev: { ok: boolean; message: string }, form
     await sb.from('milestones').insert(ms);
     created++;
   }
-  await sb.rpc('ledger_append', { p_tenant: tenant.id, p_channel: 'Console', p_actor: membership.display_name || user.email, p_actor_user: user.id, p_counterparty: null, p_stream: 'Setup', p_order: null, p_what: `Imported ${created} POs from ${file.name}${skipped ? ` (${skipped} skipped)` : ''}`, p_gate: 'Logged', p_gated: false, p_ref: { file: file.name, created, skipped } });
+  await sb.rpc('ledger_append', { p_tenant: tenant.id, p_channel: 'Console', p_actor: membership.display_name || user.email, p_actor_user: user.id, p_counterparty: null, p_stream: 'Setup', p_order: null, p_what: `Imported ${created} POs from ${file.name}${driveId ? ' (Google Drive)' : ''}${skipped ? ` (${skipped} skipped)` : ''}`, p_gate: 'Logged', p_gated: false, p_ref: { file: file.name, created, skipped } });
   revalidatePath(`/app/${slug}/orders`);
   const why = skipped ? ` ${t('importSkipped', { n: skipped, why: problems.slice(0, 5).join('; ') })}` : '';
   return { ok: created > 0, message: created ? `${t('importDone', { n: created })}${why}` : `${t('importNone')}${why} ${t('importUnchanged')}` };

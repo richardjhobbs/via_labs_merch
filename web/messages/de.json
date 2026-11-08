@@ -265,7 +265,8 @@
     "viewOrders": "Ihre Aufträge ansehen",
     "docHint": "Dieser Import braucht eine Tabelle mit einem Auftrag pro Zeile. Für eine Proforma-Rechnung, Rechnung oder Bestellung in anderem Format nutzen Sie",
     "docLink": "Aus einem Dokument hinzufügen.",
-    "destination": "Zielland"
+    "destination": "Zielland",
+    "orDrive": "oder"
   },
   "parties": {
     "title": "Kunden & Lieferanten",
@@ -362,7 +363,8 @@
       "needOrder": "Ein Auftrag braucht eine Bestellnummer und ein Versanddatum.",
       "dupPo": "Bestellung {po} existiert bereits.",
       "checkParties": "Prüfen Sie Kunde und Lieferant: Beide brauchen einen Namen mit mindestens zwei Zeichen.",
-      "nothing": "Nichts zu speichern. Setzen Sie mindestens ein Häkchen."
+      "nothing": "Nichts zu speichern. Setzen Sie mindestens ein Häkchen.",
+      "orDrive": "oder"
     },
     "bank": {
       "title": "Bankdaten",
@@ -472,6 +474,16 @@
         "refresh": "Microsoft hat keinen dauerhaften Zugriff erteilt. Verbinden Sie erneut und bestätigen Sie alle angefragten Berechtigungen.",
         "adminConsent": "Der Microsoft-Administrator Ihres Unternehmens muss VIA Merch einmal freigeben, bevor Sie verbinden können. Bitten Sie die IT darum und versuchen Sie es dann erneut.",
         "folder": "Dieses Postfach hat keinen Outlook-Ordner \"{label}\"."
+      }
+    },
+    "gdrive": {
+      "connect": "Google Drive verbinden",
+      "done": "Google Drive verbunden: {account}. Wählen Sie Dateien unter Aufträge → Tabelle importieren oder unter Aus einem Dokument hinzufügen.",
+      "note": "VIA öffnet nur die Dateien, die Sie in der Google-Dateiauswahl wählen; der Rest Ihres Drive bleibt privat.",
+      "sheetsNote": "Nutzt Ihre Google-Drive-Verbindung: unter Aufträge → Tabelle importieren eine Google-Tabelle wählen.",
+      "errors": {
+        "notReady": "Google Drive ist noch nicht freigeschaltet. VIA Labs schließt die Einrichtung ab.",
+        "scopes": "Erlauben Sie auf der Google-Seite den Zugriff auf die gewählten Dateien und versuchen Sie es erneut."
       }
     }
   },
@@ -753,7 +765,7 @@
     "tools": {
       "gmail": "Liest Bestellungen, Freigaben und Fragen in E-Mails und Anhängen. Entwirft Antworten; sendet erst nach Ihrer Freigabe.",
       "m365": "Liest Outlook-Mails und SharePoint-Dateien. Entwirft Antworten; sendet erst nach Ihrer Freigabe.",
-      "sheets": "Liest WIP-Berichte und gemeinsame Auftragstabellen. Aktualisiert Zeilen nach Ihrer Freigabe.",
+      "sheets": "Importiert die Auftragstabellen, die Sie in Google Drive wählen, als POs und Meilensteine.",
       "upload": "Liest Tech Packs, Bestellungen, Rechnungen und Fotos, die Sie hochladen. Die Dateien kommen zum Auftrag.",
       "whatsapp": "Liest Nachrichten, Fotos und Sprachnachrichten von Fabriken. Antwortet nach Ihrer Freigabe in der Sprache der Fabrik.",
       "wecom": "Liest Fabrik-Chats, auch verbundenes WeChat. Sendet Nachfragen und Antworten nach Ihrer Freigabe.",
@@ -1156,5 +1168,20 @@
     "trustLink": "Vertrauen",
     "privacyLink": "Datenschutz",
     "termsLink": "Bedingungen"
+  },
+  "drive": {
+    "pickSheet": "Google-Tabelle wählen",
+    "pickDoc": "Aus Google Drive wählen",
+    "opening": "Google Drive wird geöffnet ...",
+    "titleSheet": "Auftragstabelle wählen",
+    "titleDoc": "Dokument wählen",
+    "notConnected": "Verbinden Sie zuerst Google Drive.",
+    "connectLink": "Zu den Verbindungen",
+    "notReady": "Google Drive ist noch nicht freigeschaltet. VIA Labs schließt die Einrichtung ab.",
+    "viewer": "Betrachter können keine Dateien importieren.",
+    "failed": "Die Google-Dateiauswahl hat sich nicht geöffnet. Erlauben Sie Pop-ups und Drittanbieter-Cookies für diese Seite und versuchen Sie es erneut.",
+    "notFound": "Diese Datei konnte nicht aus Google Drive geöffnet werden. Wählen Sie sie erneut.",
+    "tooBig": "Diese Datei ist größer als 4 MB.",
+    "badType": "Diese Art von Google-Datei kann nicht gelesen werden. Wählen Sie eine Google-Tabelle, ein Google-Dokument, ein PDF, ein Foto oder eine Tabelle."
   }
 }

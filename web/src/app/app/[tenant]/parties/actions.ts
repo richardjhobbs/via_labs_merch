@@ -3,11 +3,12 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { getTranslations } from 'next-intl/server';
 import { z } from 'zod';
-import { supabaseServer } from '@/lib/supabase/server';
+import { supabaseServer, supabaseAdmin } from '@/lib/supabase/server';
 import { requireTenant } from '@/lib/tenant';
 import { extract, hasLlm, recordUsage } from '@/lib/llm';
 import { MILESTONES, OWNERS, planFromEtd } from '@/lib/core/path';
 import { bankFrom, canAddBank, maskAccount, sameAccount } from '@/lib/bank';
+import { pickedFile } from '@/lib/connectors/drive';
 import { DocSchema, documentContent, findParty, normalizeDoc, sameCompany, type DocDraft } from '@/lib/documents';
 
 const KINDS = ['brand', 'retailer', 'store', 'buying_office', 'trading', 'factory', 'mill', 'fibre', 'forwarder', 'carrier', 'lab', 'auditor', 'other', 'bank', 'funder'] as const;
@@ -76,10 +77,17 @@ bank is the beneficiary's payment details if the document shows them, otherwise 
 export async function readDocument(_prev: ReadState, form: FormData): Promise<ReadState> {
   const t = await getTranslations('parties.doc');
   const slug = String(form.get('tenant'));
-  const { tenant, membership } = await requireTenant(slug);
+  const { tenant, membership, user } = await requireTenant(slug);
   if (membership.role === 'viewer') return { error: t('viewer') };
   if (!hasLlm()) return { error: t('noAgent') };
-  const file = form.get('file') as File | null;
+  // a file chosen in Google Drive goes through exactly the same reading as an upload
+  let file = form.get('file') as File | null;
+  const driveId = String(form.get('drive_file_id') || '');
+  if ((!file || !file.size) && driveId) {
+    const r = await pickedFile(supabaseAdmin(), tenant.id, user.id, driveId);
+    if ('error' in r) return { error: (await getTranslations('drive'))(r.error) };
+    file = r.file;
+  }
   if (!file || !file.size) return { error: t('noFile') };
   if (file.size > 4_000_000) return { error: t('tooBig') };
   const content = await documentContent(file);

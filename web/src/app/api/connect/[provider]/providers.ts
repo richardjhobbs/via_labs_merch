@@ -1,10 +1,13 @@
-// The mail providers a member can connect from the Connections page, behind one OAuth flow.
+// The providers a member can connect from the Connections page, behind one OAuth flow.
+// Google Drive shares Google's redirect URI: /api/connect/google?want=drive picks the Drive variant.
 import * as google from '@/lib/connectors/google';
 import * as microsoft from '@/lib/connectors/microsoft';
+import { driveConfigured, driveAccount } from '@/lib/connectors/drive';
 
 export type ProviderKey = 'google' | 'microsoft';
 type Provider = {
-  kind: 'email_gmail' | 'email_m365'; connector: 'gmail' | 'm365'; label: string; scopes: string[];
+  kind: 'email_gmail' | 'email_m365' | 'sheets'; connector: 'gmail' | 'm365' | 'gdrive'; label: string; scopes: string[];
+  ledger: string;   // what the connection does, for the ledger row
   configured: () => boolean;
   authUrl: (o: { state: string; challenge: string; redirectUri: string; loginHint?: string }) => string;
   exchange: (code: string, verifier: string, redirectUri: string) => Promise<{ access_token: string; expires_in: number; refresh_token?: string; scope?: string }>;
@@ -13,10 +16,14 @@ type Provider = {
 };
 
 export const PROVIDERS: Record<ProviderKey, Provider> = {
-  google: { kind: 'email_gmail', connector: 'gmail', label: 'Gmail', scopes: google.GMAIL_SCOPES, configured: google.googleConfigured, authUrl: google.authUrl, exchange: google.exchangeCode,
+  google: { kind: 'email_gmail', connector: 'gmail', label: 'Gmail', scopes: google.GMAIL_SCOPES, ledger: 'reads new mail from {where}, sends only approved replies', configured: google.googleConfigured, authUrl: google.authUrl, exchange: google.exchangeCode,
     start: async (t) => { const p = await google.profile(t); return { account: p.emailAddress.toLowerCase(), cursor: { history_id: p.historyId } }; } },
-  microsoft: { kind: 'email_m365', connector: 'm365', label: 'Microsoft 365', scopes: ['Mail.Read', 'Mail.Send'], configured: microsoft.microsoftConfigured, authUrl: microsoft.authUrl, exchange: microsoft.exchangeCode,
+  microsoft: { kind: 'email_m365', connector: 'm365', label: 'Microsoft 365', scopes: ['Mail.Read', 'Mail.Send'], ledger: 'reads new mail from {where}, sends only approved replies', configured: microsoft.microsoftConfigured, authUrl: microsoft.authUrl, exchange: microsoft.exchangeCode,
     start: async (t) => { const p = await microsoft.profile(t); return { account: p.account, cursor: { since: new Date().toISOString(), at_since: [] } }; } },
 };
 
-export const providerOf = (k: string) => (k in PROVIDERS ? PROVIDERS[k as ProviderKey] : null);
+export const GOOGLE_DRIVE: Provider = { kind: 'sheets', connector: 'gdrive', label: 'Google Drive', scopes: google.DRIVE_SCOPES, ledger: 'opens only the files the person picks (drive.file)', configured: driveConfigured,
+  authUrl: (o) => google.authUrl({ ...o, scopes: google.DRIVE_SCOPES }), exchange: google.exchangeCode,
+  start: async (t) => ({ account: await driveAccount(t), cursor: {} }) };
+
+export const providerOf = (k: string, want?: string | null) => (k === 'google' && want === 'drive' ? GOOGLE_DRIVE : k in PROVIDERS ? PROVIDERS[k as ProviderKey] : null);
