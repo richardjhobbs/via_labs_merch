@@ -16,10 +16,11 @@ const ICONS: Record<string, React.ReactNode> = {
 };
 const Icon = ({ k }: { k: string }) => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{ICONS[k]}</svg>;
 
-export function MobileNav({ base, tenantName, sub, items, tabs, labels, children }: {
+export function MobileNav({ base, tenantName, sub, items, tabs, labels, brand, children }: {
   base: string; tenantName: string; sub: string;
   items: [string, string][]; tabs: [string, string][];
   labels: { more: string; menu: string; close: string };
+  brand?: React.ReactNode;
   children: React.ReactNode;
 }) {
   const path = usePathname();
@@ -38,7 +39,7 @@ export function MobileNav({ base, tenantName, sub, items, tabs, labels, children
   return (
     <>
       <header className="mbar md:hidden">
-        <Link href={base} aria-label={tenantName} className="flex items-center"><Logo merch h={30} /></Link>
+        <Link href={base} aria-label={tenantName} className="flex items-center"><Logo merch adaptive h={30} /></Link>
         <div className="min-w-0 flex-1 leading-tight">
           <div className="truncate font-semibold small">{current || tenantName}</div>
           <div className="truncate muted" style={{ fontSize: 11.5 }}>{tenantName}</div>
@@ -57,6 +58,7 @@ export function MobileNav({ base, tenantName, sub, items, tabs, labels, children
         <div className="msheet-bg md:hidden" onClick={() => setOpen(false)}>
           <div id="m-sheet" className="msheet" role="dialog" aria-modal="true" aria-label={labels.menu} onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center gap-2 pb-2">
+              {brand}
               <div className="min-w-0 flex-1"><b className="small">{tenantName}</b><div className="muted small">{sub}</div></div>
               <button className="btn sm" onClick={() => setOpen(false)} aria-label={labels.close}>×</button>
             </div>

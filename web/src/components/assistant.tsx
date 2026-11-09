@@ -97,7 +97,7 @@ export function Assistant({ slug, agentName, lang, live, labels }: { slug: strin
     router.refresh();
   });
 
-  if (!open) return <button className="asst-fab" onClick={() => setOpen(true)} aria-label={labels.open.replace('{name}', agentName)}><span className="pill" style={{ background: '#fff', color: 'var(--accent)', border: 0 }}>{agentName.slice(0, 1)}</span>{labels.open.replace('{name}', agentName)}</button>;
+  if (!open) return <button className="asst-fab" onClick={() => setOpen(true)} aria-label={labels.open.replace('{name}', agentName)}><span className="pill" style={{ background: 'var(--on-accent)', color: 'var(--accent)', border: 0 }}>{agentName.slice(0, 1)}</span>{labels.open.replace('{name}', agentName)}</button>;
 
   return (
     <div className="asst" role="dialog" aria-label={agentName}>

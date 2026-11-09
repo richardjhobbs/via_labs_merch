@@ -187,7 +187,7 @@ export default async function Connections({ params, searchParams }: { params: Pr
           <div className="small font-medium muted" style={{ letterSpacing: '.06em', textTransform: 'uppercase', fontSize: 11 }}>{CATEGORIES[g.cat]}</div>
           <div className="grid gap-2 mt-2 md:grid-cols-2 lg:grid-cols-3">
             {g.items.filter((c) => c.status === 'request' && !c.pilot).map((c) => (
-              <details key={c.id} className="p-3" style={{ border: '1px solid var(--line)', borderRadius: 10, background: '#fff' }}>
+              <details key={c.id} className="p-3" style={{ border: '1px solid var(--line)', borderRadius: 10, background: 'var(--surface)' }}>
                 <summary className="flex items-center gap-3" style={{ cursor: 'pointer', listStyle: 'none' }}>
                   <BrandIcon name={c.name} logo={c.logo} size={30} />
                   <span className="min-w-0"><span className="font-medium">{c.name}</span>{c.vendor && <span className="muted small"> · {c.vendor}</span>}</span>

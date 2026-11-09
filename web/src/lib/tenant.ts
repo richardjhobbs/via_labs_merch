@@ -6,7 +6,7 @@ import { supabaseServer, supabaseAdmin } from './supabase/server';
 import { activeSupportGrant } from './support';
 
 export type Role = 'owner' | 'manager' | 'merchandiser' | 'qc' | 'compliance' | 'logistics' | 'viewer' | 'partner';
-export type Membership = { id: string; tenant_id: string; role: Role; display_name: string | null; initials: string | null; title: string | null; locale: string | null; scopes: { parties?: string[] }; tenants: { id: string; slug: string; name: string; kind: string; locale: string; tz: string; currency: string } };
+export type Membership = { id: string; tenant_id: string; role: Role; display_name: string | null; initials: string | null; title: string | null; locale: string | null; scopes: { parties?: string[] }; phone?: string | null; avatar_path?: string | null; tenants: { id: string; slug: string; name: string; kind: string; locale: string; tz: string; currency: string; logo_path?: string | null } };
 
 // cache(): layout and page both call this; one lookup per request.
 export const me = cache(async function me() {
@@ -14,7 +14,7 @@ export const me = cache(async function me() {
   const { data: { user } } = await sb.auth.getUser();
   if (!user) return null;
   const [{ data: memberships }, { data: admin }] = await Promise.all([
-    sb.from('memberships').select('id, tenant_id, role, display_name, initials, title, locale, scopes, tenants(id, slug, name, kind, locale, tz, currency)').eq('user_id', user.id),
+    sb.from('memberships').select('id, tenant_id, role, display_name, initials, title, locale, scopes, phone, avatar_path, tenants(id, slug, name, kind, locale, tz, currency, logo_path)').eq('user_id', user.id),
     sb.from('platform_admins').select('user_id').eq('user_id', user.id).maybeSingle(),
   ]);
   return { user, memberships: (memberships || []) as unknown as Membership[], isAdmin: !!admin };
@@ -37,7 +37,7 @@ export async function requireTenant(slug: string, opts: { partner?: boolean } = 
   // this keeps the app honest too, and records the first opening on the company's ledger.
   if (m.isAdmin && !membership) {
     const sb = await supabaseServer();
-    const { data: t } = await sb.from('tenants').select('id, slug, name, kind, locale, tz, currency').eq('slug', slug).maybeSingle();
+    const { data: t } = await sb.from('tenants').select('id, slug, name, kind, locale, tz, currency, logo_path').eq('slug', slug).maybeSingle();
     if (!t) redirect('/app');
     const grant = await activeSupportGrant(t.id);
     if (!grant) redirect(`/admin/tenants/${t.id}?error=${encodeURIComponent('This company has not granted support access. Request it below; an owner or manager decides.')}`);
@@ -48,7 +48,7 @@ export async function requireTenant(slug: string, opts: { partner?: boolean } = 
     }
     const asId = (await cookies()).get(`merch_viewas_${slug}`)?.value;
     if (asId) {
-      const { data: row } = await sb.from('memberships').select('id, tenant_id, role, display_name, initials, title, locale, scopes, tenants(id, slug, name, kind, locale, tz, currency)').eq('id', asId).maybeSingle();
+      const { data: row } = await sb.from('memberships').select('id, tenant_id, role, display_name, initials, title, locale, scopes, phone, avatar_path, tenants(id, slug, name, kind, locale, tz, currency, logo_path)').eq('id', asId).maybeSingle();
       const mm = row as unknown as Membership | null;
       if (mm && mm.tenants.slug === slug) return { ...m, membership: { ...mm, display_name: `${mm.display_name || 'member'} (viewed by VIA Labs)` }, tenant: mm.tenants, viewingAs: mm.id, support: grant };
     }

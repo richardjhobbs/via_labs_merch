@@ -10,25 +10,29 @@ import { supabaseServer } from '@/lib/supabase/server';
 import { hasLlm } from '@/lib/llm';
 import { getLocale } from 'next-intl/server';
 import { ViewAs } from '@/components/view-as';
+import { Avatar, CompanyLogo } from '@/components/avatar';
+import { cookies } from 'next/headers';
 
 export default async function TenantLayout({ children, params }: { children: React.ReactNode; params: Promise<{ tenant: string }> }) {
   const { tenant: slug } = await params;
   const { tenant, membership, isAdmin, viewingAs } = await requireTenant(slug, { partner: true });
   const t = await getTranslations();
+  const ck = (await cookies()).get('merch_theme')?.value;
+  const theme = ck === 'dark' || ck === 'system' ? ck : 'light';
   // a partner sees the shared compliance portal only: no workspace navigation and no agent
   const navLabels = { more: t('nav.more'), menu: t('nav.menu'), close: t('assistant.close') };
   if (membership.role === 'partner') {
     const account = <>
-      <div><b>{membership.display_name || 'You'}</b></div>
+      <div className="flex items-center gap-2"><Avatar path={membership.avatar_path} name={membership.display_name} initials={membership.initials} /><b>{membership.display_name || 'You'}</b></div>
       <div className="flex items-center gap-2 mt-2"><LangSwitch compact up /><form action="/auth/signout" method="post"><button className="btn sm">{t('nav.signout')}</button></form></div>
     </>;
     const pitems = [['shared', t('nav.shared')]] as [string, string][];
     return (
-      <div className="min-h-screen md:grid md:grid-cols-[220px_minmax(0,1fr)]">
-        <MobileNav base={`/app/${slug}`} tenantName={tenant.name} sub={t('roles.partner')} items={pitems} tabs={[]} labels={navLabels}>{account}</MobileNav>
-        <aside className="rail hidden md:flex flex-col p-3 gap-1 sticky top-0 h-screen overflow-y-auto" style={{ borderRight: '1px solid var(--line)', background: '#fff' }}>
-          <div className="flex items-center gap-2 px-2 py-2 mb-2"><Logo merch h={44} /></div>
-          <div className="px-2 pb-2"><b className="small">{tenant.name}</b><div className="muted small">{t('roles.partner')}</div></div>
+      <div data-theme={theme} className="min-h-screen md:grid md:grid-cols-[220px_minmax(0,1fr)]">
+        <MobileNav base={`/app/${slug}`} tenantName={tenant.name} sub={t('roles.partner')} items={pitems} tabs={[]} labels={navLabels} brand={<CompanyLogo path={tenant.logo_path} name={tenant.name} />}>{account}</MobileNav>
+        <aside className="rail hidden md:flex flex-col p-3 gap-1 sticky top-0 h-screen overflow-y-auto" style={{ borderRight: '1px solid var(--line)', background: 'var(--surface)' }}>
+          <div className="flex items-center gap-2 px-2 py-2 mb-2"><Logo merch adaptive h={44} /></div>
+          <div className="px-2 pb-2 flex items-center gap-2"><CompanyLogo path={tenant.logo_path} name={tenant.name} /><div className="min-w-0"><b className="small">{tenant.name}</b><div className="muted small">{t('roles.partner')}</div></div></div>
           <Rail base={`/app/${slug}`} items={pitems} />
           <div className="mt-auto px-2 pt-3 small" style={{ borderTop: '1px solid var(--line2)' }}>{account}</div>
         </aside>
@@ -48,18 +52,18 @@ export default async function TenantLayout({ children, params }: { children: Rea
     ['esg', t('nav.esg')], ['ledger', t('nav.ledger')], ['agents', t('nav.agents')], ['connections', t('nav.connections')], ['settings', t('nav.settings')],
   ] as [string, string][];
   const account = <>
-    <div><b>{membership.display_name || 'You'}</b> <span className="muted">· {t(`roles.${membership.role}`)}</span></div>
+    <div className="flex items-center gap-2"><Avatar path={membership.avatar_path} name={membership.display_name} initials={membership.initials} /><div className="min-w-0"><b>{membership.display_name || 'You'}</b> <span className="muted">· {t(`roles.${membership.role}`)}</span></div></div>
     {isAdmin && <Link href="/admin" className="block mt-1">{t('nav.admin')}</Link>}
     {isAdmin && <ViewAs slug={slug} current={viewingAs || ''} members={(team || []).map((m) => ({ id: m.id, name: m.display_name || '?', role: t(`roles.${m.role}`) }))} label={t('viewas.label')} self={t('viewas.self')} />}
     <div className="flex items-center gap-2 mt-2"><LangSwitch compact up /><form action="/auth/signout" method="post"><button className="btn sm">{t('nav.signout')}</button></form></div>
   </>;
   const tabs = [['', t('nav.short.day')], ['queue', t('nav.short.queue')], ['orders', t('nav.short.orders')], ['threads', t('nav.short.threads')]] as [string, string][];
   return (
-    <div className="min-h-screen md:grid md:grid-cols-[220px_minmax(0,1fr)]">
-      <MobileNav base={`/app/${slug}`} tenantName={tenant.name} sub={tenant.kind.replace('_', ' ')} items={items} tabs={tabs} labels={navLabels}>{account}</MobileNav>
-      <aside className="rail hidden md:flex flex-col p-3 gap-1 sticky top-0 h-screen overflow-y-auto" style={{ borderRight: '1px solid var(--line)', background: '#fff' }}>
-        <div className="flex items-center gap-2 px-2 py-2 mb-2"><Logo merch h={44} /></div>
-        <div className="px-2 pb-2"><b className="small">{tenant.name}</b><div className="muted small">{tenant.kind.replace('_', ' ')}</div></div>
+    <div data-theme={theme} className="min-h-screen md:grid md:grid-cols-[220px_minmax(0,1fr)]">
+      <MobileNav base={`/app/${slug}`} tenantName={tenant.name} sub={tenant.kind.replace('_', ' ')} items={items} tabs={tabs} labels={navLabels} brand={<CompanyLogo path={tenant.logo_path} name={tenant.name} />}>{account}</MobileNav>
+      <aside className="rail hidden md:flex flex-col p-3 gap-1 sticky top-0 h-screen overflow-y-auto" style={{ borderRight: '1px solid var(--line)', background: 'var(--surface)' }}>
+        <div className="flex items-center gap-2 px-2 py-2 mb-2"><Logo merch adaptive h={44} /></div>
+        <div className="px-2 pb-2 flex items-center gap-2"><CompanyLogo path={tenant.logo_path} name={tenant.name} /><div className="min-w-0"><b className="small">{tenant.name}</b><div className="muted small">{tenant.kind.replace('_', ' ')}</div></div></div>
         <Rail base={`/app/${slug}`} items={items} />
         <div className="mt-auto px-2 pt-3 small" style={{ borderTop: '1px solid var(--line2)' }}>{account}</div>
       </aside>

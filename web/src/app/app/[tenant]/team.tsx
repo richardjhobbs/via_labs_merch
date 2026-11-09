@@ -3,12 +3,13 @@ import { getTranslations } from 'next-intl/server';
 import { supabaseServer } from '@/lib/supabase/server';
 import { listOrders, exceptionsOf } from '@/lib/orders';
 import { scopeOf, type Membership } from '@/lib/tenant';
+import { Avatar } from '@/components/avatar';
 
 export async function Team({ tenantId }: { tenantId: string }) {
   const t = await getTranslations('day');
   const sb = await supabaseServer();
   const [{ data: members }, { data: drafts }, { data: parties }, orders, { data: usage }] = await Promise.all([
-    sb.from('memberships').select('id, role, display_name, initials, title, scopes').eq('tenant_id', tenantId).neq('role', 'partner').order('role').order('display_name'),
+    sb.from('memberships').select('id, role, display_name, initials, title, scopes, phone, avatar_path').eq('tenant_id', tenantId).neq('role', 'partner').order('role').order('display_name'),
     sb.from('drafts').select('id, party_id, orders(customer_id)').eq('tenant_id', tenantId).in('status', ['queued', 'escalated']),
     sb.from('parties').select('id, name').eq('tenant_id', tenantId).is('archived_at', null),
     listOrders(tenantId, { status: 'open' }),
@@ -27,7 +28,7 @@ export async function Team({ tenantId }: { tenantId: string }) {
       <table className="t stack"><thead><tr><th>{t('person')}</th><th>{t('customers')}</th><th className="text-right">{t('openPos')}</th><th className="text-right">{t('offplanCol')}</th><th className="text-right">{t('exceptions')}</th><th className="text-right">{t('waiting')}</th></tr></thead><tbody>
         {rows.map(({ m, scope, pos, off, ex, q }) => (
           <tr key={m.id}>
-            <td><span className="pill agent" style={{ marginRight: 6 }}>{m.initials || (m.display_name || '?').slice(0, 2).toUpperCase()}</span>{m.display_name}<div className="muted small">{m.title || m.role}</div></td>
+            <td><div className="flex items-center gap-2"><Avatar path={m.avatar_path} name={m.display_name} initials={m.initials} size={32} /><div className="min-w-0">{m.display_name}<div className="muted small">{m.title || m.role}{m.phone && <> · <a href={`tel:${m.phone.replace(/[^+0-9]/g, '')}`}>{m.phone}</a></>}</div></div></div></td>
             <td className="small" data-l={t('customers')}>{scope ? scope.map(nameOf).join(', ') : <span className="muted">{t('allCustomers')}</span>}</td>
             <td className="text-right" data-l={t('openPos')}>{pos}</td>
             <td className="text-right" data-l={t('offplanCol')}>{off ? <span className="pill warn">{off}</span> : <span className="muted">0</span>}</td>
