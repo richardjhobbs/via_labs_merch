@@ -1,6 +1,6 @@
 # Development merchandising: research and plan
 
-Founder brief, 9 November 2026: everything built so far starts when a PO is placed. The work before it, design briefs, tech packs, material and trim sourcing, sample schedules, sample rounds and approvals, most of it inside a customer's PLM and the rest arriving as photos, scans and references from anywhere, is a second line of work. It must run as its own channel through the whole system, alongside production, with people who may work in both and a point where development hands over to production. This document is the research and the plan. Decisions taken on 9 November 2026: the style is the anchor, development is a tenant switch now and priced later, sample approvals stay a person's action. Stages A, B and C (section 5) were built the same day; Stages D and E are not built. Where this document and the code differ, the code and CLAUDE.md are current.
+Founder brief, 9 November 2026: everything built so far starts when a PO is placed. The work before it, design briefs, tech packs, material and trim sourcing, sample schedules, sample rounds and approvals, most of it inside a customer's PLM and the rest arriving as photos, scans and references from anywhere, is a second line of work. It must run as its own channel through the whole system, alongside production, with people who may work in both and a point where development hands over to production. This document is the research and the plan. Decisions taken on 9 November 2026: the style is the anchor, development is a tenant switch now and priced later, sample approvals stay a person's action. Stages A, B, C and D (section 5) were built the same day; Stage E is not built. The Delogue connector is untested against a live account. Where this document and the code differ, the code and CLAUDE.md are current.
 
 ## 1. Vocabulary
 
@@ -158,7 +158,7 @@ Each item is one or two Build Log phases. Stage A is the smallest version that a
 **Stage C, handover, built 9 November 2026 (`handover-actions.ts`, `handover-card.tsx`, `dev-history.tsx`; the PO arriving by import proposes the link on the order page, a person confirms)**
 8. The handover action, PP straddle, order file with development history, Amendments against the handed-over version.
 
-**Stage D, PLM connectors**
+**Stage D, PLM connectors, built 9 November 2026 (route one: mail attachments stored and filed as records, PLM notification senders admitted; `lib/connectors/delogue.ts` read only, pilot until a customer's key proves it)**
 9. Delogue connector, read only (styles, BOM, sample requests, measurement charts), as the reference adapter; then the first development customer's PLM; then write-back of sample status and comments through the queue. Inspectorio stays a production-track item (QC reports and webhooks).
 
 **Stage E, later**

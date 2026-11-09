@@ -11,6 +11,7 @@ import { CHANNEL_COLS, type Channel, type MailConfig } from '@/lib/connectors/ma
 import { forwardConfigured, newForwardAddress } from '@/lib/connectors/forward';
 import { checkNumber, newVerifyToken } from '@/lib/connectors/whatsapp';
 import { seal } from '@/lib/crypto';
+import { checkKey } from '@/lib/connectors/delogue';
 
 async function load(slug: string, id: string) {
   const me = await requireTenant(slug);
@@ -87,4 +88,25 @@ export async function saveWhatsApp(form: FormData) {
   if (error) return back(slug, `gerror=failed&gp=whatsapp&gmsg=${encodeURIComponent(error.message.slice(0, 160))}`);
   await sb.rpc('ledger_append', { p_tenant: me.tenant.id, p_channel: 'Console', p_actor: who, p_actor_user: me.user.id, p_counterparty: null, p_stream: 'Setup', p_order: null, p_what: `${existing ? 'Updated' : 'Connected'} WhatsApp Business ${info.display} (${info.verified_name}): receives messages to the number, replies only after approval`, p_gate: 'SETUP', p_gated: true, p_ref: {} });
   back(slug, `gconnected=${encodeURIComponent(info.display)}&gp=whatsapp`);
+}
+
+// Delogue PLM: a personal API key (Personal settings > Integrations) and the customer whose styles it holds.
+// Read only: styles, tech pack files and sample requests come in; nothing is written back.
+export async function saveDelogue(form: FormData) {
+  const slug = String(form.get('tenant'));
+  const me = await requireTenant(slug);
+  if (me.membership.id === 'admin' || !['owner', 'manager'].includes(me.membership.role)) return back(slug, 'gerror=forbidden');
+  const token = String(form.get('token') || '').trim().replace(/^bearer\s+/i, ''), customer = String(form.get('customer_id') || '');
+  if (token.length < 16) return back(slug, 'gerror=plmFields&gp=delogue');
+  let info: { brand: string | null; sample: string | null };
+  try { info = await checkKey(token); } catch (e) { return back(slug, `gerror=failed&gp=delogue&gmsg=${encodeURIComponent((e instanceof Error ? e.message : String(e)).slice(0, 160))}`); }
+  const sb = supabaseAdmin();
+  const who = me.membership.display_name || me.user.email || 'member';
+  const customer_id = /^[0-9a-f-]{36}$/i.test(customer) ? customer : null;
+  const { data: existing } = await sb.from('channels').select('id').eq('tenant_id', me.tenant.id).eq('kind', 'plm').eq('config->>connector', 'delogue').maybeSingle();
+  const row = { tenant_id: me.tenant.id, kind: 'plm', name: `Delogue PLM${info.brand ? ` (${info.brand})` : ''}`, account: info.brand || 'Delogue', owner_user_id: me.user.id, status: 'connected', scope: 'Read only: styles, tech pack files and sample requests', auth_enc: seal({ token }), config: { connector: 'delogue', customer_id, connected_by: who, brand: info.brand, last_run: null, page: 1 }, error: null, last_sync_at: null };
+  const { error } = existing ? await sb.from('channels').update(row).eq('id', existing.id) : await sb.from('channels').insert(row);
+  if (error) return back(slug, `gerror=failed&gp=delogue&gmsg=${encodeURIComponent(error.message.slice(0, 160))}`);
+  await sb.rpc('ledger_append', { p_tenant: me.tenant.id, p_channel: 'Console', p_actor: who, p_actor_user: me.user.id, p_counterparty: info.brand, p_stream: 'Setup', p_order: null, p_what: `${existing ? 'Updated' : 'Connected'} Delogue PLM${info.brand ? ` for ${info.brand}` : ''}: styles, tech pack files and sample requests are read hourly; nothing is written back`, p_gate: 'SETUP', p_gated: true, p_ref: { connector: 'delogue' }, p_track: 'development' });
+  back(slug, `gconnected=${encodeURIComponent(info.brand || 'Delogue')}&gp=delogue`);
 }

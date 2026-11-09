@@ -647,6 +647,16 @@
       "errors": {
         "notReady": "Zalo is not switched on yet. VIA Labs is completing the Zalo app setup."
       }
+    },
+    "plm": {
+      "key": "Delogue API key",
+      "customer": "Customer these styles belong to",
+      "save": "Connect Delogue",
+      "note": "Read only. Every hour VIA reads styles changed since the last pass, downloads new tech pack files and sample requests, and files them on the styles. Each file is read and then waits for a person to confirm it. Nothing is written back to Delogue.",
+      "done": "Delogue connected for {account}. The first pass runs within the hour.",
+      "last": "Last pass {time}: {styles} new styles, {files} files, {samples} sample requests",
+      "none": "Not read yet. The first pass runs within the hour.",
+      "fields": "Paste the API key from Delogue (Personal settings, Integrations)."
     }
   },
   "ledger": {
@@ -878,7 +888,11 @@
     "track": {
       "development": "development",
       "production": "production"
-    }
+    },
+    "attachments": "Attachments",
+    "filed": "Filed on the style",
+    "fileTo": "File on a style…",
+    "file": "File"
   },
   "settings": {
     "support": "VIA support access",

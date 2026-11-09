@@ -647,6 +647,16 @@
       "errors": {
         "notReady": "Zalo 尚未开通。VIA Labs 正在完成 Zalo 应用设置。"
       }
+    },
+    "plm": {
+      "key": "Delogue API 密钥",
+      "customer": "这些款式所属的客户",
+      "save": "连接 Delogue",
+      "note": "只读。VIA 每小时读取自上次同步以来有变动的款式，下载新的工艺单文件和样品申请，并归档到对应款式。每个文件读取后等待人工确认。不会向 Delogue 写回任何内容。",
+      "done": "已为 {account} 连接 Delogue。首次同步将在一小时内运行。",
+      "last": "上次同步 {time}：{styles} 个新款式，{files} 个文件，{samples} 个样品申请",
+      "none": "尚未读取。首次同步将在一小时内运行。",
+      "fields": "粘贴 Delogue 中的 API 密钥（Personal settings，Integrations）。"
     }
   },
   "ledger": {
@@ -878,7 +888,11 @@
     "track": {
       "development": "开发",
       "production": "生产"
-    }
+    },
+    "attachments": "附件",
+    "filed": "已归档到款式",
+    "fileTo": "归档到款式…",
+    "file": "归档"
   },
   "settings": {
     "support": "VIA 支持访问",

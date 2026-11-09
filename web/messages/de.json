@@ -647,6 +647,16 @@
       "errors": {
         "notReady": "Zalo ist noch nicht freigeschaltet. VIA Labs schließt die Einrichtung der Zalo-App ab."
       }
+    },
+    "plm": {
+      "key": "Delogue-API-Schlüssel",
+      "customer": "Kunde, dem diese Styles gehören",
+      "save": "Delogue verbinden",
+      "note": "Nur lesend. Jede Stunde liest VIA die seit dem letzten Durchlauf geänderten Styles, lädt neue Tech-Pack-Dateien und Musteranfragen herunter und legt sie auf den Styles ab. Jede Datei wird gelesen und wartet dann auf die Bestätigung einer Person. Nichts wird nach Delogue zurückgeschrieben.",
+      "done": "Delogue verbunden für {account}. Der erste Durchlauf startet innerhalb einer Stunde.",
+      "last": "Letzter Durchlauf {time}: {styles} neue Styles, {files} Dateien, {samples} Musteranfragen",
+      "none": "Noch nicht gelesen. Der erste Durchlauf startet innerhalb einer Stunde.",
+      "fields": "Fügen Sie den API-Schlüssel aus Delogue ein (Persönliche Einstellungen, Integrationen)."
     }
   },
   "ledger": {
@@ -878,7 +888,11 @@
     "track": {
       "development": "Entwicklung",
       "production": "Produktion"
-    }
+    },
+    "attachments": "Anhänge",
+    "filed": "Auf dem Style abgelegt",
+    "fileTo": "Auf einem Style ablegen…",
+    "file": "Ablegen"
   },
   "settings": {
     "support": "VIA-Support-Zugang",

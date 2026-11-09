@@ -10,6 +10,7 @@ import { googleConfigured, syncGmail } from '@/lib/connectors/google';
 import { microsoftConfigured, syncOutlook } from '@/lib/connectors/microsoft';
 import { sendPending } from '@/lib/connectors/outbound';
 import { CHANNEL_COLS, type Channel } from '@/lib/connectors/mail';
+import { syncDelogue } from '@/lib/connectors/delogue';
 import { purgeArchived } from '@/lib/party-lifecycle';
 import { runAllAlerts } from '@/lib/alerts';
 import { nextEsgTenant, runEsgPass } from '@/lib/agents/esg-pass';
@@ -38,6 +39,14 @@ export async function POST(req: NextRequest) {
       try { done.mail_in += (ch.kind === 'email_m365' ? await syncOutlook(sb, ch, until) : await syncGmail(sb, ch, until)).ingested; } catch (e) { done.failed++; errors.push(`${ch.kind} ${ch.account}: ${e instanceof Error ? e.message : String(e)}`); }
     }
     try { const s = await sendPending(sb, t0 + 20_000); done.mail_out += s.sent; done.failed += s.failed; } catch (e) { done.failed++; errors.push(`send: ${e instanceof Error ? e.message : String(e)}`); }
+  }
+
+  // 0b. PLM connections (Delogue): the one that has waited longest, at most hourly, read only
+  if (left() > 25_000) {
+    const { data: plm } = await sb.from('channels').select(CHANNEL_COLS).eq('kind', 'plm').eq('status', 'connected').or(`last_sync_at.is.null,last_sync_at.lt.${new Date(Date.now() - 55 * 60_000).toISOString()}`).order('last_sync_at', { ascending: true, nullsFirst: true }).limit(1);
+    for (const ch of (plm || []) as Channel[]) {
+      try { const r = await syncDelogue(sb, ch, t0 + Math.min(BUDGET_MS - 8_000, left() - 8_000)); done.plm = r.styles + r.files + r.samples; } catch (e) { done.failed++; errors.push(`plm ${ch.account}: ${e instanceof Error ? e.message : String(e)}`); }
+    }
   }
 
   if (hasLlm()) {

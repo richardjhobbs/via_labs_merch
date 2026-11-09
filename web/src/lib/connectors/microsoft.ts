@@ -4,6 +4,7 @@
 // replies only after approval, from the same mailbox, in the same conversation.
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { hasTokenKey } from '@/lib/crypto';
+import { storeAttachments, readableAttachment, type IncomingFile } from './attachments';
 import { ingestInbound } from '@/lib/agents/inbound';
 import { ReauthError, channelToken, knownSenders, newPart, type Channel, type MailConfig, type Reply, type FoundMail, type SearchInput } from './mail';
 
@@ -87,10 +88,19 @@ export async function syncOutlook(sb: Client, ch: Channel, deadline: number) {
       if (m.isDraft || !from || from === (ch.account || '').toLowerCase() || !match.known) { out.skipped++; mark(m); continue; }
       const full = await graph<GraphMsg>(token, `/messages/${m.id}?$select=uniqueBody,body,toRecipients`);
       const text = newPart(full.uniqueBody?.content?.trim() || full.body?.content || '');
-      const attachments = m.hasAttachments ? ((await graph<{ value: { name: string; contentType: string; size: number }[] }>(token, `/messages/${m.id}/attachments?$select=name,contentType,size`).catch(() => ({ value: [] }))).value || []).map((a) => ({ name: a.name, mime: a.contentType, bytes: a.size })) : [];
+      const attRows = m.hasAttachments ? ((await graph<{ value: { id: string; name: string; contentType: string; size: number; '@odata.type'?: string }[] }>(token, `/messages/${m.id}/attachments?$select=id,name,contentType,size`).catch(() => ({ value: [] }))).value || []) : [];
+      const attachments = attRows.map((a) => ({ name: a.name, mime: a.contentType, bytes: a.size }));
       try {
-        await ingestInbound({ tenantId: ch.tenant_id, channelKind: 'email_m365', channelId: ch.id, from, senderName: m.from?.emailAddress?.name || null, partyId: match.party_id, subject: m.subject || null, text: text || (attachments.length ? `(no text; attachments: ${attachments.map((a) => a.name).join(', ')})` : '(empty message)'), externalId: m.id,
-          raw: { m365: { id: m.id, conversation_id: m.conversationId || null, message_id: m.internetMessageId || null, reply_to: addr(m.replyTo?.[0]) || null, to: (full.toRecipients || []).map(addr).join(', '), date: m.receivedDateTime }, attachments } });
+        const messageId = await ingestInbound({ tenantId: ch.tenant_id, channelKind: 'email_m365', channelId: ch.id, from, senderName: m.from?.emailAddress?.name || null, partyId: match.party_id, subject: m.subject || null, text: text || (attachments.length ? `(no text; attachments: ${attachments.map((a) => a.name).join(', ')})` : '(empty message)'), externalId: m.id,
+          raw: { m365: { id: m.id, conversation_id: m.conversationId || null, message_id: m.internetMessageId || null, reply_to: addr(m.replyTo?.[0]) || null, to: (full.toRecipients || []).map(addr).join(', '), date: m.receivedDateTime }, attachments } }, { enqueue: false });
+        // readable attachments (tech packs, sheets, photos) are stored against the message before it is processed
+        const files: IncomingFile[] = [];
+        for (const a of attRows) {
+          if (!readableAttachment(a.name, a.size) || (a['@odata.type'] && !/fileAttachment/.test(a['@odata.type'])) || Date.now() > deadline - 4000) continue;
+          try { const att = await graph<{ contentBytes?: string }>(token, `/messages/${m.id}/attachments/${a.id}`); if (att.contentBytes) files.push({ name: a.name, mime: a.contentType || null, data: Buffer.from(att.contentBytes, 'base64') }); } catch (e) { console.error('[m365] attachment', a.name, e instanceof Error ? e.message : String(e)); }
+        }
+        if (files.length) await storeAttachments(sb, ch.tenant_id, messageId, 'email_m365', files);
+        await sb.rpc('q_send', { p_queue: 'merch_inbound', p_msg: { message_id: messageId, tenant_id: ch.tenant_id } });
         out.ingested++;
       } catch (e) { if (!/duplicate key/i.test(e instanceof Error ? e.message : '')) throw e; }
       mark(m);

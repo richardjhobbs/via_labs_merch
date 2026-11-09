@@ -8,6 +8,8 @@ import { runAgent } from './run';
 import { findOrCreateThread, threadMessages } from '@/lib/threads';
 import { latestBrief, briefForAgent, queueBrief } from './order-agent';
 import { ALL_STREAMS, streamForTrack, type Track } from '@/lib/tracks';
+import { fileAttachmentAsRecord } from '@/lib/connectors/attachments';
+import { plmOf } from '@/lib/connectors/plm';
 
 export type InboundInput = { tenantId: string; channelKind: string; channelId?: string | null; from: string; senderName?: string | null; partyId?: string | null; subject?: string | null; text: string; externalId?: string | null; raw?: unknown };
 
@@ -71,6 +73,8 @@ export async function processInbound(messageId: string) {
     track = (c?.track_default as Track | null) || 'production'; unsure = true;
   }
   const styleId = styleHit?.id || null;
+  // a PLM notification or an unknown sender on a known style: the style's customer is the party
+  if (!partyId && styleHit?.customer_id) partyId = styleHit.customer_id;
   const stream = streamForTrack(parsed?.stream, track);
   await sb.from('messages').update({ lang: parsed?.lang || null, text_en: parsed?.text_en || null, stream, parsed: parsed ? { ...parsed, track_unsure: unsure } : null, party_id: partyId, order_id: orderId, style_id: styleId, track, processed_at: new Date().toISOString() }).eq('id', messageId);
   // once the party and PO (or style) are known, the message belongs in that file's thread for the party
@@ -86,6 +90,14 @@ export async function processInbound(messageId: string) {
   } else if (threadId) await sb.from('threads').update({ track, style_id: styleId, last_message_at: new Date().toISOString() }).eq('id', threadId);
   const history = threadId ? (await threadMessages(sb, threadId)).filter((x) => x.id !== messageId).slice(-8) : [];
   const party = (parties || []).find((p) => p.id === partyId);
+  // attachments on a development message with a known style become records (read in the background)
+  const { data: atts } = await sb.from('attachments').select('id, tenant_id, message_id, storage_path, filename, mime, bytes, sha256, record_id').eq('message_id', messageId);
+  const filed: string[] = [];
+  if (track === 'development' && styleId) {
+    const plm = plmOf(m.from_addr as string | null);
+    for (const a of atts || []) { try { await fileAttachmentAsRecord(sb, a, styleId, { source: plm ? 'plm' : 'email', actor: plm || party?.name || m.sender_name || 'Inbound', sourceRef: plm ? `${plm} notification` : null }); filed.push(a.filename); } catch (e) { console.error('[inbound] file attachment', a.filename, e instanceof Error ? e.message : String(e)); } }
+  }
+  const attNote = (atts || []).length ? `\nAttachments: ${(atts || []).map((a) => a.filename).join(', ')}${filed.length ? ` (filed on the style as records, being read; a person confirms them)` : styleId ? '' : ' (not filed: no style matched; a person can file them from the conversation)'}.` : '';
   await sb.rpc('ledger_append', { p_tenant: T, p_channel: (m.raw as { channel?: string })?.channel || 'Inbound', p_actor: party?.name || m.sender_name || m.from_addr || 'Unknown sender', p_actor_user: null, p_counterparty: null, p_stream: stream, p_order: orderId, p_what: `Inbound${unsure ? ' (track unsure)' : ''}: ${(parsed?.text_en || m.text).slice(0, 140)}`, p_gate: 'Logged', p_gated: false, p_ref: { message_id: messageId }, p_track: track, p_style: styleId });
 
   // hand to the agent: capture dates, draft the reply; on production it reads the order agent's brief first
@@ -100,7 +112,7 @@ ${history.length ? `Earlier in this conversation (oldest first):\n${history.map(
 ${m.text}
 ---
 English rendering: ${parsed?.text_en || m.text}
-Extracted: style ${styleHit?.code || (parsed?.style_codes || []).join(', ') || 'none matched'}; asks ${JSON.stringify(parsed?.asks || [])}.` : `An inbound message arrived and was logged. Handle it:
+Extracted: style ${styleHit?.code || (parsed?.style_codes || []).join(', ') || 'none matched'}; asks ${JSON.stringify(parsed?.asks || [])}.${attNote}` : `An inbound message arrived and was logged. Handle it:
 1. If it states a milestone date as fact for a known PO, record it with set_milestone (expected for a promised date, actual for a completed step).
 2. If it reports an ESG or compliance figure or confirmation for a stated period (energy, water, effluent, chemicals, waste, emissions, wages, accidents, audits, certificates), look it up with get_compliance and, if a matching open task exists, record it with record_compliance_value. A person checks it.
 3. Queue one reply with queue_draft on stream "${stream}" to the sender${party ? ` (${party.name})` : ''}, in ${LANG_NAMES[parsed?.lang || 'en'] || 'their language'} with body_en, answering their asks from the record. If something needs a decision by a person (price, quantity, promised date, claim), say so in the draft's impact and do not promise it.
@@ -111,7 +123,7 @@ ${history.length ? `Earlier in this conversation (oldest first):\n${history.map(
 ${m.text}
 ---
 English rendering: ${parsed?.text_en || m.text}
-Extracted: PO ${po || 'none matched'}; reported dates ${JSON.stringify(parsed?.reported_dates || [])}; asks ${JSON.stringify(parsed?.asks || [])}.${ob ? `\n\nThe order agent's brief for PO ${po} (version ${ob.version}, ${ob.updated}): ${JSON.stringify(ob)}` : ''}`;
+Extracted: PO ${po || 'none matched'}; reported dates ${JSON.stringify(parsed?.reported_dates || [])}; asks ${JSON.stringify(parsed?.asks || [])}.${attNote}${ob ? `\n\nThe order agent's brief for PO ${po} (version ${ob.version}, ${ob.updated}): ${JSON.stringify(ob)}` : ''}`;
   const r = await runAgent({ tenantId: T, trigger: 'inbound', track, sourceMessageId: messageId, messages: [{ role: 'user', content: brief }] });
   if (track !== 'development') await queueBrief(sb, T, orderId, 'message');
   return { messageId, partyId, orderId, styleId, track, stream, drafts: r.drafts, summary: r.text, error: r.error };

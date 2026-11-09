@@ -647,6 +647,16 @@
       "errors": {
         "notReady": "Zalo aún no está activado. VIA Labs está completando la configuración de la app de Zalo."
       }
+    },
+    "plm": {
+      "key": "Clave API de Delogue",
+      "customer": "Cliente al que pertenecen estos estilos",
+      "save": "Conectar Delogue",
+      "note": "Solo lectura. Cada hora VIA lee los estilos modificados desde la última pasada, descarga las fichas técnicas y solicitudes de muestra nuevas y las archiva en los estilos. Cada archivo se lee y luego espera a que una persona lo confirme. No se escribe nada en Delogue.",
+      "done": "Delogue conectado para {account}. La primera pasada se ejecuta en menos de una hora.",
+      "last": "Última pasada {time}: {styles} estilos nuevos, {files} archivos, {samples} solicitudes de muestra",
+      "none": "Aún no leído. La primera pasada se ejecuta en menos de una hora.",
+      "fields": "Pegue la clave API de Delogue (Configuración personal, Integraciones)."
     }
   },
   "ledger": {
@@ -878,7 +888,11 @@
     "track": {
       "development": "desarrollo",
       "production": "producción"
-    }
+    },
+    "attachments": "Adjuntos",
+    "filed": "Archivado en el estilo",
+    "fileTo": "Archivar en un estilo…",
+    "file": "Archivar"
   },
   "settings": {
     "support": "Acceso de soporte de VIA",

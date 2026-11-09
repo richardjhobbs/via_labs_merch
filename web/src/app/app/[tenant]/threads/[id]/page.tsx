@@ -9,20 +9,24 @@ import { Chain } from '@/components/chain';
 import { refreshThreadSummary } from '../actions';
 import { PendingDraftCard } from '@/components/pending-draft';
 import { moveThread } from '../../styles/actions';
+import { fileAttachment } from '../attachment-actions';
 
 export default async function Thread({ params }: { params: Promise<{ tenant: string; id: string }> }) {
   const { tenant: slug, id } = await params;
-  const { tenant } = await requireTenant(slug);
+  const { tenant, membership } = await requireTenant(slug);
   const t = await getTranslations('threads');
   const sb = await supabaseServer();
   const { data: th } = await sb.from('threads').select('id, subject, kind, party_id, order_id, style_id, track, parties(name, kind, lang, channel_pref), orders(po, style, description), styles(id, code, name)').eq('tenant_id', tenant.id).eq('id', id).maybeSingle();
   if (!th) notFound();
-  const [{ data: msgs }, { data: drafts }, sum, { data: contacts }] = await Promise.all([
+  const [{ data: msgs }, { data: drafts }, sum, { data: contacts }, { data: atts }, { data: stylesList }] = await Promise.all([
     sb.from('messages').select('id, direction, sender_name, lang, text, text_en, stream, received_at, sent_at, contacts(role)').eq('thread_id', id).order('received_at'),
     sb.from('drafts').select('id, seq, title, body, body_en, lang, stream, gate_level, impact, priority, status, source_message_id, party_id, order_id').eq('tenant_id', tenant.id).in('status', ['queued', 'escalated']).eq('party_id', th.party_id || '00000000-0000-0000-0000-000000000000'),
     threadSummary(tenant.id, id),
     th.party_id ? sb.from('contacts').select('name, role, email, phone').eq('party_id', th.party_id) : Promise.resolve({ data: [] as { name: string; role: string | null; email: string | null; phone: string | null }[] }),
+    sb.from('attachments').select('id, message_id, filename, mime, bytes, record_id, records(style_id)').eq('tenant_id', tenant.id).in('message_id', (await sb.from('messages').select('id').eq('thread_id', id)).data?.map((x) => x.id) || ['00000000-0000-0000-0000-000000000000']),
+    sb.from('styles').select('id, code, name, season').eq('tenant_id', tenant.id).neq('status', 'dropped').order('updated_at', { ascending: false }).limit(100),
   ]);
+  const canFile = membership.role !== 'viewer' && membership.id !== 'admin';
   const p = th.parties as unknown as { name: string; kind: string; lang: string; channel_pref: string | null } | null, o = th.orders as unknown as { po: string; style: string; description: string } | null;
   // drafts that answer a message in this chain, or were raised for this party on this PO
   const open = (drafts || []).filter((d) => d.order_id === th.order_id || (msgs || []).some((m) => m.id === d.source_message_id));
@@ -39,6 +43,12 @@ export default async function Thread({ params }: { params: Promise<{ tenant: str
       <div className="grid gap-6 mt-5 lg:grid-cols-[1fr_320px]">
         <div className="card"><Chain messages={(msgs || []).map((m) => ({ id: m.id, direction: m.direction as 'in' | 'out', sender_name: m.sender_name, role: (m.contacts as unknown as { role: string } | null)?.role || null, lang: m.lang, text: m.text, text_en: m.text_en, stream: m.stream, received_at: m.received_at, sent_at: m.sent_at }))} tz={tenant.tz} labels={{ original: t('original'), awaiting: t('awaitingChannel'), us: t('us') }} />
           {open.map((d) => <div key={d.id} className="grid mt-3"><PendingDraftCard slug={slug} back={`/app/${slug}/threads/${id}`} d={d} labels={labels} /></div>)}
+          {!!atts?.length && <div className="mt-4 pt-3" style={{ borderTop: '1px solid var(--line2)' }}><div className="small font-medium">{t('attachments')}</div>
+            {atts.map((a) => { const rec = a.records as unknown as { style_id: string | null } | null; return (
+              <div key={a.id} className="small flex items-center gap-2 flex-wrap mt-2"><a href={`/api/attachments/file?id=${a.id}`} target="_blank" rel="noopener">{a.filename}</a><span className="muted">{a.bytes ? `${(a.bytes / 1048576).toFixed(1)} MB` : ''}</span>
+                {a.record_id && rec?.style_id ? <Link className="pill ok" href={`/app/${slug}/styles/${rec.style_id}/records/${a.record_id}`}>{t('filed')}</Link> : canFile && !!stylesList?.length ? <form action={fileAttachment} className="flex gap-1 items-center"><input type="hidden" name="tenant" value={slug} /><input type="hidden" name="thread" value={id} /><input type="hidden" name="id" value={a.id} /><select name="style_id" className="input sm" style={{ width: 'auto' }} defaultValue={th.style_id || ''}><option value="">{t('fileTo')}</option>{stylesList.map((st) => <option key={st.id} value={st.id}>{st.code}{st.name ? ` ${st.name}` : ''}{st.season ? ` (${st.season})` : ''}</option>)}</select><button className="btn sm">{t('file')}</button></form> : null}
+              </div>); })}
+          </div>}
         </div>
         <div className="grid gap-4" style={{ alignContent: 'start' }}>
           <div className="card" style={{ background: 'var(--accent-soft)' }}>

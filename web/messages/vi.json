@@ -647,6 +647,16 @@
       "errors": {
         "notReady": "Zalo chưa được bật. VIA Labs đang hoàn tất thiết lập ứng dụng Zalo."
       }
+    },
+    "plm": {
+      "key": "Khóa API Delogue",
+      "customer": "Khách hàng sở hữu các mã hàng này",
+      "save": "Kết nối Delogue",
+      "note": "Chỉ đọc. Mỗi giờ VIA đọc các mã hàng thay đổi kể từ lần quét trước, tải về tệp tech pack mới và yêu cầu mẫu, rồi lưu vào mã hàng tương ứng. Mỗi tệp được đọc rồi chờ một người xác nhận. Không ghi gì ngược lại Delogue.",
+      "done": "Đã kết nối Delogue cho {account}. Lần quét đầu tiên chạy trong vòng một giờ.",
+      "last": "Lần quét gần nhất {time}: {styles} mã hàng mới, {files} tệp, {samples} yêu cầu mẫu",
+      "none": "Chưa đọc. Lần quét đầu tiên chạy trong vòng một giờ.",
+      "fields": "Dán khóa API từ Delogue (Personal settings, Integrations)."
     }
   },
   "ledger": {
@@ -878,7 +888,11 @@
     "track": {
       "development": "phát triển",
       "production": "sản xuất"
-    }
+    },
+    "attachments": "Tệp đính kèm",
+    "filed": "Đã lưu vào mã hàng",
+    "fileTo": "Lưu vào mã hàng…",
+    "file": "Lưu vào"
   },
   "settings": {
     "support": "Quyền hỗ trợ của VIA",

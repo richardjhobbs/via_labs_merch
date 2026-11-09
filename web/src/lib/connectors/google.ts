@@ -9,6 +9,7 @@
 //   from the mailbox the original arrived in, threaded under it.
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { open, hasTokenKey } from '@/lib/crypto';
+import { storeAttachments, readableAttachment, type IncomingFile } from './attachments';
 import { ingestInbound } from '@/lib/agents/inbound';
 import { ReauthError, channelToken, knownSenders, newPart, addresses, type Auth, type Channel, type MailConfig, type Reply, type FoundMail, type SearchInput } from './mail';
 export type { Channel } from './mail';
@@ -93,9 +94,9 @@ export function bodyText(p: Part | undefined): string {
   return html.replace(/<(style|script)[\s\S]*?<\/\1>/gi, '').replace(/<br\s*\/?>|<\/(p|div|tr|li|h\d)>/gi, '\n').replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/\n{3,}/g, '\n\n').trim();
 }
 
-function attachmentsOf(p: Part | undefined, out: { name: string; mime: string; bytes: number }[] = []) {
+function attachmentsOf(p: Part | undefined, out: { name: string; mime: string; bytes: number; id?: string }[] = []) {
   if (!p) return out;
-  if (p.filename && p.body?.attachmentId) out.push({ name: p.filename, mime: p.mimeType || '', bytes: p.body.size || 0 });
+  if (p.filename && p.body?.attachmentId) out.push({ name: p.filename, mime: p.mimeType || '', bytes: p.body.size || 0, id: p.body.attachmentId });
   for (const c of p.parts || []) attachmentsOf(c, out);
   return out;
 }
@@ -156,8 +157,16 @@ export async function syncGmail(sb: Client, ch: Channel, deadline: number) {
       const subject = hdr(p, 'Subject') || null;
       const attachments = attachmentsOf(p);
       try {
-        await ingestInbound({ tenantId: ch.tenant_id, channelKind: 'email_gmail', channelId: ch.id, from, senderName: nameOf(hdr(p, 'From')), partyId: match.party_id, subject, text: text || (attachments.length ? `(no text; attachments: ${attachments.map((a) => a.name).join(', ')})` : '(empty message)'), externalId: m.id,
-          raw: { gmail: { id: m.id, thread_id: m.threadId, message_id: hdr(p, 'Message-ID') || hdr(p, 'Message-Id'), references: hdr(p, 'References'), reply_to: addrOf(hdr(p, 'Reply-To')) || null, to: hdr(p, 'To'), cc: hdr(p, 'Cc'), date: hdr(p, 'Date') }, attachments } });
+        const messageId = await ingestInbound({ tenantId: ch.tenant_id, channelKind: 'email_gmail', channelId: ch.id, from, senderName: nameOf(hdr(p, 'From')), partyId: match.party_id, subject, text: text || (attachments.length ? `(no text; attachments: ${attachments.map((a) => a.name).join(', ')})` : '(empty message)'), externalId: m.id,
+          raw: { gmail: { id: m.id, thread_id: m.threadId, message_id: hdr(p, 'Message-ID') || hdr(p, 'Message-Id'), references: hdr(p, 'References'), reply_to: addrOf(hdr(p, 'Reply-To')) || null, to: hdr(p, 'To'), cc: hdr(p, 'Cc'), date: hdr(p, 'Date') }, attachments: attachments.map(({ name, mime, bytes }) => ({ name, mime, bytes })) } }, { enqueue: false });
+        // readable attachments (tech packs, sheets, photos) are stored against the message before it is processed
+        const files: IncomingFile[] = [];
+        for (const a of attachments) {
+          if (!a.id || !readableAttachment(a.name, a.bytes) || Date.now() > deadline - 4000) continue;
+          try { const att = await gmail<{ data: string }>(token, `/messages/${m.id}/attachments/${a.id}`); files.push({ name: a.name, mime: a.mime || null, data: Buffer.from(att.data.replace(/-/g, '+').replace(/_/g, '/'), 'base64') }); } catch (e) { console.error('[gmail] attachment', a.name, e instanceof Error ? e.message : String(e)); }
+        }
+        if (files.length) await storeAttachments(sb, ch.tenant_id, messageId, 'email_gmail', files);
+        await sb.rpc('q_send', { p_queue: 'merch_inbound', p_msg: { message_id: messageId, tenant_id: ch.tenant_id } });
         out.ingested++;
       } catch (e) { if (!/duplicate key/i.test(e instanceof Error ? e.message : '')) throw e; }
       lastDone = hid;

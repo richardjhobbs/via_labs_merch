@@ -5,6 +5,8 @@ import { seal, open } from '@/lib/crypto';
 
 type Client = SupabaseClient<any, 'merch', any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
+import { plmOf } from './plm';
+
 export type Auth = { refresh_token: string; access_token?: string; expires_at?: number };
 export type MailConfig = { connector: 'gmail' | 'm365' | 'gdrive' | 'forward' | 'zalo' | 'whatsapp'; filter?: 'known' | 'label'; label?: string | null; label_id?: string | null; connected_by?: string; [k: string]: unknown };
 export type Channel = { id: string; tenant_id: string; kind: string; status: string; account: string | null; owner_user_id: string | null; auth_enc: string | null; config: MailConfig; last_sync_at: string | null };
@@ -40,7 +42,10 @@ const FREE_MAIL = new Set(['gmail.com', 'googlemail.com', 'yahoo.com', 'yahoo.co
 export async function senderList(sb: Client, tenantId: string, partyId?: string | null) {
   let q = sb.from('contacts').select('id, party_id, email, parties!inner(archived_at)').eq('tenant_id', tenantId).not('email', 'is', null).is('parties.archived_at', null);   // archived parties no longer let mail in
   if (partyId) q = q.eq('party_id', partyId);
-  const { data } = await q;
+  const [{ data }, { data: tn }] = await Promise.all([q, partyId ? Promise.resolve({ data: null }) : sb.from('tenants').select('settings').eq('id', tenantId).maybeSingle()]);
+  // PLM systems (Delogue, Centric, FlexPLM, Techpacker...) mail tech packs on a brand's behalf from their own domains:
+  // known senders when the company runs the development track, with no party (the style code names the customer)
+  const plmOk = !!(tn?.settings as { tracks?: { development?: boolean } } | null)?.tracks?.development;
   const byEmail = new Map<string, { party_id: string; contact_id: string }>();
   const byDomain = new Map<string, Set<string>>();
   for (const c of data || []) {
@@ -53,6 +58,7 @@ export async function senderList(sb: Client, tenantId: string, partyId?: string 
     const hit = byEmail.get(a); if (hit) return { party_id: hit.party_id, known: true };
     const parties = byDomain.get(a.split('@')[1] || '');
     if (parties) return { party_id: parties.size === 1 ? [...parties][0] : null, known: true };
+    if (plmOk && plmOf(a)) return { party_id: null, known: true };
     return { party_id: null, known: false };
   };
   // search terms: domains cover everyone at a company, so only list emails whose domain is free mail

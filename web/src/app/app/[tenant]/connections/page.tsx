@@ -9,7 +9,7 @@ import { BrandIcon, BrandCluster, BrandRow } from '@/components/brand-icon';
 import { googleConfigured } from '@/lib/connectors/google';
 import { microsoftConfigured } from '@/lib/connectors/microsoft';
 import { driveConfigured } from '@/lib/connectors/drive';
-import { saveMailbox, disconnectMailbox, createForwardAddress, saveWhatsApp } from './actions';
+import { saveMailbox, disconnectMailbox, createForwardAddress, saveWhatsApp, saveDelogue } from './actions';
 import { zaloConfigured } from '@/lib/connectors/zalo';
 import { forwardConfigured } from '@/lib/connectors/forward';
 import { CopyButton } from '@/components/copy-button';
@@ -20,7 +20,7 @@ const GUIDE_ICONS: Record<string, [string, string][] | undefined> = {
   s1: [['Gmail', '/brands/gmail.svg'], ['Microsoft 365', '/brands/microsoft.svg'], ['Google Drive', '/brands/googledrive.svg'], ['WhatsApp Business', '/brands/whatsapp.svg'], ['WeCom', '/brands/wecom.png'], ['Zalo OA', '/brands/zalo.svg']],
   s2: [['Zalo', '/brands/zalo.svg'], ['WeChat', '/brands/wechat.svg'], ['WhatsApp', '/brands/whatsapp.svg'], ['Telegram', '/brands/telegram.svg']],
 };
-const GERR = ['notReady', 'support', 'viewer', 'state', 'denied', 'scopes', 'refresh', 'failed', 'label', 'forbidden', 'adminConsent', 'folder', 'waFields'] as const;
+const GERR = ['notReady', 'support', 'viewer', 'state', 'denied', 'scopes', 'refresh', 'failed', 'label', 'forbidden', 'adminConsent', 'folder', 'waFields', 'plmFields'] as const;
 const M365_ERR = ['adminConsent', 'folder'];
 
 export default async function Connections({ params, searchParams }: { params: Promise<{ tenant: string }>; searchParams: Promise<Record<string, string | undefined>> }) {
@@ -49,6 +49,8 @@ export default async function Connections({ params, searchParams }: { params: Pr
   const groups = (Object.keys(CATEGORIES) as ConnectorCategory[]).map((cat) => ({ cat, items: CONNECTORS.filter((c) => c.category === cat) })).filter((g) => g.items.length);
   const live = CONNECTORS.filter((c) => c.status !== 'request' || c.pilot);
   const was = channels.filter((c) => c.kind === 'whatsapp' && c.status !== 'off'), oas = channels.filter((c) => c.kind === 'zalo' && c.status !== 'off');
+  const plms = channels.filter((c) => c.kind === 'plm' && c.status !== 'off');
+  const { data: customersForPlm } = await sb.from('parties').select('id, name').eq('tenant_id', tenant.id).is('archived_at', null).in('kind', ['brand', 'retailer', 'store', 'buying_office', 'trading']).order('name');
   const isManager = membership.id !== 'admin' && ['owner', 'manager'].includes(membership.role);
   const origin = process.env.NEXT_PUBLIC_APP_URL || 'https://merch.getvia.xyz';
 
@@ -57,9 +59,9 @@ export default async function Connections({ params, searchParams }: { params: Pr
       <h1>{t('title')}</h1>
       <p className="muted mt-1" style={{ maxWidth: '70ch' }}>{t('sub')}</p>
 
-      {sp.gconnected && <div className="notice mt-4">{t(ms ? 'm365.done' : dv ? 'gdrive.done' : sp.gp === 'zalo' ? 'zalo.done' : sp.gp === 'whatsapp' ? 'wa.done' : 'gmail.done', { account: sp.gconnected })}</div>}
+      {sp.gconnected && <div className="notice mt-4">{t(ms ? 'm365.done' : dv ? 'gdrive.done' : sp.gp === 'zalo' ? 'zalo.done' : sp.gp === 'whatsapp' ? 'wa.done' : sp.gp === 'delogue' ? 'plm.done' : 'gmail.done', { account: sp.gconnected })}</div>}
       {sp.gsaved && <div className="notice mt-4">{t('gmail.saved')}</div>}
-      {gerr && <div className="notice crit mt-4">{t(`${errNs}.errors.${gerr}` as 'gmail.errors.failed', { error: sp.gmsg || '', label: sp.glabel || '' })}</div>}
+      {gerr && <div className="notice crit mt-4">{gerr === 'plmFields' ? t('plm.fields') : t(`${errNs}.errors.${gerr}` as 'gmail.errors.failed', { error: sp.gmsg || '', label: sp.glabel || '' })}</div>}
 
       <div className="card mt-6" style={{ borderLeft: '3px solid var(--accent)' }}>
         <h2 style={{ fontSize: 16 }}>{t('guide.title')}</h2>
@@ -108,6 +110,23 @@ export default async function Connections({ params, searchParams }: { params: Pr
                   </div>}
                   <p className="muted small mt-2">{t('forward.note')}</p>
                   {canConnect && !myForward && (forwardConfigured() ? <form action={createForwardAddress}><input type="hidden" name="tenant" value={slug} /><button className="btn sm primary mt-2">{t('forward.create')}</button></form> : <><button className="btn sm mt-2" disabled>{t('forward.create')}</button><p className="muted small mt-1">{t('forward.notReady')}</p></>)}
+                </>}
+                {c.id === 'delogue' && <>
+                  {plms.filter((m) => m.config?.connector === 'delogue').map((m) => { const cfg = m.config as { brand?: string; connected_by?: string; last_pass?: { styles?: number; files?: number; samples?: number } }; return (
+                    <div key={m.id} className="mt-3 p-2 small" style={{ border: '1px solid var(--line)', borderRadius: 8 }}>
+                      <div className="flex items-center gap-2 flex-wrap"><span className="font-medium">{m.name}</span><span className={`pill ${m.status === 'connected' ? 'ok' : m.status === 'reauth' ? 'warn' : 'crit'}`}>{m.status === 'connected' ? t('connected') : m.status}</span><span className="muted">{cfg.connected_by}</span></div>
+                      <div className="muted mt-1">{m.last_sync_at ? t('plm.last', { time: when(m.last_sync_at), styles: cfg.last_pass?.styles ?? 0, files: cfg.last_pass?.files ?? 0, samples: cfg.last_pass?.samples ?? 0 }) : t('plm.none')}</div>
+                      {m.error && <div className="mt-1" style={{ color: 'var(--crit)' }}>{m.error}</div>}
+                      {isManager && <form action={disconnectMailbox} className="mt-2"><input type="hidden" name="tenant" value={slug} /><input type="hidden" name="id" value={m.id} /><button className="btn sm red">{t('gmail.disconnect')}</button></form>}
+                    </div>); })}
+                  {isManager && !plms.some((m) => m.config?.connector === 'delogue' && m.status === 'connected') && <form action={saveDelogue} className="mt-3 grid gap-2 small">
+                    <input type="hidden" name="tenant" value={slug} />
+                    <label className="grid gap-1"><span className="muted">{t('plm.key')}</span><input name="token" type="password" className="input" autoComplete="off" required /></label>
+                    <label className="grid gap-1"><span className="muted">{t('plm.customer')}</span><select name="customer_id" className="input" defaultValue=""><option value="">—</option>{(customersForPlm || []).map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select></label>
+                    <div><button className="btn sm primary">{t('plm.save')}</button></div>
+                    <p className="muted">{t('plm.note')}</p>
+                  </form>}
+                  {!isManager && !plms.length && <p className="muted small mt-2">{t('wa.managerOnly')}</p>}
                 </>}
                 {c.id === 'whatsapp' && <>
                   {was.map((m) => { const cfg = m.config as { display?: string; verified_name?: string; verify_token?: string }; return (
