@@ -6,7 +6,7 @@ import { supabaseServer } from '@/lib/supabase/server';
 import { hasLlm } from '@/lib/llm';
 import { lastPass } from '@/lib/agents/proactive';
 
-const TOOLS = ['get_briefing', 'search_orders', 'get_order', 'get_exceptions', 'get_party', 'get_messages', 'get_ledger', 'get_gates', 'get_team', 'queue_draft', 'request_approval', 'set_milestone', 'navigate', 'search_styles', 'get_style', 'get_style_file', 'diff_tech_pack'];
+const TOOLS = ['get_briefing', 'search_orders', 'get_order', 'get_exceptions', 'get_party', 'get_messages', 'get_ledger', 'get_gates', 'get_team', 'queue_draft', 'request_approval', 'set_milestone', 'navigate', 'search_styles', 'get_style', 'get_style_file', 'diff_tech_pack', 'get_samples', 'record_sample_event', 'get_materials', 'get_schedule'];
 
 export default async function Agents({ params }: { params: Promise<{ tenant: string }> }) {
   const { tenant: slug } = await params;

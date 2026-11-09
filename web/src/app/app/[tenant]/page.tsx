@@ -28,7 +28,7 @@ export default async function MyDay({ params, searchParams }: { params: Promise<
     scope ? sb.from('parties').select('name').in('id', scope) : Promise.resolve({ data: null }),
     sb.from('tenants').select('settings').eq('id', tenant.id).single(),
     esgSnapshot(tenant.id, sb),
-    sb.from('alerts').select('id, kind, order_id, party_id, milestone, due_date, detail, assignee_user_id, created_at, escalated_at').eq('tenant_id', tenant.id).eq('status', 'open').order('created_at', { ascending: false }).limit(50),
+    sb.from('alerts').select('id, kind, order_id, party_id, milestone, due_date, detail, assignee_user_id, created_at, escalated_at').eq('tenant_id', tenant.id).eq('track', 'production').eq('status', 'open').order('created_at', { ascending: false }).limit(50),
   ]);
   // the safety net: mine first; managers see everyone's; scoped people see their customers' orders
   const orderIds = new Set(orders.map((o) => o.id));

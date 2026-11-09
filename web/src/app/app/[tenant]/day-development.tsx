@@ -6,18 +6,22 @@ import { supabaseServer } from '@/lib/supabase/server';
 import { listStyles, styleSignals, STATUS_PILL } from '@/lib/styles';
 import { approveDraft, rejectDraft } from './queue/actions';
 import { lastPass } from '@/lib/agents/proactive';
+import { chaseAlert, dismissAlert } from './alert-actions';
 import type { Membership } from '@/lib/tenant';
 
 export async function DevelopmentDay({ slug, tenant, membership, scope, saved, error }: { slug: string; tenant: { id: string; tz: string }; membership: Membership; scope: string[] | null; saved?: string; error?: string }) {
   const [t, ts] = await Promise.all([getTranslations('day'), getTranslations('styles')]);
   const sb = await supabaseServer();
-  const [{ data: queuedRows }, { count: approvedToday }, styles, { data: agent }, lp] = await Promise.all([
+  const [{ data: queuedRows }, { count: approvedToday }, styles, { data: agent }, lp, { data: alertRows }] = await Promise.all([
     sb.from('drafts').select('id, seq, priority, stream, title, impact, body, lang, gate_level, created_at, party_id, styles(id, code, customer_id), parties(name), source:messages!drafts_source_message_id_fkey(thread_id)').eq('tenant_id', tenant.id).eq('track', 'development').in('status', ['queued', 'escalated']).order('priority').order('seq'),
     sb.from('drafts').select('id', { count: 'exact', head: true }).eq('tenant_id', tenant.id).eq('track', 'development').eq('status', 'sent').gte('decided_at', new Date(new Date().setHours(0, 0, 0, 0)).toISOString()),
     listStyles(tenant.id, { customers: scope }, sb),
     sb.from('agents').select('name').eq('tenant_id', tenant.id).eq('scope_kind', 'tenant').order('track', { ascending: true }).limit(1).maybeSingle(),
     lastPass(tenant.id),
+    sb.from('alerts').select('id, kind, party_id, due_date, detail, assignee_user_id, created_at, escalated_at, style_id, sample_id').eq('tenant_id', tenant.id).eq('track', 'development').eq('status', 'open').order('created_at', { ascending: false }).limit(30),
   ]);
+  const manager = ['owner', 'manager'].includes(membership.role);
+  const alerts = (alertRows || []).filter((a) => manager || a.assignee_user_id === membership.id || !a.assignee_user_id);
   const sig = await styleSignals(tenant.id, styles.map((s) => s.id), sb);
   const prepared = (queuedRows || []).filter((d) => !scope || (d.party_id && scope.includes(d.party_id)) || scope.includes((d.styles as unknown as { customer_id: string } | null)?.customer_id || ''));
   const live = styles.filter((s) => !['handed_over', 'dropped'].includes(s.status));
@@ -39,6 +43,17 @@ export async function DevelopmentDay({ slug, tenant, membership, scope, saved, e
       </div>
       {saved && <div className="notice ok mt-4">{t('decided')}</div>}
       {error && <div className="notice crit mt-4">{error}</div>}
+      {!!alerts.length && <div className="card mt-4" style={{ borderLeft: '3px solid var(--crit)' }}><h2>{t('alerts.title', { n: alerts.length })}</h2><p className="muted small mt-1">{t('alerts.sub')}</p>
+        {alerts.slice(0, 8).map((a) => { const d = (a.detail || {}) as { style?: string; style_id?: string; party?: string; label?: string; days_silent?: number | null; error?: string }; return (
+          <div key={a.id} className="small" style={{ borderTop: '1px solid var(--line2)', paddingTop: 10, marginTop: 10 }}>
+            <div className="flex items-center gap-2 flex-wrap"><span className={`pill ${a.kind === 'silence' ? 'warn' : 'crit'}`}>{t(`alerts.kind.${a.kind}`)}</span>{d.style_id && <Link className="pill" href={`${base}/styles/${d.style_id}${a.sample_id ? `/samples/${a.sample_id}` : ''}`}>{d.style}</Link>}{a.escalated_at && <span className="pill crit">{t('alerts.escalated')}</span>}</div>
+            <div className="mt-1">{a.kind === 'silence' ? (d.days_silent != null ? t('alerts.silence', { label: d.label || '', date: a.due_date || '', party: d.party || '', n: d.days_silent }) : t('alerts.silenceNever', { label: d.label || '', date: a.due_date || '', party: d.party || '' })) : t('alerts.failed', { party: d.party || '', error: d.error || '' })}</div>
+            <div className="flex gap-2 mt-2 flex-wrap items-center">
+              {a.kind === 'silence' && <form action={chaseAlert}><input type="hidden" name="tenant" value={slug} /><input type="hidden" name="id" value={a.id} /><button className="btn primary sm">{t('alerts.chase', { party: d.party || '' })}</button></form>}
+              <form action={dismissAlert} className="flex gap-2 items-center"><input type="hidden" name="tenant" value={slug} /><input type="hidden" name="id" value={a.id} /><select name="why" className="input" style={{ maxWidth: 200, width: 'auto', padding: '4px 8px' }}>{['heard', 'onTrack', 'notNeeded'].map((k) => <option key={k} value={k}>{t(`alerts.why.${k}`)}</option>)}</select><button className="btn sm">{t('alerts.dismiss')}</button></form>
+            </div>
+          </div>); })}
+      </div>}
       {!!pending.length && <div className="card mt-4" style={{ borderLeft: '3px solid #c9a24a' }}><h2>{t('devPendingTitle')}</h2><p className="muted small mt-1">{t('devPendingSub')}</p>
         {pending.slice(0, 8).map((s) => <div key={s.id} className="small flex items-center gap-2 flex-wrap mt-2" style={{ borderTop: '1px solid var(--line2)', paddingTop: 8 }}><Link className="font-medium" href={`${base}/styles/${s.id}`}>{s.code}{s.name ? ` ${s.name}` : ''}</Link><span className="muted">{s.customer?.name}{s.season ? ` · ${s.season}` : ''}</span><span className="pill warn ml-auto">{ts('pendingN', { n: sig.get(s.id)!.pending })}</span></div>)}
       </div>}

@@ -13,6 +13,8 @@ import { PendingDraftCard } from '@/components/pending-draft';
 import { UploadForm } from './upload-form';
 import { StyleFields } from '../style-fields';
 import { updateStyle, translateRecord } from '../actions';
+import { listSamples, listMaterials, listDevMilestones } from '@/lib/samples';
+import { SamplesCard, MaterialsCard, ScheduleCard } from '@/components/dev-cards';
 
 export const maxDuration = 60;
 const CUSTOMER = ['brand', 'retailer', 'store', 'buying_office', 'trading'];
@@ -24,12 +26,16 @@ export default async function StylePage({ params, searchParams }: { params: Prom
   const sb = await supabaseServer();
   const s = await getStyle(tenant.id, id, sb);
   if (!s) notFound();
-  const [records, { data: threads }, { data: drafts }, { data: ledger }, { data: parties }] = await Promise.all([
+  const [records, { data: threads }, { data: drafts }, { data: ledger }, { data: parties }, samples, materials, milestones, { data: allParties }] = await Promise.all([
     styleRecords(sb, tenant.id, id),
     sb.from('threads').select('id, subject, kind, last_message_at, summary, party_id, parties(name, kind)').eq('tenant_id', tenant.id).eq('style_id', id).order('last_message_at', { ascending: false }),
     sb.from('drafts').select('id, seq, title, body, body_en, lang, stream, gate_level, impact, priority, source_message_id, party_id').eq('tenant_id', tenant.id).eq('style_id', id).in('status', ['queued', 'escalated']).order('seq'),
     sb.from('ledger').select('id, at, actor, counterparty, stream, what, gate, gated').eq('tenant_id', tenant.id).eq('style_id', id).order('id', { ascending: false }).limit(30),
     sb.from('parties').select('id, name').eq('tenant_id', tenant.id).is('archived_at', null).in('kind', CUSTOMER).order('name'),
+    listSamples(tenant.id, { styleId: id }, sb),
+    listMaterials(tenant.id, id, sb),
+    listDevMilestones(tenant.id, id, sb),
+    sb.from('parties').select('id, name, kind').eq('tenant_id', tenant.id).is('archived_at', null).order('name'),
   ]);
   const tps = techPackVersions(records), latest = tps[0] || null, prev = tps[1] || null;
   const changes = diffTechPack(prev?.parsed || null, latest?.parsed || null);
@@ -68,6 +74,9 @@ export default async function StylePage({ params, searchParams }: { params: Prom
             {tps.length > 1 && <div className="mt-3 small"><span className="muted">{t('versions')}:</span> {tps.map((r) => <Link key={r.id} className="pill mr-1" href={`${base}/records/${r.id}`}>v{r.version}{r.parsed?.version_label ? ` ${r.parsed.version_label}` : ''} · {new Date(r.confirmed_at!).toLocaleDateString('en-GB', { timeZone: tenant.tz, day: '2-digit', month: 'short' })}</Link>)}</div>}
           </div>
           {!!others.length && <div className="card"><h2>{t('otherRecords')}</h2>{others.map((r) => <div key={r.id} className="small flex items-center gap-2 flex-wrap mt-2" style={{ borderTop: '1px solid var(--line2)', paddingTop: 8 }}><span className="pill">{t(`kinds.${r.kind}`)}</span><Link href={`${base}/records/${r.id}`}>{r.title || r.filename}</Link><span className="muted">v{r.version} · {r.created_by_name} · {when(r.created_at)}</span>{r.storage_path && <a className="small ml-auto" href={`/api/records/file?id=${r.id}`} target="_blank" rel="noopener">{t('openFile')}</a>}</div>)}</div>}
+          <ScheduleCard slug={slug} styleId={id} rows={milestones} targetDelivery={s.target_delivery} canEdit={canEdit} tz={tenant.tz} />
+          <SamplesCard slug={slug} styleId={id} samples={samples} parties={allParties || []} canEdit={canEdit} tz={tenant.tz} techPackVersion={latest?.version ?? null} />
+          <MaterialsCard slug={slug} styleId={id} materials={materials} parties={allParties || []} canEdit={canEdit} hasBom={!!latest?.parsed?.bom.length} currency={s.currency} />
           {canEdit && <UploadForm tenant={slug} styleId={id} live={hasLlm()} />}
           <div className="card"><div className="flex items-center gap-2"><h2>{t('styleFile')}</h2><span className="muted small">{t('fileCount', { n: threads?.length || 0 })}</span></div>
             {!threads?.length && <p className="muted small mt-2">{t('noConversations')}</p>}

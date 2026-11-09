@@ -6,6 +6,10 @@ import { z } from 'zod';
 import { supabaseAdmin } from '@/lib/supabase/server';
 import { listStyles, styleByCode, getStyle, styleBrief, styleFile, styleSignals } from '@/lib/styles';
 import { styleRecords, techPackVersions, diffTechPack } from '@/lib/records';
+import { listSamples, listMaterials, listDevMilestones, sampleState } from '@/lib/samples';
+import { computeDevPath } from '@/lib/dev-path';
+import { isoOf } from '@/lib/core/path';
+import { actorOf } from './tools';
 import { partyByRef, type AgentCtx } from './tools';
 
 const brief = (s: Awaited<ReturnType<typeof listStyles>>[number]) => ({ id: s.id, code: s.code, name: s.name, season: s.season, category: s.category, status: s.status, customer: s.customer?.name, target_price: s.target_price, currency: s.currency, target_delivery: s.target_delivery, plm_ref: s.plm_ref, updated_at: s.updated_at });
@@ -72,5 +76,58 @@ export function styleTools(ctx: AgentCtx, wrap: <I, O>(name: string, fn: (i: I) 
     }),
   });
 
-  return [search_styles, get_style, get_style_file, diff_tech_pack];
+  const get_samples = betaZodTool({
+    name: 'get_samples',
+    description: 'Development track: sample rounds (proto, fit, size set, SMS, PP, lab dip, strike-off...) for one style or across all styles: maker, due, sent with courier and AWB, received, state (planned, overdue, in transit, awaiting a decision, approved, rejected, resubmit), decision and who made it, comments. Decisions are only ever made by a person in the workspace.',
+    inputSchema: z.object({ style: z.string().optional().describe('style code or id; omit for every open round'), open_only: z.boolean().optional() }),
+    run: wrap('get_samples', async (a) => {
+      const st = a.style ? await resolve(a.style) : null;
+      if (a.style && !st) return { error: `No style matching "${a.style}"` };
+      const L = await listSamples(T, { styleId: st?.id, open: a.open_only }, sb);
+      return L.slice(0, 60).map((x) => ({ id: x.id, style: x.style?.code, po: x.order?.po, type: x.type, round: x.round, size: x.size, colourway: x.colourway, maker: x.maker?.name, requested: x.requested_at, due: x.due_at, sent: x.sent_at, courier: x.courier, awb: x.awb, received: x.received_at, state: sampleState(x), decision: x.decision, decided_by: x.decided_by_name, comments: x.comments, note: x.note }));
+    }),
+  });
+
+  const record_sample_event = betaZodTool({
+    name: 'record_sample_event',
+    description: 'Development track: record that a sample round was sent (with courier and AWB) or received, or a new due date, when the maker or a person clearly states it. Never records a decision: approvals and rejections are a person\'s action in the workspace.',
+    inputSchema: z.object({ sample_id: z.string().describe('id from get_samples'), event: z.enum(['sent', 'received', 'due']), date: z.string().describe('YYYY-MM-DD'), courier: z.string().optional(), awb: z.string().optional(), note: z.string().optional() }),
+    run: wrap('record_sample_event', async (a) => {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(a.date)) return { error: 'date must be YYYY-MM-DD' };
+      const { data: smp } = await sb.from('samples').select('id, style_id, type, round, decision').eq('tenant_id', T).eq('id', a.sample_id).maybeSingle();
+      if (!smp) return { error: 'No such sample round' };
+      const patch = a.event === 'sent' ? { sent_at: a.date, courier: a.courier || null, awb: a.awb || null } : a.event === 'received' ? { received_at: a.date } : { due_at: a.date };
+      const { error } = await sb.from('samples').update({ ...patch, ...(a.note ? { note: a.note.slice(0, 500) } : {}) }).eq('id', smp.id);
+      if (error) throw new Error(error.message);
+      await sb.rpc('ledger_append', { p_tenant: T, p_channel: ctx.trigger === 'chat' ? 'Console' : 'Inbound', p_actor: actorOf(ctx), p_actor_user: ctx.userId, p_counterparty: null, p_stream: 'Sample schedule', p_order: null, p_what: `${smp.type} round ${smp.round} ${a.event === 'due' ? 'due date' : a.event} ${a.date}${a.courier ? ` ${a.courier} ${a.awb || ''}` : ''}${a.note ? ` (${a.note})` : ''}`, p_gate: ctx.trigger === 'chat' ? 'PERSON · chat' : 'AUTO · capture', p_gated: false, p_ref: { sample_id: smp.id, event: a.event, date: a.date }, p_track: 'development', p_style: smp.style_id });
+      return { ok: true, sample_id: smp.id, event: a.event, date: a.date };
+    }),
+  });
+
+  const get_materials = betaZodTool({
+    name: 'get_materials',
+    description: 'Development track: the bill of materials of a style with sourcing status per line (to source, swatch requested, swatch received, lab dip pending, approved, rejected), supplier, MOQ, lead time and price.',
+    inputSchema: z.object({ style: z.string() }),
+    run: wrap('get_materials', async ({ style }) => {
+      const st = await resolve(style);
+      if (!st) return { error: `No style matching "${style}"` };
+      const L = await listMaterials(T, st.id, sb);
+      return L.map((m) => ({ id: m.id, kind: m.kind, item: m.item, description: m.description, composition: m.composition, weight: m.weight, colour: m.colour, placement: m.placement, qty: m.qty, supplier: m.supplier?.name || m.supplier_name, status: m.status, moq: m.moq, lead_days: m.lead_days, price: m.price, currency: m.currency, note: m.note }));
+    }),
+  });
+
+  const get_schedule = betaZodTool({
+    name: 'get_schedule',
+    description: 'Development track: the development schedule of a style (brief, tech pack, materials, proto, fits, size set, cost, adoption) with plan, forecast, slip and status per step. The forecast moves when an upstream step slips.',
+    inputSchema: z.object({ style: z.string() }),
+    run: wrap('get_schedule', async ({ style }) => {
+      const st = await resolve(style);
+      if (!st) return { error: `No style matching "${style}"` };
+      const rows = await listDevMilestones(T, st.id, sb);
+      if (!rows.length) return { style: st.code, schedule: [], note: 'No schedule yet; a person builds it from the target delivery date on the style page.' };
+      return { style: st.code, target_delivery: st.target_delivery, schedule: computeDevPath(rows).map((p) => ({ step: p.label, key: p.key, owner: p.owner, plan: isoOf(p.plan), forecast: isoOf(p.f), actual: p.actual != null ? isoOf(p.actual) : null, status: p.status, slip_days: p.status === 'done' ? 0 : p.slip })) };
+    }),
+  });
+
+  return [search_styles, get_style, get_style_file, diff_tech_pack, get_samples, record_sample_event, get_materials, get_schedule];
 }

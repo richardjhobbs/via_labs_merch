@@ -10,7 +10,7 @@
 // closes: a message from the party, a milestone update, the reply sent, the order closed.
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { listOrders } from '@/lib/orders';
-import { LABELS, isoOf, today, type MilestoneKey } from '@/lib/core/path';
+import { LABELS, isoOf, dayOf, today, type MilestoneKey } from '@/lib/core/path';
 import { brandedHtml, sendMail } from '@/lib/mail';
 
 type Client = SupabaseClient<any, 'merch', any>; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -19,7 +19,7 @@ const APP = process.env.NEXT_PUBLIC_APP_URL || 'https://merch.getvia.xyz';
 const SILENT_DAYS = 5, AHEAD = 3, BEHIND = 14, ESCALATE_HOURS = 24;
 const DAY = 86_400_000;
 
-type NewAlert = { kind: 'silence' | 'unsent' | 'send_failed'; key: string; order_id: string | null; party_id: string | null; message_id: string | null; milestone: string | null; due_date: string | null; assignee_user_id: string | null; detail: Record<string, unknown> };
+type NewAlert = { kind: 'silence' | 'unsent' | 'send_failed'; key: string; order_id: string | null; party_id: string | null; message_id: string | null; milestone: string | null; due_date: string | null; assignee_user_id: string | null; detail: Record<string, unknown>; track?: 'production' | 'development'; style_id?: string | null; sample_id?: string | null };
 
 export async function runAlerts(sb: Client, tenantId: string) {
   const now = Date.now(), T = today();
@@ -55,6 +55,17 @@ export async function runAlerts(sb: Client, tenantId: string) {
       seen.add(party.id);
       want.push({ kind: 'silence', key: `silence:${o.id}:${m.key}:${isoOf(due)}`, order_id: o.id, party_id: party.id, message_id: null, milestone: m.key, due_date: isoOf(due), assignee_user_id: ownerOf.get(o.id) || null, detail: { po: o.po, party: party.name, label: LABELS[m.key as MilestoneKey], days_silent: days } });
     }
+  }
+  // development: a sample round due or overdue, not received, nothing heard from its maker for 5 days
+  const { data: rounds } = await sb.from('samples').select('id, style_id, type, round, due_at, maker_party_id, updated_at, styles(code, owner_user_id), parties!samples_maker_party_id_fkey(name)').eq('tenant_id', tenantId).is('received_at', null).is('decision', null).not('maker_party_id', 'is', null).not('due_at', 'is', null);
+  for (const r of rounds || []) {
+    const due = dayOf(r.due_at as string);
+    if (due - T > AHEAD || T - due > BEHIND) continue;
+    const since = now - SILENT_DAYS * DAY;
+    if ((lastHeard.get(r.maker_party_id as string) || 0) > since || Date.parse(r.updated_at) > since) continue;
+    const st = r.styles as unknown as { code: string; owner_user_id: string | null } | null, maker = r.parties as unknown as { name: string } | null;
+    const days = lastHeard.get(r.maker_party_id as string) ? Math.floor((now - lastHeard.get(r.maker_party_id as string)!) / DAY) : null;
+    want.push({ kind: 'silence', key: `silence:sample:${r.id}:${r.due_at}`, order_id: null, party_id: r.maker_party_id as string, message_id: null, milestone: null, due_date: r.due_at as string, assignee_user_id: st?.owner_user_id || null, track: 'development', style_id: r.style_id as string, sample_id: r.id as string, detail: { style: st?.code || null, style_id: r.style_id, party: maker?.name || null, label: `${String(r.type).replace('_', ' ')} round ${r.round}`, days_silent: days } });
   }
   const draftIds = (unsent || []).map((m) => (m.raw as { draft_id?: string })?.draft_id).filter(Boolean) as string[];
   const { data: drafts } = draftIds.length ? await sb.from('drafts').select('id, decided_by, title').in('id', draftIds) : { data: [] };
@@ -119,8 +130,8 @@ export async function runAlerts(sb: Client, tenantId: string) {
 const cap = (list: { kind: string; detail: unknown; due_date: string | null }[]) => [...list.slice(0, 12).map(lineOf), ...(list.length > 12 ? [`And ${list.length - 12} more on My day.`] : [])];
 
 function lineOf(a: { kind: string; detail: unknown; due_date: string | null }) {
-  const d = (a.detail || {}) as { po?: string; party?: string; label?: string; days_silent?: number | null; title?: string; error?: string };
-  if (a.kind === 'silence') return `PO ${d.po}: ${d.label} is due ${a.due_date} and nothing has come in from ${d.party}${d.days_silent != null ? ` for ${d.days_silent} days` : ''}.`;
+  const d = (a.detail || {}) as { po?: string; style?: string; party?: string; label?: string; days_silent?: number | null; title?: string; error?: string };
+  if (a.kind === 'silence') return `${d.po ? `PO ${d.po}` : `Style ${d.style || '-'}`}: ${d.label} is due ${a.due_date} and nothing has come in from ${d.party}${d.days_silent != null ? ` for ${d.days_silent} days` : ''}.`;
   if (a.kind === 'unsent') return `PO ${d.po || '-'}: the approved reply to ${d.party || 'the party'} has not been sent yet.`;
   return `PO ${d.po || '-'}: the reply to ${d.party || 'the party'} could not be sent${d.error ? ` (${d.error})` : ''}.`;
 }

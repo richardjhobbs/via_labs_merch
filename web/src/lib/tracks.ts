@@ -43,3 +43,14 @@ export async function trackFor(sb: Sb, slug: string, tenantId: string, member: {
   const tracks = memberTracks(member, (data as { settings?: unknown } | null)?.settings as Settings);
   return { track: await currentTrack(slug, tracks), tracks };
 }
+
+// The model names a stream from both lists; a message filed on one track gets that track's equivalent stream.
+const TO_DEV: Record<string, string> = { 'Approvals': 'Sample comments and approvals', 'Tech pack forwarding': 'Tech packs and specs', 'RFQ and quotes': 'Costing and quotes', 'Price clarification': 'Costing and quotes', 'QC': 'Testing', 'Material sourcing': 'Material sourcing', 'General enquiries': 'General enquiries', 'Production status': 'Sample schedule', 'WIP reports': 'Sample schedule', 'Amendments': 'Tech packs and specs' };
+const TO_PROD: Record<string, string> = { 'Sample comments and approvals': 'Approvals', 'Tech packs and specs': 'Tech pack forwarding', 'Costing and quotes': 'RFQ and quotes', 'Testing': 'QC', 'Design briefs': 'General enquiries', 'Sample schedule': 'Production status', 'Lab dips and strike-offs': 'Approvals' };
+export function streamForTrack(stream: string | null | undefined, track: Track): string {
+  const list = streamsOf(track);
+  const exact = list.find((x) => x.toLowerCase() === (stream || '').toLowerCase());
+  if (exact) return exact;
+  const mapped = track === 'development' ? TO_DEV[stream || ''] : TO_PROD[stream || ''];
+  return mapped && list.includes(mapped) ? mapped : 'General enquiries';
+}
