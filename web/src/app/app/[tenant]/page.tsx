@@ -68,7 +68,7 @@ export default async function MyDay({ params, searchParams }: { params: Promise<
                 {d.po && <Link className="btn sm" href={`/app/${slug}/orders/${encodeURIComponent(d.po)}`}>{t('alerts.update')}</Link>}
               </> : <Link className="btn primary sm" href={`/app/${slug}/queue`}>{t('alerts.openQueue')}</Link>}
               <form action={dismissAlert} className="flex gap-2 items-center"><input type="hidden" name="tenant" value={slug} /><input type="hidden" name="id" value={a.id} />
-                <select name="why" className="input" style={{ maxWidth: 200, padding: '4px 8px' }}>{['heard', 'onTrack', 'notNeeded'].map((k) => <option key={k} value={k}>{t(`alerts.why.${k}`)}</option>)}</select>
+                <select name="why" className="input" style={{ maxWidth: 200, width: 'auto', padding: '4px 8px' }}>{['heard', 'onTrack', 'notNeeded'].map((k) => <option key={k} value={k}>{t(`alerts.why.${k}`)}</option>)}</select>
                 <button className="btn sm">{t('alerts.dismiss')}</button>
               </form>
             </div>
@@ -76,7 +76,7 @@ export default async function MyDay({ params, searchParams }: { params: Promise<
           </div>); })}
         {alerts.length > 8 && <div className="muted small mt-2">{t('more', { n: alerts.length - 8 })}</div>}
       </div>}
-      <div className="grid gap-4 mt-4" style={{ gridTemplateColumns: '1.4fr 1fr' }}>
+      <div className="grid gap-4 mt-4 lg:grid-cols-[1.4fr_1fr]">
         <div className="card">
           <div className="flex items-center gap-2 flex-wrap"><span className="pill agent">{agentName.slice(0, 1)}</span><h2>{t('prepared', { name: agentName, n: queued })}</h2><span className="muted small ml-auto">{lp ? t('preparedAt', { time: new Date(lp).toLocaleTimeString('en-GB', { timeZone: tenant.tz, hour: '2-digit', minute: '2-digit' }) }) : ''}</span></div>
           {!queued && <p className="muted mt-2 small">{t('empty')}</p>}
@@ -103,8 +103,8 @@ export default async function MyDay({ params, searchParams }: { params: Promise<
         {esgDue.slice(0, 5).map((x) => <Link key={x.id} href={`/app/${slug}/esg/task/${x.id}`} className="block small no-underline" style={{ padding: '8px 0', borderTop: '1px solid var(--line2)', color: 'inherit' }}><span className={`pill ${STATE_PILL[x.state]}`}>{te(`state.${x.state}`)}</span> <b>{x.code ? `${x.code} ` : ''}{x.title}</b> <span className="muted">· {x.period} · {x.days_left < 0 ? te('daysOver', { n: -x.days_left }) : te('dueIn', { date: x.due, n: x.days_left })} · {x.programme}</span></Link>)}
         {esgDue.length > 5 && <Link className="small" href={`/app/${slug}/esg`}>{t('more', { n: esgDue.length - 5 })}</Link>}
       </div>}
-      {!!off.length && <div className="card mt-4 tw" style={{ padding: 0 }}><div className="p-4 pb-2"><h2>{t('offplanTitle')}</h2></div><table className="t"><thead><tr><th>PO</th><th>{t('style')}</th><th>{t('customer')}</th><th>{t('factory')}</th><th>{t('health')}</th></tr></thead><tbody>
-        {off.slice(0, 10).map((o) => <tr key={o.id}><td><Link className="mono" href={`/app/${slug}/orders/${encodeURIComponent(o.po)}`}>{o.po}</Link></td><td>{o.style} <span className="muted small">{o.description}</span></td><td>{o.customer?.name}</td><td>{o.factory?.short || o.factory?.name}</td><td><HealthPill h={o.health} /></td></tr>)}
+      {!!off.length && <div className="card mt-4 tw" style={{ padding: 0 }}><div className="p-4 pb-2"><h2>{t('offplanTitle')}</h2></div><table className="t stack"><thead><tr><th>PO</th><th>{t('style')}</th><th>{t('customer')}</th><th>{t('factory')}</th><th>{t('health')}</th></tr></thead><tbody>
+        {off.slice(0, 10).map((o) => <tr key={o.id}><td><Link className="mono" href={`/app/${slug}/orders/${encodeURIComponent(o.po)}`}>{o.po}</Link> <span className="md:hidden"><HealthPill h={o.health} /></span></td><td>{o.style} <span className="muted small">{o.description}</span></td><td data-l={t('customer')}>{o.customer?.name}</td><td data-l={t('factory')}>{o.factory?.short || o.factory?.name}</td><td className="hidden md:table-cell"><HealthPill h={o.health} /></td></tr>)}
       </tbody></table></div>}
       {manager && <Team tenantId={tenant.id} />}
       {!orders.length && <div className="notice mt-4">{t('noOrders')} <Link href={`/app/${slug}/orders/import`}>{t('importLink')}</Link></div>}

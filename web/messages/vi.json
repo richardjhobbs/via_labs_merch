@@ -17,7 +17,15 @@
     "signout": "Đăng xuất",
     "threads": "Hội thoại",
     "esg": "ESG & tuân thủ",
-    "shared": "Được chia sẻ với bạn"
+    "shared": "Được chia sẻ với bạn",
+    "short": {
+      "day": "Hôm nay",
+      "queue": "Duyệt",
+      "orders": "Đơn hàng",
+      "threads": "Hội thoại"
+    },
+    "more": "Thêm",
+    "menu": "Menu"
   },
   "landing": {
     "kicker": "Dành cho văn phòng mua hàng, thương hiệu, nhà máy và công ty thương mại",

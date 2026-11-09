@@ -64,6 +64,47 @@ table.t tr.click { cursor: pointer; } table.t tr.click:hover td { background: va
 .asst .sug button:hover { border-color: var(--accent); color: var(--accent); }
 .asst form { display: flex; gap: 8px; padding: 10px 12px; border-top: 1px solid var(--line); }
 
+/* Phones (below 768 px): top bar, bottom tabs and a menu sheet replace the rail (app/[tenant]/mobile-nav.tsx). */
+.mbar { position: sticky; top: 0; z-index: 30; display: flex; align-items: center; gap: 10px; padding: 8px 12px; padding-top: max(8px, env(safe-area-inset-top)); background: rgba(255,255,255,.96); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+.mtabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; background: rgba(255,255,255,.97); backdrop-filter: blur(8px); border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom); }
+.mtabs a, .mtabs button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 56px; padding: 6px 2px; border: 0; background: none; font: inherit; font-size: 11px; font-weight: 500; color: var(--muted); text-decoration: none; cursor: pointer; min-width: 0; }
+.mtabs span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mtabs .on { color: var(--accent); }
+.mtabs .on svg { stroke-width: 2.2; }
+.msheet-bg { position: fixed; inset: 0; z-index: 45; background: rgba(20,24,22,.35); display: flex; align-items: flex-end; }
+.msheet { width: 100%; max-height: 85vh; overflow-y: auto; background: #fff; border-radius: 16px 16px 0 0; padding: 16px 16px max(16px, env(safe-area-inset-bottom)); box-shadow: 0 -12px 40px rgba(20,24,22,.2); }
+.mlist { display: grid; gap: 2px; }
+.mlist a { display: block; padding: 12px 12px; border-radius: 8px; color: var(--fg); text-decoration: none; font-size: 15px; }
+.mlist a.on { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+@media (min-width: 768px) { .mbar, .mtabs, .msheet-bg { display: none; } }
+@media (max-width: 767px) {
+  .app-main { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
+  h1 { font-size: 20px; }
+  /* 16 px stops iOS zooming into a field on focus */
+  .input, select.input, textarea.input { font-size: 16px; }
+  .btn { min-height: 40px; }
+  .btn.sm { min-height: 36px; padding: 6px 12px; }
+  .card { padding: 14px; }
+  .kpi { padding: 10px 12px; }
+  .kpi .n { font-size: 21px; overflow-wrap: anywhere; }
+  .asst-fab { right: 14px; bottom: calc(68px + env(safe-area-inset-bottom)); padding: 10px 14px; }
+  .asst { inset: 0; width: 100%; height: 100%; height: 100dvh; border-radius: 0; border: 0; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+  /* A table marked .stack becomes one card per row; each cell shows its column name from data-l. */
+  table.t.stack, table.t.stack tbody, table.t.stack tr, table.t.stack td { display: block; width: 100%; }
+  table.t.stack thead { display: none; }
+  table.t.stack tr { padding: 12px 14px; border-bottom: 1px solid var(--line2); }
+  table.t.stack tr:last-child { border-bottom: 0; }
+  table.t.stack td { border: 0; padding: 2px 0; text-align: left !important; max-width: none !important; white-space: normal !important; }
+  table.t.stack td:empty { display: none; }
+  table.t.stack .hidden { display: none; }
+  table.t.stack td[data-l]::before { content: attr(data-l); display: inline-block; min-width: 88px; margin-right: 8px; font-size: 11px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+  table.t.stack tr.click:hover td { background: none; }
+  /* filter chips scroll sideways in one row instead of wrapping into a wall */
+  .chips { flex-wrap: nowrap; overflow-x: auto; white-space: nowrap; margin-inline: -1rem; padding: 2px 1rem 6px; scrollbar-width: none; }
+  .chips::-webkit-scrollbar { display: none; }
+  .chips .pill { padding: 6px 12px; font-size: 13px; text-decoration: none; }
+}
+
 /* landing switchboard and connector banner: one dark exchange-board look (walnut, bakelite, brass) */
 .sb { background: #0E0C0A; border-radius: 14px; padding: 14px; color: #EDE6DA; }
 .sb-board { border-radius: 10px; overflow: hidden; box-shadow: 0 0 0 1px #2E241B; }
@@ -139,7 +180,7 @@ table.t tr.click { cursor: pointer; } table.t tr.click:hover td { background: va
 /* Printing a compliance report: the page alone, without the rail, the assistant or the controls. */
 .print-only { display: none; }
 @media print {
-  .rail, .no-print, .asst, .asst-fab { display: none !important; }
+  .rail, .no-print, .asst, .asst-fab, .mbar, .mtabs { display: none !important; }
   .print-only { display: block; }
   main { padding: 0 !important; background: #fff !important; }
   body > div, .min-h-screen { display: block !important; }

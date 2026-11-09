@@ -105,7 +105,7 @@ export default async function Programme({ params, searchParams }: { params: Prom
               <h3 className="small"><b>{t('prepare')}</b></h3><p className="muted small mt-1">{t('prepareHelp')}</p>
               <input type="hidden" name="tenant" value={slug} /><input type="hidden" name="programme_id" value={id} />
               <label className="f mt-2"><span>{t('periodLabel')}</span><input className="input" name="label" maxLength={60} defaultValue={lastPeriod?.period_label || ''} required /></label>
-              <div className="grid gap-2" style={{ gridTemplateColumns: '1fr 1fr' }}><label className="f"><span>{t('from')}</span><input className="input" type="date" name="from" required defaultValue={lastPeriod?.period_end || ''} /></label><label className="f"><span>{t('to')}</span><input className="input" type="date" name="to" required defaultValue={lastPeriod?.period_end || ''} /></label></div>
+              <div className="grid gap-2 sm:grid-cols-2"><label className="f"><span>{t('from')}</span><input className="input" type="date" name="from" required defaultValue={lastPeriod?.period_end || ''} /></label><label className="f"><span>{t('to')}</span><input className="input" type="date" name="to" required defaultValue={lastPeriod?.period_end || ''} /></label></div>
               <button className="btn primary">{t('prepareBtn')}</button>
             </form>}
           </div>
@@ -114,7 +114,7 @@ export default async function Programme({ params, searchParams }: { params: Prom
             <input type="hidden" name="tenant" value={slug} /><input type="hidden" name="programme_id" value={id} />
             <div className="grid gap-2" style={{ gridTemplateColumns: '90px 1fr' }}><label className="f"><span>{t('code')}</span><input className="input" name="code" maxLength={40} /></label><label className="f"><span>{t('reqTitle')}</span><input className="input" name="title" required minLength={3} maxLength={200} /></label></div>
             <label className="f"><span>{t('instruction')}</span><textarea className="input" name="instruction" rows={3} maxLength={2000} /></label>
-            <div className="grid gap-2" style={{ gridTemplateColumns: '1fr 1fr' }}>
+            <div className="grid gap-2 sm:grid-cols-2">
               <label className="f"><span>{t('discipline')}</span><select className="input" name="discipline" defaultValue="energy">{DISCIPLINES.map((d) => <option key={d} value={d}>{t(`disc.${d}`)}</option>)}</select></label>
               <label className="f"><span>{t('measure')}</span><select className="input" name="measure" defaultValue="number">{MEASURES.map((m) => <option key={m} value={m}>{t(`meas.${m}`)}</option>)}</select></label>
               <label className="f"><span>{t('unit')}</span><input className="input" name="unit" maxLength={24} placeholder="kWh" /></label>
@@ -127,7 +127,7 @@ export default async function Programme({ params, searchParams }: { params: Prom
               <h3 className="small"><b>{t('whenTitle')}</b></h3>
               <label className="f mt-2"><span>{t('trigger')}</span><select className="input" name="trigger" defaultValue="schedule">{TRIGGERS.map((x) => <option key={x} value={x}>{t(`trig.${x}`)}</option>)}</select></label>
               <p className="muted small mb-2">{t('triggerHelp')}</p>
-              <div className="grid gap-2" style={{ gridTemplateColumns: '1fr 1fr' }}>
+              <div className="grid gap-2 sm:grid-cols-2">
                 <label className="f"><span>{t('frequency')}</span><select className="input" name="frequency" defaultValue="quarterly">{FREQUENCIES.map((f) => <option key={f} value={f}>{t(`freq.${f}`)}</option>)}</select></label>
                 <label className="f"><span>{t('firstPeriodEnd')}</span><input className="input" type="date" name="first_period_end" /></label>
                 <label className="f"><span>{t('dueDays')}</span><input className="input" name="due_days" type="number" min={0} max={180} defaultValue={30} /></label>
@@ -136,7 +136,7 @@ export default async function Programme({ params, searchParams }: { params: Prom
                 <label className="f"><span>{t('milestoneOffset')}</span><input className="input" name="milestone_offset" type="number" min={-365} max={365} defaultValue={-7} /></label>
               </div>
               {!!customers.length && <label className="f"><span>{t('orderCustomers')}</span><select className="input" name="o_customers" multiple size={Math.min(4, customers.length)}>{customers.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}</select></label>}
-              <div className="grid gap-2" style={{ gridTemplateColumns: '1fr 1fr' }}>
+              <div className="grid gap-2 sm:grid-cols-2">
                 <label className="f"><span>{t('orderDestinations')}</span><input className="input" name="o_destinations" maxLength={200} placeholder="US, GB" /></label>
                 <label className="f"><span>{t('orderCountries')}</span><input className="input" name="o_countries" maxLength={60} placeholder="BD, VN" /></label>
                 <label className="f"><span>{t('orderCategory')}</span><input className="input" name="o_category" maxLength={60} placeholder={t('orderCategoryPh')} /></label>
@@ -146,7 +146,7 @@ export default async function Programme({ params, searchParams }: { params: Prom
               <h3 className="small"><b>{t('whoTitle')}</b></h3>
               <label className="f mt-2"><span>{t('appliesTo')}</span><select className="input" name="applies_to" defaultValue="company"><option value="company">{t('applies.company')}</option><option value="suppliers">{t('applies.suppliers')}</option></select></label>
               <div className="flex gap-3 flex-wrap small mb-2">{SUPPLIER_KINDS.map((k) => <label key={k} className="flex items-center gap-1"><input type="checkbox" name="s_kinds" value={k} defaultChecked={k === 'factory'} />{tp(`kinds.${k}` as never)}</label>)}</div>
-              <div className="grid gap-2" style={{ gridTemplateColumns: '1fr 1fr' }}>
+              <div className="grid gap-2 sm:grid-cols-2">
                 <div className="flex gap-3 small items-center">{[1, 2, 3].map((n) => <label key={n} className="flex items-center gap-1"><input type="checkbox" name="s_tiers" value={n} />T{n}</label>)}</div>
                 <label className="f"><span>{t('supplierCountries')}</span><input className="input" name="s_countries" maxLength={60} placeholder="BD, VN" /></label>
               </div>

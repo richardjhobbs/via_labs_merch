@@ -81,7 +81,7 @@ export default async function Esg({ params, searchParams }: { params: Promise<{ 
             <label className="f"><span>{t('issuerName')}</span><input className="input" name="issuer_name" maxLength={160} /></label>
             <label className="f"><span>{t('chain')}</span><input className="input" name="chain" maxLength={200} placeholder={t('chainPh')} /></label>
             <label className="f"><span>{t('purpose')}</span><input className="input" name="purpose" maxLength={400} /></label>
-            <div className="grid gap-2" style={{ gridTemplateColumns: '1fr 1fr' }}><label className="f"><span>{t('starts')}</span><input className="input" type="date" name="starts_on" /></label><label className="f"><span>{t('ends')}</span><input className="input" type="date" name="ends_on" /></label></div>
+            <div className="grid gap-2 sm:grid-cols-2"><label className="f"><span>{t('starts')}</span><input className="input" type="date" name="starts_on" /></label><label className="f"><span>{t('ends')}</span><input className="input" type="date" name="ends_on" /></label></div>
             <button className="btn">{t('save')}</button>
           </form>
         </div> : <div className="card self-start small muted">{t('leadsOnly')}</div>}

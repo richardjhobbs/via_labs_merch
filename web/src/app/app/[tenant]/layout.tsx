@@ -4,6 +4,7 @@ import { getTranslations } from 'next-intl/server';
 import { requireTenant } from '@/lib/tenant';
 import { LangSwitch } from '@/components/lang-switch';
 import { Rail } from './rail';
+import { MobileNav } from './mobile-nav';
 import { Assistant } from '@/components/assistant';
 import { supabaseServer } from '@/lib/supabase/server';
 import { hasLlm } from '@/lib/llm';
@@ -15,20 +16,26 @@ export default async function TenantLayout({ children, params }: { children: Rea
   const { tenant, membership, isAdmin, viewingAs } = await requireTenant(slug, { partner: true });
   const t = await getTranslations();
   // a partner sees the shared compliance portal only: no workspace navigation and no agent
-  if (membership.role === 'partner') return (
-    <div className="min-h-screen grid" style={{ gridTemplateColumns: '220px minmax(0,1fr)' }}>
-      <aside className="rail flex flex-col p-3 gap-1" style={{ borderRight: '1px solid var(--line)', background: '#fff' }}>
-        <div className="flex items-center gap-2 px-2 py-2 mb-2"><Logo merch h={44} /></div>
-        <div className="px-2 pb-2"><b className="small">{tenant.name}</b><div className="muted small">{t('roles.partner')}</div></div>
-        <Rail base={`/app/${slug}`} items={[['shared', t('nav.shared')]]} />
-        <div className="mt-auto px-2 pt-3 small" style={{ borderTop: '1px solid var(--line2)' }}>
-          <div><b>{membership.display_name || 'You'}</b></div>
-          <div className="flex items-center gap-2 mt-2"><LangSwitch compact up /><form action="/auth/signout" method="post"><button className="btn sm">{t('nav.signout')}</button></form></div>
-        </div>
-      </aside>
-      <main className="p-6" style={{ background: 'var(--paper)' }}>{children}</main>
-    </div>
-  );
+  const navLabels = { more: t('nav.more'), menu: t('nav.menu'), close: t('assistant.close') };
+  if (membership.role === 'partner') {
+    const account = <>
+      <div><b>{membership.display_name || 'You'}</b></div>
+      <div className="flex items-center gap-2 mt-2"><LangSwitch compact up /><form action="/auth/signout" method="post"><button className="btn sm">{t('nav.signout')}</button></form></div>
+    </>;
+    const pitems = [['shared', t('nav.shared')]] as [string, string][];
+    return (
+      <div className="min-h-screen md:grid md:grid-cols-[220px_minmax(0,1fr)]">
+        <MobileNav base={`/app/${slug}`} tenantName={tenant.name} sub={t('roles.partner')} items={pitems} tabs={[]} labels={navLabels}>{account}</MobileNav>
+        <aside className="rail hidden md:flex flex-col p-3 gap-1 sticky top-0 h-screen overflow-y-auto" style={{ borderRight: '1px solid var(--line)', background: '#fff' }}>
+          <div className="flex items-center gap-2 px-2 py-2 mb-2"><Logo merch h={44} /></div>
+          <div className="px-2 pb-2"><b className="small">{tenant.name}</b><div className="muted small">{t('roles.partner')}</div></div>
+          <Rail base={`/app/${slug}`} items={pitems} />
+          <div className="mt-auto px-2 pt-3 small" style={{ borderTop: '1px solid var(--line2)' }}>{account}</div>
+        </aside>
+        <main className="p-4 md:p-6 min-w-0" style={{ background: 'var(--paper)' }}>{children}</main>
+      </div>
+    );
+  }
   const locale = await getLocale();
   const sb = await supabaseServer();
   const { data: team } = isAdmin ? await sb.from('memberships').select('id, display_name, role').eq('tenant_id', tenant.id).neq('role', 'partner').order('role') : { data: null };
@@ -40,20 +47,23 @@ export default async function TenantLayout({ children, params }: { children: Rea
     ['', t('nav.day')], ['queue', t('nav.queue')], ['orders', t('nav.orders')], ['threads', t('nav.threads')], ['parties', t('nav.parties')],
     ['esg', t('nav.esg')], ['ledger', t('nav.ledger')], ['agents', t('nav.agents')], ['connections', t('nav.connections')], ['settings', t('nav.settings')],
   ] as [string, string][];
+  const account = <>
+    <div><b>{membership.display_name || 'You'}</b> <span className="muted">· {t(`roles.${membership.role}`)}</span></div>
+    {isAdmin && <Link href="/admin" className="block mt-1">{t('nav.admin')}</Link>}
+    {isAdmin && <ViewAs slug={slug} current={viewingAs || ''} members={(team || []).map((m) => ({ id: m.id, name: m.display_name || '?', role: t(`roles.${m.role}`) }))} label={t('viewas.label')} self={t('viewas.self')} />}
+    <div className="flex items-center gap-2 mt-2"><LangSwitch compact up /><form action="/auth/signout" method="post"><button className="btn sm">{t('nav.signout')}</button></form></div>
+  </>;
+  const tabs = [['', t('nav.short.day')], ['queue', t('nav.short.queue')], ['orders', t('nav.short.orders')], ['threads', t('nav.short.threads')]] as [string, string][];
   return (
-    <div className="min-h-screen grid" style={{ gridTemplateColumns: '220px minmax(0,1fr)' }}>
-      <aside className="rail flex flex-col p-3 gap-1" style={{ borderRight: '1px solid var(--line)', background: '#fff' }}>
+    <div className="min-h-screen md:grid md:grid-cols-[220px_minmax(0,1fr)]">
+      <MobileNav base={`/app/${slug}`} tenantName={tenant.name} sub={tenant.kind.replace('_', ' ')} items={items} tabs={tabs} labels={navLabels}>{account}</MobileNav>
+      <aside className="rail hidden md:flex flex-col p-3 gap-1 sticky top-0 h-screen overflow-y-auto" style={{ borderRight: '1px solid var(--line)', background: '#fff' }}>
         <div className="flex items-center gap-2 px-2 py-2 mb-2"><Logo merch h={44} /></div>
         <div className="px-2 pb-2"><b className="small">{tenant.name}</b><div className="muted small">{tenant.kind.replace('_', ' ')}</div></div>
         <Rail base={`/app/${slug}`} items={items} />
-        <div className="mt-auto px-2 pt-3 small" style={{ borderTop: '1px solid var(--line2)' }}>
-          <div><b>{membership.display_name || 'You'}</b> <span className="muted">· {t(`roles.${membership.role}`)}</span></div>
-          {isAdmin && <Link href="/admin" className="block mt-1">{t('nav.admin')}</Link>}
-          {isAdmin && <ViewAs slug={slug} current={viewingAs || ''} members={(team || []).map((m) => ({ id: m.id, name: m.display_name || '?', role: t(`roles.${m.role}`) }))} label={t('viewas.label')} self={t('viewas.self')} />}
-          <div className="flex items-center gap-2 mt-2"><LangSwitch compact up /><form action="/auth/signout" method="post"><button className="btn sm">{t('nav.signout')}</button></form></div>
-        </div>
+        <div className="mt-auto px-2 pt-3 small" style={{ borderTop: '1px solid var(--line2)' }}>{account}</div>
       </aside>
-      <main className="p-6" style={{ background: 'var(--paper)' }}>
+      <main className="app-main p-4 md:p-6 min-w-0" style={{ background: 'var(--paper)' }}>
         {pendingSupport && <Link href={`/app/${slug}/settings`} className="notice warn block mb-4 no-underline">{t('settings.pendingNotice', { reason: pendingSupport.reason })}</Link>}
         {children}
       </main>

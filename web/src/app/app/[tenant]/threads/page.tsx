@@ -27,13 +27,13 @@ export default async function Threads({ params, searchParams }: { params: Promis
     <div className="max-w-6xl">
       <h1>{t('title')}</h1>
       <p className="muted mt-1" style={{ maxWidth: '70ch' }}>{t('sub')}</p>
-      <div className="flex gap-2 mt-4">{(['all', 'customers', 'suppliers'] as const).map((s) => <Link key={s} className={`btn sm ${side === s ? 'primary' : ''}`} href={`/app/${slug}/threads${s === 'all' ? '' : `?side=${s}`}`}>{t(`side.${s}`)}</Link>)}</div>
+      <div className="flex gap-2 mt-4 flex-wrap">{(['all', 'customers', 'suppliers'] as const).map((s) => <Link key={s} className={`btn sm ${side === s ? 'primary' : ''}`} href={`/app/${slug}/threads${s === 'all' ? '' : `?side=${s}`}`}>{t(`side.${s}`)}</Link>)}</div>
       <div className="card tw mt-4" style={{ padding: 0 }}>
-        <table className="t"><thead><tr><th>{t('party')}</th><th>{t('po')}</th><th>{t('subject')}</th><th>{t('last')}</th><th></th></tr></thead><tbody>
+        <table className="t stack"><thead><tr><th>{t('party')}</th><th>{t('po')}</th><th>{t('subject')}</th><th>{t('last')}</th><th></th></tr></thead><tbody>
           {rows.map((th) => { const p = th.parties as unknown as { name: string; kind: string } | null, o = th.orders as unknown as { po: string } | null, last = lastOf.get(th.id); return (
             <RowLink key={th.id} href={`/app/${slug}/threads/${th.id}`}>
               <td><Link href={`/app/${slug}/threads/${th.id}`} className="font-medium">{p?.name || '—'}</Link><div className="muted small">{CUSTOMER.includes(p?.kind || '') ? t('customer') : t(`kind.${p?.kind || 'other'}`, { default: p?.kind || '' })} · {th.kind}</div></td>
-              <td>{o?.po && <Link className="mono small" href={`/app/${slug}/orders/${encodeURIComponent(o.po)}`}>{o.po}</Link>}</td>
+              <td data-l={o?.po ? t('po') : undefined}>{o?.po && <Link className="mono small" href={`/app/${slug}/orders/${encodeURIComponent(o.po)}`}>{o.po}</Link>}</td>
               <td className="small">{th.subject || t('conversation')}<div className="muted">{countOf.get(th.id) || 0} {t('messages')}</div></td>
               <td className="small" style={{ maxWidth: 420 }}>{last && <><span className="muted">{last.direction === 'in' ? '← ' : '→ '}{last.sender_name} · {new Date(last.received_at).toLocaleDateString('en-GB', { timeZone: tenant.tz, day: '2-digit', month: 'short' })}</span><div>{(last.text_en || last.text).slice(0, 110)}{(last.text_en || last.text).length > 110 ? '…' : ''}</div></>}</td>
               <td className="small">{(() => { const w = waiting(th); return w ? <><span className="pill warn">{t('replyWaiting')}</span><div className="muted mt-1"><span className="mono">Q-{w.seq}</span> {w.title}</div></> : last?.direction === 'out' ? <span className="pill ok">{t('ours')}</span> : last?.direction === 'in' ? <span className="pill">{t('theirs')}</span> : null; })()}</td>

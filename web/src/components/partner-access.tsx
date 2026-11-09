@@ -26,7 +26,7 @@ export async function PartnerAccess({ slug, tenantId, partyId, role }: { slug: s
         {pending.map((i) => <div key={i.id} className="flex items-center gap-2"><span>{i.display_name || i.email}</span><span className="pill warn">{t('invited')}</span></div>)}
         {!people.length && !pending.length && <span className="muted">{t('nobody')}</span>}
       </div>
-      <form action={invitePartner} className="grid gap-2 mt-3" style={{ gridTemplateColumns: '1fr 1fr auto', alignItems: 'end' }}>
+      <form action={invitePartner} className="grid gap-2 mt-3 sm:grid-cols-[1fr_1fr_auto] items-end">
         <input type="hidden" name="tenant" value={slug} /><input type="hidden" name="party_id" value={partyId} />
         <label className="f" style={{ margin: 0 }}><span>{t('email')}</span><input className="input sm" name="email" type="email" required maxLength={120} /></label>
         <label className="f" style={{ margin: 0 }}><span>{t('name')}</span><input className="input sm" name="name" maxLength={80} /></label>

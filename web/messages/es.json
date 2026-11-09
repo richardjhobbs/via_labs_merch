@@ -17,7 +17,15 @@
     "signout": "Cerrar sesión",
     "threads": "Conversaciones",
     "esg": "ESG y cumplimiento",
-    "shared": "Compartido con usted"
+    "shared": "Compartido con usted",
+    "short": {
+      "day": "Mi día",
+      "queue": "Aprobar",
+      "orders": "Pedidos",
+      "threads": "Chats"
+    },
+    "more": "Más",
+    "menu": "Menú"
   },
   "landing": {
     "kicker": "Para oficinas de compras, marcas, fábricas y empresas comercializadoras",

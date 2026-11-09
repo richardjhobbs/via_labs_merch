@@ -86,7 +86,7 @@ export default async function Queue({ params, searchParams }: { params: Promise<
                 <div className="flex gap-2 flex-wrap items-center">
                   <button className="btn primary sm" name="intent" value="approve">{t('approve')}</button>
                   <button className="btn sm" formAction={rejectDraft}>{t('reject')}</button>
-                  <input name="note" className="input sm" placeholder={t('note')} style={{ maxWidth: 320 }} />
+                  <input name="note" className="input sm" placeholder={t('note')} style={{ maxWidth: 320, flex: '1 1 180px' }} />
                 </div>
               </form>
             </div>
@@ -96,7 +96,7 @@ export default async function Queue({ params, searchParams }: { params: Promise<
       {!!decided?.length && (
         <div className="mt-8">
           <h2 style={{ fontSize: 15 }}>{t('decided')}</h2>
-          <div className="card tw mt-2" style={{ padding: 0 }}><table className="t"><tbody>
+          <div className="card tw mt-2" style={{ padding: 0 }}><table className="t stack"><tbody>
             {decided.map((d) => <tr key={d.id}><td className="mono small muted">Q-{d.seq}</td><td>{d.title}</td><td className="small muted">{(d.orders as unknown as { po: string } | null)?.po}</td><td><span className={`pill ${d.status === 'rejected' ? 'crit' : 'ok'}`}>{d.status}</span></td><td className="small muted">{d.decision_note}</td><td className="small muted">{d.decided_at ? new Date(d.decided_at).toLocaleTimeString('en-GB', { timeZone: tenant.tz, hour: '2-digit', minute: '2-digit' }) : ''}</td></tr>)}
           </tbody></table></div>
         </div>

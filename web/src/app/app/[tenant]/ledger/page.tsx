@@ -34,15 +34,15 @@ export default async function Ledger({ params, searchParams }: { params: Promise
 
       <div className="grid gap-6 mt-6 lg:grid-cols-[1fr_360px]">
         <div className="card tw" style={{ padding: 0 }}>
-          <table className="t"><thead><tr><th>{t('when')}</th><th>{t('who')}</th><th>{t('stream')}</th><th>{t('po')}</th><th>{t('what')}</th><th>{t('gate')}</th></tr></thead><tbody>
+          <table className="t stack"><thead><tr><th>{t('when')}</th><th>{t('who')}</th><th>{t('stream')}</th><th>{t('po')}</th><th>{t('what')}</th><th>{t('gate')}</th></tr></thead><tbody>
             {(rows || []).map((r) => { const po = (r.orders as unknown as { po: string } | null)?.po; return (
               <tr key={r.id}>
                 <td className="small muted" style={{ whiteSpace: 'nowrap' }}>{new Date(r.at).toLocaleString('en-GB', { timeZone: tenant.tz, day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</td>
-                <td className="small">{r.actor}{r.counterparty ? <span className="muted"> → {r.counterparty}</span> : ''}</td>
-                <td className="small muted">{r.stream}</td>
-                <td className="small">{po ? <Link href={`/app/${slug}/orders/${encodeURIComponent(po)}`}>{po}</Link> : ''}</td>
+                <td className="small" data-l={t('who')}>{r.actor}{r.counterparty ? <span className="muted"> → {r.counterparty}</span> : ''}</td>
+                <td className="small muted" data-l={t('stream')}>{r.stream}</td>
+                <td className="small" data-l={po ? t('po') : undefined}>{po ? <Link href={`/app/${slug}/orders/${encodeURIComponent(po)}`}>{po}</Link> : ''}</td>
                 <td className="small">{r.what}</td>
-                <td><span className={`pill ${r.gated ? (r.gate?.startsWith('APPROVED') || r.gate?.startsWith('ADMIN') ? 'ok' : r.gate?.startsWith('REJECTED') ? 'crit' : 'warn') : r.gate?.startsWith('AUTO') ? 'agent' : ''}`}>{r.gate}</span></td>
+                <td data-l={t('gate')}><span className={`pill ${r.gated ? (r.gate?.startsWith('APPROVED') || r.gate?.startsWith('ADMIN') ? 'ok' : r.gate?.startsWith('REJECTED') ? 'crit' : 'warn') : r.gate?.startsWith('AUTO') ? 'agent' : ''}`}>{r.gate}</span></td>
               </tr>); })}
           </tbody></table>
         </div>

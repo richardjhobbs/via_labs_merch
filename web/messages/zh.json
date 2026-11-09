@@ -17,7 +17,15 @@
     "signout": "退出登录",
     "threads": "会话",
     "esg": "ESG 与合规",
-    "shared": "与您共享"
+    "shared": "与您共享",
+    "short": {
+      "day": "我的今天",
+      "queue": "审批",
+      "orders": "订单",
+      "threads": "会话"
+    },
+    "more": "更多",
+    "menu": "菜单"
   },
   "landing": {
     "kicker": "面向采购办、品牌、工厂和贸易公司",

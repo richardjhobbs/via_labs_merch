@@ -17,7 +17,15 @@
     "signout": "Abmelden",
     "threads": "Unterhaltungen",
     "esg": "ESG & Compliance",
-    "shared": "Mit Ihnen geteilt"
+    "shared": "Mit Ihnen geteilt",
+    "short": {
+      "day": "Mein Tag",
+      "queue": "Freigaben",
+      "orders": "Aufträge",
+      "threads": "Chats"
+    },
+    "more": "Mehr",
+    "menu": "Menü"
   },
   "landing": {
     "kicker": "Für Einkaufsbüros, Marken, Fabriken und Handelshäuser",

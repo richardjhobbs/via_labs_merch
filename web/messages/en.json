@@ -17,7 +17,15 @@
     "signout": "Sign out",
     "threads": "Conversations",
     "esg": "ESG & compliance",
-    "shared": "Shared with you"
+    "shared": "Shared with you",
+    "short": {
+      "day": "My day",
+      "queue": "Queue",
+      "orders": "Orders",
+      "threads": "Chats"
+    },
+    "more": "More",
+    "menu": "Menu"
   },
   "landing": {
     "kicker": "For buying offices, brands, factories and trading companies",

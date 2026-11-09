@@ -74,7 +74,7 @@ export default async function Report({ params, searchParams }: { params: Promise
           {draft && !approver && <span className="muted small">{t('approverNote')}</span>}
         </div>
         {draft && <p className="muted small mt-2">{t('approveHelp')}</p>}
-        {rep.status === 'approved' && approver && <form action={markReportSent} className="grid gap-2 mt-3" style={{ gridTemplateColumns: '1fr 1fr auto', alignItems: 'end' }}>
+        {rep.status === 'approved' && approver && <form action={markReportSent} className="grid gap-2 mt-3 sm:grid-cols-[1fr_1fr_auto] items-end">
           <input type="hidden" name="tenant" value={slug} /><input type="hidden" name="id" value={id} />
           <label className="f" style={{ margin: 0 }}><span>{t('sentToLabel')}</span><input className="input" name="sent_to" required maxLength={200} defaultValue={[issuer, p.parties?.contacts?.find((c) => c.email)?.email].filter(Boolean).join(', ')} /></label>
           <label className="f" style={{ margin: 0 }}><span>{t('sentNote')}</span><input className="input" name="sent_note" maxLength={500} placeholder={t('sentNotePh')} /></label>
