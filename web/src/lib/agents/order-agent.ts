@@ -105,9 +105,12 @@ export async function updateBrief(tenantId: string, orderId: string, reason = 'e
     prev ? `Previous brief (version ${prev.version}, ${day(prev.created_at)}):\n${JSON.stringify(prev.brief)}` : 'There is no previous brief: build the first one from the evidence above.',
   ].filter(Boolean).join('\n\n');
 
-  const { data: brief, usage } = await extract(BriefSchema, SOUL, evidence, { maxTokens: 2500 });
+  // room for the model's thinking as well as the answer: a busy order cut off at 2,500 tokens (9 Nov)
+  let brief: Brief | null = null, usage = { model: SMALL_MODEL, tokensIn: 0, tokensOut: 0, cost: 0 };
+  try { ({ data: brief, usage } = await extract(BriefSchema, SOUL, evidence, { maxTokens: 8000 })); }
+  catch (e) { await failed(sb, tenantId, agentId, reason, t0, e instanceof Error ? e.message : String(e)); throw e; }
   await recordUsage(tenantId, { runs: 1, tokensIn: usage.tokensIn, tokensOut: usage.tokensOut, cost: usage.cost });
-  if (!brief) throw new Error(`brief for PO ${o.po}: no output`);
+  if (!brief) { await failed(sb, tenantId, agentId, reason, t0, 'no output'); throw new Error(`brief for PO ${o.po}: no output`); }
 
   // an agent cannot remember what it cannot cite: keep only items whose source was in front of it
   const allowed = new Set<string>([...(prev?.sources || []), ...(ins || []).map((x) => `i:${x.id}`), ...ms.map((l) => l.slice(1, l.indexOf(']'))), ...(msgs || []).map((m) => `m:${m.id}`), ...(led || []).map((l) => `l:${l.id}`), ...(drafts || []).map((d) => `d:${d.id}`)]);
@@ -126,6 +129,12 @@ export async function updateBrief(tenantId: string, orderId: string, reason = 'e
   await sb.from('agent_runs').insert({ tenant_id: tenantId, agent_id: agentId, trigger: 'brief', model: usage.model, input: { reason, version, messages: msgs?.length || 0, ledger: led?.length || 0, drafts: drafts?.length || 0 }, tools_called: [], output: clean.status_line, tokens_in: usage.tokensIn, tokens_out: usage.tokensOut, cost_usd: usage.cost, ms: Date.now() - t0 });
   const n = (x: Brief) => x.open_asks.length + x.commitments.length + x.risks.length + x.last_contact.length;
   return { version, dropped: n(brief) - n(clean) };
+}
+
+// A failed update is a run with its error: it shows on the Agents page, and the drain waits an hour before
+// trying that order's first brief again (orders_without_brief).
+async function failed(sb: Client, tenantId: string, agentId: string, reason: string, t0: number, error: string) {
+  await sb.from('agent_runs').insert({ tenant_id: tenantId, agent_id: agentId, trigger: 'brief', model: SMALL_MODEL, input: { reason }, tools_called: [], error: error.slice(0, 500), tokens_in: 0, tokens_out: 0, cost_usd: 0, ms: Date.now() - t0 });
 }
 
 // A compact form for the agent above (Mira): the brief without its source ids.
