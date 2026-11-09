@@ -299,7 +299,30 @@
     "docHint": "Cách nhập này cần bảng tính mỗi dòng một đơn hàng. Với hóa đơn chiếu lệ, hóa đơn hoặc đơn đặt hàng ở định dạng khác, hãy dùng",
     "docLink": "Thêm từ tài liệu.",
     "destination": "Điểm đến",
-    "orDrive": "hoặc"
+    "orDrive": "hoặc",
+    "agent": {
+      "title": "Tác tử đơn hàng",
+      "sub": "Cập nhật bản tóm tắt của PO này sau mỗi tin nhắn, thay đổi mốc và quyết định. Mỗi dòng dẫn tới bằng chứng của nó.",
+      "none": "Chưa có bản tóm tắt. Tác tử đơn hàng sẽ viết bản đầu tiên trong vài phút.",
+      "version": "Phiên bản {n} · {when}",
+      "next": "Tiếp theo",
+      "asks": "Đang chờ",
+      "commitments": "Đã hứa",
+      "risks": "Rủi ro",
+      "contact": "Liên hệ gần nhất",
+      "history": "Phiên bản trước",
+      "src": {
+        "m": "tin nhắn",
+        "l": "sổ ghi",
+        "d": "bản nháp",
+        "ms": "mốc"
+      },
+      "sev": {
+        "high": "cao",
+        "medium": "trung bình",
+        "low": "thấp"
+      }
+    }
   },
   "parties": {
     "title": "Khách hàng & nhà cung cấp",
@@ -669,7 +692,13 @@
     "trigChat": "được hỏi",
     "trigInbound": "tin đến",
     "trigSchedule": "định kỳ",
-    "trigPartner": "agent đối tác"
+    "trigPartner": "agent đối tác",
+    "orderAgents": "Tác tử đơn hàng",
+    "orderAgentsSub": "{n} đang chạy, mỗi PO đang mở một tác tử. Mỗi tác tử cập nhật bản tóm tắt đơn hàng và Mira đọc nó.",
+    "kOrderAgents": "Tác tử đơn hàng",
+    "kBriefs": "Phiên bản tóm tắt đã viết",
+    "openOrders": "Mở đơn hàng",
+    "trigBrief": "Tóm tắt đơn hàng"
   },
   "assistant": {
     "title": "Hỏi",

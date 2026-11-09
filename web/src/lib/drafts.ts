@@ -1,5 +1,6 @@
 // A person's decision on a draft, shared by the approval queue and the assistant panel.
-import { supabaseServer } from '@/lib/supabase/server';
+import { supabaseServer, supabaseAdmin } from '@/lib/supabase/server';
+import { queueBrief } from '@/lib/agents/order-agent';
 import type { requireTenant } from '@/lib/tenant';
 import { recordOutbound } from '@/lib/threads';
 
@@ -20,5 +21,6 @@ export async function decideDraft(me: Me, id: string, status: 'approved' | 'reje
   const hh = new Date().toLocaleTimeString('en-GB', { timeZone: tenant.tz, hour: '2-digit', minute: '2-digit' });
   await sb.rpc('ledger_append', { p_tenant: tenant.id, p_channel: 'Console', p_actor: who, p_actor_user: user.id, p_counterparty: (d.parties as unknown as { name: string } | null)?.name || null, p_stream: d.stream, p_order: d.order_id, p_what: `${status === 'approved' ? (edited ? 'Edited and approved' : 'Approved') : 'Rejected'} Q-${d.seq}: ${d.title}${note ? ` (${note})` : ''}`, p_gate: `${status.toUpperCase()} ${hh} · ${who}`, p_gated: true, p_ref: { draft_id: id } });
   if (status === 'approved') await recordOutbound(tenant.id, { id: d.id, body: edited ? body : d.body, body_en: d.body_en, lang: d.lang, stream: d.stream, party_id: d.party_id, order_id: d.order_id, source_message_id: d.source_message_id }, who);
+  await queueBrief(supabaseAdmin(), tenant.id, d.order_id, `draft ${status}`);
   return { ok: true, seq: d.seq };
 }

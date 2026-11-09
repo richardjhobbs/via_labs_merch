@@ -35,6 +35,14 @@ export async function getOrder(tenantId: string, po: string, client?: Client): P
   return { ...o, health: orderHealth(o.milestones) };
 }
 
+export async function getOrderById(tenantId: string, id: string, client?: Client): Promise<OrderWithHealth | null> {
+  const sb = client || await supabaseServer();
+  const { data } = await sb.from('orders').select(SELECT).eq('tenant_id', tenantId).eq('id', id).maybeSingle();
+  if (!data) return null;
+  const o = data as unknown as OrderRow;
+  return { ...o, health: orderHealth(o.milestones) };
+}
+
 export function exceptionsOf(orders: OrderWithHealth[]) {
   return orders.filter((o) => o.status === 'open').map((o) => slipException(o.po, o.qty || 0, o.fob || 0, o.health)).filter((x): x is NonNullable<typeof x> => !!x)
     .sort((a, b) => (a.sev === b.sev ? 0 : a.sev === 'crit' ? -1 : 1));

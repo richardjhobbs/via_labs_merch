@@ -299,7 +299,30 @@
     "docHint": "This import needs a spreadsheet with one order per row. For a proforma invoice, invoice or purchase order in any other layout, use",
     "docLink": "Add from a document.",
     "destination": "Destination",
-    "orDrive": "or"
+    "orDrive": "or",
+    "agent": {
+      "title": "Order agent",
+      "sub": "Keeps this PO's brief current after every message, milestone change and decision. Each line links to its evidence.",
+      "none": "No brief yet. The order agent writes its first one within a few minutes.",
+      "version": "Version {n} · {when}",
+      "next": "Next",
+      "asks": "Waiting on",
+      "commitments": "Promised",
+      "risks": "Risks",
+      "contact": "Last contact",
+      "history": "Earlier versions",
+      "src": {
+        "m": "message",
+        "l": "ledger",
+        "d": "draft",
+        "ms": "milestone"
+      },
+      "sev": {
+        "high": "high",
+        "medium": "medium",
+        "low": "low"
+      }
+    }
   },
   "parties": {
     "title": "Customers & suppliers",
@@ -669,7 +692,13 @@
     "trigChat": "asked",
     "trigInbound": "inbound",
     "trigSchedule": "scheduled",
-    "trigPartner": "partner agent"
+    "trigPartner": "partner agent",
+    "orderAgents": "Order agents",
+    "orderAgentsSub": "{n} active, one for every open PO. Each keeps its order's brief current and Mira reads it.",
+    "kOrderAgents": "Order agents",
+    "kBriefs": "Brief versions written",
+    "openOrders": "Open orders",
+    "trigBrief": "Order brief"
   },
   "assistant": {
     "title": "Ask",

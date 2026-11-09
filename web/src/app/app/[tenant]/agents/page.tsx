@@ -13,16 +13,18 @@ export default async function Agents({ params }: { params: Promise<{ tenant: str
   const { tenant } = await requireTenant(slug);
   const t = await getTranslations('agents');
   const sb = await supabaseServer();
-  const [{ data: agents }, { data: runs }, { data: gates }, { count: queued }, { count: msgs }, lp] = await Promise.all([
-    sb.from('agents').select('id, name, scope_kind, scope_stream, model, languages, enabled, parties(name)').eq('tenant_id', tenant.id).order('created_at'),
+  const [{ data: agents }, { data: runs }, { data: gates }, { count: queued }, { count: msgs }, lp, { count: orderAgents }, { count: briefs }] = await Promise.all([
+    sb.from('agents').select('id, name, scope_kind, scope_stream, model, languages, enabled, parties(name)').eq('tenant_id', tenant.id).eq('layer', 'manager').order('created_at'),
     sb.from('agent_runs').select('id, trigger, tools_called, tokens_in, tokens_out, cost_usd, ms, error, output, created_at').eq('tenant_id', tenant.id).order('created_at', { ascending: false }).limit(12),
     sb.from('gates').select('stream, level, locked').eq('tenant_id', tenant.id).order('stream'),
     sb.from('drafts').select('id', { count: 'exact', head: true }).eq('tenant_id', tenant.id).in('status', ['queued', 'escalated']),
     sb.from('messages').select('id', { count: 'exact', head: true }).eq('tenant_id', tenant.id).eq('direction', 'in'),
     lastPass(tenant.id),
+    sb.from('agents').select('id', { count: 'exact', head: true }).eq('tenant_id', tenant.id).eq('layer', 'order').eq('status', 'active'),
+    sb.from('agent_memory').select('id', { count: 'exact', head: true }).eq('tenant_id', tenant.id),
   ]);
   const live = hasLlm();
-  const TRIG: Record<string, string> = { chat: t('trigChat'), inbound: t('trigInbound'), schedule: t('trigSchedule'), partner: t('trigPartner') };
+  const TRIG: Record<string, string> = { chat: t('trigChat'), inbound: t('trigInbound'), schedule: t('trigSchedule'), partner: t('trigPartner'), brief: t('trigBrief') };
   return (
     <div className="max-w-6xl">
       <h1>{t('title')}</h1>
@@ -53,6 +55,14 @@ export default async function Agents({ params }: { params: Promise<{ tenant: str
               </details>
             </div>
           ))}
+          <div className="card">
+            <div className="flex items-center gap-3"><span className="pill agent" style={{ fontSize: 14, padding: '4px 10px' }}>PO</span><div><div className="font-medium" style={{ fontSize: 16 }}>{t('orderAgents')}</div><div className="muted small">{t('orderAgentsSub', { n: orderAgents ?? 0 })}</div></div></div>
+            <div className="mt-4 grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))' }}>
+              <div className="kpi"><div className="n">{orderAgents ?? 0}</div><div className="l">{t('kOrderAgents')}</div></div>
+              <div className="kpi"><div className="n">{briefs ?? 0}</div><div className="l">{t('kBriefs')}</div></div>
+            </div>
+            <div className="mt-3"><Link className="btn sm" href={`/app/${slug}/orders`}>{t('openOrders')}</Link></div>
+          </div>
         </div>
         <div className="card" style={{ alignSelf: 'start' }}>
           <div className="font-medium small">{t('activity')}</div>

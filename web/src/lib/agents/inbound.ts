@@ -6,6 +6,7 @@ import { supabaseAdmin } from '@/lib/supabase/server';
 import { extract, recordUsage, LANG_NAMES } from '@/lib/llm';
 import { runAgent } from './run';
 import { findOrCreateThread, threadMessages } from '@/lib/threads';
+import { latestBrief, briefForAgent, queueBrief } from './order-agent';
 
 export type InboundInput = { tenantId: string; channelKind: string; channelId?: string | null; from: string; senderName?: string | null; partyId?: string | null; subject?: string | null; text: string; externalId?: string | null; raw?: unknown };
 
@@ -65,7 +66,8 @@ export async function processInbound(messageId: string) {
   const party = (parties || []).find((p) => p.id === partyId);
   await sb.rpc('ledger_append', { p_tenant: T, p_channel: (m.raw as { channel?: string })?.channel || 'Inbound', p_actor: party?.name || m.sender_name || m.from_addr || 'Unknown sender', p_actor_user: null, p_counterparty: null, p_stream: parsed?.stream || null, p_order: orderId, p_what: `Inbound: ${(parsed?.text_en || m.text).slice(0, 140)}`, p_gate: 'Logged', p_gated: false, p_ref: { message_id: messageId } });
 
-  // hand to the agent: capture dates, draft the reply
+  // hand to the agent: capture dates, draft the reply; it reads the order agent's brief first
+  const ob = orderId ? briefForAgent(await latestBrief(sb, orderId)) : null;
   const brief = `An inbound message arrived and was logged. Handle it:
 1. If it states a milestone date as fact for a known PO, record it with set_milestone (expected for a promised date, actual for a completed step).
 2. If it reports an ESG or compliance figure or confirmation for a stated period (energy, water, effluent, chemicals, waste, emissions, wages, accidents, audits, certificates), look it up with get_compliance and, if a matching open task exists, record it with record_compliance_value. A person checks it.
@@ -77,7 +79,8 @@ ${history.length ? `Earlier in this conversation (oldest first):\n${history.map(
 ${m.text}
 ---
 English rendering: ${parsed?.text_en || m.text}
-Extracted: PO ${po || 'none matched'}; reported dates ${JSON.stringify(parsed?.reported_dates || [])}; asks ${JSON.stringify(parsed?.asks || [])}.`;
+Extracted: PO ${po || 'none matched'}; reported dates ${JSON.stringify(parsed?.reported_dates || [])}; asks ${JSON.stringify(parsed?.asks || [])}.${ob ? `\n\nThe order agent's brief for PO ${po} (version ${ob.version}, ${ob.updated}): ${JSON.stringify(ob)}` : ''}`;
   const r = await runAgent({ tenantId: T, trigger: 'inbound', sourceMessageId: messageId, messages: [{ role: 'user', content: brief }] });
+  await queueBrief(sb, T, orderId, 'message');
   return { messageId, partyId, orderId, stream: parsed?.stream, drafts: r.drafts, summary: r.text, error: r.error };
 }

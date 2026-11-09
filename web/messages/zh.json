@@ -299,7 +299,30 @@
     "docHint": "此导入需要每行一个订单的表格。其他格式的形式发票、发票或采购订单，请使用",
     "docLink": "从文件添加。",
     "destination": "目的地",
-    "orDrive": "或"
+    "orDrive": "或",
+    "agent": {
+      "title": "订单代理",
+      "sub": "每次收到消息、里程碑变更或做出决定后，更新此 PO 的简报。每一行都链接到其依据。",
+      "none": "尚无简报。订单代理会在几分钟内写出第一份。",
+      "version": "第 {n} 版 · {when}",
+      "next": "下一步",
+      "asks": "等待中",
+      "commitments": "已承诺",
+      "risks": "风险",
+      "contact": "最近联系",
+      "history": "早期版本",
+      "src": {
+        "m": "消息",
+        "l": "记录",
+        "d": "草稿",
+        "ms": "里程碑"
+      },
+      "sev": {
+        "high": "高",
+        "medium": "中",
+        "low": "低"
+      }
+    }
   },
   "parties": {
     "title": "客户与供应商",
@@ -669,7 +692,13 @@
     "trigChat": "提问触发",
     "trigInbound": "来信触发",
     "trigSchedule": "定时触发",
-    "trigPartner": "合作方智能体"
+    "trigPartner": "合作方智能体",
+    "orderAgents": "订单代理",
+    "orderAgentsSub": "{n} 个在运行，每个未结 PO 一个。每个代理更新其订单简报，Mira 会读取。",
+    "kOrderAgents": "订单代理",
+    "kBriefs": "已写简报版本",
+    "openOrders": "打开订单",
+    "trigBrief": "订单简报"
   },
   "assistant": {
     "title": "提问",

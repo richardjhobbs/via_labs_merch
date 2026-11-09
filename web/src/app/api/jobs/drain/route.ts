@@ -13,6 +13,7 @@ import { CHANNEL_COLS, type Channel } from '@/lib/connectors/mail';
 import { purgeArchived } from '@/lib/party-lifecycle';
 import { runAllAlerts } from '@/lib/alerts';
 import { nextEsgTenant, runEsgPass } from '@/lib/agents/esg-pass';
+import { updateBrief } from '@/lib/agents/order-agent';
 
 export const maxDuration = 55;
 const BUDGET_MS = 40_000;
@@ -21,7 +22,7 @@ export async function POST(req: NextRequest) {
   if (!process.env.JOBS_SECRET || req.headers.get('x-merch-jobs') !== process.env.JOBS_SECRET) return NextResponse.json({ error: 'forbidden' }, { status: 403 });
   const sb = supabaseAdmin();
   const t0 = Date.now();
-  const done: Record<string, number> = { mail_in: 0, mail_out: 0, inbound: 0, jobs: 0, proactive: 0, esg: 0, failed: 0 };
+  const done: Record<string, number> = { mail_in: 0, mail_out: 0, inbound: 0, jobs: 0, proactive: 0, briefs: 0, esg: 0, failed: 0 };
   const errors: string[] = [];
   const left = () => BUDGET_MS - (Date.now() - t0);
 
@@ -45,14 +46,25 @@ export async function POST(req: NextRequest) {
       try { await processInbound(item.message.message_id); await sb.rpc('q_delete', { p_queue: 'merch_inbound', p_id: item.msg_id }); done.inbound++; }
       catch (e) { done.failed++; errors.push(e instanceof Error ? e.message : String(e)); if (item.read_ct >= 3) await sb.rpc('q_delete', { p_queue: 'merch_inbound', p_id: item.msg_id }); }
     }
-    // 2. explicit agent jobs (a proactive pass requested by the sample loader or the console)
-    const { data: jobs } = await sb.rpc('q_read', { p_queue: 'merch_agent_runs', p_n: 2 });
-    for (const job of (jobs || []) as { msg_id: number; read_ct: number; message: { type: string; tenant_id: string } }[]) {
-      if (left() < 20_000) break;
+    // 2. explicit agent jobs: a proactive pass (sample loader, console) or an order agent's brief update after an event
+    const { data: jobs } = await sb.rpc('q_read', { p_queue: 'merch_agent_runs', p_n: 4 });
+    const briefed = new Set<string>();
+    for (const job of (jobs || []) as { msg_id: number; read_ct: number; message: { type: string; tenant_id: string; order_id?: string; reason?: string } }[]) {
+      if (left() < (job.message.type === 'brief' ? 12_000 : 20_000)) break;
       try {
         if (job.message.type === 'proactive') { await runProactive(job.message.tenant_id, { force: true }); done.proactive++; }
+        // several events on one order in the same minute need one update: the update reads everything new since the last version
+        if (job.message.type === 'brief' && job.message.order_id && !briefed.has(job.message.order_id)) { briefed.add(job.message.order_id); const r = await updateBrief(job.message.tenant_id, job.message.order_id, job.message.reason); if ('version' in r) done.briefs++; }
         await sb.rpc('q_delete', { p_queue: 'merch_agent_runs', p_id: job.msg_id }); done.jobs++;
       } catch (e) { done.failed++; errors.push(e instanceof Error ? e.message : String(e)); if (job.read_ct >= 2) await sb.rpc('q_delete', { p_queue: 'merch_agent_runs', p_id: job.msg_id }); }
+    }
+    // 2b. first briefs: open orders whose agent has no memory yet, two a minute while budget allows
+    if (left() > 22_000) {
+      const { data: fresh } = await sb.rpc('orders_without_brief', { p_n: 2 });
+      for (const f of (fresh || []) as { order_id: string; tenant_id: string }[]) {
+        if (left() < 18_000) break;
+        try { const r = await updateBrief(f.tenant_id, f.order_id, 'first brief'); if ('version' in r) done.briefs++; } catch (e) { done.failed++; errors.push(`brief: ${e instanceof Error ? e.message : String(e)}`); }
+      }
     }
     // 3. hourly pass for the company that has waited longest
     if (left() > 25_000 && done.proactive === 0) {
