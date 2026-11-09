@@ -315,7 +315,30 @@
     "docHint": "Esta importación necesita una hoja con un pedido por fila. Para una factura proforma, factura u orden de compra con otro formato, use",
     "docLink": "Añadir desde un documento.",
     "destination": "Destino",
-    "orDrive": "o"
+    "orDrive": "o",
+    "agent": {
+      "title": "Agente del pedido",
+      "sub": "Mantiene al día el resumen de este PO tras cada mensaje, cambio de hito y decisión. Cada línea enlaza con su evidencia.",
+      "none": "Aún no hay resumen. El agente del pedido escribe el primero en unos minutos.",
+      "version": "Versión {n} · {when}",
+      "next": "Siguiente",
+      "asks": "Pendiente de",
+      "commitments": "Prometido",
+      "risks": "Riesgos",
+      "contact": "Último contacto",
+      "history": "Versiones anteriores",
+      "src": {
+        "m": "mensaje",
+        "l": "registro",
+        "d": "borrador",
+        "ms": "hito"
+      },
+      "sev": {
+        "high": "alto",
+        "medium": "medio",
+        "low": "bajo"
+      }
+    }
   },
   "parties": {
     "title": "Clientes y proveedores",
@@ -686,7 +709,13 @@
     "trigChat": "a petición",
     "trigInbound": "entrante",
     "trigSchedule": "programada",
-    "trigPartner": "agente de socio"
+    "trigPartner": "agente de socio",
+    "orderAgents": "Agentes de pedido",
+    "orderAgentsSub": "{n} activos, uno por cada PO abierto. Cada uno mantiene al día el resumen de su pedido y Mira lo lee.",
+    "kOrderAgents": "Agentes de pedido",
+    "kBriefs": "Versiones de resumen escritas",
+    "openOrders": "Abrir pedidos",
+    "trigBrief": "Resumen del pedido"
   },
   "assistant": {
     "title": "Preguntar",

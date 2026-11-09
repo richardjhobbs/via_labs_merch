@@ -315,7 +315,30 @@
     "docHint": "Dieser Import braucht eine Tabelle mit einem Auftrag pro Zeile. Für eine Proforma-Rechnung, Rechnung oder Bestellung in anderem Format nutzen Sie",
     "docLink": "Aus einem Dokument hinzufügen.",
     "destination": "Zielland",
-    "orDrive": "oder"
+    "orDrive": "oder",
+    "agent": {
+      "title": "Auftragsagent",
+      "sub": "Hält das Briefing zu dieser PO nach jeder Nachricht, Meilensteinänderung und Entscheidung aktuell. Jede Zeile verweist auf ihren Beleg.",
+      "none": "Noch kein Briefing. Der Auftragsagent schreibt das erste innerhalb weniger Minuten.",
+      "version": "Version {n} · {when}",
+      "next": "Nächster Schritt",
+      "asks": "Wartet auf",
+      "commitments": "Zugesagt",
+      "risks": "Risiken",
+      "contact": "Letzter Kontakt",
+      "history": "Frühere Versionen",
+      "src": {
+        "m": "Nachricht",
+        "l": "Ledger",
+        "d": "Entwurf",
+        "ms": "Meilenstein"
+      },
+      "sev": {
+        "high": "hoch",
+        "medium": "mittel",
+        "low": "niedrig"
+      }
+    }
   },
   "parties": {
     "title": "Kunden & Lieferanten",
@@ -686,7 +709,13 @@
     "trigChat": "gefragt",
     "trigInbound": "eingehend",
     "trigSchedule": "geplant",
-    "trigPartner": "Partner-Agent"
+    "trigPartner": "Partner-Agent",
+    "orderAgents": "Auftragsagenten",
+    "orderAgentsSub": "{n} aktiv, einer pro offener PO. Jeder hält das Briefing seines Auftrags aktuell, und Mira liest es.",
+    "kOrderAgents": "Auftragsagenten",
+    "kBriefs": "Geschriebene Briefing-Versionen",
+    "openOrders": "Aufträge öffnen",
+    "trigBrief": "Auftragsbriefing"
   },
   "assistant": {
     "title": "Fragen",

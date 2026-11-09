@@ -9,6 +9,7 @@ import { LABELS, MILESTONES, isoOf, type MilestoneKey } from '@/lib/core/path';
 import { orderFile, orderSummary, recordOutbound } from '@/lib/threads';
 import { searchMailboxes } from '@/lib/connectors/search';
 import { esgEnabled, esgSnapshot } from '@/lib/esg';
+import { latestBrief, briefForAgent, queueBrief } from './order-agent';
 import { ALL_STREAMS, type Track } from '@/lib/tracks';
 import { styleTools } from './style-tools';
 
@@ -89,13 +90,14 @@ export function toolsFor(ctx: AgentCtx) {
 
   const get_order = betaZodTool({
     name: 'get_order',
-    description: 'Full record for one PO: critical path with plan, forecast and status per milestone, supply chain (factory, mill, fibre), route, sizes, colours and the open exception if any.',
+    description: 'Full record for one PO: critical path with plan, forecast and status per milestone, supply chain (factory, mill, fibre), route, sizes, colours, the open exception if any, and the order agent\'s brief (open asks, commitments, risks, last contact, next action). Read the brief before the raw messages.',
     inputSchema: z.object({ po: z.string().describe('PO number, e.g. 48812') }),
     run: wrap('get_order', async ({ po }) => {
       const o = await getOrder(T, po.trim(), sb);
       if (!o) return { error: `No PO ${po} in this company` };
       const h = o.health, ex = exceptionsOf([o])[0];
-      return { ...orderBrief(o), composition: o.composition, category: o.category, sizes: o.sizes, colours: o.colours, incoterm: o.incoterm, route: `${o.pol || '?'} → ${o.pod || '?'}`, destination_country: o.destination, in_store: o.instore_date, season: o.season, supply_chain: { factory: o.factory?.name, mill: o.mill?.name, fibre: o.fibre?.name },
+      const agentBrief = briefForAgent(await latestBrief(sb, o.id));
+      return { order_agent_brief: agentBrief, ...orderBrief(o), composition: o.composition, category: o.category, sizes: o.sizes, colours: o.colours, incoterm: o.incoterm, route: `${o.pol || '?'} → ${o.pod || '?'}`, destination_country: o.destination, in_store: o.instore_date, season: o.season, supply_chain: { factory: o.factory?.name, mill: o.mill?.name, fibre: o.fibre?.name },
         critical_path: MILESTONES.map((k) => h.p[k]).filter(Boolean).map((m) => ({ milestone: LABELS[m.key], key: m.key, owner: m.owner, plan: d(m.plan), forecast: d(m.status === 'done' ? m.actual : m.f), reported_expected: d(m.expected), actual: d(m.actual), status: m.status, slip_days: m.status === 'done' ? 0 : m.slip })),
         exception: ex ? { severity: ex.sev, title: ex.title, exposure_usd: ex.exposure, chain: ex.chain.map((c) => c.t), options: ex.opts.map((o) => ({ option: o[0], consequence: o[1] })) } : null };
     }),
@@ -209,6 +211,7 @@ export function toolsFor(ctx: AgentCtx) {
       if (error) throw new Error(error.message);
       await sb.rpc('ledger_append', { p_tenant: T, p_channel: ctx.trigger === 'chat' ? 'Console' : 'Inbound', p_actor: actorOf(ctx), p_actor_user: ctx.userId, p_counterparty: null, p_stream: 'Production status', p_order: o.id, p_what: `${LABELS[a.key as MilestoneKey]} ${a.field} date set to ${a.date}${a.note ? ` (${a.note})` : ''}`, p_gate: ctx.trigger === 'chat' ? 'PERSON · chat' : 'AUTO · capture', p_gated: false, p_ref: { key: a.key, field: a.field, date: a.date } });
       const after = await getOrder(T, a.po, sb);
+      await queueBrief(sb, T, o.id, 'milestone');
       return { ok: true, health: after?.health.state, etd_forecast: d(after?.health.p.etd?.f), etd_slip_days: after?.health.etdSlip };
     }),
   });

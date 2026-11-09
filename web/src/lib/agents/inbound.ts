@@ -6,6 +6,7 @@ import { supabaseAdmin } from '@/lib/supabase/server';
 import { extract, recordUsage, LANG_NAMES } from '@/lib/llm';
 import { runAgent } from './run';
 import { findOrCreateThread, threadMessages } from '@/lib/threads';
+import { latestBrief, briefForAgent, queueBrief } from './order-agent';
 import { ALL_STREAMS, type Track } from '@/lib/tracks';
 
 export type InboundInput = { tenantId: string; channelKind: string; channelId?: string | null; from: string; senderName?: string | null; partyId?: string | null; subject?: string | null; text: string; externalId?: string | null; raw?: unknown };
@@ -86,7 +87,8 @@ export async function processInbound(messageId: string) {
   const party = (parties || []).find((p) => p.id === partyId);
   await sb.rpc('ledger_append', { p_tenant: T, p_channel: (m.raw as { channel?: string })?.channel || 'Inbound', p_actor: party?.name || m.sender_name || m.from_addr || 'Unknown sender', p_actor_user: null, p_counterparty: null, p_stream: parsed?.stream || null, p_order: orderId, p_what: `Inbound${unsure ? ' (track unsure)' : ''}: ${(parsed?.text_en || m.text).slice(0, 140)}`, p_gate: 'Logged', p_gated: false, p_ref: { message_id: messageId }, p_track: track, p_style: styleId });
 
-  // hand to the agent: capture dates, draft the reply
+  // hand to the agent: capture dates, draft the reply; on production it reads the order agent's brief first
+  const ob = orderId && track !== 'development' ? briefForAgent(await latestBrief(sb, orderId)) : null;
   const brief = track === 'development' ? `An inbound message arrived on the DEVELOPMENT track and was logged${styleHit ? ` against style ${styleHit.code}` : ''}. Handle it:
 1. Read the style with get_style when a style is known; if a tech pack, brief, swatch, lab dip, strike-off or sample is mentioned, say what the record shows about it. Do not record any decision: approvals and rejections are a person's action.
 2. Queue one reply with queue_draft on stream "${parsed?.stream || 'General enquiries'}"${styleHit ? ` with style "${styleHit.code}"` : ''} to the sender${party ? ` (${party.name})` : ''}, in ${LANG_NAMES[parsed?.lang || 'en'] || 'their language'} with body_en, answering their asks from the record. Price, a sample approval, a promised sample date and anything not on the record need a person: say so in the draft's impact and do not promise it.
@@ -108,7 +110,8 @@ ${history.length ? `Earlier in this conversation (oldest first):\n${history.map(
 ${m.text}
 ---
 English rendering: ${parsed?.text_en || m.text}
-Extracted: PO ${po || 'none matched'}; reported dates ${JSON.stringify(parsed?.reported_dates || [])}; asks ${JSON.stringify(parsed?.asks || [])}.`;
+Extracted: PO ${po || 'none matched'}; reported dates ${JSON.stringify(parsed?.reported_dates || [])}; asks ${JSON.stringify(parsed?.asks || [])}.${ob ? `\n\nThe order agent's brief for PO ${po} (version ${ob.version}, ${ob.updated}): ${JSON.stringify(ob)}` : ''}`;
   const r = await runAgent({ tenantId: T, trigger: 'inbound', track, sourceMessageId: messageId, messages: [{ role: 'user', content: brief }] });
+  if (track !== 'development') await queueBrief(sb, T, orderId, 'message');
   return { messageId, partyId, orderId, styleId, track, stream: parsed?.stream, drafts: r.drafts, summary: r.text, error: r.error };
 }

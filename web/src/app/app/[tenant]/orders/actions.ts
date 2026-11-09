@@ -7,6 +7,7 @@ import { supabaseServer, supabaseAdmin } from '@/lib/supabase/server';
 import { pickedFile } from '@/lib/connectors/drive';
 import { requireTenant } from '@/lib/tenant';
 import { LABELS, MILESTONES, OWNERS, planFromEtd, type MilestoneKey } from '@/lib/core/path';
+import { queueBrief } from '@/lib/agents/order-agent';
 
 // A person reports a revised or actual date. The forecast downstream is recomputed
 // on read, and the change is a signed ledger row.
@@ -20,6 +21,7 @@ export async function setMilestone(form: FormData) {
   const { error } = await sb.from('milestones').update({ ...patch, updated_by: user.id }).eq('order_id', orderId).eq('key', key);
   if (error) redirect(`/app/${slug}/orders/${encodeURIComponent(o.po)}?error=${encodeURIComponent(error.message)}`);
   await sb.rpc('ledger_append', { p_tenant: tenant.id, p_channel: 'Console', p_actor: membership.display_name || user.email, p_actor_user: user.id, p_counterparty: null, p_stream: 'Production status', p_order: orderId, p_what: `${LABELS[key]} ${field} date set to ${date}`, p_gate: 'Logged', p_gated: false, p_ref: { key, field, date } });
+  await queueBrief(supabaseAdmin(), tenant.id, orderId, 'milestone');
   revalidatePath(`/app/${slug}/orders`);
   redirect(`/app/${slug}/orders/${encodeURIComponent(o.po)}?saved=1`);
 }
