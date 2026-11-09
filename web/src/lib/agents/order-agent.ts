@@ -35,6 +35,9 @@ Rules:
 
 // The agent an order reports to: the desk whose rule matches it (authority.deskFor), else the manager (Mira).
 export async function parentFor(sb: Client, tenantId: string, orderId: string) {
+  // a person can pin an order to a desk (director view); the pin holds while that desk is active
+  const { data: pin } = await sb.from('agents').select('pinned_parent_id, pinned:agents!agents_pinned_parent_id_fkey(status)').eq('order_id', orderId).eq('layer', 'order').maybeSingle();
+  if (pin?.pinned_parent_id && (pin.pinned as unknown as { status: string } | null)?.status === 'active') return pin.pinned_parent_id as string;
   const [{ data: o }, { data: desks }, { data: mira }] = await Promise.all([
     sb.from('orders').select('id, customer_id, factory_id, mill_id, category').eq('id', orderId).single(),
     sb.from('agents').select('id, desk_rule').eq('tenant_id', tenantId).eq('layer', 'desk').eq('status', 'active').eq('track', 'production').order('created_at'),
@@ -83,6 +86,8 @@ export async function updateBrief(tenantId: string, orderId: string, reason = 'e
   if (!o) return { skipped: 'no order' as const };
   const agentId = await ensureOrderAgent(sb, tenantId, orderId);
   if (o.status !== 'open') { await sb.from('agents').update({ status: 'closed' }).eq('id', agentId); return { skipped: 'closed' as const }; }
+  const { data: me0 } = await sb.from('agents').select('status').eq('id', agentId).single();
+  if (me0?.status === 'paused') return { skipped: 'paused' as const };
   const prev = await latestBrief(sb, orderId);
   const since = prev?.created_at || '1970-01-01';
   const [{ data: msgs }, { data: led }, { data: drafts }, { data: ins }] = await Promise.all([

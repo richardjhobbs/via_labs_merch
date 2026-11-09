@@ -11,8 +11,12 @@ test('two desks, same factory, ex-factory within a week, one off plan: a conflic
   assert.deepEqual(c[0].orders.map((x) => x.id), ['A', 'B']);
 });
 
-test('the same desk settles its own clash: not Mira\'s', () => {
-  assert.equal(capacityConflicts([o({ id: 'A', state: 'red' }), o({ id: 'B' })], T).length, 0);
+test('a clash inside one desk is that desk\'s to decide; across desks it is Mira\'s', () => {
+  const same = capacityConflicts([o({ id: 'A', state: 'red' }), o({ id: 'B' })], T);
+  assert.equal(same.length, 1);
+  assert.equal(same[0].deskId, 'desk-a');
+  assert.equal(capacityConflicts([o({ id: 'A', state: 'red' }), o({ id: 'B', parentId: 'desk-b' })], T)[0].deskId, null);
+  assert.equal(capacityConflicts([o({ id: 'A', state: 'red', parentId: 'mira', parentIsManager: true }), o({ id: 'B', parentId: 'mira', parentIsManager: true })], T)[0].deskId, null, 'no desk: Mira');
 });
 
 test('orders sitting directly under Mira with no desk are hers', () => {

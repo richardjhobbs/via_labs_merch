@@ -19,6 +19,8 @@ export async function lastPass(tenantId: string) {
 
 export async function runProactive(tenantId: string, opts: { force?: boolean } = {}) {
   const sb = supabaseAdmin();
+  const { data: mgr } = await sb.from('agents').select('status').eq('tenant_id', tenantId).eq('layer', 'manager').eq('track', 'production').limit(1).maybeSingle();
+  if (mgr?.status === 'paused') return { skipped: 'paused' as const };
   const last = await lastPass(tenantId);
   if (!opts.force && last && Date.now() - Date.parse(last) < 60 * 60_000) return { skipped: 'recent' as const };
   const passAt = new Date().toISOString();

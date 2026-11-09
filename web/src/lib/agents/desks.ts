@@ -16,7 +16,7 @@ import { ensureOrderAgent, parentFor } from './order-agent';
 type Client = SupabaseClient<any, 'merch', any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 const APP = process.env.NEXT_PUBLIC_APP_URL || 'https://merch.getvia.xyz';
 
-type AgentRow = { id: string; name: string; layer: Layer; ceilings: Record<string, number> | null; person_id: string | null; parent_agent_id: string | null };
+type AgentRow = { id: string; name: string; layer: Layer; ceilings: Record<string, number> | null; person_id: string | null; parent_agent_id: string | null; status: string };
 
 // The order agent and every layer above it, each with the user id of the person it works for.
 export async function chainFor(sb: Client, tenantId: string, orderId: string): Promise<ChainLink[]> {
@@ -24,14 +24,15 @@ export async function chainFor(sb: Client, tenantId: string, orderId: string): P
   const links: AgentRow[] = [];
   let id: string | null = orderAgentId;
   for (let i = 0; id && i < 4; i++) {
-    const { data }: { data: AgentRow | null } = await sb.from('agents').select('id, name, layer, ceilings, person_id, parent_agent_id').eq('id', id).maybeSingle();
+    const { data }: { data: AgentRow | null } = await sb.from('agents').select('id, name, layer, ceilings, person_id, parent_agent_id, status').eq('id', id).maybeSingle();
     if (!data) break;
     links.push(data); id = data.parent_agent_id;
   }
   const pids = links.map((l) => l.person_id).filter(Boolean) as string[];
   const { data: people } = pids.length ? await sb.from('memberships').select('id, user_id').in('id', pids) : { data: [] };
   const uid = new Map((people || []).map((p) => [p.id as string, p.user_id as string]));
-  return links.map((l) => ({ agentId: l.id, name: l.name, layer: l.layer, ceilings: l.ceilings, personUserId: l.person_id ? uid.get(l.person_id) || null : null }));
+  // a paused agent approves nothing; decisions pass through it to its person or the layer above
+  return links.map((l) => ({ agentId: l.id, name: l.name, layer: l.layer, ceilings: l.status === 'paused' ? null : l.ceilings, personUserId: l.person_id ? uid.get(l.person_id) || null : null }));
 }
 
 async function gate(sb: Client, tenantId: string, stream: string): Promise<Gate> {

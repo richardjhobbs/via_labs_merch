@@ -1,8 +1,8 @@
 // Layered agents, phase 3: what the manager agent (Mira) watches across desks. Pure functions, tested in
 // manager-rules.test.ts. A capacity conflict is two or more open orders at the same factory whose ex-factory
-// dates fall within a week of each other in the coming weeks, at least one of them already off plan, and
-// owned by different desks (or sitting directly under Mira, where no desk can settle it). Those are the
-// clashes a desk cannot decide alone, because protecting one order's slot costs the other desk.
+// dates fall within a week of each other in the coming weeks, at least one of them already off plan.
+// When every order in the clash sits on one desk, that desk decides it (deskId set); across desks, or with
+// orders directly under Mira, Mira decides, because protecting one order's slot costs the other desk.
 
 export type ConflictOrder = {
   id: string; po: string; factoryId: string | null; factoryName: string | null;
@@ -11,7 +11,7 @@ export type ConflictOrder = {
   state: 'red' | 'amber' | 'green';
   instore: string | null; value: number; customer: string | null;
 };
-export type Conflict = { key: string; factoryId: string; factoryName: string; orders: ConflictOrder[] };
+export type Conflict = { key: string; factoryId: string; factoryName: string; orders: ConflictOrder[]; deskId: string | null };
 
 export function capacityConflicts(orders: ConflictOrder[], today: number, opts: { horizon?: number; gap?: number } = {}): Conflict[] {
   const horizon = opts.horizon ?? 28, gap = opts.gap ?? 7;
@@ -21,17 +21,18 @@ export function capacityConflicts(orders: ConflictOrder[], today: number, opts: 
   const out: Conflict[] = [];
   for (const [factoryId, list] of byFactory) {
     if (list.length < 2) continue;
-    // join orders that clash: close dates, different owners, at least one off plan
+    // join orders that clash: close dates, at least one off plan
     const parent = new Map(list.map((o) => [o.id, o.id]));
     const find = (x: string): string => (parent.get(x) === x ? x : find(parent.get(x)!));
-    const clash = (a: ConflictOrder, b: ConflictOrder) => Math.abs(a.exf! - b.exf!) <= gap && (a.state !== 'green' || b.state !== 'green') && (a.parentId !== b.parentId || (a.parentIsManager && b.parentIsManager));
+    const clash = (a: ConflictOrder, b: ConflictOrder) => Math.abs(a.exf! - b.exf!) <= gap && (a.state !== 'green' || b.state !== 'green');
     for (let i = 0; i < list.length; i++) for (let j = i + 1; j < list.length; j++) if (clash(list.at(i)!, list.at(j)!)) parent.set(find(list.at(i)!.id), find(list.at(j)!.id));
     const groups = new Map<string, ConflictOrder[]>();
     for (const o of list) { const r = find(o.id); groups.set(r, [...(groups.get(r) || []), o]); }
     for (const g of groups.values()) {
       if (g.length < 2) continue;
       const sorted = [...g].sort((a, b) => a.po.localeCompare(b.po));
-      out.push({ key: `${factoryId}:${sorted.map((o) => o.id).join(',')}`, factoryId, factoryName: g[0].factoryName || '?', orders: sorted });
+      const one = g.every((o) => o.parentId === g[0].parentId && !o.parentIsManager);
+      out.push({ key: `${factoryId}:${sorted.map((o) => o.id).join(',')}`, factoryId, factoryName: g[0].factoryName || '?', orders: sorted, deskId: one ? g[0].parentId : null });
     }
   }
   return out;
