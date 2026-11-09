@@ -10,6 +10,7 @@ import { orderFile, orderSummary, recordOutbound } from '@/lib/threads';
 import { searchMailboxes } from '@/lib/connectors/search';
 import { esgEnabled, esgSnapshot } from '@/lib/esg';
 import { latestBrief, briefForAgent, queueBrief } from './order-agent';
+import { routeDraft } from './desks';
 import { ALL_STREAMS, type Track } from '@/lib/tracks';
 import { styleTools } from './style-tools';
 
@@ -176,6 +177,12 @@ export function toolsFor(ctx: AgentCtx) {
       if (error || !dr) throw new Error(error?.message || 'draft failed');
       ctx.drafts.push({ id: dr.id, seq: dr.seq, title: a.title, stream: a.stream, gate_level: g.level, party: p?.name || null, po: a.po || null, style: st?.code || null });
       await sb.rpc('ledger_append', { p_tenant: T, p_channel: 'Draft', p_actor: actorOf(ctx), p_actor_user: ctx.userId, p_counterparty: p?.name || a.party, p_stream: a.stream, p_order: o?.id || null, p_what: `Draft Q-${dr.seq}: ${a.title}`, p_gate: `L${g.level}${g.locked != null ? ' · capped' : ''}`, p_gated: true, p_ref: { draft_id: dr.id }, p_track: ctx.track, p_style: st?.id || null });
+      // inbound and scheduled drafts on a production order go through the layers: the lowest agent allowed approves, else a person decides
+      if (ctx.trigger !== 'chat' && ctx.track === 'production' && o?.id) {
+        const r = await routeDraft(T, dr.id);
+        if (r.routed && 'approvedBy' in r) return { id: dr.id, ref: `Q-${dr.seq}`, queued: false, approved: true, note: `Approved by ${r.approvedBy} under L${r.level}.` };
+        if (r.routed) return { id: dr.id, ref: `Q-${dr.seq}`, queued: true, autonomy: `L${g.level}`, note: `Waiting for ${r.waitingFor} to decide.` };
+      }
       return { id: dr.id, ref: `Q-${dr.seq}`, queued: true, autonomy: `L${g.level}`, note: g.level >= 2 && g.locked == null ? 'Routine stream at L2: request_approval may send it.' : 'A person must approve before it is sent.' };
     }),
   });

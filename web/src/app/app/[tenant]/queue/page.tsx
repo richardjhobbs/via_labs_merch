@@ -6,19 +6,24 @@ import { supabaseServer } from '@/lib/supabase/server';
 import { approveDraft, rejectDraft } from './actions';
 import { trackFor } from '@/lib/tracks';
 
-export default async function Queue({ params, searchParams }: { params: Promise<{ tenant: string }>; searchParams: Promise<{ saved?: string; error?: string }> }) {
+export default async function Queue({ params, searchParams }: { params: Promise<{ tenant: string }>; searchParams: Promise<{ saved?: string; error?: string; mine?: string }> }) {
   const { tenant: slug } = await params; const q = await searchParams;
-  const { tenant, membership } = await requireTenant(slug);
+  const { tenant, membership, user } = await requireTenant(slug);
   const scope = scopeOf(membership);
   const t = await getTranslations('queue');
   const sb = await supabaseServer();
   const since = new Date(new Date().setHours(0, 0, 0, 0)).toISOString();
   const { track } = await trackFor(sb, slug, tenant.id, membership);
-  const [{ data: draftsAll }, { data: decided }] = await Promise.all([
-    sb.from('drafts').select('id, seq, priority, stream, title, impact, body, body_en, lang, gate_level, status, created_at, party_id, orders(po, customer_id), styles(id, code, customer_id), parties(name, short, channel_pref), source:messages!drafts_source_message_id_fkey(sender_name, from_addr, text_en, text, thread_id, raw, channel:channels(kind, account, status))').eq('tenant_id', tenant.id).eq('track', track).in('status', ['queued', 'escalated']).order('created_at', { ascending: false }),
+  const [{ data: draftsAll }, { data: decided }, { data: people }] = await Promise.all([
+    sb.from('drafts').select('id, seq, priority, stream, title, impact, body, body_en, lang, gate_level, status, created_at, party_id, assignee_user_id, waiting_layer, orders(po, customer_id), styles(id, code, customer_id), parties(name, short, channel_pref), source:messages!drafts_source_message_id_fkey(sender_name, from_addr, text_en, text, thread_id, raw, channel:channels(kind, account, status))').eq('tenant_id', tenant.id).eq('track', track).in('status', ['queued', 'escalated']).order('created_at', { ascending: false }),
     sb.from('drafts').select('id, seq, title, status, decided_at, decision_note, orders(po), styles(code)').eq('tenant_id', tenant.id).eq('track', track).in('status', ['approved', 'sent', 'rejected']).gte('decided_at', since).order('decided_at', { ascending: false }).limit(20),
+    sb.from('memberships').select('user_id, display_name').eq('tenant_id', tenant.id),
   ]);
   const drafts = (draftsAll || []).filter((d) => !scope || (d.parties && scope.includes(d.party_id as string)) || scope.includes((d.orders as unknown as { customer_id: string } | null)?.customer_id || '') || scope.includes((d.styles as unknown as { customer_id: string } | null)?.customer_id || ''));
+  // decisions routed to a person by the layers: theirs first, and a filter for just mine
+  const nameOf = new Map((people || []).map((p) => [p.user_id as string, (p.display_name as string) || '?']));
+  const mineCount = drafts.filter((d) => d.assignee_user_id === user.id).length;
+  const shown = (q.mine ? drafts.filter((d) => d.assignee_user_id === user.id) : drafts).sort((a, b) => Number(b.assignee_user_id === user.id) - Number(a.assignee_user_id === user.id));
   const P = ['', 'crit', 'warn', ''];
   return (
     <div className="max-w-5xl">
@@ -26,9 +31,10 @@ export default async function Queue({ params, searchParams }: { params: Promise<
       <p className="muted mt-1" style={{ maxWidth: '70ch' }}>{t('sub')}</p>
       {q.error && <div className="notice crit mt-4">{q.error}</div>}
       {q.saved && <div className="notice ok mt-4">{t('approvedNote')}</div>}
+      {(mineCount > 0 || q.mine) && <div className="flex gap-2 mt-4 flex-wrap"><Link className={`btn sm ${q.mine ? '' : 'primary'}`} href={`/app/${slug}/queue`}>{t('all', { n: drafts.length })}</Link><Link className={`btn sm ${q.mine ? 'primary' : ''}`} href={`/app/${slug}/queue?mine=1`}>{t('mine', { n: mineCount })}</Link></div>}
       <div className="grid gap-4 mt-6">
-        {!drafts?.length && <div className="card muted">{t('empty')}</div>}
-        {(drafts || []).map((d) => {
+        {!shown.length && <div className="card muted">{t('empty')}</div>}
+        {shown.map((d) => {
           const po = (d.orders as unknown as { po: string; customer_id: string } | null)?.po, st = d.styles as unknown as { id: string; code: string } | null, party = d.parties as unknown as { name: string; short: string | null; channel_pref: string | null } | null, src = d.source as unknown as { sender_name: string | null; from_addr: string | null; text_en: string | null; text: string; thread_id: string | null; raw: { gmail?: { reply_to?: string | null }; m365?: { reply_to?: string | null } } | null; channel: { kind: string; account: string | null; status: string } | null } | null;
           // where an approved reply really goes: back out through the mailbox the original came in on, else a person sends it
           const box = src?.channel && ['email_gmail', 'email_m365'].includes(src.channel.kind) ? src.channel : null;
@@ -41,6 +47,7 @@ export default async function Queue({ params, searchParams }: { params: Promise<
                 <span className={`pill ${P[d.priority] || ''}`}>P{d.priority}</span>
                 <span className="pill">{d.stream}</span>
                 <span className="pill agent">L{d.gate_level}</span>
+                {d.assignee_user_id === user.id ? <span className="pill warn">{t('forYou')}</span> : d.assignee_user_id ? <span className="pill">{t('forName', { name: nameOf.get(d.assignee_user_id) || '?' })}</span> : d.waiting_layer === 'manager' ? <span className="pill">{t('forManagers')}</span> : null}
                 {po && <Link className="pill" href={`/app/${slug}/orders/${encodeURIComponent(po)}`}>PO {po}</Link>}
                 {st && <Link className="pill" href={`/app/${slug}/styles/${st.id}`}>{st.code}</Link>}
                 <span className="ml-auto small muted">{new Date(d.created_at).toLocaleString('en-GB', { timeZone: tenant.tz })}</span>

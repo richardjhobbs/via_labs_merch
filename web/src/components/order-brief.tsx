@@ -7,6 +7,8 @@ import type { BriefRow } from '@/lib/agents/order-agent';
 export async function OrderBrief({ slug, tenantId, orderId, tz }: { slug: string; tenantId: string; orderId: string; tz: string }) {
   const t = await getTranslations('orders.agent');
   const sb = await supabaseServer();
+  const { data: me } = await sb.from('agents').select('parent:agents!agents_parent_agent_id_fkey(name)').eq('order_id', orderId).eq('layer', 'order').maybeSingle();
+  const reportsTo = (me?.parent as unknown as { name: string } | null)?.name || null;
   const { data } = await sb.from('agent_memory').select('id, version, brief, sources, created_at, reason').eq('tenant_id', tenantId).eq('order_id', orderId).order('version', { ascending: false }).limit(6);
   const rows = (data || []) as BriefRow[];
   const cur = rows[0];
@@ -38,7 +40,8 @@ export async function OrderBrief({ slug, tenantId, orderId, tz }: { slug: string
         {rows.length > 1 && <details className="mt-3"><summary className="muted" style={{ cursor: 'pointer' }}>{t('history')}</summary>
           <ul className="mt-1 grid gap-1">{rows.slice(1).map((r) => <li key={r.id} className="muted">v{r.version} · {when(r.created_at)} · {r.brief.status_line}</li>)}</ul></details>}
       </>}
-      <p className="muted mt-3" style={{ fontSize: 11 }}>{t('sub')}</p>
+      {reportsTo && <p className="muted mt-3" style={{ fontSize: 11 }}>{t('reportsTo', { name: reportsTo })}</p>}
+      <p className="muted mt-1" style={{ fontSize: 11 }}>{t('sub')}</p>
     </div>
   );
 }

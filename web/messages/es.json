@@ -201,7 +201,12 @@
     "openThread": "Abrir la conversación",
     "viaEmail": "Correo a {to}, enviado desde {from}",
     "manual": "{channel}: no conectado, lo envía una persona",
-    "viaChat": "{app} a {to}"
+    "viaChat": "{app} a {to}",
+    "all": "Todos ({n})",
+    "mine": "Míos ({n})",
+    "forYou": "Para ti",
+    "forName": "Para {name}",
+    "forManagers": "Para propietarios y gerentes"
   },
   "admin": {
     "title": "Administración VIA",
@@ -339,7 +344,8 @@
         "high": "alto",
         "medium": "medio",
         "low": "bajo"
-      }
+      },
+      "reportsTo": "Informa a {name}"
     }
   },
   "parties": {
@@ -717,7 +723,64 @@
     "kOrderAgents": "Agentes de pedido",
     "kBriefs": "Versiones de resumen escritas",
     "openOrders": "Abrir pedidos",
-    "trigBrief": "Resumen del pedido"
+    "trigBrief": "Resumen del pedido",
+    "desks": {
+      "title": "Mesas",
+      "sub": "Los agentes de mesa supervisan un grupo de pedidos para un merchandiser sénior. Los pedidos sin mesa informan directamente a Mira.",
+      "none": "Aún no hay mesas. Todos los pedidos informan directamente a Mira.",
+      "name": "Nombre de la mesa",
+      "namePh": "p. ej. Mesa Northline",
+      "person": "Merchandiser sénior",
+      "aPerson": "una persona",
+      "groupBy": "Agrupar pedidos por",
+      "by": {
+        "customer": "Clientes",
+        "supplier": "Proveedores",
+        "category": "Categorías de producto",
+        "list": "Pedidos elegidos"
+      },
+      "categoryPh": "p. ej. Punto, Denim",
+      "groupHelp": "Rellena el campo de la agrupación elegida; los demás se ignoran. Una mesa de pedidos elegidos tiene prioridad, luego cliente, proveedor y categoría.",
+      "ceilings": "Límites",
+      "ceilingsHelp": "Lo máximo que esta mesa puede aprobar y enviar por sí sola, por flujo. Nunca supera el nivel de la empresa; los flujos limitados siempre van a una persona.",
+      "ceilingsOwner": "Solo un propietario puede cambiar los límites.",
+      "stream": "Flujo",
+      "gate": "Nivel de la empresa",
+      "ceiling": "Límite de la mesa",
+      "capped": "limitado",
+      "save": "Guardar mesa",
+      "add": "Añadir mesa",
+      "new": "Nueva mesa",
+      "noPerson": "sin merchandiser sénior asignado",
+      "orders": "{n} pedidos",
+      "waiting": "{n} en espera",
+      "allL1": "L1 en todos los flujos (solo borradores)",
+      "edit": "Editar",
+      "close": "Cerrar mesa",
+      "log": "Entre agentes",
+      "logSub": "Informes, escalados y decisiones entre las capas, lo más reciente primero.",
+      "logNone": "Nada todavía.",
+      "kind": {
+        "report": "informe",
+        "escalation": "escalado",
+        "instruction": "instrucción",
+        "question": "pregunta",
+        "answer": "respuesta",
+        "decision": "decisión"
+      },
+      "decision": {
+        "approved": "aprobado",
+        "rejected": "rechazado"
+      },
+      "waitingFor": "esperando a {name}",
+      "openQueue": "Abrir la cola de aprobación",
+      "saved": "Mesa guardada.",
+      "err": {
+        "role": "Solo propietarios y gerentes pueden cambiar las mesas.",
+        "fields": "Revisa el nombre y la agrupación de la mesa.",
+        "person": "Esa persona no pertenece a esta empresa."
+      }
+    }
   },
   "assistant": {
     "title": "Preguntar",

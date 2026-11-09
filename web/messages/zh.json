@@ -201,7 +201,12 @@
     "openThread": "打开会话",
     "viaEmail": "发送邮件至 {to}，发件邮箱 {from}",
     "manual": "{channel}：未连接，由人工发送",
-    "viaChat": "通过 {app} 发给 {to}"
+    "viaChat": "通过 {app} 发给 {to}",
+    "all": "全部（{n}）",
+    "mine": "我的（{n}）",
+    "forYou": "待您处理",
+    "forName": "待 {name} 处理",
+    "forManagers": "待所有者和经理处理"
   },
   "admin": {
     "title": "VIA 管理",
@@ -339,7 +344,8 @@
         "high": "高",
         "medium": "中",
         "low": "低"
-      }
+      },
+      "reportsTo": "向 {name} 汇报"
     }
   },
   "parties": {
@@ -717,7 +723,64 @@
     "kOrderAgents": "订单代理",
     "kBriefs": "已写简报版本",
     "openOrders": "打开订单",
-    "trigBrief": "订单简报"
+    "trigBrief": "订单简报",
+    "desks": {
+      "title": "业务组",
+      "sub": "业务组代理为一位高级跟单负责一组订单。不在任何业务组的订单直接向 Mira 汇报。",
+      "none": "尚无业务组。所有订单直接向 Mira 汇报。",
+      "name": "业务组名称",
+      "namePh": "例如 Northline 组",
+      "person": "高级跟单",
+      "aPerson": "人工",
+      "groupBy": "订单分组方式",
+      "by": {
+        "customer": "客户",
+        "supplier": "供应商",
+        "category": "产品类别",
+        "list": "选定订单"
+      },
+      "categoryPh": "例如 针织、牛仔",
+      "groupHelp": "填写所选分组方式对应的字段，其他字段会被忽略。选定订单的业务组优先，其次是客户、供应商和类别。",
+      "ceilings": "权限上限",
+      "ceilingsHelp": "此业务组在每个流程中可自行批准并发送的最高级别。不会超过公司闸门；受限流程始终交由人工处理。",
+      "ceilingsOwner": "只有所有者可以更改权限上限。",
+      "stream": "流程",
+      "gate": "公司闸门",
+      "ceiling": "业务组上限",
+      "capped": "受限",
+      "save": "保存业务组",
+      "add": "添加业务组",
+      "new": "新建业务组",
+      "noPerson": "未设置高级跟单",
+      "orders": "{n} 个订单",
+      "waiting": "{n} 项待处理",
+      "allL1": "所有流程均为 L1（仅草稿）",
+      "edit": "编辑",
+      "close": "关闭业务组",
+      "log": "代理之间",
+      "logSub": "各层之间传递的报告、上报和决定，最新在前。",
+      "logNone": "暂无内容。",
+      "kind": {
+        "report": "报告",
+        "escalation": "上报",
+        "instruction": "指示",
+        "question": "问题",
+        "answer": "回答",
+        "decision": "决定"
+      },
+      "decision": {
+        "approved": "已批准",
+        "rejected": "已拒绝"
+      },
+      "waitingFor": "等待 {name}",
+      "openQueue": "打开审批队列",
+      "saved": "业务组已保存。",
+      "err": {
+        "role": "只有所有者和经理可以更改业务组。",
+        "fields": "请检查业务组名称和分组方式。",
+        "person": "此人不属于本公司。"
+      }
+    }
   },
   "assistant": {
     "title": "提问",

@@ -201,7 +201,12 @@
     "openThread": "Unterhaltung öffnen",
     "viaEmail": "E-Mail an {to}, gesendet von {from}",
     "manual": "{channel}: nicht verbunden, eine Person sendet sie",
-    "viaChat": "{app} an {to}"
+    "viaChat": "{app} an {to}",
+    "all": "Alle ({n})",
+    "mine": "Meine ({n})",
+    "forYou": "Für Sie",
+    "forName": "Für {name}",
+    "forManagers": "Für Inhaber und Manager"
   },
   "admin": {
     "title": "VIA-Verwaltung",
@@ -339,7 +344,8 @@
         "high": "hoch",
         "medium": "mittel",
         "low": "niedrig"
-      }
+      },
+      "reportsTo": "Berichtet an {name}"
     }
   },
   "parties": {
@@ -717,7 +723,64 @@
     "kOrderAgents": "Auftragsagenten",
     "kBriefs": "Geschriebene Briefing-Versionen",
     "openOrders": "Aufträge öffnen",
-    "trigBrief": "Auftragsbriefing"
+    "trigBrief": "Auftragsbriefing",
+    "desks": {
+      "title": "Desks",
+      "sub": "Desk-Agenten betreuen eine Gruppe von Aufträgen für einen Senior Merchandiser. Aufträge ohne Desk berichten direkt an Mira.",
+      "none": "Noch keine Desks. Jeder Auftrag berichtet direkt an Mira.",
+      "name": "Name des Desks",
+      "namePh": "z. B. Northline-Desk",
+      "person": "Senior Merchandiser",
+      "aPerson": "eine Person",
+      "groupBy": "Aufträge gruppieren nach",
+      "by": {
+        "customer": "Kunden",
+        "supplier": "Lieferanten",
+        "category": "Produktkategorien",
+        "list": "Ausgewählte Aufträge"
+      },
+      "categoryPh": "z. B. Strick, Denim",
+      "groupHelp": "Füllen Sie das Feld der gewählten Gruppierung aus; die anderen werden ignoriert. Ein Desk mit ausgewählten Aufträgen hat Vorrang, dann Kunde, Lieferant und Kategorie.",
+      "ceilings": "Obergrenzen",
+      "ceilingsHelp": "Das Höchste, was dieser Desk je Stream selbst freigeben und senden darf. Nie über der Firmenstufe; gedeckelte Streams gehen immer an eine Person.",
+      "ceilingsOwner": "Nur ein Inhaber kann Obergrenzen ändern.",
+      "stream": "Stream",
+      "gate": "Firmenstufe",
+      "ceiling": "Desk-Obergrenze",
+      "capped": "gedeckelt",
+      "save": "Desk speichern",
+      "add": "Desk hinzufügen",
+      "new": "Neuer Desk",
+      "noPerson": "kein Senior Merchandiser festgelegt",
+      "orders": "{n} Aufträge",
+      "waiting": "{n} wartend",
+      "allL1": "L1 in jedem Stream (nur Entwürfe)",
+      "edit": "Bearbeiten",
+      "close": "Desk schließen",
+      "log": "Zwischen Agenten",
+      "logSub": "Berichte, Eskalationen und Entscheidungen zwischen den Ebenen, neueste zuerst.",
+      "logNone": "Noch nichts.",
+      "kind": {
+        "report": "Bericht",
+        "escalation": "Eskalation",
+        "instruction": "Anweisung",
+        "question": "Frage",
+        "answer": "Antwort",
+        "decision": "Entscheidung"
+      },
+      "decision": {
+        "approved": "freigegeben",
+        "rejected": "abgelehnt"
+      },
+      "waitingFor": "wartet auf {name}",
+      "openQueue": "Freigaben öffnen",
+      "saved": "Desk gespeichert.",
+      "err": {
+        "role": "Nur Inhaber und Manager können Desks ändern.",
+        "fields": "Prüfen Sie Name und Gruppierung des Desks.",
+        "person": "Diese Person gehört nicht zu dieser Firma."
+      }
+    }
   },
   "assistant": {
     "title": "Fragen",
