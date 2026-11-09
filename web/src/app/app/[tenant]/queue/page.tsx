@@ -3,8 +3,7 @@ import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { requireTenant, scopeOf } from '@/lib/tenant';
 import { supabaseServer } from '@/lib/supabase/server';
-import { approveDraft, rejectDraft, markSentByHand } from './actions';
-import { ManualSend } from '@/components/manual-send';
+import { approveDraft, rejectDraft } from './actions';
 
 export default async function Queue({ params, searchParams }: { params: Promise<{ tenant: string }>; searchParams: Promise<{ saved?: string; error?: string }> }) {
   const { tenant: slug } = await params; const q = await searchParams;
@@ -13,13 +12,10 @@ export default async function Queue({ params, searchParams }: { params: Promise<
   const t = await getTranslations('queue');
   const sb = await supabaseServer();
   const since = new Date(new Date().setHours(0, 0, 0, 0)).toISOString();
-  const [{ data: draftsAll }, { data: decided }, { data: toSendAll }] = await Promise.all([
+  const [{ data: draftsAll }, { data: decided }] = await Promise.all([
     sb.from('drafts').select('id, seq, priority, stream, title, impact, body, body_en, lang, gate_level, status, created_at, party_id, orders(po, customer_id), parties(name, short, channel_pref), source:messages!drafts_source_message_id_fkey(sender_name, from_addr, text_en, text, thread_id, raw, channel:channels(kind, account, status))').eq('tenant_id', tenant.id).in('status', ['queued', 'escalated']).order('created_at', { ascending: false }),
     sb.from('drafts').select('id, seq, title, status, decided_at, decision_note, orders(po)').eq('tenant_id', tenant.id).in('status', ['approved', 'sent', 'rejected']).gte('decided_at', since).order('decided_at', { ascending: false }).limit(20),
-    // approved replies with no connected channel: a person sends them from their own chat app or mail
-    sb.from('messages').select('id, text, created_at, party_id, order_id, raw, parties(name, channel_pref, contacts(name, phone, email, is_primary)), orders(po, customer_id)').eq('tenant_id', tenant.id).eq('direction', 'out').is('sent_at', null).is('channel_id', null).not('raw->>draft_id', 'is', null).is('raw->>send', null).order('created_at', { ascending: false }).limit(20),
   ]);
-  const toSend = (toSendAll || []).filter((m) => !scope || scope.includes(m.party_id as string) || scope.includes((m.orders as unknown as { customer_id: string } | null)?.customer_id || ''));
   const drafts = (draftsAll || []).filter((d) => !scope || (d.parties && scope.includes(d.party_id as string)) || scope.includes((d.orders as unknown as { customer_id: string } | null)?.customer_id || ''));
   const P = ['', 'crit', 'warn', ''];
   return (
@@ -28,34 +24,6 @@ export default async function Queue({ params, searchParams }: { params: Promise<
       <p className="muted mt-1" style={{ maxWidth: '70ch' }}>{t('sub')}</p>
       {q.error && <div className="notice crit mt-4">{q.error}</div>}
       {q.saved && <div className="notice ok mt-4">{t('approvedNote')}</div>}
-      {toSend.length > 0 && (
-        <div className="mt-6">
-          <h2 style={{ fontSize: 15 }}>{t('toSend')}</h2>
-          <p className="muted small mt-1" style={{ maxWidth: '70ch' }}>{t('toSendNote')}</p>
-          <div className="grid gap-3 mt-3">
-            {toSend.map((m) => {
-              const p = m.parties as unknown as { name: string; channel_pref: string | null; contacts: { name: string; phone: string | null; email: string | null; is_primary: boolean }[] } | null;
-              const c = (p?.contacts || []).sort((a, b) => Number(b.is_primary) - Number(a.is_primary))[0];
-              const po = (m.orders as unknown as { po: string } | null)?.po;
-              return (
-                <div key={m.id} className="card">
-                  <div className="flex items-center gap-2 flex-wrap small"><span className="font-medium">{p?.name || '—'}</span>{c && <span className="muted">{c.name}{c.phone ? ` · ${c.phone}` : ''}</span>}{po && <span className="pill">PO {po}</span>}{p?.channel_pref && <span className="pill">{p.channel_pref}</span>}</div>
-                  <pre className="mt-2 p-2 small" style={{ whiteSpace: 'pre-wrap', background: 'var(--paper)', borderRadius: 8, fontFamily: 'inherit', maxHeight: 220, overflow: 'auto' }}>{m.text}</pre>
-                  <ManualSend text={m.text} phone={c?.phone || null} email={c?.email || null} pref={p?.channel_pref || null} labels={{ copy: t('ms.copy'), copied: t('ms.copied'), whatsapp: t('ms.whatsapp'), zalo: t('ms.zalo'), share: t('ms.share'), email: t('ms.email') }}>
-                    <form action={markSentByHand} className="flex gap-2 items-center flex-wrap">
-                      <input type="hidden" name="tenant" value={slug} /><input type="hidden" name="id" value={m.id} />
-                      <select name="via" className="input" style={{ maxWidth: 160, padding: '4px 8px' }} defaultValue={p?.channel_pref || 'zalo'}>
-                        {['zalo', 'wechat', 'wecom', 'whatsapp', 'telegram', 'line', 'email', 'phone', 'other'].map((v) => <option key={v} value={v}>{t(`ms.via.${v}`)}</option>)}
-                      </select>
-                      <button className="btn sm primary">{t('ms.markSent')}</button>
-                    </form>
-                  </ManualSend>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
       <div className="grid gap-4 mt-6">
         {!drafts?.length && <div className="card muted">{t('empty')}</div>}
         {(drafts || []).map((d) => {

@@ -183,28 +183,6 @@
     "openThread": "Open the conversation",
     "viaEmail": "Email to {to}, sent from {from}",
     "manual": "{channel}: not connected, a person sends it",
-    "toSend": "To send by hand",
-    "toSendNote": "Approved replies to messages that came in by forwarding or with no connected channel. Send each from your chat app or mail, then mark it sent.",
-    "ms": {
-      "copy": "Copy",
-      "copied": "Copied",
-      "whatsapp": "Open in WhatsApp",
-      "zalo": "Open in Zalo (text copied)",
-      "share": "Share…",
-      "email": "Open in mail",
-      "markSent": "Mark as sent",
-      "via": {
-        "zalo": "Zalo",
-        "wechat": "WeChat",
-        "wecom": "WeCom",
-        "whatsapp": "WhatsApp",
-        "telegram": "Telegram",
-        "line": "Line",
-        "email": "Email",
-        "phone": "Phone call",
-        "other": "Other"
-      }
-    },
     "viaChat": "{app} to {to}"
   },
   "admin": {
@@ -591,8 +569,6 @@
       "s2": "Messages in personal Zalo, WeChat or WhatsApp: share them to your forwarding address. Two taps, and VIA files them against the right PO.",
       "s3Title": "Silence becomes an alert",
       "s3": "VIA watches every date on every PO. When a milestone is due and nothing has come in from the factory, mill or customer for 5 days, it tells you on My day and by email and offers to chase. After 24 hours it tells your manager.",
-      "s4Title": "Replies sent by hand are tracked",
-      "s4": "Approved replies that go out from your own chat app stay under To send by hand until you mark them sent. After 4 hours you get a reminder; after a day your manager does.",
       "promise": "Anything due either came in, or VIA asks about it. It cannot slip past unnoticed."
     },
     "pilot": "Pilot",

@@ -183,28 +183,6 @@
     "openThread": "Abrir la conversación",
     "viaEmail": "Correo a {to}, enviado desde {from}",
     "manual": "{channel}: no conectado, lo envía una persona",
-    "toSend": "Para enviar a mano",
-    "toSendNote": "Respuestas aprobadas a mensajes que llegaron por reenvío o sin un canal conectado. Envíe cada una desde su app de chat o su correo y márquela como enviada.",
-    "ms": {
-      "copy": "Copiar",
-      "copied": "Copiado",
-      "whatsapp": "Abrir en WhatsApp",
-      "zalo": "Abrir en Zalo (texto copiado)",
-      "share": "Compartir…",
-      "email": "Abrir en el correo",
-      "markSent": "Marcar como enviada",
-      "via": {
-        "zalo": "Zalo",
-        "wechat": "WeChat",
-        "wecom": "WeCom",
-        "whatsapp": "WhatsApp",
-        "telegram": "Telegram",
-        "line": "Line",
-        "email": "Correo",
-        "phone": "Llamada",
-        "other": "Otro"
-      }
-    },
     "viaChat": "{app} a {to}"
   },
   "admin": {
@@ -591,8 +569,6 @@
       "s2": "Los mensajes de Zalo, WeChat o WhatsApp personales: compártalos a su dirección de reenvío. Dos toques y VIA los archiva en el PO correcto.",
       "s3Title": "El silencio se convierte en alerta",
       "s3": "VIA vigila cada fecha de cada PO. Cuando vence un hito y no ha llegado nada de la fábrica, la tejeduría o el cliente en 5 días, se lo indica en Mi día y por correo y le ofrece reclamar. A las 24 horas avisa a su responsable.",
-      "s4Title": "Las respuestas enviadas a mano se siguen",
-      "s4": "Las respuestas aprobadas que salen desde su propia app de chat quedan en Para enviar a mano hasta que las marque como enviadas. A las 4 horas recibe un recordatorio; al día siguiente, su responsable.",
       "promise": "Lo que vence o ya llegó, o VIA pregunta por ello. No puede pasar desapercibido."
     },
     "pilot": "Piloto",

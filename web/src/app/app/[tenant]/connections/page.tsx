@@ -64,7 +64,7 @@ export default async function Connections({ params, searchParams }: { params: Pr
       <div className="card mt-6" style={{ borderLeft: '3px solid var(--accent)' }}>
         <h2 style={{ fontSize: 16 }}>{t('guide.title')}</h2>
         <ol className="grid gap-3 mt-3 md:grid-cols-2" style={{ listStyle: 'none', padding: 0 }}>
-          {(['s1', 's2', 's3', 's4'] as const).map((k, i) => (
+          {(['s1', 's2', 's3'] as const).map((k, i) => (
             <li key={k} className="flex gap-3 small"><span className="pill agent" style={{ alignSelf: 'flex-start' }}>{i + 1}</span><div><div className="font-medium">{t(`guide.${k}Title`)}</div>{GUIDE_ICONS[k] && <div className="mt-1"><BrandRow items={GUIDE_ICONS[k]!} /></div>}<div className="mt-1" style={{ color: 'var(--fg2)' }}>{t(`guide.${k}`)}</div></div></li>
           ))}
         </ol>

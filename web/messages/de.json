@@ -183,28 +183,6 @@
     "openThread": "Unterhaltung öffnen",
     "viaEmail": "E-Mail an {to}, gesendet von {from}",
     "manual": "{channel}: nicht verbunden, eine Person sendet sie",
-    "toSend": "Von Hand senden",
-    "toSendNote": "Freigegebene Antworten auf weitergeleitete Nachrichten oder solche ohne verbundenen Kanal. Senden Sie jede aus Ihrer Chat-App oder Ihrem Mailprogramm und markieren Sie sie dann als gesendet.",
-    "ms": {
-      "copy": "Kopieren",
-      "copied": "Kopiert",
-      "whatsapp": "In WhatsApp öffnen",
-      "zalo": "In Zalo öffnen (Text kopiert)",
-      "share": "Teilen …",
-      "email": "Im Mailprogramm öffnen",
-      "markSent": "Als gesendet markieren",
-      "via": {
-        "zalo": "Zalo",
-        "wechat": "WeChat",
-        "wecom": "WeCom",
-        "whatsapp": "WhatsApp",
-        "telegram": "Telegram",
-        "line": "Line",
-        "email": "E-Mail",
-        "phone": "Anruf",
-        "other": "Andere"
-      }
-    },
     "viaChat": "{app} an {to}"
   },
   "admin": {
@@ -591,8 +569,6 @@
       "s2": "Nachrichten in privatem Zalo, WeChat oder WhatsApp: an Ihre Weiterleitungsadresse teilen. Zwei Fingertipps, und VIA ordnet sie dem richtigen PO zu.",
       "s3Title": "Stille wird zur Warnung",
       "s3": "VIA beobachtet jedes Datum jedes PO. Ist ein Meilenstein fällig und kam 5 Tage lang nichts von Fabrik, Weberei oder Kunde, meldet VIA das unter Mein Tag und per E-Mail und bietet an nachzufassen. Nach 24 Stunden erfährt es Ihr Manager.",
-      "s4Title": "Von Hand gesendete Antworten werden verfolgt",
-      "s4": "Freigegebene Antworten, die aus Ihrer eigenen Chat-App rausgehen, bleiben unter Von Hand senden, bis Sie sie als gesendet markieren. Nach 4 Stunden kommt eine Erinnerung, nach einem Tag an Ihren Manager.",
       "promise": "Alles Fällige ist entweder eingegangen, oder VIA fragt nach. Es kann nicht unbemerkt durchrutschen."
     },
     "pilot": "Pilot",

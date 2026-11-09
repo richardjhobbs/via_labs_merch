@@ -183,28 +183,6 @@
     "openThread": "Mở hội thoại",
     "viaEmail": "Email tới {to}, gửi từ {from}",
     "manual": "{channel}: chưa kết nối, một người sẽ gửi",
-    "toSend": "Cần gửi thủ công",
-    "toSendNote": "Các trả lời đã duyệt cho tin nhắn đến qua chuyển tiếp hoặc không có kênh kết nối. Hãy gửi từng tin từ ứng dụng chat hoặc email của bạn, rồi đánh dấu đã gửi.",
-    "ms": {
-      "copy": "Sao chép",
-      "copied": "Đã sao chép",
-      "whatsapp": "Mở trong WhatsApp",
-      "zalo": "Mở trong Zalo (đã sao chép nội dung)",
-      "share": "Chia sẻ…",
-      "email": "Mở trong email",
-      "markSent": "Đánh dấu đã gửi",
-      "via": {
-        "zalo": "Zalo",
-        "wechat": "WeChat",
-        "wecom": "WeCom",
-        "whatsapp": "WhatsApp",
-        "telegram": "Telegram",
-        "line": "Line",
-        "email": "Email",
-        "phone": "Gọi điện",
-        "other": "Khác"
-      }
-    },
     "viaChat": "{app} gửi {to}"
   },
   "admin": {
@@ -591,8 +569,6 @@
       "s2": "Tin nhắn trong Zalo, WeChat hoặc WhatsApp cá nhân: chia sẻ tới địa chỉ chuyển tiếp của bạn. Hai lần chạm, VIA sẽ xếp vào đúng PO.",
       "s3Title": "Im lặng trở thành cảnh báo",
       "s3": "VIA theo dõi mọi mốc thời gian của mọi PO. Khi một mốc sắp đến hạn mà 5 ngày không có gì từ nhà máy, xưởng vải hoặc khách hàng, VIA báo bạn ở Ngày của tôi và qua email, và đề nghị nhắc họ. Sau 24 giờ VIA báo cho quản lý của bạn.",
-      "s4Title": "Trả lời gửi thủ công cũng được theo dõi",
-      "s4": "Các trả lời đã duyệt cần gửi từ ứng dụng chat của bạn sẽ nằm trong Cần gửi thủ công cho đến khi bạn đánh dấu đã gửi. Sau 4 giờ bạn được nhắc; sau một ngày quản lý của bạn được nhắc.",
       "promise": "Việc đến hạn hoặc đã có tin, hoặc VIA sẽ hỏi. Không thể lặng lẽ bị bỏ sót."
     },
     "pilot": "Thí điểm",

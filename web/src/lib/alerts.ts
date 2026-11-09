@@ -3,7 +3,6 @@
 //
 //  silence      a milestone owned by the factory, mill or customer is due within 3 days or overdue (up to 14 days)
 //               and nothing has come in from that party for 5 days, and nobody has updated the milestone.
-//  unsent       an approved reply with no connected channel has not been marked sent after 4 hours.
 //  send_failed  an approved reply could not be sent on its connected channel.
 //
 // Each alert is raised once per key, emailed to the person responsible (the order's owner, or whoever approved
@@ -17,7 +16,7 @@ import { brandedHtml, sendMail } from '@/lib/mail';
 type Client = SupabaseClient<any, 'merch', any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 const APP = process.env.NEXT_PUBLIC_APP_URL || 'https://merch.getvia.xyz';
-const SILENT_DAYS = 5, AHEAD = 3, BEHIND = 14, UNSENT_HOURS = 4, ESCALATE_HOURS = 24;
+const SILENT_DAYS = 5, AHEAD = 3, BEHIND = 14, ESCALATE_HOURS = 24;
 const DAY = 86_400_000;
 
 type NewAlert = { kind: 'silence' | 'unsent' | 'send_failed'; key: string; order_id: string | null; party_id: string | null; message_id: string | null; milestone: string | null; due_date: string | null; assignee_user_id: string | null; detail: Record<string, unknown> };
@@ -68,7 +67,6 @@ export async function runAlerts(sb: Client, tenantId: string) {
     const base = { order_id: m.order_id, party_id: m.party_id, message_id: m.id, milestone: null, due_date: null, assignee_user_id: d?.decided_by || ownerOf.get(m.order_id || '') || null };
     const detail = { po: poOf.get(m.order_id || '') || null, party: partyName.get(m.party_id || '') || null, title: d?.title || null };
     if (raw.send === 'failed') want.push({ kind: 'send_failed', key: `send_failed:${m.id}`, ...base, detail: { ...detail, error: raw.send_error || null } });
-    else if (!m.channel_id && !raw.send && now - Date.parse(m.created_at) > UNSENT_HOURS * 3_600_000) want.push({ kind: 'unsent', key: `unsent:${m.id}`, ...base, detail });
   }
 
   // 2. close what no longer applies (the party wrote, the milestone moved, the reply went, the order closed)
