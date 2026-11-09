@@ -13,6 +13,8 @@ const ICONS: Record<string, React.ReactNode> = {
   orders: <><rect x="4" y="3" width="16" height="18" rx="2" /><path d="M8 8h8M8 12h8M8 16h5" /></>,
   threads: <path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z" />,
   styles: <><path d="M6 3h12l-2 5H8z" /><path d="M8 8v13h8V8" /></>,
+  samples: <><path d="M4 7h16v13H4z" /><path d="M8 7V4h8v3M4 12h16" /></>,
+  materials: <><path d="M3 6h18M3 12h18M3 18h18" /></>,
   more: <><circle cx="5" cy="12" r="1.6" /><circle cx="12" cy="12" r="1.6" /><circle cx="19" cy="12" r="1.6" /></>,
 };
 const Icon = ({ k }: { k: string }) => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{ICONS[k]}</svg>;

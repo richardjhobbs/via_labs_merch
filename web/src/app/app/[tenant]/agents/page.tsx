@@ -7,7 +7,7 @@ import { hasLlm } from '@/lib/llm';
 import { lastPass } from '@/lib/agents/proactive';
 import { DesksSection } from './desks-section';
 
-const TOOLS = ['get_briefing', 'search_orders', 'get_order', 'get_exceptions', 'get_party', 'get_messages', 'get_ledger', 'get_gates', 'get_team', 'queue_draft', 'request_approval', 'set_milestone', 'navigate', 'search_styles', 'get_style', 'get_style_file', 'diff_tech_pack', 'get_desk_brief', 'get_company_brief'];
+const TOOLS = ['get_briefing', 'search_orders', 'get_order', 'get_exceptions', 'get_party', 'get_messages', 'get_ledger', 'get_gates', 'get_team', 'queue_draft', 'request_approval', 'set_milestone', 'navigate', 'search_styles', 'get_style', 'get_style_file', 'diff_tech_pack', 'get_samples', 'record_sample_event', 'get_materials', 'get_schedule', 'get_desk_brief', 'get_company_brief'];
 
 export default async function Agents({ params, searchParams }: { params: Promise<{ tenant: string }>; searchParams: Promise<{ dsaved?: string; derr?: string }> }) {
   const { tenant: slug } = await params; const q = await searchParams;

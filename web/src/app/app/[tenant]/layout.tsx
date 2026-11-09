@@ -57,7 +57,7 @@ export default async function TenantLayout({ children, params }: { children: Rea
   const { data: pendingSupport } = canDecide ? await sb.from('support_access').select('id, reason').eq('tenant_id', tenant.id).eq('status', 'requested').limit(1).maybeSingle() : { data: null };
   const A = { title: t('assistant.title'), placeholder: t('assistant.placeholder'), send: t('assistant.send'), working: t('assistant.working'), queued: t('assistant.queued'), used: t('assistant.used'), approve: t('assistant.approve'), hold: t('assistant.hold'), reject: t('assistant.reject'), approved: t('assistant.approved'), rejected: t('assistant.rejected'), inQueue: t('assistant.inQueue'), open: t('assistant.open'), close: t('assistant.close'), clear: t('assistant.clear'), you: t('assistant.you'), noKey: t('assistant.noKey'), mic: t('assistant.mic'), micStop: t('assistant.micStop'), micDenied: t('assistant.micDenied'), listening: t('assistant.listening'), micService: t('assistant.micService'), micDevice: t('assistant.micDevice'), micSilence: t('assistant.micSilence'), sendHint: t('assistant.sendHint') };
   const items = (track === 'development' ? [
-    ['', t('nav.day')], ['queue', t('nav.queue')], ['styles', t('nav.styles')], ['threads', t('nav.threads')], ['parties', t('nav.parties')],
+    ['', t('nav.day')], ['queue', t('nav.queue')], ['styles', t('nav.styles')], ['samples', t('nav.samples')], ['materials', t('nav.materials')], ['threads', t('nav.threads')], ['parties', t('nav.parties')],
     ['ledger', t('nav.ledger')], ['agents', t('nav.agents')], ['connections', t('nav.connections')], ['settings', t('nav.settings')],
   ] : [
     ['', t('nav.day')], ['queue', t('nav.queue')], ['orders', t('nav.orders')], ['threads', t('nav.threads')], ['parties', t('nav.parties')],
