@@ -695,7 +695,8 @@
     "listening": "正在聆听……请说话",
     "micService": "语音服务没有响应。此浏览器或窗口可能阻止了它：Brave、访客和无痕窗口以及部分广告拦截器会这样。请在普通的 Chrome 或 Edge 窗口中重试。",
     "micDevice": "未找到麦克风，或 Windows 阻止了它。请检查 设置 → 隐私 → 麦克风。",
-    "micSilence": "没有听到语音。请点击麦克风后再说一次。"
+    "micSilence": "没有听到语音。请点击麦克风后再说一次。",
+    "sendHint": "Enter 换行 · {keys} 发送"
   },
   "viewas": {
     "label": "查看身份",

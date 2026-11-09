@@ -90,7 +90,10 @@ table.t tr.click { cursor: pointer; } table.t tr.click:hover td { background: va
 .asst .sug { display: flex; flex-wrap: wrap; gap: 6px; }
 .asst .sug button { font-size: 12px; padding: 5px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--fg2); cursor: pointer; }
 .asst .sug button:hover { border-color: var(--accent); color: var(--accent); }
-.asst form { display: flex; gap: 8px; padding: 10px 12px; border-top: 1px solid var(--line); }
+.asst form { display: flex; align-items: flex-end; gap: 8px; padding: 10px 12px 4px; border-top: 1px solid var(--line); }
+.asst form textarea { resize: none; min-height: 38px; line-height: 1.45; overflow-y: hidden; }
+.asst-hint { font-size: 11px; padding: 0 12px 8px; }
+@media (hover: none) { .asst-hint { display: none; } }
 
 /* segmented control (Settings: day, night, device) */
 .seg { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 4px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); }

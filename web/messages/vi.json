@@ -695,7 +695,8 @@
     "listening": "Đang nghe... hãy nói",
     "micService": "Dịch vụ giọng nói không phản hồi. Trình duyệt hoặc cửa sổ này có thể đang chặn: Brave, cửa sổ Khách và Ẩn danh, và một số trình chặn quảng cáo. Hãy thử cửa sổ Chrome hoặc Edge thông thường.",
     "micDevice": "Không tìm thấy micrô, hoặc Windows đang chặn. Kiểm tra Cài đặt → Quyền riêng tư → Micrô.",
-    "micSilence": "Không nghe thấy giọng nói. Bấm vào micrô và nói lại."
+    "micSilence": "Không nghe thấy giọng nói. Bấm vào micrô và nói lại.",
+    "sendHint": "Enter để xuống dòng · {keys} để gửi"
   },
   "viewas": {
     "label": "Xem dưới vai trò",

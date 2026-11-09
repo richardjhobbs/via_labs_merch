@@ -695,7 +695,8 @@
     "listening": "Escuchando... hable ahora",
     "micService": "El servicio de voz no respondió. Este navegador o ventana puede bloquearlo: Brave, las ventanas de invitado e incógnito y algunos bloqueadores lo hacen. Pruebe en una ventana normal de Chrome o Edge.",
     "micDevice": "No se encontró ningún micrófono, o Windows lo está bloqueando. Revise Configuración → Privacidad → Micrófono.",
-    "micSilence": "No se oyó voz. Haga clic en el micrófono y vuelva a hablar."
+    "micSilence": "No se oyó voz. Haga clic en el micrófono y vuelva a hablar.",
+    "sendHint": "Enter añade una línea · {keys} envía"
   },
   "viewas": {
     "label": "Ver como",

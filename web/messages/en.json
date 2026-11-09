@@ -695,7 +695,8 @@
     "listening": "Listening... speak now",
     "micService": "The speech service didn't respond. This browser or window may block it: Brave, Guest and Incognito windows and some ad blockers do. Try a normal Chrome or Edge window.",
     "micDevice": "No microphone found, or Windows is blocking it. Check Settings → Privacy → Microphone.",
-    "micSilence": "No speech heard. Click the mic and speak again."
+    "micSilence": "No speech heard. Click the mic and speak again.",
+    "sendHint": "Enter adds a new line · {keys} sends"
   },
   "viewas": {
     "label": "View as",
