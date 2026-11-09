@@ -199,7 +199,12 @@
     "openThread": "Mở hội thoại",
     "viaEmail": "Email tới {to}, gửi từ {from}",
     "manual": "{channel}: chưa kết nối, một người sẽ gửi",
-    "viaChat": "{app} gửi {to}"
+    "viaChat": "{app} gửi {to}",
+    "all": "Tất cả ({n})",
+    "mine": "Của tôi ({n})",
+    "forYou": "Chờ bạn",
+    "forName": "Chờ {name}",
+    "forManagers": "Chờ chủ sở hữu và quản lý"
   },
   "admin": {
     "title": "Quản trị VIA",
@@ -337,7 +342,8 @@
         "high": "cao",
         "medium": "trung bình",
         "low": "thấp"
-      }
+      },
+      "reportsTo": "Báo cáo cho {name}"
     }
   },
   "parties": {
@@ -715,7 +721,64 @@
     "kOrderAgents": "Tác tử đơn hàng",
     "kBriefs": "Phiên bản tóm tắt đã viết",
     "openOrders": "Mở đơn hàng",
-    "trigBrief": "Tóm tắt đơn hàng"
+    "trigBrief": "Tóm tắt đơn hàng",
+    "desks": {
+      "title": "Nhóm",
+      "sub": "Tác tử nhóm phụ trách một nhóm đơn hàng cho một merchandiser cấp cao. Đơn không thuộc nhóm nào báo cáo thẳng cho Mira.",
+      "none": "Chưa có nhóm. Mọi đơn hàng báo cáo thẳng cho Mira.",
+      "name": "Tên nhóm",
+      "namePh": "vd. Nhóm Northline",
+      "person": "Merchandiser cấp cao",
+      "aPerson": "một người",
+      "groupBy": "Nhóm đơn hàng theo",
+      "by": {
+        "customer": "Khách hàng",
+        "supplier": "Nhà cung cấp",
+        "category": "Loại sản phẩm",
+        "list": "Đơn hàng chọn sẵn"
+      },
+      "categoryPh": "vd. Hàng dệt kim, Denim",
+      "groupHelp": "Điền ô của cách nhóm bạn đã chọn; các ô khác bị bỏ qua. Nhóm theo đơn chọn sẵn được ưu tiên, sau đó khách hàng, nhà cung cấp và loại.",
+      "ceilings": "Mức trần",
+      "ceilingsHelp": "Mức cao nhất nhóm này được tự duyệt và gửi trên mỗi luồng. Không bao giờ vượt cổng của công ty; luồng bị giới hạn luôn chuyển cho người.",
+      "ceilingsOwner": "Chỉ chủ sở hữu mới đổi được mức trần.",
+      "stream": "Luồng",
+      "gate": "Cổng công ty",
+      "ceiling": "Mức trần nhóm",
+      "capped": "bị giới hạn",
+      "save": "Lưu nhóm",
+      "add": "Thêm nhóm",
+      "new": "Nhóm mới",
+      "noPerson": "chưa chọn merchandiser cấp cao",
+      "orders": "{n} đơn hàng",
+      "waiting": "{n} đang chờ",
+      "allL1": "L1 trên mọi luồng (chỉ bản nháp)",
+      "edit": "Sửa",
+      "close": "Đóng nhóm",
+      "log": "Giữa các tác tử",
+      "logSub": "Báo cáo, chuyển cấp và quyết định giữa các tầng, mới nhất trước.",
+      "logNone": "Chưa có gì.",
+      "kind": {
+        "report": "báo cáo",
+        "escalation": "chuyển cấp",
+        "instruction": "chỉ thị",
+        "question": "câu hỏi",
+        "answer": "trả lời",
+        "decision": "quyết định"
+      },
+      "decision": {
+        "approved": "đã duyệt",
+        "rejected": "đã từ chối"
+      },
+      "waitingFor": "đang chờ {name}",
+      "openQueue": "Mở hàng chờ duyệt",
+      "saved": "Đã lưu nhóm.",
+      "err": {
+        "role": "Chỉ chủ sở hữu và quản lý mới đổi được nhóm.",
+        "fields": "Kiểm tra tên nhóm và cách nhóm.",
+        "person": "Người này không thuộc công ty."
+      }
+    }
   },
   "assistant": {
     "title": "Hỏi",

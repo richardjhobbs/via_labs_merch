@@ -199,7 +199,12 @@
     "openThread": "Open the conversation",
     "viaEmail": "Email to {to}, sent from {from}",
     "manual": "{channel}: not connected, a person sends it",
-    "viaChat": "{app} to {to}"
+    "viaChat": "{app} to {to}",
+    "all": "All ({n})",
+    "mine": "Mine ({n})",
+    "forYou": "For you",
+    "forName": "For {name}",
+    "forManagers": "For owners and managers"
   },
   "admin": {
     "title": "VIA admin",
@@ -337,7 +342,8 @@
         "high": "high",
         "medium": "medium",
         "low": "low"
-      }
+      },
+      "reportsTo": "Reports to {name}"
     }
   },
   "parties": {
@@ -715,7 +721,64 @@
     "kOrderAgents": "Order agents",
     "kBriefs": "Brief versions written",
     "openOrders": "Open orders",
-    "trigBrief": "Order brief"
+    "trigBrief": "Order brief",
+    "desks": {
+      "title": "Desks",
+      "sub": "Desk agents oversee a group of orders for a senior merchandiser. Orders not on a desk report straight to Mira.",
+      "none": "No desks yet. Every order reports straight to Mira.",
+      "name": "Desk name",
+      "namePh": "e.g. Northline desk",
+      "person": "Senior merchandiser",
+      "aPerson": "a person",
+      "groupBy": "Group orders by",
+      "by": {
+        "customer": "Customers",
+        "supplier": "Suppliers",
+        "category": "Product categories",
+        "list": "Chosen orders"
+      },
+      "categoryPh": "e.g. Knitwear, Denim",
+      "groupHelp": "Fill in the field for the grouping you chose; the others are ignored. A chosen-orders desk wins, then customer, supplier and category.",
+      "ceilings": "Ceilings",
+      "ceilingsHelp": "The most this desk may approve and send on its own, per stream. It never goes above the company gate, and capped streams always go to a person.",
+      "ceilingsOwner": "Only an owner can change ceilings.",
+      "stream": "Stream",
+      "gate": "Company gate",
+      "ceiling": "Desk ceiling",
+      "capped": "capped",
+      "save": "Save desk",
+      "add": "Add desk",
+      "new": "New desk",
+      "noPerson": "no senior merchandiser set",
+      "orders": "{n} orders",
+      "waiting": "{n} waiting",
+      "allL1": "L1 on every stream (drafts only)",
+      "edit": "Edit",
+      "close": "Close desk",
+      "log": "Between agents",
+      "logSub": "Reports, escalations and decisions passing between the layers, newest first.",
+      "logNone": "Nothing yet.",
+      "kind": {
+        "report": "report",
+        "escalation": "escalation",
+        "instruction": "instruction",
+        "question": "question",
+        "answer": "answer",
+        "decision": "decision"
+      },
+      "decision": {
+        "approved": "approved",
+        "rejected": "rejected"
+      },
+      "waitingFor": "waiting for {name}",
+      "openQueue": "Open the approval queue",
+      "saved": "Desk saved.",
+      "err": {
+        "role": "Only owners and managers can change desks.",
+        "fields": "Check the desk name and grouping.",
+        "person": "That person is not in this company."
+      }
+    }
   },
   "assistant": {
     "title": "Ask",
