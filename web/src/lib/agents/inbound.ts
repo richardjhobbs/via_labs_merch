@@ -88,7 +88,9 @@ export async function processInbound(messageId: string) {
     }
     await sb.from('threads').update({ party_id: partyId, order_id: orderId, style_id: orderId ? null : styleId, track, last_message_at: new Date().toISOString() }).eq('id', threadId);
   } else if (threadId) await sb.from('threads').update({ track, style_id: styleId, last_message_at: new Date().toISOString() }).eq('id', threadId);
-  const history = threadId ? (await threadMessages(sb, threadId)).filter((x) => x.id !== messageId).slice(-8) : [];
+  // the order agent's brief carries the order's history, so only the last few messages of the thread come along
+  const hasBrief = !!orderId && !!(await sb.from('agent_memory').select('id').eq('order_id', orderId).limit(1).maybeSingle()).data;
+  const history = threadId ? (await threadMessages(sb, threadId)).filter((x) => x.id !== messageId).slice(hasBrief ? -3 : -8) : [];
   const party = (parties || []).find((p) => p.id === partyId);
   // attachments on a development message with a known style become records (read in the background)
   const { data: atts } = await sb.from('attachments').select('id, tenant_id, message_id, storage_path, filename, mime, bytes, sha256, record_id').eq('message_id', messageId);
@@ -123,7 +125,7 @@ ${history.length ? `Earlier in this conversation (oldest first):\n${history.map(
 ${m.text}
 ---
 English rendering: ${parsed?.text_en || m.text}
-Extracted: PO ${po || 'none matched'}; reported dates ${JSON.stringify(parsed?.reported_dates || [])}; asks ${JSON.stringify(parsed?.asks || [])}.${attNote}${ob ? `\n\nThe order agent's brief for PO ${po} (version ${ob.version}, ${ob.updated}): ${JSON.stringify(ob)}` : ''}`;
+Extracted: PO ${po || 'none matched'}; reported dates ${JSON.stringify(parsed?.reported_dates || [])}; asks ${JSON.stringify(parsed?.asks || [])}.${attNote}${ob ? `\n\nThe order agent's brief for PO ${po} (version ${ob.version}, ${ob.updated}): ${JSON.stringify(ob)}\nIt is the current record of the order: answer from it, and call get_order or get_messages only for what it lacks.` : ''}`;
   const r = await runAgent({ tenantId: T, trigger: 'inbound', track, sourceMessageId: messageId, messages: [{ role: 'user', content: brief }] });
   if (track !== 'development') await queueBrief(sb, T, orderId, 'message');
   return { messageId, partyId, orderId, styleId, track, stream, drafts: r.drafts, summary: r.text, error: r.error };

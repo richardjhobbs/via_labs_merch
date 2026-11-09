@@ -23,6 +23,13 @@ export function costOf(model: string, tokensIn: number, tokensOut: number) {
   return (tokensIn * i + tokensOut * o) / 1e6;
 }
 
+// Input read from the prompt cache bills at a tenth of the input price and a cache write at 1.25 times it
+// (5-minute cache); thinking bills as output. Use this wherever the response reports cache tokens.
+export function costOfUsage(model: string, u: { input: number; cacheRead: number; cacheWrite: number; output: number }) {
+  const [i, o] = PRICE[model] || [2, 10];
+  return (u.input * i + u.cacheRead * i * 0.1 + u.cacheWrite * i * 1.25 + u.output * o) / 1e6;
+}
+
 export async function recordUsage(tenantId: string, u: { runs?: number; messagesIn?: number; messagesOut?: number; tokensIn?: number; tokensOut?: number; cost?: number }) {
   await supabaseAdmin().rpc('usage_add', { p_tenant: tenantId, p_runs: u.runs || 0, p_in: u.messagesIn || 0, p_out: u.messagesOut || 0, p_tokens_in: u.tokensIn || 0, p_tokens_out: u.tokensOut || 0, p_cost: u.cost || 0 });
 }

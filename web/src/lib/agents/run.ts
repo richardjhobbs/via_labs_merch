@@ -1,6 +1,6 @@
 // The agent loop: Claude Sonnet with the company's tools, logged to agent_runs and usage_daily.
 import type Anthropic from '@anthropic-ai/sdk';
-import { anthropic, MODEL, SMALL_MODEL, costOf, recordUsage } from '@/lib/llm';
+import { anthropic, MODEL, SMALL_MODEL, costOfUsage, recordUsage } from '@/lib/llm';
 
 const ALLOWED = [MODEL, SMALL_MODEL];
 import { supabaseAdmin } from '@/lib/supabase/server';
@@ -63,6 +63,7 @@ ${track === 'development' ? '' : `- You are the merchandising manager agent. Eve
 
   const client = anthropic();
   let tokensIn = 0, tokensOut = 0, text = '', error: string | undefined;
+  const u = { input: 0, cacheRead: 0, cacheWrite: 0, output: 0 };
   try {
     const runner = client.beta.messages.toolRunner({
       // Testing phase: Sonnet or Haiku only (no server-side fallback, which could route to Opus).
@@ -73,12 +74,15 @@ ${track === 'development' ? '' : `- You are the merchandising manager agent. Eve
       tools: toolsFor(ctx),
       messages: input.messages,
       max_iterations: 10,
+      // cache the conversation as it grows, not only the system prompt: each tool step re-reads the history at a tenth of the price
+      cache_control: { type: 'ephemeral' },
     });
     let last: Anthropic.Beta.BetaMessage | null = null;
     for await (const message of runner) {
       last = message;
       tokensIn += message.usage.input_tokens + (message.usage.cache_read_input_tokens || 0) + (message.usage.cache_creation_input_tokens || 0);
       tokensOut += message.usage.output_tokens;
+      u.input += message.usage.input_tokens; u.cacheRead += message.usage.cache_read_input_tokens || 0; u.cacheWrite += message.usage.cache_creation_input_tokens || 0; u.output += message.usage.output_tokens;
     }
     if (last?.stop_reason === 'refusal') error = 'The model declined this request.';
     text = (last?.content || []).filter((b): b is Anthropic.Beta.BetaTextBlock => b.type === 'text').map((b) => b.text).join('\n').trim();
@@ -86,8 +90,8 @@ ${track === 'development' ? '' : `- You are the merchandising manager agent. Eve
     error = e instanceof Error ? e.message : String(e);
   }
   const model = ALLOWED.includes(agent?.model || '') ? agent!.model : MODEL;
-  const cost = costOf(model, tokensIn, tokensOut);
-  const { data: run } = await sb.from('agent_runs').insert({ tenant_id: tenant.id, agent_id: ctx.agentId, user_id: ctx.userId, trigger: input.trigger, model, input: { track, messages: input.messages.slice(-2) }, tools_called: ctx.calls, output: text || null, tokens_in: tokensIn, tokens_out: tokensOut, cost_usd: cost, ms: Date.now() - t0, error: error || null }).select('id').single();
+  const cost = costOfUsage(model, u);
+  const { data: run } = await sb.from('agent_runs').insert({ tenant_id: tenant.id, agent_id: ctx.agentId, user_id: ctx.userId, trigger: input.trigger, model, input: { track, messages: input.messages.slice(-2), cache: { read: u.cacheRead, write: u.cacheWrite, uncached: u.input } }, tools_called: ctx.calls, output: text || null, tokens_in: tokensIn, tokens_out: tokensOut, cost_usd: cost, ms: Date.now() - t0, error: error || null }).select('id').single();
   await recordUsage(tenant.id, { runs: 1, tokensIn, tokensOut, cost });
   return { text, calls: ctx.calls, drafts: ctx.drafts, nav: ctx.nav, runId: run?.id || null, usage: { tokensIn, tokensOut, cost }, error };
 }

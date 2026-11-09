@@ -17,10 +17,10 @@ const Src = z.string().describe('the id of the evidence, exactly as shown in bra
 export const BriefSchema = z.object({
   status_line: z.string().describe('one line: where the order stands right now'),
   summary: z.string().describe('at most 5 short sentences: the state of the order, what changed recently, what matters next'),
-  open_asks: z.array(z.object({ owed_by: z.string().describe('who owes it: a party name, or "us"'), what: z.string(), since: z.string().nullable().describe('YYYY-MM-DD or null'), source: Src })).describe('things someone has asked for and not yet received'),
-  commitments: z.array(z.object({ by: z.string(), what: z.string(), due: z.string().nullable().describe('YYYY-MM-DD or null'), source: Src })).describe('promises made by us or a party'),
-  risks: z.array(z.object({ what: z.string(), severity: z.enum(['high', 'medium', 'low']), source: Src })),
-  last_contact: z.array(z.object({ party: z.string(), date: z.string().describe('YYYY-MM-DD'), direction: z.enum(['in', 'out']), source: Src })).describe('the latest message with each party, newest first'),
+  open_asks: z.array(z.object({ owed_by: z.string().describe('who owes it: a party name, or "us"'), what: z.string(), since: z.string().nullable().describe('YYYY-MM-DD or null'), source: Src })).describe('things someone has asked for and not yet received, at most 8, most important first'),
+  commitments: z.array(z.object({ by: z.string(), what: z.string(), due: z.string().nullable().describe('YYYY-MM-DD or null'), source: Src })).describe('promises made by us or a party, at most 8'),
+  risks: z.array(z.object({ what: z.string(), severity: z.enum(['high', 'medium', 'low']), source: Src })).describe('at most 6, highest first'),
+  last_contact: z.array(z.object({ party: z.string(), date: z.string().describe('YYYY-MM-DD'), direction: z.enum(['in', 'out']), source: Src })).describe('the latest message with each party, newest first, at most 6'),
   next_action: z.object({ what: z.string(), due: z.string().nullable(), owner: z.string() }).nullable(),
 });
 export type Brief = z.infer<typeof BriefSchema>;
@@ -115,7 +115,8 @@ export async function updateBrief(tenantId: string, orderId: string, reason = 'e
   // an agent cannot remember what it cannot cite: keep only items whose source was in front of it
   const allowed = new Set<string>([...(prev?.sources || []), ...(ins || []).map((x) => `i:${x.id}`), ...ms.map((l) => l.slice(1, l.indexOf(']'))), ...(msgs || []).map((m) => `m:${m.id}`), ...(led || []).map((l) => `l:${l.id}`), ...(drafts || []).map((d) => `d:${d.id}`)]);
   const ok = <T extends { source: string }>(xs: T[]) => xs.filter((x) => allowed.has(x.source.trim()));
-  const clean: Brief = { ...brief, open_asks: ok(brief.open_asks), commitments: ok(brief.commitments), risks: ok(brief.risks), last_contact: ok(brief.last_contact) };
+  // fixed size, so the brief (and every run that reads it) never grows with the order's history
+  const clean: Brief = { ...brief, summary: brief.summary.slice(0, 900), open_asks: ok(brief.open_asks).slice(0, 8), commitments: ok(brief.commitments).slice(0, 8), risks: ok(brief.risks).slice(0, 6), last_contact: ok(brief.last_contact).slice(0, 6) };
   const sources = [...new Set([...clean.open_asks, ...clean.commitments, ...clean.risks, ...clean.last_contact].map((x) => x.source.trim()))];
   const version = (prev?.version || 0) + 1;
   const { error } = await sb.from('agent_memory').insert({ tenant_id: tenantId, agent_id: agentId, order_id: orderId, version, brief: clean, narrative: clean.summary, sources, reason, model: usage.model, tokens_in: usage.tokensIn, tokens_out: usage.tokensOut, cost_usd: usage.cost });
