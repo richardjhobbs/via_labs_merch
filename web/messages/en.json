@@ -176,7 +176,12 @@
     "devNoTechPack": "Styles with no confirmed tech pack",
     "devNoTechPackSub": "Upload the tech pack or brief on the style, or forward the email that carries it.",
     "devAllHaveTechPack": "Every live style has a confirmed tech pack.",
-    "devRecent": "Styles in development"
+    "devRecent": "Styles in development",
+    "brief": {
+      "title": "{name}'s morning brief",
+      "desk": "{name} this morning",
+      "byDesk": "Desk by desk"
+    }
   },
   "queue": {
     "title": "Approval queue",
@@ -336,7 +341,8 @@
         "m": "message",
         "l": "ledger",
         "d": "draft",
-        "ms": "milestone"
+        "ms": "milestone",
+        "i": "instruction"
       },
       "sev": {
         "high": "high",
@@ -777,8 +783,11 @@
         "role": "Only owners and managers can change desks.",
         "fields": "Check the desk name and grouping.",
         "person": "That person is not in this company."
-      }
-    }
+      },
+      "capacity": "Capacity at {factory}",
+      "needsPerson": "A person needs to decide."
+    },
+    "trigManager": "Manager"
   },
   "assistant": {
     "title": "Ask",

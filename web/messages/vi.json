@@ -176,7 +176,12 @@
     "devPending": "hồ sơ cần kiểm tra",
     "devPendingSub": "Agent đã đọc một tech pack hoặc brief. Chưa có gì được tính cho đến khi bạn xác nhận.",
     "devPendingTitle": "Đã đọc, đang chờ bạn kiểm tra",
-    "devRecent": "Mã hàng đang phát triển"
+    "devRecent": "Mã hàng đang phát triển",
+    "brief": {
+      "title": "Bản tin sáng của {name}",
+      "desk": "{name} sáng nay",
+      "byDesk": "Theo từng nhóm"
+    }
   },
   "queue": {
     "title": "Hàng chờ duyệt",
@@ -336,7 +341,8 @@
         "m": "tin nhắn",
         "l": "sổ ghi",
         "d": "bản nháp",
-        "ms": "mốc"
+        "ms": "mốc",
+        "i": "chỉ thị"
       },
       "sev": {
         "high": "cao",
@@ -777,8 +783,11 @@
         "role": "Chỉ chủ sở hữu và quản lý mới đổi được nhóm.",
         "fields": "Kiểm tra tên nhóm và cách nhóm.",
         "person": "Người này không thuộc công ty."
-      }
-    }
+      },
+      "capacity": "Năng lực tại {factory}",
+      "needsPerson": "Cần một người quyết định."
+    },
+    "trigManager": "Quản lý"
   },
   "assistant": {
     "title": "Hỏi",

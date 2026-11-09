@@ -11,6 +11,7 @@ import { listOrders, exceptionsOf } from '@/lib/orders';
 import { HealthPill } from '@/components/milestones';
 import { esgEnabled, esgSnapshot, isMine, STATE_PILL } from '@/lib/esg';
 import { trackFor } from '@/lib/tracks';
+import { MorningBrief } from '@/components/morning-brief';
 import { DevelopmentDay } from './day-development';
 
 export default async function MyDay({ params, searchParams }: { params: Promise<{ tenant: string }>; searchParams: Promise<{ saved?: string; error?: string }> }) {
@@ -55,6 +56,7 @@ export default async function MyDay({ params, searchParams }: { params: Promise<
       </div>
       {q.saved && <div className="notice ok mt-4">{t('decided')}</div>}
       {q.error && <div className="notice crit mt-4">{q.error}</div>}
+      <MorningBrief slug={slug} tenantId={tenant.id} membershipId={membership.id} role={membership.role} tz={tenant.tz} />
       {!!alerts.length && <div className="card mt-4" style={{ borderLeft: '3px solid var(--crit)' }}>
         <h2>{t('alerts.title', { n: alerts.length })}</h2>
         <p className="muted small mt-1">{t('alerts.sub')}</p>

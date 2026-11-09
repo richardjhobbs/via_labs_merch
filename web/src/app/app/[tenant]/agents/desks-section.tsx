@@ -88,11 +88,11 @@ export async function DesksSection({ slug, tenantId, role, tz }: { slug: string;
       <p className="muted small mt-1">{t('logSub')}</p>
       {!log?.length && <p className="muted small mt-2">{t('logNone')}</p>}
       <div className="mt-2 grid gap-2">
-        {(log || []).map((m) => { const b = (m.body || {}) as { title?: string; status?: string; po?: string; decision?: string; by?: string; waiting_for?: string; why?: string }; return (
+        {(log || []).map((m) => { const b = (m.body || {}) as { title?: string; status?: string; po?: string; decision?: string; by?: string; waiting_for?: string; why?: string; factory?: string; priority?: string[]; rationale?: string; text?: string; needs_person?: boolean }; return (
           <div key={m.id} className="small" style={{ borderTop: '1px solid var(--line2)', paddingTop: 6 }}>
             <div className="flex items-center gap-2 flex-wrap"><span className={`pill ${m.kind === 'escalation' ? (m.status === 'open' ? 'warn' : '') : m.kind === 'decision' ? 'ok' : 'agent'}`}>{t(`kind.${m.kind}` as never)}</span>
               <span>{m.from_agent_id ? nameOf.get(m.from_agent_id) : b.by || t('aPerson')} → {m.to_agent_id ? nameOf.get(m.to_agent_id) : '—'}</span><span className="muted ml-auto">{when(m.created_at)}</span></div>
-            <div className="muted mt-1">{m.kind === 'report' ? `PO ${b.po}: ${b.status}` : m.kind === 'decision' ? `${b.decision === 'approved' || b.decision === 'rejected' ? t(`decision.${b.decision}`) : b.decision} · ${b.title}` : `${b.title}${b.waiting_for ? ` · ${t('waitingFor', { name: b.waiting_for })}` : ''}`}</div>
+            <div className="muted mt-1">{m.kind === 'report' ? `PO ${b.po}: ${b.status}` : b.factory ? `${t('capacity', { factory: b.factory })}: ${(b.priority || []).join(' > ')}. ${b.rationale || ''}${b.needs_person ? ` ${t('needsPerson')}` : ''}` : m.kind === 'instruction' ? b.text : m.kind === 'decision' ? `${b.decision === 'approved' || b.decision === 'rejected' ? t(`decision.${b.decision}`) : b.decision} · ${b.title}` : `${b.title}${b.waiting_for ? ` · ${t('waitingFor', { name: b.waiting_for })}` : ''}`}</div>
           </div>); })}
       </div>
       <div className="mt-3"><Link className="btn sm" href={`/app/${slug}/queue`}>{t('openQueue')}</Link></div>

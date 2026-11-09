@@ -7,7 +7,7 @@ import { hasLlm } from '@/lib/llm';
 import { lastPass } from '@/lib/agents/proactive';
 import { DesksSection } from './desks-section';
 
-const TOOLS = ['get_briefing', 'search_orders', 'get_order', 'get_exceptions', 'get_party', 'get_messages', 'get_ledger', 'get_gates', 'get_team', 'queue_draft', 'request_approval', 'set_milestone', 'navigate', 'search_styles', 'get_style', 'get_style_file', 'diff_tech_pack'];
+const TOOLS = ['get_briefing', 'search_orders', 'get_order', 'get_exceptions', 'get_party', 'get_messages', 'get_ledger', 'get_gates', 'get_team', 'queue_draft', 'request_approval', 'set_milestone', 'navigate', 'search_styles', 'get_style', 'get_style_file', 'diff_tech_pack', 'get_desk_brief', 'get_company_brief'];
 
 export default async function Agents({ params, searchParams }: { params: Promise<{ tenant: string }>; searchParams: Promise<{ dsaved?: string; derr?: string }> }) {
   const { tenant: slug } = await params; const q = await searchParams;
@@ -25,7 +25,7 @@ export default async function Agents({ params, searchParams }: { params: Promise
     sb.from('agent_memory').select('id', { count: 'exact', head: true }).eq('tenant_id', tenant.id),
   ]);
   const live = hasLlm();
-  const TRIG: Record<string, string> = { chat: t('trigChat'), inbound: t('trigInbound'), schedule: t('trigSchedule'), partner: t('trigPartner'), brief: t('trigBrief') };
+  const TRIG: Record<string, string> = { chat: t('trigChat'), inbound: t('trigInbound'), schedule: t('trigSchedule'), partner: t('trigPartner'), brief: t('trigBrief'), manager: t('trigManager') };
   return (
     <div className="max-w-6xl">
       <h1>{t('title')}</h1>
