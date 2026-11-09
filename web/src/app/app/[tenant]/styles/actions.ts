@@ -11,7 +11,7 @@ import { requireTenant } from '@/lib/tenant';
 import { supabaseServer, supabaseAdmin } from '@/lib/supabase/server';
 import { recordUsage, hasLlm, translate } from '@/lib/llm';
 import { pickedFile } from '@/lib/connectors/drive';
-import { DEV_BUCKET, MAX_RECORD_BYTES, RECORD_KINDS, signedUpload, readRecordJob, type RecordKind, type TechPack } from '@/lib/records';
+import { DEV_BUCKET, MAX_RECORD_BYTES, RECORD_KINDS, signedUpload, readRecordJob, readableRecord, recordKindOf, isTechPack, type RecordKind, type RecordParsed, type TechPack } from '@/lib/records';
 import { STYLE_STATUSES, type StyleStatus } from '@/lib/styles';
 import { isTrack } from '@/lib/tracks';
 
@@ -90,8 +90,10 @@ export async function readUploaded(slug: string, styleId: string, path: string, 
   const buf = Buffer.from(await blob.arrayBuffer());
   if (!buf.length || buf.length > MAX_RECORD_BYTES) { await admin.storage.from(DEV_BUCKET).remove([path]); return { ok: false, error: t('tooBig') }; }
   const sha256 = createHash('sha256').update(buf).digest('hex');
-  const kind: RecordKind = (RECORD_KINDS as readonly string[]).includes(kindHint) ? (kindHint as RecordKind) : 'tech_pack';
-  const readable = /\.(pdf|xlsx?|xlsm|csv|png|jpe?g|webp)$/i.test(filename);
+  // "auto" means tech pack unless the file is plainly a costing or a 3D file; the model refines the kind on reading
+  const guess = recordKindOf(filename);
+  const kind: RecordKind = (RECORD_KINDS as readonly string[]).includes(kindHint) ? (kindHint as RecordKind) : guess === 'costing' || guess === 'model_3d' ? guess : 'tech_pack';
+  const readable = readableRecord(filename, kind);
   const sb = await supabaseServer();
   const { data: r, error } = await sb.from('records').insert({ tenant_id: me.tenant.id, track: 'development', kind, style_id: styleId, version: 0, title: filename, source, source_ref: sourceRef, storage_path: path, filename: filename.slice(0, 200), mime: mime || null, bytes: buf.length, sha256, parsed: null, read_status: readable && hasLlm() ? 'pending' : 'skipped', created_by: me.user.id, created_by_name: who(me) }).select('id').single();
   if (error || !r) return { ok: false, error: error?.message || 'failed' };
@@ -132,19 +134,19 @@ export async function confirmRecord(form: FormData) {
   if (!r || !s) back(`/app/${slug}/styles/${styleId}`, { error: 'not found' });
   if (r.confirmed_at) back(path, { error: t('alreadyConfirmed') });
   const kind = (RECORD_KINDS as readonly string[]).includes(String(form.get('kind'))) ? (String(form.get('kind')) as RecordKind) : (r.kind as RecordKind);
-  const parsed = (r.parsed || null) as TechPack | null;
+  const parsed = (r.parsed || null) as RecordParsed | null;
   const label = clean(form.get('version_label'), 60), title = clean(form.get('title'), 200) || r.filename, lang = clean(form.get('lang'), 5);
-  if (parsed) { parsed.version_label = label; if (lang) parsed.lang = lang; }
+  if (parsed && 'version_label' in parsed) { parsed.version_label = label; if (lang) parsed.lang = lang; }
   const { data: prev } = await sb.from('records').select('id, version').eq('tenant_id', me.tenant.id).eq('style_id', styleId).eq('kind', kind).not('confirmed_at', 'is', null).order('version', { ascending: false }).limit(1).maybeSingle();
   const version = (prev?.version || 0) + 1;
-  const { error } = await sb.from('records').update({ kind, title, lang: lang || parsed?.lang || null, parsed, version, supersedes_id: prev?.id || null, confirmed_at: new Date().toISOString(), confirmed_by: me.user.id }).eq('id', id);
+  const { error } = await sb.from('records').update({ kind, title, lang: lang || (parsed && 'lang' in parsed ? parsed.lang : null) || null, parsed, version, supersedes_id: prev?.id || null, confirmed_at: new Date().toISOString(), confirmed_by: me.user.id }).eq('id', id);
   if (error) back(path, { error: error.message });
   const note = clean(form.get('note'), 500);
-  await ledger(me, styleId, 'Tech packs and specs', `${kind.replace('_', ' ')} v${version}${label ? ` (${label})` : ''} confirmed: ${title}${prev ? `, supersedes v${prev.version}` : ''}${note ? ` (${note})` : ''}`, 'CONFIRMED', { record_id: id, version, supersedes: prev?.id || null });
+  await ledger(me, styleId, kind === 'costing' ? 'Costing and quotes' : 'Tech packs and specs', `${kind.replace('_', ' ')} v${version}${label ? ` (${label})` : ''} confirmed: ${title}${prev ? `, supersedes v${prev.version}` : ''}${note ? ` (${note})` : ''}`, 'CONFIRMED', { record_id: id, version, supersedes: prev?.id || null });
   // the first confirmed tech pack moves a brief into development and fills what the style still lacks
   const patch: Record<string, unknown> = {};
   if (kind === 'tech_pack' && s.status === 'brief') patch.status = 'developing';
-  if (parsed) { if (!s.name && parsed.style_name) patch.name = parsed.style_name; if (!s.season && parsed.season) patch.season = parsed.season; if (!s.category && parsed.category) patch.category = parsed.category; }
+  if (isTechPack(parsed)) { if (!s.name && parsed.style_name) patch.name = parsed.style_name; if (!s.season && parsed.season) patch.season = parsed.season; if (!s.category && parsed.category) patch.category = parsed.category; }
   if (Object.keys(patch).length) await sb.from('styles').update(patch).eq('id', styleId);
   revalidatePath(`/app/${slug}/styles/${styleId}`); revalidatePath(`/app/${slug}/styles`);
   redirect(`/app/${slug}/styles/${styleId}?saved=1`);
@@ -178,7 +180,7 @@ export async function translateRecord(form: FormData) {
   if (!hasLlm() && !process.env.DEEPSEEK_API_KEY) back(path, { error: t('noAgent') });
   const sb = await supabaseServer();
   const { data: r } = await sb.from('records').select('id, parsed, confirmed_at, version, kind').eq('tenant_id', me.tenant.id).eq('id', id).eq('style_id', styleId).maybeSingle();
-  const parsed = (r?.parsed || null) as TechPack | null;
+  const parsed = isTechPack(r?.parsed as RecordParsed | null) ? (r!.parsed as TechPack) : null;
   if (!r || !parsed) back(path, { error: 'not found' });
   const lines = parsed.construction.length ? parsed.construction : [];
   const src = [...lines.map((l, i) => `${i + 1}. ${l}`), ...(parsed.notes ? [`N. ${parsed.notes}`] : [])].join('\n');

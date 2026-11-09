@@ -1,5 +1,5 @@
 'use client';
-// Tech pack or brief in: the file goes straight from the browser to the private bucket by signed link, then
+// Tech pack, brief, costing or 3D file in: the file goes straight from the browser to the private bucket by signed link, then
 // the server reads it and opens the review. A Google Drive pick posts the file id and is read server side.
 import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -7,7 +7,7 @@ import { useTranslations } from 'next-intl';
 import { DrivePicker } from '@/components/drive-picker';
 import { prepareUpload, readUploaded, readFromDrive } from '../actions';
 
-const KINDS = ['auto', 'tech_pack', 'brief', 'spec', 'bom', 'photo', 'reference', 'other'] as const;
+const KINDS = ['auto', 'tech_pack', 'brief', 'spec', 'bom', 'costing', 'model_3d', 'photo', 'reference', 'other'] as const;
 
 export function UploadForm({ tenant, styleId, live }: { tenant: string; styleId: string; live: boolean }) {
   const t = useTranslations('styles');
@@ -41,7 +41,7 @@ export function UploadForm({ tenant, styleId, live }: { tenant: string; styleId:
       <p className="muted small mt-1">{live ? t('addRecordNote') : t('addRecordNoAgent')}</p>
       <form onSubmit={send} className="grid gap-2 mt-3">
         <div className="flex gap-2 flex-wrap items-end">
-          <label className="f" style={{ margin: 0, flex: '1 1 240px' }}><span>{t('file')}</span><input ref={fileRef} type="file" className="input" accept=".pdf,.xlsx,.xls,.xlsm,.csv,.png,.jpg,.jpeg,.webp" disabled={state !== 'idle'} /></label>
+          <label className="f" style={{ margin: 0, flex: '1 1 240px' }}><span>{t('file')}</span><input ref={fileRef} type="file" className="input" accept=".pdf,.xlsx,.xls,.xlsm,.csv,.png,.jpg,.jpeg,.webp,.glb,.gltf,.usdz,.obj,.fbx,.zprj,.zpac,.bw,.bwg" disabled={state !== 'idle'} /></label>
           <label className="f" style={{ margin: 0 }}><span>{t('recordKind')}</span><select className="input" value={kind} onChange={(e) => setKind(e.target.value as (typeof KINDS)[number])} disabled={state !== 'idle'}>{KINDS.map((k) => <option key={k} value={k}>{t(`kinds.${k}`)}</option>)}</select></label>
           <button className="btn primary" disabled={state !== 'idle'}>{state === 'uploading' ? t('uploading') : state === 'reading' ? t('reading') : t('readIt')}</button>
         </div>

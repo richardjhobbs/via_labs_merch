@@ -7,7 +7,7 @@ import { requireTenant } from '@/lib/tenant';
 import { supabaseServer } from '@/lib/supabase/server';
 import { hasLlm, LANG_NAMES } from '@/lib/llm';
 import { getStyle, STYLE_STATUSES, STATUS_PILL } from '@/lib/styles';
-import { styleRecords, techPackVersions, diffTechPack } from '@/lib/records';
+import { styleRecords, techPackVersions, costingVersions, diffTechPack } from '@/lib/records';
 import { TechPackView } from '@/components/tech-pack-view';
 import { PendingDraftCard } from '@/components/pending-draft';
 import { UploadForm } from './upload-form';
@@ -41,8 +41,9 @@ export default async function StylePage({ params, searchParams }: { params: Prom
     sb.from('orders').select('id, po, status').eq('tenant_id', tenant.id).eq('style_id', id).order('po'),
   ]);
   const tps = techPackVersions(records), latest = tps[0] || null, prev = tps[1] || null;
+  const costs = costingVersions(records), cost = costs[0] || null;
   const changes = diffTechPack(prev?.parsed || null, latest?.parsed || null);
-  const pending = records.filter((r) => !r.confirmed_at), others = records.filter((r) => r.confirmed_at && r.kind !== 'tech_pack');
+  const pending = records.filter((r) => !r.confirmed_at), others = records.filter((r) => r.confirmed_at && r.kind !== 'tech_pack' && r.kind !== 'costing');
   const canEdit = membership.role !== 'viewer' && membership.id !== 'admin';
   const base = `/app/${slug}/styles/${id}`;
   const when = (x: string) => new Date(x).toLocaleString('en-GB', { timeZone: tenant.tz, day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
@@ -76,6 +77,16 @@ export default async function StylePage({ params, searchParams }: { params: Prom
               {!!Object.keys(latest.parsed.translations || {}).length && <span className="muted">{t('translated', { langs: Object.keys(latest.parsed.translations!).map((l) => LANG_NAMES[l] || l).join(', ') })}</span>}</form>}
             {tps.length > 1 && <div className="mt-3 small"><span className="muted">{t('versions')}:</span> {tps.map((r) => <Link key={r.id} className="pill mr-1" href={`${base}/records/${r.id}`}>v{r.version}{r.parsed?.version_label ? ` ${r.parsed.version_label}` : ''} · {new Date(r.confirmed_at!).toLocaleDateString('en-GB', { timeZone: tenant.tz, day: '2-digit', month: 'short' })}</Link>)}</div>}
           </div>
+          {cost && <div className="card"><div className="flex items-center gap-2 flex-wrap"><h2>{t('costing.title')}</h2><span className="pill ok">v{cost.version}{cost.parsed?.version_label ? ` · ${cost.parsed.version_label}` : ''}</span>{cost.parsed?.supplier && <span className="muted small">{cost.parsed.supplier}</span>}<Link className="btn sm ml-auto" href={`${base}/records/${cost.id}`}>{t('costing.open')}</Link></div>
+            {cost.parsed && <div className="mt-3 flex gap-4 flex-wrap small">
+              <div><div className="muted">{t('costing.price')}{cost.parsed.incoterm ? ` ${cost.parsed.incoterm}` : ''}</div><b style={{ fontSize: 18 }}>{cost.parsed.price != null ? `${cost.parsed.currency || ''} ${cost.parsed.price}` : '—'}</b></div>
+              <div><div className="muted">{t('fTargetPrice')}</div><b style={{ fontSize: 18 }}>{s.target_price != null ? `${s.currency} ${s.target_price}` : '—'}</b></div>
+              {cost.parsed.total_cost != null && <div><div className="muted">{t('costing.totalCost')}</div><b style={{ fontSize: 18 }}>{cost.parsed.currency || ''} {cost.parsed.total_cost}</b></div>}
+              {cost.parsed.price != null && s.target_price != null && <div className="self-end"><span className={`pill ${cost.parsed.price > s.target_price ? 'crit' : 'ok'}`}>{cost.parsed.price > s.target_price ? t('costing.above', { n: `${s.currency} ${Math.round((cost.parsed.price - s.target_price) * 100) / 100}` }) : t('costing.within', { n: `${s.currency} ${Math.round((s.target_price - cost.parsed.price) * 100) / 100}` })}</span></div>}
+              {cost.parsed.valid_until && <div><div className="muted">{t('costing.validUntil')}</div><b>{cost.parsed.valid_until}</b></div>}
+            </div>}
+            {costs.length > 1 && <div className="mt-3 small"><span className="muted">{t('versions')}:</span> {costs.map((r) => <Link key={r.id} className="pill mr-1" href={`${base}/records/${r.id}`}>v{r.version}{r.parsed?.price != null ? ` ${r.parsed.currency || ''} ${r.parsed.price}` : ''}</Link>)}</div>}
+          </div>}
           {!!others.length && <div className="card"><h2>{t('otherRecords')}</h2>{others.map((r) => <div key={r.id} className="small flex items-center gap-2 flex-wrap mt-2" style={{ borderTop: '1px solid var(--line2)', paddingTop: 8 }}><span className="pill">{t(`kinds.${r.kind}`)}</span><Link href={`${base}/records/${r.id}`}>{r.title || r.filename}</Link><span className="muted">v{r.version} · {r.created_by_name} · {when(r.created_at)}</span>{r.storage_path && <a className="small ml-auto" href={`/api/records/file?id=${r.id}`} target="_blank" rel="noopener">{t('openFile')}</a>}</div>)}</div>}
           <ScheduleCard slug={slug} styleId={id} rows={milestones} targetDelivery={s.target_delivery} canEdit={canEdit} tz={tenant.tz} />
           <SamplesCard slug={slug} styleId={id} samples={samples} parties={allParties || []} canEdit={canEdit} tz={tenant.tz} techPackVersion={latest?.version ?? null} />

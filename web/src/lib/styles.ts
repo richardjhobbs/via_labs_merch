@@ -2,7 +2,7 @@
 // briefs and other records hang off it, and after handover the orders point back to it.
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { supabaseServer, supabaseAdmin } from './supabase/server';
-import { styleRecords, techPackVersions, type RecordRow } from './records';
+import { styleRecords, techPackVersions, costingVersions, isComment, type RecordRow } from './records';
 
 type Client = SupabaseClient<any, 'merch', any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
@@ -71,6 +71,6 @@ export async function styleBrief(tenantId: string, id: string) {
   const s = await getStyle(tenantId, id, sb);
   if (!s) return null;
   const records = await styleRecords(sb, tenantId, id);
-  const tps = techPackVersions(records);
-  return { style: s, techPack: tps[0] || null, techPackVersions: tps.map((r) => ({ id: r.id, version: r.version, label: r.parsed?.version_label, filename: r.filename, confirmed_at: r.confirmed_at })), records: records.filter((r) => r.kind !== 'tech_pack' || !r.confirmed_at).map((r) => ({ id: r.id, kind: r.kind, title: r.title || r.filename, source: r.source, confirmed: !!r.confirmed_at, created_at: r.created_at })) };
+  const tps = techPackVersions(records), costs = costingVersions(records);
+  return { style: s, techPack: tps[0] || null, costing: costs[0] || null, techPackVersions: tps.map((r) => ({ id: r.id, version: r.version, label: r.parsed?.version_label, filename: r.filename, confirmed_at: r.confirmed_at })), records: records.filter((r) => (r.kind !== 'tech_pack' && r.kind !== 'costing') || !r.confirmed_at).map((r) => ({ id: r.id, kind: r.kind, title: r.title || r.filename, source: r.source, by: r.created_by_name, comment: isComment(r.parsed) ? r.parsed.text : undefined, confirmed: !!r.confirmed_at, created_at: r.created_at })) };
 }

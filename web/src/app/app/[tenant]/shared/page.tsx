@@ -1,24 +1,35 @@
 // The partner portal: a customer's or supplier's people see the compliance records that concern their
-// company, and nothing else. What they owe (tasks for their company) and what they set (programmes their
-// company issued, with progress and approved reports). Reads run under RLS (merch.partner_task_ok).
+// company, and the styles developed for it, and nothing else. Compliance: what they owe (tasks for their
+// company) and what they set (programmes their company issued, with progress and approved reports).
+// Development: their styles with the confirmed tech pack version and the rounds awaiting a decision.
+// Reads run under RLS (merch.partner_task_ok, merch.partner_style_ok).
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { requireTenant } from '@/lib/tenant';
 import { supabaseServer } from '@/lib/supabase/server';
-import { STATE_PILL, taskState } from '@/lib/esg-shared';
+import { STATE_PILL, taskState, esgEnabled } from '@/lib/esg-shared';
+import { tenantTracks } from '@/lib/tracks';
+import { listStyles, STATUS_PILL } from '@/lib/styles';
+import { listSamples, sampleState } from '@/lib/samples';
 
 export default async function Shared({ params }: { params: Promise<{ tenant: string }> }) {
   const { tenant: slug } = await params;
   const { tenant, membership } = await requireTenant(slug, { partner: true });
-  const t = await getTranslations('partners'), te = await getTranslations('esg');
+  const t = await getTranslations('partners'), te = await getTranslations('esg'), tst = await getTranslations('styles');
+  const tsStatus = (x: string) => tst(`status.${x}` as never);
   const sb = await supabaseServer();
   const mine = membership.role === 'partner' ? membership.scopes?.parties || [] : [];
-  const [{ data: tasks }, { data: programmes }, { data: reports }, { data: parties }] = await Promise.all([
+  const [{ data: tasks }, { data: programmes }, { data: reports }, { data: parties }, { data: tn }, styles, samples] = await Promise.all([
     sb.from('esg_tasks').select('id, party_id, programme_id, period_label, due_date, status, esg_requirements(title, code, lead_days, trigger), esg_programmes(name, issuer_party_id), orders(po)').eq('tenant_id', tenant.id).order('due_date').limit(300),
     sb.from('esg_programmes').select('id, name, kind, status').eq('tenant_id', tenant.id).in('issuer_party_id', mine.length ? mine : ['00000000-0000-0000-0000-000000000000']),
     sb.from('esg_reports').select('id, programme_id, period_label, status, approved_at, sent_at').eq('tenant_id', tenant.id).order('created_at', { ascending: false }),
     sb.from('parties').select('id, name').in('id', mine.length ? mine : ['00000000-0000-0000-0000-000000000000']),
+    sb.from('tenants').select('settings').eq('id', tenant.id).single(),
+    listStyles(tenant.id, { customers: mine.length ? mine : ['00000000-0000-0000-0000-000000000000'] }, sb),
+    listSamples(tenant.id, { open: true }, sb),
   ]);
+  const esg = esgEnabled(tn?.settings), dev = tenantTracks(tn?.settings as never).includes('development');
+  const awaiting = (styleId: string) => samples.filter((x) => x.style_id === styleId && sampleState(x) === 'awaiting').length;
   const rows = (tasks || []).map((x) => { const r = x.esg_requirements as unknown as { title: string; code: string | null; lead_days: number; trigger: string }; return { ...x, r, prog: x.esg_programmes as unknown as { name: string; issuer_party_id: string | null }, po: (x.orders as unknown as { po: string } | null)?.po, state: taskState(x, r.lead_days) }; });
   const owed = rows.filter((x) => x.party_id && mine.includes(x.party_id));
   const toDo = owed.filter((x) => !['done', 'waived', 'review'].includes(x.state));
@@ -31,9 +42,16 @@ export default async function Shared({ params }: { params: Promise<{ tenant: str
   );
   return (
     <div className="max-w-5xl">
-      <h1>{t('title', { company: tenant.name })}</h1>
-      <p className="muted small mt-1" style={{ maxWidth: '76ch' }}>{t('sub', { party: (parties || []).map((p) => p.name).join(', ') || '…', company: tenant.name })}</p>
-      <div className="grid gap-4 mt-4 md:grid-cols-2">
+      <h1>{t(dev && !esg ? 'titleDev' : dev ? 'titleBoth' : 'title', { company: tenant.name })}</h1>
+      <p className="muted small mt-1" style={{ maxWidth: '76ch' }}>{t(dev && !esg ? 'subDev' : dev ? 'subBoth' : 'sub', { party: (parties || []).map((p) => p.name).join(', ') || '…', company: tenant.name })}</p>
+      {dev && <div className="card mt-4">
+        <div className="flex items-center gap-2 flex-wrap"><h2>{t('styles')}</h2><span className="muted small">{t('stylesN', { n: styles.length })}</span></div>
+        {!styles.length && <p className="muted small mt-2">{t('noStyles')}</p>}
+        {!!styles.length && <div className="tw mt-2"><table className="t stack"><thead><tr><th>{t('colStyle')}</th><th>{t('colSeason')}</th><th>{t('colStatus')}</th><th>{t('colAwaiting')}</th></tr></thead><tbody>
+          {styles.map((s) => { const n = awaiting(s.id); return <tr key={s.id}><td><Link href={`/app/${slug}/shared/styles/${s.id}`} className="font-medium">{s.code}</Link>{s.name && <span className="muted small"> · {s.name}</span>}</td><td data-l={t('colSeason')} className="small">{s.season || '—'}</td><td data-l={t('colStatus')}><span className={`pill ${STATUS_PILL[s.status]}`}>{tsStatus(s.status)}</span></td><td data-l={t('colAwaiting')}>{n ? <span className="pill warn">{t('awaitingN', { n })}</span> : <span className="muted small">—</span>}</td></tr>; })}
+        </tbody></table></div>}
+      </div>}
+      {esg && <div className="grid gap-4 mt-4 md:grid-cols-2">
         <div className="card self-start">
           <h2>{t('toProvide')} <span className="muted">({toDo.length})</span></h2>
           {!toDo.length && <p className="muted small mt-2">{t('nothingToProvide')}</p>}
@@ -50,7 +68,7 @@ export default async function Shared({ params }: { params: Promise<{ tenant: str
               {!!p.reports.length && <div className="mt-2 grid gap-1">{p.reports.map((r) => <a key={r.id} href={`/api/export/esg?tenant=${slug}&report=${r.id}`}>{te('reports')}: {r.period_label} ({te(`rstatus.${r.status}` as never)})</a>)}</div>}
             </div>))}
         </div>
-      </div>
+      </div>}
       <p className="muted small mt-6" style={{ maxWidth: '76ch' }}>{t('privacy', { company: tenant.name })}</p>
     </div>
   );

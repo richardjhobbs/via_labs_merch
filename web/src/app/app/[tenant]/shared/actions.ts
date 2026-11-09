@@ -1,6 +1,7 @@
 'use server';
 // The partner portal and partner access. Partners write nothing directly (RLS gives them read only); their
-// submissions go in here under the service role after checking the task is for the party they speak for.
+// submissions go in here under the service role after checking the task is for the party they speak for, and
+// their comments on a sample round after checking the style is their customer's and development is on.
 // Inviting and removing partners is for owners and managers, on the customer or supplier's page.
 import { createHash } from 'node:crypto';
 import { redirect } from 'next/navigation';
@@ -10,6 +11,8 @@ import { supabaseAdmin, supabaseServer } from '@/lib/supabase/server';
 import { requireTenant } from '@/lib/tenant';
 import { sendMail, brandedHtml } from '@/lib/mail';
 import { EVIDENCE_BUCKET, esgEnabled } from '@/lib/esg';
+import { DEV_BUCKET } from '@/lib/records';
+import { tenantTracks } from '@/lib/tracks';
 
 const APP = process.env.NEXT_PUBLIC_APP_URL || 'https://merch.getvia.xyz';
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
@@ -29,14 +32,16 @@ export async function invitePartner(form: FormData) {
     sb.from('tenants').select('settings').eq('id', tenant.id).single(),
   ]);
   if (!party) redirect(`/app/${slug}/parties`);
-  if (!esgEnabled(tn?.settings)) back(path, { error: t('needAddon') });
+  const esg = esgEnabled(tn?.settings), dev = tenantTracks(tn?.settings as never).includes('development');
+  if (!esg && !dev) back(path, { error: t('needAddon') });
   const { data: inv, error } = await sb.from('invites').insert({ tenant_id: tenant.id, email, role: 'partner', display_name: name, invited_by: user.id, scopes: { parties: [party!.id] } }).select('token').single();
   if (error || !inv) back(path, { error: error?.message || 'failed' });
   const url = `${APP}/invite/${inv!.token}`;
-  const subject = `${tenant.name} shares compliance records with ${party!.name} on VIA Merch`;
-  const text = `${membership.display_name || tenant.name} at ${tenant.name} has invited you to see and supply the compliance records that concern ${party!.name}: certificates, audits, test reports and figures they need from you, and the reports they send you.\n\nYou see only these records, nothing else in their workspace.`;
+  const subject = `${tenant.name} shares ${esg && dev ? 'development and compliance' : dev ? 'development' : 'compliance'} records with ${party!.name} on VIA Merch`;
+  const what = [esg ? `the compliance records that concern ${party!.name}: certificates, audits, test reports and figures they need from you, and the reports they send you` : '', dev ? `the styles ${tenant.name} develops for ${party!.name}: the confirmed tech pack, each sample round with its measurements and decision, the schedule, and a place to post your fit comments and photos` : ''].filter(Boolean).join(', and ');
+  const text = `${membership.display_name || tenant.name} at ${tenant.name} has invited you to see ${what}.\n\nYou see only these records, nothing else in their workspace.`;
   try { await sendMail({ to: email, subject, text: `${text}\n\n${url}`, html: brandedHtml({ title: subject, paragraphs: text.split('\n\n'), cta: { label: 'Open the shared records', url }, footnote: 'Sign-in is by a code or link sent to this address. The invitation expires in 14 days.' }) }); } catch { /* the invite stands; it can be resent */ }
-  await sb.rpc('ledger_append', { p_tenant: tenant.id, p_channel: 'Console', p_actor: membership.display_name || user.email, p_actor_user: user.id, p_counterparty: party!.name, p_stream: 'Compliance and CSR', p_order: null, p_what: `Invited ${email} as a partner for ${party!.name}: compliance records only`, p_gate: 'Logged', p_gated: false, p_ref: { party_id: party!.id } });
+  await sb.rpc('ledger_append', { p_tenant: tenant.id, p_channel: 'Console', p_actor: membership.display_name || user.email, p_actor_user: user.id, p_counterparty: party!.name, p_stream: 'Compliance and CSR', p_order: null, p_what: `Invited ${email} as a partner for ${party!.name}: ${[esg ? 'compliance records' : '', dev ? 'development styles' : ''].filter(Boolean).join(' and ')} only`, p_gate: 'Logged', p_gated: false, p_ref: { party_id: party!.id } });
   revalidatePath(path); back(path, { saved: '1' });
 }
 
@@ -95,4 +100,49 @@ export async function partnerSubmit(form: FormData) {
   await admin.from('esg_tasks').update({ status: 'submitted', latest_submission_id: sub!.id }).eq('id', id);
   await admin.rpc('ledger_append', { p_tenant: tenant.id, p_channel: 'Portal', p_actor: actor, p_actor_user: user.id, p_counterparty: party, p_stream: 'Compliance and CSR', p_order: null, p_what: `${party} submitted v${version} for ${req.code ? `${req.code} ` : ''}${req.title}, ${task.period_label}${value_num != null ? `: ${value_num}${req.unit ? ` ${req.unit}` : ''}` : ''}${evidence.length ? `, ${evidence.length} file${evidence.length === 1 ? '' : 's'}` : ''}${valid_until ? `, valid until ${valid_until}` : ''}`, p_gate: 'Logged', p_gated: false, p_ref: { esg_task: id, esg_submission: sub!.id } });
   revalidatePath(path); back(path, { saved: 'submitted' });
+}
+
+// A partner at the customer comments on a sample round, with photos if they like. The comment is a typed record
+// (kind fit_comment, source portal) on the round; each photo a photo record. Nothing here decides anything.
+export async function partnerComment(form: FormData) {
+  const slug = String(form.get('tenant')), styleId = String(form.get('style')), sampleId = String(form.get('sample'));
+  const { tenant, membership, user } = await requireTenant(slug, { partner: true });
+  const t = await getTranslations('partners');
+  const path = `/app/${slug}/shared/styles/${styleId}/samples/${sampleId}`;
+  if (membership.role !== 'partner') redirect(`/app/${slug}/styles/${styleId}/samples/${sampleId}`);
+  const mine = membership.scopes?.parties || [];
+  const admin = supabaseAdmin();
+  const [{ data: tn }, { data: style }, { data: smp }] = await Promise.all([
+    admin.from('tenants').select('settings').eq('id', tenant.id).single(),
+    admin.from('styles').select('id, code, customer_id, parties!styles_customer_id_fkey(name)').eq('id', styleId).eq('tenant_id', tenant.id).maybeSingle(),
+    admin.from('samples').select('id, type, round, style_id').eq('id', sampleId).eq('tenant_id', tenant.id).maybeSingle(),
+  ]);
+  if (!tenantTracks(tn?.settings as never).includes('development') || !style || !style.customer_id || !mine.includes(style.customer_id) || !smp || smp.style_id !== styleId) redirect(`/app/${slug}/shared`);
+  const text = String(form.get('text') || '').trim().slice(0, 4000);
+  const files = (form.getAll('photos') as File[]).filter((f) => f && f.size).slice(0, 5);
+  if (files.some((f) => f.size > 4_000_000)) back(path, { error: t('tooBig') });
+  if (files.some((f) => !/\.(png|jpe?g|webp|pdf)$/i.test(f.name))) back(path, { error: t('badFile') });
+  if (!text && !files.length) back(path, { error: t('emptyComment') });
+  const party = (style.parties as unknown as { name: string } | null)?.name || 'customer';
+  const actor = `${membership.display_name || user.email} (${party})`;
+  const round = `${smp.type.replace('_', ' ')} round ${smp.round}`;
+  const base = { tenant_id: tenant.id, track: 'development', style_id: styleId, sample_id: sampleId, version: 1, source: 'portal', read_status: 'skipped', confirmed_at: new Date().toISOString(), created_by: user.id, created_by_name: actor };
+  const ids: string[] = [];
+  if (text) {
+    const { data: r, error } = await admin.from('records').insert({ ...base, kind: 'fit_comment', title: text.slice(0, 80), parsed: { doc: 'comment', text, by: actor, party } }).select('id').single();
+    if (error || !r) back(path, { error: error?.message || 'failed' });
+    ids.push(r!.id);
+  }
+  for (const f of files) {
+    const buf = Buffer.from(await f.arrayBuffer()), sha256 = createHash('sha256').update(buf).digest('hex');
+    const ext = (f.name.split('.').pop() || 'bin').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 8);
+    const objectPath = `${tenant.id}/${styleId}/portal-${sha256.slice(0, 16)}.${ext}`;
+    const { error } = await admin.storage.from(DEV_BUCKET).upload(objectPath, buf, { contentType: f.type || 'application/octet-stream', upsert: true });
+    if (error) back(path, { error: error.message });
+    const { data: r } = await admin.from('records').insert({ ...base, kind: ext === 'pdf' ? 'fit_comment' : 'photo', title: f.name.slice(0, 160), storage_path: objectPath, filename: f.name.slice(0, 200), mime: f.type || null, bytes: buf.length, sha256, parsed: null }).select('id').single();
+    if (r) ids.push(r.id);
+  }
+  await admin.rpc('ledger_append', { p_tenant: tenant.id, p_channel: 'Portal', p_actor: actor, p_actor_user: user.id, p_counterparty: party, p_stream: 'Sample comments and approvals', p_order: null, p_what: `${party} commented on ${style.code} ${round}${text ? `: ${text.slice(0, 200)}` : ''}${files.length ? ` (${files.length} file${files.length === 1 ? '' : 's'})` : ''}`, p_gate: 'Logged', p_gated: false, p_ref: { sample_id: sampleId, record_ids: ids }, p_track: 'development', p_style: styleId });
+  revalidatePath(path); revalidatePath(`/app/${slug}/styles/${styleId}/samples/${sampleId}`);
+  back(path, { saved: '1' });
 }
