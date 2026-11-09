@@ -15,6 +15,7 @@ import { StyleFields } from '../style-fields';
 import { updateStyle, translateRecord } from '../actions';
 import { listSamples, listMaterials, listDevMilestones } from '@/lib/samples';
 import { SamplesCard, MaterialsCard, ScheduleCard } from '@/components/dev-cards';
+import { HandoverCard } from '@/components/handover-card';
 
 export const maxDuration = 60;
 const CUSTOMER = ['brand', 'retailer', 'store', 'buying_office', 'trading'];
@@ -26,7 +27,7 @@ export default async function StylePage({ params, searchParams }: { params: Prom
   const sb = await supabaseServer();
   const s = await getStyle(tenant.id, id, sb);
   if (!s) notFound();
-  const [records, { data: threads }, { data: drafts }, { data: ledger }, { data: parties }, samples, materials, milestones, { data: allParties }] = await Promise.all([
+  const [records, { data: threads }, { data: drafts }, { data: ledger }, { data: parties }, samples, materials, milestones, { data: allParties }, { data: freeOrders }, { data: linkedOrders }] = await Promise.all([
     styleRecords(sb, tenant.id, id),
     sb.from('threads').select('id, subject, kind, last_message_at, summary, party_id, parties(name, kind)').eq('tenant_id', tenant.id).eq('style_id', id).order('last_message_at', { ascending: false }),
     sb.from('drafts').select('id, seq, title, body, body_en, lang, stream, gate_level, impact, priority, source_message_id, party_id').eq('tenant_id', tenant.id).eq('style_id', id).in('status', ['queued', 'escalated']).order('seq'),
@@ -36,6 +37,8 @@ export default async function StylePage({ params, searchParams }: { params: Prom
     listMaterials(tenant.id, id, sb),
     listDevMilestones(tenant.id, id, sb),
     sb.from('parties').select('id, name, kind').eq('tenant_id', tenant.id).is('archived_at', null).order('name'),
+    sb.from('orders').select('id, po, style, customer_id, status').eq('tenant_id', tenant.id).is('style_id', null).eq('status', 'open').order('po'),
+    sb.from('orders').select('id, po, status').eq('tenant_id', tenant.id).eq('style_id', id).order('po'),
   ]);
   const tps = techPackVersions(records), latest = tps[0] || null, prev = tps[1] || null;
   const changes = diffTechPack(prev?.parsed || null, latest?.parsed || null);
@@ -77,6 +80,7 @@ export default async function StylePage({ params, searchParams }: { params: Prom
           <ScheduleCard slug={slug} styleId={id} rows={milestones} targetDelivery={s.target_delivery} canEdit={canEdit} tz={tenant.tz} />
           <SamplesCard slug={slug} styleId={id} samples={samples} parties={allParties || []} canEdit={canEdit} tz={tenant.tz} techPackVersion={latest?.version ?? null} />
           <MaterialsCard slug={slug} styleId={id} materials={materials} parties={allParties || []} canEdit={canEdit} hasBom={!!latest?.parsed?.bom.length} currency={s.currency} />
+          <HandoverCard slug={slug} s={s} parties={allParties || []} orders={freeOrders || []} linked={linkedOrders || []} canEdit={canEdit && ['owner', 'manager', 'merchandiser'].includes(membership.role)} techPackVersion={latest?.version ?? null} />
           {canEdit && <UploadForm tenant={slug} styleId={id} live={hasLlm()} />}
           <div className="card"><div className="flex items-center gap-2"><h2>{t('styleFile')}</h2><span className="muted small">{t('fileCount', { n: threads?.length || 0 })}</span></div>
             {!threads?.length && <p className="muted small mt-2">{t('noConversations')}</p>}

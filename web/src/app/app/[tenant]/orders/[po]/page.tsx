@@ -9,6 +9,7 @@ import { MsCell, HealthPill } from '@/components/milestones';
 import { setMilestone, setDestination } from '../actions';
 import { ComplianceCard } from '@/components/compliance-card';
 import { OrderBrief } from '@/components/order-brief';
+import { DevHistory } from '@/components/dev-history';
 
 export default async function OrderDetail({ params, searchParams }: { params: Promise<{ tenant: string; po: string }>; searchParams: Promise<{ saved?: string; error?: string }> }) {
   const { tenant: slug, po } = await params; const { saved, error } = await searchParams;
@@ -43,6 +44,7 @@ export default async function OrderDetail({ params, searchParams }: { params: Pr
         </div>
         <div className="grid gap-4 self-start">
           <OrderBrief slug={slug} tenantId={tenant.id} orderId={o.id} tz={tenant.tz} />
+          <DevHistory slug={slug} tenantId={tenant.id} order={{ id: o.id, po: o.po, style: o.style, style_id: o.style_id, meta: o.meta, dev_style: o.dev_style }} canEdit={canEdit} tz={tenant.tz} />
           <ComplianceCard slug={slug} tenantId={tenant.id} orderId={o.id} />
           <div className="card small"><h3>{t('order')}</h3><dl className="mt-2 grid gap-1" style={{ gridTemplateColumns: 'auto 1fr', columnGap: 12 }}>
             <dt className="muted">{t('customer')}</dt><dd>{o.customer?.name}</dd><dt className="muted">{t('factory')}</dt><dd>{o.factory?.name}</dd><dt className="muted">Mill</dt><dd>{o.mill?.name || '–'}</dd><dt className="muted">Fibre</dt><dd>{o.fibre?.name || '–'}</dd>

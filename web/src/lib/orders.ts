@@ -9,14 +9,15 @@ import { orderHealth, slipException, type MilestoneRow, type Health } from './co
 export type OrderRow = {
   id: string; po: string; style: string | null; description: string | null; category: string | null; composition: string | null;
   qty: number | null; sizes: Record<string, number>; colours: string[]; fob: number | null; currency: string; incoterm: string | null;
-  pol: string | null; pod: string | null; destination: string | null; instore_date: string | null; season: string | null; status: string; source: string | null;
+  pol: string | null; pod: string | null; destination: string | null; instore_date: string | null; season: string | null; status: string; source: string | null; style_id: string | null; meta: Record<string, unknown> | null;
+  dev_style: { id: string; code: string; name: string | null; status: string } | null;
   customer: { id: string; name: string; short: string | null } | null; factory: { id: string; name: string; short: string | null; country: string | null } | null;
   mill: { id: string; name: string; short: string | null } | null; fibre: { id: string; name: string; short: string | null } | null;
   milestones: (MilestoneRow & { id: string; forecast_date: string | null; note: string | null })[];
 };
 export type OrderWithHealth = OrderRow & { health: Health };
 
-const SELECT = 'id, po, style, description, category, composition, qty, sizes, colours, fob, currency, incoterm, pol, pod, destination, instore_date, season, status, source, customer:parties!orders_customer_id_fkey(id, name, short), factory:parties!orders_factory_id_fkey(id, name, short, country), mill:parties!orders_mill_id_fkey(id, name, short), fibre:parties!orders_fibre_id_fkey(id, name, short), milestones(id, key, plan_date, expected_date, actual_date, forecast_date, owner_kind, note)';
+const SELECT = 'id, po, style, description, category, composition, qty, sizes, colours, fob, currency, incoterm, pol, pod, destination, instore_date, season, status, source, style_id, meta, dev_style:styles!orders_style_id_fkey(id, code, name, status), customer:parties!orders_customer_id_fkey(id, name, short), factory:parties!orders_factory_id_fkey(id, name, short, country), mill:parties!orders_mill_id_fkey(id, name, short), fibre:parties!orders_fibre_id_fkey(id, name, short), milestones(id, key, plan_date, expected_date, actual_date, forecast_date, owner_kind, note)';
 
 export async function listOrders(tenantId: string, opts: { status?: string; customers?: string[] | null } = {}, client?: Client): Promise<OrderWithHealth[]> {
   const sb = client || await supabaseServer();
