@@ -1539,7 +1539,7 @@
     "otherRecords": "Otros registros",
     "pendingN": "{n} por comprobar",
     "readIt": "Subir y leer",
-    "reading": "Leyendo…",
+    "reading": "El agente está leyendo el archivo. Esta página se actualiza sola; una ficha técnica tarda alrededor de un minuto.",
     "recordKind": "Tipo",
     "save": "Guardar",
     "saved": "Guardado y registrado.",
@@ -1623,6 +1623,8 @@
     "versions": "Versiones",
     "viewer": "Los observadores no pueden modificar estilos.",
     "willBeFirst": "Pasa a ser la v1, la primera versión confirmada de su tipo en este estilo.",
-    "willBeVersion": "Pasa a ser la v{v} y sustituye a la v{prev}."
+    "willBeVersion": "Pasa a ser la v{v} y sustituye a la v{prev}.",
+    "readFailed": "No se pudo leer el archivo. Confírmelo como registro guardado, o descártelo e inténtelo de nuevo.",
+    "readingPill": "leyendo"
   }
 }

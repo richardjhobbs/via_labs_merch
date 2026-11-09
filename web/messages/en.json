@@ -1534,7 +1534,7 @@
     "recordKind": "Kind",
     "readIt": "Upload and read",
     "uploading": "Uploading…",
-    "reading": "Reading…",
+    "reading": "The agent is reading the file. This page refreshes itself; a tech pack takes about a minute.",
     "noFile": "Choose a file first.",
     "tooBig": "That file is larger than 30 MB.",
     "uploadFailed": "Upload failed ({status}).",
@@ -1623,6 +1623,8 @@
         "thread": "Thread",
         "other": "Other"
       }
-    }
+    },
+    "readFailed": "The file could not be read. Confirm it as a stored record, or discard it and try again.",
+    "readingPill": "reading"
   }
 }

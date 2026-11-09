@@ -1539,7 +1539,7 @@
     "otherRecords": "其他记录",
     "pendingN": "{n} 条待核对",
     "readIt": "上传并读取",
-    "reading": "读取中…",
+    "reading": "智能体正在读取文件。本页会自动刷新；一份工艺单约需一分钟。",
     "recordKind": "类型",
     "save": "保存",
     "saved": "已保存并记入台账。",
@@ -1623,6 +1623,8 @@
     "versions": "版本",
     "viewer": "查看者不能修改款式。",
     "willBeFirst": "此记录将成为 v1，即此款式上该类型的首个确认版本。",
-    "willBeVersion": "此记录将成为 v{v}，取代 v{prev}。"
+    "willBeVersion": "此记录将成为 v{v}，取代 v{prev}。",
+    "readFailed": "文件无法读取。可将其确认为已存档记录，或丢弃后重试。",
+    "readingPill": "读取中"
   }
 }

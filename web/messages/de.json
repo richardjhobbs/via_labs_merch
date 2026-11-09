@@ -1539,7 +1539,7 @@
     "otherRecords": "Weitere Datensätze",
     "pendingN": "{n} zu prüfen",
     "readIt": "Hochladen und lesen",
-    "reading": "Wird gelesen…",
+    "reading": "Der Agent liest die Datei. Diese Seite aktualisiert sich selbst; ein Tech Pack dauert etwa eine Minute.",
     "recordKind": "Art",
     "save": "Speichern",
     "saved": "Gespeichert und protokolliert.",
@@ -1623,6 +1623,8 @@
     "versions": "Versionen",
     "viewer": "Betrachter können Styles nicht ändern.",
     "willBeFirst": "Dies wird v1, die erste bestätigte Version dieser Art an diesem Style.",
-    "willBeVersion": "Dies wird v{v} und ersetzt v{prev}."
+    "willBeVersion": "Dies wird v{v} und ersetzt v{prev}.",
+    "readFailed": "Die Datei konnte nicht gelesen werden. Als gespeicherten Datensatz bestätigen oder verwerfen und erneut versuchen.",
+    "readingPill": "wird gelesen"
   }
 }
