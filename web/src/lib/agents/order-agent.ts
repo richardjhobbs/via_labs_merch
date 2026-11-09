@@ -13,7 +13,7 @@ import { deskFor, type DeskRule } from './authority';
 
 type Client = SupabaseClient<any, 'merch', any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
-const Src = z.string().describe('the id of the evidence, exactly as shown in brackets: m:<id> message, l:<id> ledger row, d:<id> draft, ms:<key> milestone');
+const Src = z.string().describe('the id of the evidence, exactly as shown in brackets: m:<id> message, l:<id> ledger row, d:<id> draft, ms:<key> milestone, i:<id> instruction from the agent above');
 export const BriefSchema = z.object({
   status_line: z.string().describe('one line: where the order stands right now'),
   summary: z.string().describe('at most 5 short sentences: the state of the order, what changed recently, what matters next'),
@@ -85,12 +85,14 @@ export async function updateBrief(tenantId: string, orderId: string, reason = 'e
   if (o.status !== 'open') { await sb.from('agents').update({ status: 'closed' }).eq('id', agentId); return { skipped: 'closed' as const }; }
   const prev = await latestBrief(sb, orderId);
   const since = prev?.created_at || '1970-01-01';
-  const [{ data: msgs }, { data: led }, { data: drafts }] = await Promise.all([
+  const [{ data: msgs }, { data: led }, { data: drafts }, { data: ins }] = await Promise.all([
     sb.from('messages').select('id, direction, sender_name, text, text_en, received_at, created_at, parties(name)').eq('order_id', orderId).or(`created_at.gt.${since},processed_at.gt.${since}`).order('created_at', { ascending: false }).limit(prev ? 25 : 30),
     sb.from('ledger').select('id, at, actor, what, gate').eq('order_id', orderId).gt('at', since).order('id', { ascending: false }).limit(prev ? 30 : 40),
     sb.from('drafts').select('id, title, status, stream, created_at, decided_at, parties(name)').eq('order_id', orderId).or(`created_at.gt.${since},decided_at.gt.${since}`).order('created_at', { ascending: false }).limit(10),
+    sb.from('agent_messages').select('id, body, created_at, from:agents!agent_messages_from_agent_id_fkey(name)').eq('to_agent_id', agentId).eq('kind', 'instruction').eq('status', 'open').or(`due_at.is.null,due_at.gt.${new Date().toISOString()}`).order('created_at', { ascending: false }).limit(5),
   ]);
-  if (prev && !msgs?.length && !led?.length && !drafts?.length) return { skipped: 'nothing new' as const };
+  const newIns = (ins || []).filter((x) => !prev || x.created_at > prev.created_at);
+  if (prev && !msgs?.length && !led?.length && !drafts?.length && !newIns.length) return { skipped: 'nothing new' as const };
 
   const ms = MILESTONES.filter((k) => o.health.p[k]).map((k) => { const p = o.health.p[k], row = o.milestones.find((r) => r.key === k); return `[ms:${k}] ${LABELS[k]}: plan ${isoOf(p.plan)}, ${p.status}${p.slip > 0 && p.status !== 'done' ? ` (+${p.slip}d)` : ''}${row?.actual_date ? `, actual ${row.actual_date}` : row?.expected_date ? `, expected ${row.expected_date}` : ''}${row?.note ? `, note: ${clip(row.note, 120)}` : ''}`; });
   const evidence = [
@@ -99,15 +101,19 @@ export async function updateBrief(tenantId: string, orderId: string, reason = 'e
     msgs?.length ? `Messages${prev ? ' since the last brief' : ''} (newest first):\n${msgs.map((m) => `[m:${m.id}] ${day(m.received_at || m.created_at)} ${m.direction === 'in' ? `from ${m.sender_name || (m.parties as unknown as { name: string } | null)?.name || 'them'}` : `us to ${(m.parties as unknown as { name: string } | null)?.name || 'them'}`}: ${clip(m.text_en || m.text, 600)}`).join('\n')}` : '',
     led?.length ? `Ledger${prev ? ' since the last brief' : ''} (newest first):\n${led.map((l) => `[l:${l.id}] ${day(l.at)} ${l.actor}: ${clip(l.what, 240)} (${l.gate})`).join('\n')}` : '',
     drafts?.length ? `Drafts:\n${drafts.map((d) => `[d:${d.id}] ${day(d.created_at)} ${d.status} · ${d.stream} · to ${(d.parties as unknown as { name: string } | null)?.name || '?'}: ${clip(d.title, 160)}`).join('\n')}` : '',
+    ins?.length ? `Instructions from the agents above you (act on them in next_action; cite them as i:<id>):\n${ins.map((x) => `[i:${x.id}] ${day(x.created_at)} ${(x.from as unknown as { name: string } | null)?.name || 'Mira'}: ${clip((x.body as { text?: string })?.text, 300)}`).join('\n')}` : '',
     prev ? `Previous brief (version ${prev.version}, ${day(prev.created_at)}):\n${JSON.stringify(prev.brief)}` : 'There is no previous brief: build the first one from the evidence above.',
   ].filter(Boolean).join('\n\n');
 
-  const { data: brief, usage } = await extract(BriefSchema, SOUL, evidence, { maxTokens: 2500 });
+  // room for the model's thinking as well as the answer: a busy order cut off at 2,500 tokens (9 Nov)
+  let brief: Brief | null = null, usage = { model: SMALL_MODEL, tokensIn: 0, tokensOut: 0, cost: 0 };
+  try { ({ data: brief, usage } = await extract(BriefSchema, SOUL, evidence, { maxTokens: 8000 })); }
+  catch (e) { await failed(sb, tenantId, agentId, reason, t0, e instanceof Error ? e.message : String(e)); throw e; }
   await recordUsage(tenantId, { runs: 1, tokensIn: usage.tokensIn, tokensOut: usage.tokensOut, cost: usage.cost });
-  if (!brief) throw new Error(`brief for PO ${o.po}: no output`);
+  if (!brief) { await failed(sb, tenantId, agentId, reason, t0, 'no output'); throw new Error(`brief for PO ${o.po}: no output`); }
 
   // an agent cannot remember what it cannot cite: keep only items whose source was in front of it
-  const allowed = new Set<string>([...(prev?.sources || []), ...ms.map((l) => l.slice(1, l.indexOf(']'))), ...(msgs || []).map((m) => `m:${m.id}`), ...(led || []).map((l) => `l:${l.id}`), ...(drafts || []).map((d) => `d:${d.id}`)]);
+  const allowed = new Set<string>([...(prev?.sources || []), ...(ins || []).map((x) => `i:${x.id}`), ...ms.map((l) => l.slice(1, l.indexOf(']'))), ...(msgs || []).map((m) => `m:${m.id}`), ...(led || []).map((l) => `l:${l.id}`), ...(drafts || []).map((d) => `d:${d.id}`)]);
   const ok = <T extends { source: string }>(xs: T[]) => xs.filter((x) => allowed.has(x.source.trim()));
   const clean: Brief = { ...brief, open_asks: ok(brief.open_asks), commitments: ok(brief.commitments), risks: ok(brief.risks), last_contact: ok(brief.last_contact) };
   const sources = [...new Set([...clean.open_asks, ...clean.commitments, ...clean.risks, ...clean.last_contact].map((x) => x.source.trim()))];
@@ -123,6 +129,12 @@ export async function updateBrief(tenantId: string, orderId: string, reason = 'e
   await sb.from('agent_runs').insert({ tenant_id: tenantId, agent_id: agentId, trigger: 'brief', model: usage.model, input: { reason, version, messages: msgs?.length || 0, ledger: led?.length || 0, drafts: drafts?.length || 0 }, tools_called: [], output: clean.status_line, tokens_in: usage.tokensIn, tokens_out: usage.tokensOut, cost_usd: usage.cost, ms: Date.now() - t0 });
   const n = (x: Brief) => x.open_asks.length + x.commitments.length + x.risks.length + x.last_contact.length;
   return { version, dropped: n(brief) - n(clean) };
+}
+
+// A failed update is a run with its error: it shows on the Agents page, and the drain waits an hour before
+// trying that order's first brief again (orders_without_brief).
+async function failed(sb: Client, tenantId: string, agentId: string, reason: string, t0: number, error: string) {
+  await sb.from('agent_runs').insert({ tenant_id: tenantId, agent_id: agentId, trigger: 'brief', model: SMALL_MODEL, input: { reason }, tools_called: [], error: error.slice(0, 500), tokens_in: 0, tokens_out: 0, cost_usd: 0, ms: Date.now() - t0 });
 }
 
 // A compact form for the agent above (Mira): the brief without its source ids.

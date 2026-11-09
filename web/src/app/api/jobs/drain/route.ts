@@ -15,6 +15,7 @@ import { runAllAlerts } from '@/lib/alerts';
 import { nextEsgTenant, runEsgPass } from '@/lib/agents/esg-pass';
 import { updateBrief } from '@/lib/agents/order-agent';
 import { riseAll } from '@/lib/agents/desks';
+import { conflictPass, dueMorningBrief, morningBrief } from '@/lib/agents/manager';
 
 export const maxDuration = 55;
 const BUDGET_MS = 40_000;
@@ -59,7 +60,16 @@ export async function POST(req: NextRequest) {
         await sb.rpc('q_delete', { p_queue: 'merch_agent_runs', p_id: job.msg_id }); done.jobs++;
       } catch (e) { done.failed++; errors.push(e instanceof Error ? e.message : String(e)); if (job.read_ct >= 2) await sb.rpc('q_delete', { p_queue: 'merch_agent_runs', p_id: job.msg_id }); }
     }
-    // 2b. first briefs: open orders whose agent has no memory yet, two a minute while budget allows
+    // 2b. Mira as manager: the morning brief for one company whose day has started, and once an hour at :41
+    //     the capacity clashes across desks (at most two new decisions per company per pass)
+    if (left() > 25_000) {
+      try { const due = await dueMorningBrief(sb); if (due) { await morningBrief(due); done.morning = 1; } } catch (e) { done.failed++; errors.push(`morning: ${e instanceof Error ? e.message : String(e)}`); }
+    }
+    if (new Date().getUTCMinutes() === 41 && left() > 22_000) {
+      const { data: ts } = await sb.from('tenants').select('id');
+      for (const tn of ts || []) { if (left() < 18_000) break; try { const r = await conflictPass(tn.id); if ('decided' in r) done.conflicts = (done.conflicts || 0) + (r.decided || 0); } catch (e) { done.failed++; errors.push(`conflicts: ${e instanceof Error ? e.message : String(e)}`); } }
+    }
+    // 2c. first briefs: open orders whose agent has no memory yet, two a minute while budget allows
     if (left() > 22_000) {
       const { data: fresh } = await sb.rpc('orders_without_brief', { p_n: 2 });
       for (const f of (fresh || []) as { order_id: string; tenant_id: string }[]) {

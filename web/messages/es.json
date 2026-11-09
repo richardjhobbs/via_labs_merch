@@ -178,7 +178,12 @@
     "devPending": "registros por comprobar",
     "devPendingSub": "El agente leyó una ficha técnica o un brief. Nada cuenta hasta que usted lo confirme.",
     "devPendingTitle": "Leídos y a la espera de su comprobación",
-    "devRecent": "Estilos en desarrollo"
+    "devRecent": "Estilos en desarrollo",
+    "brief": {
+      "title": "Resumen matinal de {name}",
+      "desk": "{name} esta mañana",
+      "byDesk": "Mesa por mesa"
+    }
   },
   "queue": {
     "title": "Cola de aprobación",
@@ -338,7 +343,8 @@
         "m": "mensaje",
         "l": "registro",
         "d": "borrador",
-        "ms": "hito"
+        "ms": "hito",
+        "i": "instrucción"
       },
       "sev": {
         "high": "alto",
@@ -779,8 +785,11 @@
         "role": "Solo propietarios y gerentes pueden cambiar las mesas.",
         "fields": "Revisa el nombre y la agrupación de la mesa.",
         "person": "Esa persona no pertenece a esta empresa."
-      }
-    }
+      },
+      "capacity": "Capacidad en {factory}",
+      "needsPerson": "Debe decidir una persona."
+    },
+    "trigManager": "Gerente"
   },
   "assistant": {
     "title": "Preguntar",

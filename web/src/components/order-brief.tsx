@@ -18,8 +18,8 @@ export async function OrderBrief({ slug, tenantId, orderId, tz }: { slug: string
   const when = (s: string) => new Date(s).toLocaleString('en-GB', { timeZone: tz, day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
   const src = (s: string) => {
     const [kind, id] = [s.slice(0, s.indexOf(':')), s.slice(s.indexOf(':') + 1)];
-    const href = kind === 'm' ? (threadOf.get(id) ? `/app/${slug}/threads/${threadOf.get(id)}` : null) : kind === 'l' ? `/app/${slug}/ledger` : kind === 'd' ? `/app/${slug}/queue` : kind === 'ms' ? `#ms-${id}` : null;
-    const label = ['m', 'l', 'd', 'ms'].includes(kind) ? t(`src.${kind}` as never) : kind;
+    const href = kind === 'm' ? (threadOf.get(id) ? `/app/${slug}/threads/${threadOf.get(id)}` : null) : kind === 'l' ? `/app/${slug}/ledger` : kind === 'd' ? `/app/${slug}/queue` : kind === 'ms' ? `#ms-${id}` : kind === 'i' ? `/app/${slug}/agents#desks` : null;
+    const label = ['m', 'l', 'd', 'ms', 'i'].includes(kind) ? t(`src.${kind}` as never) : kind;
     return href ? <Link className="pill" href={href} style={{ fontSize: 10.5 }}>{label}</Link> : <span className="pill" style={{ fontSize: 10.5 }}>{label}</span>;
   };
   const list = <T extends { source: string }>(title: string, xs: T[], line: (x: T) => React.ReactNode) => !!xs.length && (

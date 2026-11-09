@@ -178,7 +178,12 @@
     "devPending": "条记录待核对",
     "devPendingSub": "智能体已读取一份工艺单或设计简报。在您确认之前，一律不计入。",
     "devPendingTitle": "已读取，等待您核对",
-    "devRecent": "开发中的款式"
+    "devRecent": "开发中的款式",
+    "brief": {
+      "title": "{name} 的晨间简报",
+      "desk": "{name} 今晨概况",
+      "byDesk": "按业务组"
+    }
   },
   "queue": {
     "title": "审批队列",
@@ -338,7 +343,8 @@
         "m": "消息",
         "l": "记录",
         "d": "草稿",
-        "ms": "里程碑"
+        "ms": "里程碑",
+        "i": "指示"
       },
       "sev": {
         "high": "高",
@@ -779,8 +785,11 @@
         "role": "只有所有者和经理可以更改业务组。",
         "fields": "请检查业务组名称和分组方式。",
         "person": "此人不属于本公司。"
-      }
-    }
+      },
+      "capacity": "{factory} 产能",
+      "needsPerson": "需要人工决定。"
+    },
+    "trigManager": "经理"
   },
   "assistant": {
     "title": "提问",

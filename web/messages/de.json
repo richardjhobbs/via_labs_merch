@@ -178,7 +178,12 @@
     "devPending": "Datensätze zu prüfen",
     "devPendingSub": "Der Agent hat ein Tech Pack oder Briefing gelesen. Nichts zählt, bevor Sie es bestätigen.",
     "devPendingTitle": "Gelesen und wartet auf Ihre Prüfung",
-    "devRecent": "Styles in Entwicklung"
+    "devRecent": "Styles in Entwicklung",
+    "brief": {
+      "title": "Morgenbriefing von {name}",
+      "desk": "{name} heute Morgen",
+      "byDesk": "Desk für Desk"
+    }
   },
   "queue": {
     "title": "Freigaben",
@@ -338,7 +343,8 @@
         "m": "Nachricht",
         "l": "Ledger",
         "d": "Entwurf",
-        "ms": "Meilenstein"
+        "ms": "Meilenstein",
+        "i": "Anweisung"
       },
       "sev": {
         "high": "hoch",
@@ -779,8 +785,11 @@
         "role": "Nur Inhaber und Manager können Desks ändern.",
         "fields": "Prüfen Sie Name und Gruppierung des Desks.",
         "person": "Diese Person gehört nicht zu dieser Firma."
-      }
-    }
+      },
+      "capacity": "Kapazität bei {factory}",
+      "needsPerson": "Eine Person muss entscheiden."
+    },
+    "trigManager": "Manager"
   },
   "assistant": {
     "title": "Fragen",

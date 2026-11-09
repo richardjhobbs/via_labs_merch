@@ -287,6 +287,46 @@ export function toolsFor(ctx: AgentCtx) {
 
   // ESG and compliance (add-on): what is due, and recording a figure someone reported, for a person to check.
   const esgOn = async () => esgEnabled((await sb.from('tenants').select('settings').eq('id', T).single()).data?.settings);
+  // the layers' memory: a desk's orders as their agents see them, and Mira's latest morning brief
+  const get_desk_brief = betaZodTool({
+    name: 'get_desk_brief',
+    description: 'The layer below you: each desk (a group of orders run for a senior merchandiser), or one desk by name, with every order\'s current status line and next action from its order agent, and the decisions waiting at that desk. Use it for questions about a customer, a supplier or a group of orders before reading raw records. "No desk" holds orders that report straight to you.',
+    inputSchema: z.object({ desk: z.string().optional().describe('desk name, or empty for all desks') }),
+    run: wrap('get_desk_brief', async ({ desk }) => {
+      const [{ data: agents }, { data: mem }, { data: waiting }] = await Promise.all([
+        sb.from('agents').select('id, name, layer, order_id, parent_agent_id, status').eq('tenant_id', T).in('layer', ['order', 'desk']).eq('status', 'active'),
+        sb.from('agent_memory').select('order_id, version, brief').eq('tenant_id', T).not('order_id', 'is', null).order('version', { ascending: false }).limit(2000),
+        sb.from('drafts').select('agent_id, waiting_layer, title, seq').eq('tenant_id', T).eq('status', 'queued').not('waiting_layer', 'is', null),
+      ]);
+      const desks = (agents || []).filter((a) => a.layer === 'desk'), orderAgents = (agents || []).filter((a) => a.layer === 'order');
+      const latest = new Map<string, { status_line: string; next_action: { what: string } | null }>();
+      for (const m of mem || []) if (!latest.has(m.order_id as string)) latest.set(m.order_id as string, m.brief as { status_line: string; next_action: { what: string } | null });
+      const { data: pos } = await sb.from('orders').select('id, po, customer_id').eq('tenant_id', T).in('id', orderAgents.map((a) => a.order_id as string));
+      // a person limited to some customers sees only their orders
+      const visible = (pos || []).filter((o) => !ctx.scope || ctx.scope.includes(o.customer_id as string));
+      const poOf = new Map(visible.map((o) => [o.id as string, o.po as string]));
+      const groups = [...desks.map((d) => ({ id: d.id as string, name: d.name as string })), { id: '', name: 'No desk' }].filter((g) => !desk || g.name.toLowerCase().includes(desk.toLowerCase()));
+      return groups.map((g) => {
+        const mine = orderAgents.filter((a) => poOf.has(a.order_id as string) && (g.id ? a.parent_agent_id === g.id : !desks.some((d) => d.id === a.parent_agent_id)));
+        return { desk: g.name, orders: mine.map((a) => ({ po: poOf.get(a.order_id as string), status: latest.get(a.order_id as string)?.status_line || 'no brief yet', next: latest.get(a.order_id as string)?.next_action?.what || null })), decisions_waiting: (waiting || []).filter((w) => mine.some((a) => a.id === w.agent_id)).map((w) => ({ ref: `Q-${w.seq}`, title: w.title, waiting_at: w.waiting_layer })) };
+      }).filter((g) => g.orders.length);
+    }),
+  });
+
+  const get_company_brief = betaZodTool({
+    name: 'get_company_brief',
+    description: 'Your own latest morning brief for the company (what needs attention, desk by desk, and the top actions) and the capacity decisions you made across desks in the last 7 days.',
+    inputSchema: z.object({}),
+    run: wrap('get_company_brief', async () => {
+      const [{ data: b }, { data: dec }] = await Promise.all([
+        ctx.agentId ? sb.from('agent_memory').select('brief, created_at').eq('agent_id', ctx.agentId).order('version', { ascending: false }).limit(1).maybeSingle() : Promise.resolve({ data: null }),
+        ctx.agentId ? sb.from('agent_messages').select('body, created_at').eq('from_agent_id', ctx.agentId).eq('kind', 'decision').gte('created_at', new Date(Date.now() - 7 * 864e5).toISOString()).order('created_at', { ascending: false }).limit(20) : Promise.resolve({ data: [] }),
+      ]);
+      const seen = new Set<string>();
+      return { morning_brief: b ? { written: b.created_at, ...(b.brief as object) } : null, capacity_decisions: (dec || []).filter((x) => { const k = (x.body as { key?: string }).key || ''; if (seen.has(k)) return false; seen.add(k); return true; }).map((x) => ({ at: x.created_at, ...(x.body as object) })) };
+    }),
+  });
+
   const get_compliance = betaZodTool({
     name: 'get_compliance',
     description: 'Compliance work the company owes its lenders, customers, certifiers, auditors and authorities: ESG reporting, codes of conduct, audits and corrective actions, certificates and licences to renew, test reports and transaction certificates per PO. Open tasks with requirement, programme, period or PO, supplier, due date, owner role and state (overdue, due, upcoming, review, returned). Use for "what compliance is due", "what does the bank need this quarter", "which certificates expire soon", "is the test report in for 48812".',
@@ -320,7 +360,7 @@ export function toolsFor(ctx: AgentCtx) {
     }),
   });
 
-  const all = [get_briefing, search_orders, get_order, get_exceptions, get_party, get_messages, get_ledger, get_gates, queue_draft, request_approval, set_milestone, navigate, get_team, get_order_file, search_mailbox, get_compliance, record_compliance_value, ...styleTools(ctx, wrap)];
+  const all = [get_briefing, search_orders, get_order, get_exceptions, get_party, get_messages, get_ledger, get_gates, queue_draft, request_approval, set_milestone, navigate, get_team, get_order_file, search_mailbox, get_compliance, record_compliance_value, ...(ctx.track === 'development' ? [] : [get_desk_brief, get_company_brief]), ...styleTools(ctx, wrap)];
   const forRole = ['owner', 'manager'].includes(ctx.role || '') || ctx.trigger !== 'chat' ? all : all.filter((t) => t.name !== 'get_team');
   // inbound runs may capture a reported date (L1 record) and draft; they never approve
   // mailbox search is for a person in chat only, on their own mailbox
