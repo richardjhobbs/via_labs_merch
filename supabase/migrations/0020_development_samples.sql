@@ -1,4 +1,4 @@
--- 0019: development track, Stage B (docs/development-merchandising.md section 3.2): sample rounds and their
+-- 0020 (registered on Supabase as merch_0019_development_samples, before main gained 0019_desk_agents): development track, Stage B (docs/development-merchandising.md section 3.2): sample rounds and their
 -- measurements, materials (the BOM with sourcing status), the development schedule, and cross-references.
 --   samples          one row per round (proto, fit, size set, SMS, PP, TOP, shipment, lab dip, strike-off...), on a
 --                    style and, from PP on, on the order; the decision is always a person's (written by server

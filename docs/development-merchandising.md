@@ -151,7 +151,7 @@ Each item is one or two Build Log phases. Stage A is the smallest version that a
 4. Inbound track classification with `track_default` on contacts and the "which track?" queue item.
 5. Development agent prompt and the style tools; PLM notification recognition for the first customer's PLM (route 1).
 
-**Stage B, samples and materials, built 9 November 2026 (migration 0019, `lib/samples.ts`, `lib/dev-path.ts`, `components/dev-cards.tsx`; `style_links` has its table but no screen yet, and comment-sheet compilation is the agent drafting on the Sample comments and approvals stream)**
+**Stage B, samples and materials, built 9 November 2026 (migration 0020, `lib/samples.ts`, `lib/dev-path.ts`, `components/dev-cards.tsx`; `style_links` has its table but no screen yet, and comment-sheet compilation is the agent drafting on the Sample comments and approvals stream)**
 6. `samples`, `measurements`, `materials`, `dev_milestones`, `schedule_templates`; the generalised path engine; Samples and Materials screens; the sample review form; courier capture; silence alerts on rounds and swatches; comment-sheet compilation.
 7. `style_links` and reference search.
 

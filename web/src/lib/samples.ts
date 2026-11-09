@@ -1,4 +1,4 @@
-// Sample rounds, materials and the development schedule (migration 0019). Reads for screens and the agent;
+// Sample rounds, materials and the development schedule (migration 0020). Reads for screens and the agent;
 // writes live in app/[tenant]/styles/[id]/sample-actions.ts and material-actions.ts after a role check.
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { supabaseServer } from './supabase/server';
