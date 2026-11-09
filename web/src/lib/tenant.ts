@@ -6,7 +6,7 @@ import { supabaseServer, supabaseAdmin } from './supabase/server';
 import { activeSupportGrant } from './support';
 
 export type Role = 'owner' | 'manager' | 'merchandiser' | 'qc' | 'compliance' | 'logistics' | 'viewer' | 'partner';
-export type Membership = { id: string; tenant_id: string; role: Role; display_name: string | null; initials: string | null; title: string | null; locale: string | null; scopes: { parties?: string[] }; tenants: { id: string; slug: string; name: string; kind: string; locale: string; tz: string; currency: string } };
+export type Membership = { id: string; tenant_id: string; role: Role; display_name: string | null; initials: string | null; title: string | null; locale: string | null; scopes: { parties?: string[] }; tracks: string[]; tenants: { id: string; slug: string; name: string; kind: string; locale: string; tz: string; currency: string } };
 
 // cache(): layout and page both call this; one lookup per request.
 export const me = cache(async function me() {
@@ -14,7 +14,7 @@ export const me = cache(async function me() {
   const { data: { user } } = await sb.auth.getUser();
   if (!user) return null;
   const [{ data: memberships }, { data: admin }] = await Promise.all([
-    sb.from('memberships').select('id, tenant_id, role, display_name, initials, title, locale, scopes, tenants(id, slug, name, kind, locale, tz, currency)').eq('user_id', user.id),
+    sb.from('memberships').select('id, tenant_id, role, display_name, initials, title, locale, scopes, tracks, tenants(id, slug, name, kind, locale, tz, currency)').eq('user_id', user.id),
     sb.from('platform_admins').select('user_id').eq('user_id', user.id).maybeSingle(),
   ]);
   return { user, memberships: (memberships || []) as unknown as Membership[], isAdmin: !!admin };
@@ -48,11 +48,11 @@ export async function requireTenant(slug: string, opts: { partner?: boolean } = 
     }
     const asId = (await cookies()).get(`merch_viewas_${slug}`)?.value;
     if (asId) {
-      const { data: row } = await sb.from('memberships').select('id, tenant_id, role, display_name, initials, title, locale, scopes, tenants(id, slug, name, kind, locale, tz, currency)').eq('id', asId).maybeSingle();
+      const { data: row } = await sb.from('memberships').select('id, tenant_id, role, display_name, initials, title, locale, scopes, tracks, tenants(id, slug, name, kind, locale, tz, currency)').eq('id', asId).maybeSingle();
       const mm = row as unknown as Membership | null;
       if (mm && mm.tenants.slug === slug) return { ...m, membership: { ...mm, display_name: `${mm.display_name || 'member'} (viewed by VIA Labs)` }, tenant: mm.tenants, viewingAs: mm.id, support: grant };
     }
-    return { ...m, membership: { id: 'admin', tenant_id: t.id, role: 'manager' as Role, display_name: 'VIA Labs', initials: 'VIA', title: 'VIA Labs', locale: null, scopes: {}, tenants: t } as Membership, tenant: t, viewingAs: null as string | null, support: grant };
+    return { ...m, membership: { id: 'admin', tenant_id: t.id, role: 'manager' as Role, display_name: 'VIA Labs', initials: 'VIA', title: 'VIA Labs', locale: null, scopes: {}, tracks: ['production', 'development'], tenants: t } as Membership, tenant: t, viewingAs: null as string | null, support: grant };
   }
   if (!membership) redirect('/app');
   return { ...m, membership, tenant: membership.tenants, viewingAs: null as string | null, support: null as Awaited<ReturnType<typeof activeSupportGrant>> };

@@ -4,6 +4,7 @@ import { getTranslations } from 'next-intl/server';
 import { requireTenant, scopeOf } from '@/lib/tenant';
 import { supabaseServer } from '@/lib/supabase/server';
 import { approveDraft, rejectDraft } from './actions';
+import { trackFor } from '@/lib/tracks';
 
 export default async function Queue({ params, searchParams }: { params: Promise<{ tenant: string }>; searchParams: Promise<{ saved?: string; error?: string }> }) {
   const { tenant: slug } = await params; const q = await searchParams;
@@ -12,11 +13,12 @@ export default async function Queue({ params, searchParams }: { params: Promise<
   const t = await getTranslations('queue');
   const sb = await supabaseServer();
   const since = new Date(new Date().setHours(0, 0, 0, 0)).toISOString();
+  const { track } = await trackFor(sb, slug, tenant.id, membership);
   const [{ data: draftsAll }, { data: decided }] = await Promise.all([
-    sb.from('drafts').select('id, seq, priority, stream, title, impact, body, body_en, lang, gate_level, status, created_at, party_id, orders(po, customer_id), parties(name, short, channel_pref), source:messages!drafts_source_message_id_fkey(sender_name, from_addr, text_en, text, thread_id, raw, channel:channels(kind, account, status))').eq('tenant_id', tenant.id).in('status', ['queued', 'escalated']).order('created_at', { ascending: false }),
-    sb.from('drafts').select('id, seq, title, status, decided_at, decision_note, orders(po)').eq('tenant_id', tenant.id).in('status', ['approved', 'sent', 'rejected']).gte('decided_at', since).order('decided_at', { ascending: false }).limit(20),
+    sb.from('drafts').select('id, seq, priority, stream, title, impact, body, body_en, lang, gate_level, status, created_at, party_id, orders(po, customer_id), styles(id, code, customer_id), parties(name, short, channel_pref), source:messages!drafts_source_message_id_fkey(sender_name, from_addr, text_en, text, thread_id, raw, channel:channels(kind, account, status))').eq('tenant_id', tenant.id).eq('track', track).in('status', ['queued', 'escalated']).order('created_at', { ascending: false }),
+    sb.from('drafts').select('id, seq, title, status, decided_at, decision_note, orders(po), styles(code)').eq('tenant_id', tenant.id).eq('track', track).in('status', ['approved', 'sent', 'rejected']).gte('decided_at', since).order('decided_at', { ascending: false }).limit(20),
   ]);
-  const drafts = (draftsAll || []).filter((d) => !scope || (d.parties && scope.includes(d.party_id as string)) || scope.includes((d.orders as unknown as { customer_id: string } | null)?.customer_id || ''));
+  const drafts = (draftsAll || []).filter((d) => !scope || (d.parties && scope.includes(d.party_id as string)) || scope.includes((d.orders as unknown as { customer_id: string } | null)?.customer_id || '') || scope.includes((d.styles as unknown as { customer_id: string } | null)?.customer_id || ''));
   const P = ['', 'crit', 'warn', ''];
   return (
     <div className="max-w-5xl">
@@ -27,7 +29,7 @@ export default async function Queue({ params, searchParams }: { params: Promise<
       <div className="grid gap-4 mt-6">
         {!drafts?.length && <div className="card muted">{t('empty')}</div>}
         {(drafts || []).map((d) => {
-          const po = (d.orders as unknown as { po: string; customer_id: string } | null)?.po, party = d.parties as unknown as { name: string; short: string | null; channel_pref: string | null } | null, src = d.source as unknown as { sender_name: string | null; from_addr: string | null; text_en: string | null; text: string; thread_id: string | null; raw: { gmail?: { reply_to?: string | null }; m365?: { reply_to?: string | null } } | null; channel: { kind: string; account: string | null; status: string } | null } | null;
+          const po = (d.orders as unknown as { po: string; customer_id: string } | null)?.po, st = d.styles as unknown as { id: string; code: string } | null, party = d.parties as unknown as { name: string; short: string | null; channel_pref: string | null } | null, src = d.source as unknown as { sender_name: string | null; from_addr: string | null; text_en: string | null; text: string; thread_id: string | null; raw: { gmail?: { reply_to?: string | null }; m365?: { reply_to?: string | null } } | null; channel: { kind: string; account: string | null; status: string } | null } | null;
           // where an approved reply really goes: back out through the mailbox the original came in on, else a person sends it
           const box = src?.channel && ['email_gmail', 'email_m365'].includes(src.channel.kind) ? src.channel : null;
           const chat = src?.channel && ['whatsapp', 'zalo'].includes(src.channel.kind) ? src.channel : null;
@@ -40,6 +42,7 @@ export default async function Queue({ params, searchParams }: { params: Promise<
                 <span className="pill">{d.stream}</span>
                 <span className="pill agent">L{d.gate_level}</span>
                 {po && <Link className="pill" href={`/app/${slug}/orders/${encodeURIComponent(po)}`}>PO {po}</Link>}
+                {st && <Link className="pill" href={`/app/${slug}/styles/${st.id}`}>{st.code}</Link>}
                 <span className="ml-auto small muted">{new Date(d.created_at).toLocaleString('en-GB', { timeZone: tenant.tz })}</span>
               </div>
               <h2 className="mt-2" style={{ fontSize: 16 }}>{d.title}</h2>
@@ -65,7 +68,7 @@ export default async function Queue({ params, searchParams }: { params: Promise<
         <div className="mt-8">
           <h2 style={{ fontSize: 15 }}>{t('decided')}</h2>
           <div className="card tw mt-2" style={{ padding: 0 }}><table className="t stack"><tbody>
-            {decided.map((d) => <tr key={d.id}><td className="mono small muted">Q-{d.seq}</td><td>{d.title}</td><td className="small muted">{(d.orders as unknown as { po: string } | null)?.po}</td><td><span className={`pill ${d.status === 'rejected' ? 'crit' : 'ok'}`}>{d.status}</span></td><td className="small muted">{d.decision_note}</td><td className="small muted">{d.decided_at ? new Date(d.decided_at).toLocaleTimeString('en-GB', { timeZone: tenant.tz, hour: '2-digit', minute: '2-digit' }) : ''}</td></tr>)}
+            {decided.map((d) => <tr key={d.id}><td className="mono small muted">Q-{d.seq}</td><td>{d.title}</td><td className="small muted">{(d.orders as unknown as { po: string } | null)?.po || (d.styles as unknown as { code: string } | null)?.code}</td><td><span className={`pill ${d.status === 'rejected' ? 'crit' : 'ok'}`}>{d.status}</span></td><td className="small muted">{d.decision_note}</td><td className="small muted">{d.decided_at ? new Date(d.decided_at).toLocaleTimeString('en-GB', { timeZone: tenant.tz, hour: '2-digit', minute: '2-digit' }) : ''}</td></tr>)}
           </tbody></table></div>
         </div>
       )}

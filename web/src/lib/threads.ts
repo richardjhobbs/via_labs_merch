@@ -6,14 +6,18 @@ import { anthropic, SMALL_MODEL, costOf, recordUsage, LANG_NAMES } from '@/lib/l
 
 type Client = SupabaseClient<any, 'merch', any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
-export async function findOrCreateThread(sb: Client, tenantId: string, partyId: string | null, orderId: string | null, kind: string | null, subject: string | null) {
+// A thread is one party on one PO (production) or one style (development); the track rides along so the
+// Conversations list and the queue of each track show only their own.
+export async function findOrCreateThread(sb: Client, tenantId: string, partyId: string | null, orderId: string | null, kind: string | null, subject: string | null, opts: { track?: 'production' | 'development'; styleId?: string | null } = {}) {
+  const track = opts.track || 'production', styleId = opts.styleId || null;
   if (partyId) {
-    let q = sb.from('threads').select('id').eq('tenant_id', tenantId).eq('party_id', partyId).order('last_message_at', { ascending: false }).limit(1);
+    let q = sb.from('threads').select('id').eq('tenant_id', tenantId).eq('party_id', partyId).eq('track', track).order('last_message_at', { ascending: false }).limit(1);
     q = orderId ? q.eq('order_id', orderId) : q.is('order_id', null);
+    q = styleId ? q.eq('style_id', styleId) : q.is('style_id', null);
     const { data } = await q.maybeSingle();
     if (data) return data.id as string;
   }
-  const { data: t, error } = await sb.from('threads').insert({ tenant_id: tenantId, party_id: partyId, order_id: orderId, kind, subject, last_message_at: new Date().toISOString() }).select('id').single();
+  const { data: t, error } = await sb.from('threads').insert({ tenant_id: tenantId, party_id: partyId, order_id: orderId, style_id: styleId, track, kind, subject, last_message_at: new Date().toISOString() }).select('id').single();
   if (error || !t) throw new Error(error?.message || 'thread failed');
   return t.id as string;
 }
@@ -46,7 +50,8 @@ export async function threadSummary(tenantId: string, threadId: string, opts: { 
 }
 
 // An approved draft becomes an outbound message on the thread (sent when a channel is connected).
-export async function recordOutbound(tenantId: string, draft: { id: string; body: string; body_en: string | null; lang: string | null; stream: string; party_id: string | null; order_id: string | null; source_message_id: string | null }, who: string) {
+export async function recordOutbound(tenantId: string, draft: { id: string; body: string; body_en: string | null; lang: string | null; stream: string; party_id: string | null; order_id: string | null; source_message_id: string | null; track?: string | null; style_id?: string | null }, who: string) {
+  const track = draft.track === 'development' ? 'development' : 'production';
   const sb = supabaseAdmin();
   let threadId: string | null = null, kind: string | null = null, channelId: string | null = null;
   let send: Record<string, unknown> = {};
@@ -68,8 +73,8 @@ export async function recordOutbound(tenantId: string, draft: { id: string; body
       if (ch && ['email_gmail', 'email_m365'].includes(ch.kind)) { channelId = ch.id; send = { send: 'pending', reply: { to: g.reply_to || src.from_addr, subject: r.subject || null, message_id: g.message_id || null, references: g.references || null, thread_id: g.thread_id || g.conversation_id || null, provider_id: g.id || null } }; }
     }
   }
-  if (!threadId) threadId = await findOrCreateThread(sb, tenantId, draft.party_id, draft.order_id, kind, null);
-  const { data: m } = await sb.from('messages').insert({ tenant_id: tenantId, thread_id: threadId, channel_id: channelId, direction: 'out', party_id: draft.party_id, order_id: draft.order_id, sender_name: who, lang: draft.lang, text: draft.body, text_en: draft.body_en || (draft.lang === 'en' || !draft.lang ? draft.body : null), stream: draft.stream, sent_at: null, raw: { draft_id: draft.id, ...send } }).select('id').single();
+  if (!threadId) threadId = await findOrCreateThread(sb, tenantId, draft.party_id, draft.order_id, kind, null, { track, styleId: draft.style_id || null });
+  const { data: m } = await sb.from('messages').insert({ tenant_id: tenantId, thread_id: threadId, channel_id: channelId, direction: 'out', party_id: draft.party_id, order_id: draft.order_id, style_id: draft.style_id || null, track, sender_name: who, lang: draft.lang, text: draft.body, text_en: draft.body_en || (draft.lang === 'en' || !draft.lang ? draft.body : null), stream: draft.stream, sent_at: null, raw: { draft_id: draft.id, ...send } }).select('id').single();
   await sb.from('threads').update({ last_message_at: new Date().toISOString() }).eq('id', threadId);
   if (m) await sb.from('drafts').update({ sent_message_id: m.id }).eq('id', draft.id);
   await recordUsage(tenantId, { messagesOut: 1 });

@@ -8,13 +8,14 @@ import { threadSummary } from '@/lib/threads';
 import { Chain } from '@/components/chain';
 import { refreshThreadSummary } from '../actions';
 import { PendingDraftCard } from '@/components/pending-draft';
+import { moveThread } from '../../styles/actions';
 
 export default async function Thread({ params }: { params: Promise<{ tenant: string; id: string }> }) {
   const { tenant: slug, id } = await params;
   const { tenant } = await requireTenant(slug);
   const t = await getTranslations('threads');
   const sb = await supabaseServer();
-  const { data: th } = await sb.from('threads').select('id, subject, kind, party_id, order_id, parties(name, kind, lang, channel_pref), orders(po, style, description)').eq('tenant_id', tenant.id).eq('id', id).maybeSingle();
+  const { data: th } = await sb.from('threads').select('id, subject, kind, party_id, order_id, style_id, track, parties(name, kind, lang, channel_pref), orders(po, style, description), styles(id, code, name)').eq('tenant_id', tenant.id).eq('id', id).maybeSingle();
   if (!th) notFound();
   const [{ data: msgs }, { data: drafts }, sum, { data: contacts }] = await Promise.all([
     sb.from('messages').select('id, direction, sender_name, lang, text, text_en, stream, received_at, sent_at, contacts(role)').eq('thread_id', id).order('received_at'),
@@ -47,6 +48,8 @@ export default async function Thread({ params }: { params: Promise<{ tenant: str
           </div>
           {!!open.length && <div className="card"><div className="small font-medium">{t('draftsHere')}</div>{open.map((d) => <div key={d.id} className="small mt-2"><span className="mono muted">Q-{d.seq}</span> {d.title}</div>)}<Link className="btn sm mt-3" href={`/app/${slug}/queue`}>{t('openQueue')}</Link></div>}
           {o && <Link className="btn sm" href={`/app/${slug}/orders/${encodeURIComponent(o.po)}`}>{t('openOrderFile')}</Link>}
+          {(() => { const st = th.styles as unknown as { id: string; code: string; name: string | null } | null; return st ? <Link className="btn sm" href={`/app/${slug}/styles/${st.id}`}>{t('openStyle', { code: st.code })}</Link> : null; })()}
+          <form action={moveThread} className="small muted flex gap-2 items-center flex-wrap"><input type="hidden" name="tenant" value={slug} /><input type="hidden" name="id" value={id} /><input type="hidden" name="track" value={th.track === 'development' ? 'production' : 'development'} />{t('onTrack', { track: t(`track.${th.track || 'production'}`) })}<button className="btn sm">{t('moveTo', { track: t(`track.${th.track === 'development' ? 'production' : 'development'}`) })}</button></form>
         </div>
       </div>
     </div>

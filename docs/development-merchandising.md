@@ -1,6 +1,6 @@
 # Development merchandising: research and plan
 
-Founder brief, 9 November 2026: everything built so far starts when a PO is placed. The work before it, design briefs, tech packs, material and trim sourcing, sample schedules, sample rounds and approvals, most of it inside a customer's PLM and the rest arriving as photos, scans and references from anywhere, is a second line of work. It must run as its own channel through the whole system, alongside production, with people who may work in both and a point where development hands over to production. This document is the research and the plan. Nothing here is built.
+Founder brief, 9 November 2026: everything built so far starts when a PO is placed. The work before it, design briefs, tech packs, material and trim sourcing, sample schedules, sample rounds and approvals, most of it inside a customer's PLM and the rest arriving as photos, scans and references from anywhere, is a second line of work. It must run as its own channel through the whole system, alongside production, with people who may work in both and a point where development hands over to production. This document is the research and the plan. Decisions taken on 9 November 2026: the style is the anchor, development is a tenant switch now and priced later, sample approvals stay a person's action. Stage A (section 5) was built the same day; Stages B to E are not built. Where this document and the code differ, the code and CLAUDE.md are current.
 
 ## 1. Vocabulary
 
@@ -144,7 +144,7 @@ Design consequences:
 
 Each item is one or two Build Log phases. Stage A is the smallest version that a development desk can use; nothing in it is throwaway.
 
-**Stage A, the second track (foundation)**
+**Stage A, the second track (foundation), built 9 November 2026 (migration 0015, `lib/tracks.ts`, `lib/styles.ts`, `lib/records.ts`, `app/[tenant]/styles`)**
 1. Migration: `track` on gates, drafts, threads, messages, agents, ledger, alerts; `memberships.tracks`; `tenants.settings.tracks`; `styles`, `records`, bucket `merch-development`; `orders.style_id`. Backfill production. Development streams and default gates.
 2. Track switch in the workspace, per-track queue, briefing and ledger views; Styles list and style file with tech pack versions.
 3. Tech pack and brief intake: direct-to-storage upload, Drive pick, email attachment, forwarded mail; extraction to a confirmed `tech_pack` record; translation of the construction notes; version diff.

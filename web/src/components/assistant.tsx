@@ -69,7 +69,7 @@ export function Assistant({ slug, agentName, lang, live, labels }: { slug: strin
       const r = await askAgent(slug, history, text, lang, screen === 'order' ? `PO ${po}` : screen);
       setTurns((t) => [...t, { role: 'assistant', text: r.text || (r.error ? `(${r.error})` : ''), calls: r.calls, drafts: r.drafts, error: r.error }]);
       if (r.nav) {
-        const to = r.nav.screen === 'day' ? base : r.nav.screen === 'order' && r.nav.id ? `${base}/orders/${encodeURIComponent(r.nav.id)}` : `${base}/${r.nav.screen}`;
+        const to = r.nav.screen === 'day' ? base : r.nav.screen === 'order' && r.nav.id ? `${base}/orders/${encodeURIComponent(r.nav.id)}` : r.nav.screen === 'style' && r.nav.id ? `${base}/styles/${encodeURIComponent(r.nav.id)}` : `${base}/${r.nav.screen}`;
         if (to !== path) router.push(to);
       }
       if (r.drafts.length) router.refresh();

@@ -8,6 +8,7 @@ import { sendMail, brandedHtml } from '@/lib/mail';
 import { loadSample } from '@/lib/sample/load';
 import { loadSampleThreads } from '@/lib/sample/threads-load';
 import { SUPPORT_HOURS } from '@/lib/support';
+import { DEV_GATES, isTrack } from '@/lib/tracks';
 
 const Tenant = z.object({ name: z.string().min(2).max(80), slug: z.string().regex(/^[a-z0-9-]{3,40}$/), kind: z.enum(['buying_office', 'brand', 'factory', 'trading', 'retailer']), plan: z.enum(['retainer', 'trial', 'per_user']), locale: z.string().max(5), tz: z.string().max(60), owner_email: z.string().email() });
 const ROLES = ['owner', 'manager', 'merchandiser', 'qc', 'compliance', 'logistics', 'viewer'] as const;
@@ -26,7 +27,7 @@ export async function createTenant(form: FormData) {
     const msg = /invalid api key|jwt/i.test(error?.message || '') ? 'Supabase rejected SUPABASE_SERVICE_ROLE_KEY in the Vercel project. Paste the service_role key from Supabase → Settings → API Keys and redeploy.' : (error?.message || 'failed');
     redirect('/admin?error=' + encodeURIComponent(msg));
   }
-  await sb.from('gates').insert(GATES.map(([stream, level, locked]) => ({ tenant_id: t.id, stream, level, locked, set_by: me.user.id })));
+  await sb.from('gates').insert([...GATES.map(([stream, level, locked]) => ({ tenant_id: t.id, track: 'production', stream, level, locked, set_by: me.user.id })), ...DEV_GATES.map(([stream, level, locked]) => ({ tenant_id: t.id, track: 'development', stream, level, locked, set_by: me.user.id }))]);
   await sb.from('agents').insert({ tenant_id: t.id, name: 'Mira', scope_kind: 'tenant', languages: [d.locale, 'en'] });
   await sb.rpc('ledger_append', { p_tenant: t.id, p_channel: 'Console', p_actor: `VIA admin (${me.user.email})`, p_actor_user: me.user.id, p_counterparty: null, p_stream: 'Setup', p_order: null, p_what: `Tenant created: ${d.name} (${d.kind}, ${d.plan})`, p_gate: 'ADMIN', p_gated: true, p_ref: {} });
   // Created from an access request: the owner gets the welcome email (what VIA Merch is, what happens next)
@@ -101,13 +102,15 @@ export async function setMemberScope(form: FormData) {
   const me = await requireAdmin();
   const tenantId = String(form.get('tenant_id')), id = String(form.get('id')), title = String(form.get('title') || '').trim() || null;
   const parties = form.getAll('parties').map(String).filter((x) => /^[0-9a-f-]{36}$/i.test(x));
+  // which lines of work the person sees: production, development or both (never none)
+  const tracks = form.getAll('tracks').map(String).filter(isTrack);
   const sb = supabaseAdmin();
   const { data: m } = await sb.from('memberships').select('display_name').eq('id', id).eq('tenant_id', tenantId).maybeSingle();
   if (!m) redirect(`/admin/tenants/${tenantId}?error=missing`);
-  const { error } = await sb.from('memberships').update({ title, scopes: { parties } }).eq('id', id);
+  const { error } = await sb.from('memberships').update({ title, scopes: { parties }, tracks: tracks.length ? tracks : ['production'] }).eq('id', id);
   if (error) redirect(`/admin/tenants/${tenantId}?error=${encodeURIComponent(error.message)}`);
   const { data: names } = parties.length ? await sb.from('parties').select('name').in('id', parties) : { data: [] };
-  await sb.rpc('ledger_append', { p_tenant: tenantId, p_channel: 'Console', p_actor: `VIA admin (${me.user.email})`, p_actor_user: me.user.id, p_counterparty: m.display_name, p_stream: 'Setup', p_order: null, p_what: `${m.display_name}: ${title ? title + '; ' : ''}customers ${parties.length ? (names || []).map((n) => n.name).join(', ') : 'all'}`, p_gate: 'ADMIN', p_gated: true, p_ref: { membership_id: id, parties } });
+  await sb.rpc('ledger_append', { p_tenant: tenantId, p_channel: 'Console', p_actor: `VIA admin (${me.user.email})`, p_actor_user: me.user.id, p_counterparty: m.display_name, p_stream: 'Setup', p_order: null, p_what: `${m.display_name}: ${title ? title + '; ' : ''}customers ${parties.length ? (names || []).map((n) => n.name).join(', ') : 'all'}; tracks ${(tracks.length ? tracks : ['production']).join(' and ')}`, p_gate: 'ADMIN', p_gated: true, p_ref: { membership_id: id, parties } });
   revalidatePath(`/admin/tenants/${tenantId}`);
   redirect(`/admin/tenants/${tenantId}?sent=${encodeURIComponent('scope saved')}`);
 }
@@ -193,6 +196,26 @@ export async function setAddon(form: FormData) {
   }
   revalidatePath(`/admin/tenants/${tenantId}`);
   redirect(`/admin/tenants/${tenantId}?sent=${encodeURIComponent(`add-on ${on ? 'on' : 'off'}`)}`);
+}
+
+// The development track: a company switch in tenants.settings.tracks (docs/development-merchandising.md).
+// Not an add-on yet: pricing is a later decision, so production-only companies simply never see it.
+export async function setDevelopmentTrack(form: FormData) {
+  const me = await requireAdmin();
+  const tenantId = String(form.get('tenant_id')), on = form.get('on') === '1';
+  const sb = supabaseAdmin();
+  const { data: t } = await sb.from('tenants').select('settings').eq('id', tenantId).single();
+  const settings = (t?.settings || {}) as { tracks?: Record<string, boolean> };
+  const { error } = await sb.from('tenants').update({ settings: { ...settings, tracks: { ...(settings.tracks || {}), development: on } } }).eq('id', tenantId);
+  if (error) redirect(`/admin/tenants/${tenantId}?error=${encodeURIComponent(error.message)}`);
+  // owners and managers get the track at once so someone can hand it out; everyone else is added per person
+  if (on) {
+    const { data: leads } = await sb.from('memberships').select('id, tracks').eq('tenant_id', tenantId).in('role', ['owner', 'manager']);
+    for (const l of leads || []) if (!(l.tracks || []).includes('development')) await sb.from('memberships').update({ tracks: [...(l.tracks || ['production']), 'development'] }).eq('id', l.id);
+  }
+  await sb.rpc('ledger_append', { p_tenant: tenantId, p_channel: 'Console', p_actor: `VIA admin (${me.user.email})`, p_actor_user: me.user.id, p_counterparty: null, p_stream: 'Setup', p_order: null, p_what: `${on ? 'Switched on' : 'Switched off'} the development track`, p_gate: 'ADMIN', p_gated: true, p_ref: { track: 'development' }, p_track: 'development' });
+  revalidatePath(`/admin/tenants/${tenantId}`);
+  redirect(`/admin/tenants/${tenantId}?sent=${encodeURIComponent(`development track ${on ? 'on' : 'off'}`)}`);
 }
 
 export async function declineAddon(form: FormData) {
