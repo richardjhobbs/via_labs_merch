@@ -38,10 +38,10 @@ export async function ensureOrderAgent(sb: Client, tenantId: string, orderId: st
   if (have) return have.id as string;
   const [{ data: o }, { data: mira }] = await Promise.all([
     sb.from('orders').select('po, owner_user_id').eq('id', orderId).single(),
-    sb.from('agents').select('id, languages').eq('tenant_id', tenantId).eq('layer', 'manager').limit(1).maybeSingle(),
+    sb.from('agents').select('id, languages').eq('tenant_id', tenantId).eq('layer', 'manager').eq('track', 'production').limit(1).maybeSingle(),
   ]);
   const { data: person } = o?.owner_user_id ? await sb.from('memberships').select('id').eq('tenant_id', tenantId).eq('user_id', o.owner_user_id).maybeSingle() : { data: null };
-  const { data: row, error } = await sb.from('agents').insert({ tenant_id: tenantId, name: `PO ${o?.po || '?'}`, layer: 'order', scope_kind: 'order', order_id: orderId, parent_agent_id: mira?.id || null, person_id: person?.id || null, model: SMALL_MODEL, languages: mira?.languages || ['en'] }).select('id').single();
+  const { data: row, error } = await sb.from('agents').insert({ tenant_id: tenantId, name: `PO ${o?.po || '?'}`, layer: 'order', scope_kind: 'order', track: 'production', order_id: orderId, parent_agent_id: mira?.id || null, person_id: person?.id || null, model: SMALL_MODEL, languages: mira?.languages || ['en'] }).select('id').single();
   if (error) { // a parallel run created it first
     const { data: again } = await sb.from('agents').select('id').eq('order_id', orderId).eq('layer', 'order').single();
     return again!.id as string;

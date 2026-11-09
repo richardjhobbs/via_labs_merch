@@ -10,6 +10,8 @@ import { supabaseServer } from '@/lib/supabase/server';
 import { listOrders, exceptionsOf } from '@/lib/orders';
 import { HealthPill } from '@/components/milestones';
 import { esgEnabled, esgSnapshot, isMine, STATE_PILL } from '@/lib/esg';
+import { trackFor } from '@/lib/tracks';
+import { DevelopmentDay } from './day-development';
 
 export default async function MyDay({ params, searchParams }: { params: Promise<{ tenant: string }>; searchParams: Promise<{ saved?: string; error?: string }> }) {
   const { tenant: slug } = await params; const q = await searchParams;
@@ -17,9 +19,11 @@ export default async function MyDay({ params, searchParams }: { params: Promise<
   const [t, te] = await Promise.all([getTranslations('day'), getTranslations('esg')]);
   const sb = await supabaseServer();
   const scope = scopeOf(membership), manager = ['owner', 'manager'].includes(membership.role);
+  const { track } = await trackFor(sb, slug, tenant.id, membership);
+  if (track === 'development') return <DevelopmentDay slug={slug} tenant={tenant} membership={membership} scope={scope} saved={q.saved} error={q.error} />;
   const [{ data: queuedRows }, { count: approvedToday }, orders, { data: scopeNames }, { data: tnRow }, esgAll, { data: alertRows }] = await Promise.all([
-    sb.from('drafts').select('id, seq, priority, stream, title, impact, body, lang, gate_level, created_at, party_id, orders(po, customer_id), parties(name), source:messages!drafts_source_message_id_fkey(thread_id)').eq('tenant_id', tenant.id).in('status', ['queued', 'escalated']).order('priority').order('seq'),
-    sb.from('drafts').select('id', { count: 'exact', head: true }).eq('tenant_id', tenant.id).eq('status', 'sent').gte('decided_at', new Date(new Date().setHours(0, 0, 0, 0)).toISOString()),
+    sb.from('drafts').select('id, seq, priority, stream, title, impact, body, lang, gate_level, created_at, party_id, orders(po, customer_id), parties(name), source:messages!drafts_source_message_id_fkey(thread_id)').eq('tenant_id', tenant.id).eq('track', 'production').in('status', ['queued', 'escalated']).order('priority').order('seq'),
+    sb.from('drafts').select('id', { count: 'exact', head: true }).eq('tenant_id', tenant.id).eq('track', 'production').eq('status', 'sent').gte('decided_at', new Date(new Date().setHours(0, 0, 0, 0)).toISOString()),
     listOrders(tenant.id, { status: 'open', customers: scope }),
     scope ? sb.from('parties').select('name').in('id', scope) : Promise.resolve({ data: null }),
     sb.from('tenants').select('settings').eq('id', tenant.id).single(),

@@ -6,7 +6,7 @@ import { supabaseServer } from '@/lib/supabase/server';
 import { hasLlm } from '@/lib/llm';
 import { lastPass } from '@/lib/agents/proactive';
 
-const TOOLS = ['get_briefing', 'search_orders', 'get_order', 'get_exceptions', 'get_party', 'get_messages', 'get_ledger', 'get_gates', 'get_team', 'queue_draft', 'request_approval', 'set_milestone', 'navigate'];
+const TOOLS = ['get_briefing', 'search_orders', 'get_order', 'get_exceptions', 'get_party', 'get_messages', 'get_ledger', 'get_gates', 'get_team', 'queue_draft', 'request_approval', 'set_milestone', 'navigate', 'search_styles', 'get_style', 'get_style_file', 'diff_tech_pack'];
 
 export default async function Agents({ params }: { params: Promise<{ tenant: string }> }) {
   const { tenant: slug } = await params;
@@ -16,7 +16,7 @@ export default async function Agents({ params }: { params: Promise<{ tenant: str
   const [{ data: agents }, { data: runs }, { data: gates }, { count: queued }, { count: msgs }, lp, { count: orderAgents }, { count: briefs }] = await Promise.all([
     sb.from('agents').select('id, name, scope_kind, scope_stream, model, languages, enabled, parties(name)').eq('tenant_id', tenant.id).eq('layer', 'manager').order('created_at'),
     sb.from('agent_runs').select('id, trigger, tools_called, tokens_in, tokens_out, cost_usd, ms, error, output, created_at').eq('tenant_id', tenant.id).order('created_at', { ascending: false }).limit(12),
-    sb.from('gates').select('stream, level, locked').eq('tenant_id', tenant.id).order('stream'),
+    sb.from('gates').select('stream, level, locked, track').eq('tenant_id', tenant.id).order('track', { ascending: false }).order('stream'),
     sb.from('drafts').select('id', { count: 'exact', head: true }).eq('tenant_id', tenant.id).in('status', ['queued', 'escalated']),
     sb.from('messages').select('id', { count: 'exact', head: true }).eq('tenant_id', tenant.id).eq('direction', 'in'),
     lastPass(tenant.id),
@@ -50,7 +50,7 @@ export default async function Agents({ params }: { params: Promise<{ tenant: str
                   <div><span className="muted">{t('model')}:</span> {a.model === 'claude-sonnet-5-5' || a.model === 'claude-haiku-5-5' ? a.model : 'claude-sonnet-5-5'}</div>
                   <div><span className="muted">{t('languages')}:</span> {(a.languages || []).join(', ')}</div>
                   <div><span className="muted">{t('toolsList')}:</span> <span className="mono" style={{ fontSize: 11 }}>{TOOLS.join(' · ')}</span></div>
-                  <div><span className="muted">{t('gatesLine')}:</span> {(gates || []).map((g) => `${g.stream} L${g.level}${g.locked != null ? '*' : ''}`).join(' · ')}</div>
+                  <div><span className="muted">{t('gatesLine')}:</span> {(gates || []).map((g) => `${g.track === 'development' ? 'Dev ' : ''}${g.stream} L${g.level}${g.locked != null ? '*' : ''}`).join(' · ')}</div>
                 </div>
               </details>
             </div>

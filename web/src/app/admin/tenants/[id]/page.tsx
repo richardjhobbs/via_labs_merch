@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { supabaseAdmin } from '@/lib/supabase/server';
-import { inviteMember, resendInvite, loadSampleAction, loadSampleThreadsAction, setMemberScope, requestSupport, endSupport, setAddon, declineAddon } from '../../actions';
+import { inviteMember, resendInvite, loadSampleAction, loadSampleThreadsAction, setMemberScope, requestSupport, endSupport, setAddon, declineAddon, setDevelopmentTrack } from '../../actions';
 import { activeSupportGrant, pendingSupportRequest, supportHistory, SUPPORT_HOURS } from '@/lib/support';
 import { InboundSim } from '@/app/app/[tenant]/agents/panels';
 
@@ -18,7 +18,7 @@ export default async function TenantAdmin({ params, searchParams }: { params: Pr
   const [grant, pending, history] = await Promise.all([activeSupportGrant(id), pendingSupportRequest(id), supportHistory(id, 6)]);
   const none = Promise.resolve({ data: [] as never[] });
   const [{ data: members }, { data: customers }, { data: customersAll }, { data: invites }, { data: gates }, { data: ledger }] = await Promise.all([
-    sb.from('memberships').select('id, role, display_name, title, user_id, created_at, scopes').eq('tenant_id', id).order('created_at'),
+    sb.from('memberships').select('id, role, display_name, title, user_id, created_at, scopes, tracks').eq('tenant_id', id).order('created_at'),
     grant ? sb.from('parties').select('id, name').eq('tenant_id', id).in('kind', ['brand', 'retailer', 'store', 'buying_office', 'trading']).order('name') : none,
     grant ? sb.from('parties').select('id, name, kind').eq('tenant_id', id).order('kind').order('name') : none,
     sb.from('invites').select('id, email, role, display_name, created_at, expires_at').eq('tenant_id', id).is('accepted_at', null).order('created_at', { ascending: false }),
@@ -53,6 +53,7 @@ export default async function TenantAdmin({ params, searchParams }: { params: Pr
               {(members || []).map((m) => { const sc = ((m.scopes as { parties?: string[] })?.parties) || []; return (<tr key={m.id}><td>{emailOf(m.user_id)}<div className="muted small">{new Date(m.created_at).toLocaleDateString('en-GB')}</div></td><td data-l={t('admin.name')}>{m.display_name}</td><td data-l={t('admin.role')}><span className="pill">{t(`roles.${m.role}`)}</span></td><td>
                 <form action={setMemberScope} className="grid gap-1"><input type="hidden" name="tenant_id" value={id} /><input type="hidden" name="id" value={m.id} />
                   <input className="input sm" name="title" defaultValue={m.title || ''} placeholder={t('admin.jobTitle')} />
+                  <div className="flex gap-3 small"><label className="flex items-center gap-1"><input type="checkbox" name="tracks" value="production" defaultChecked={(m.tracks || ['production']).includes('production')} />Production</label><label className="flex items-center gap-1"><input type="checkbox" name="tracks" value="development" defaultChecked={(m.tracks || []).includes('development')} disabled={!(tenant.settings as { tracks?: { development?: boolean } })?.tracks?.development} />Development</label></div>
                   {grant ? <select className="input sm" name="parties" multiple defaultValue={sc} size={Math.min(5, Math.max(2, (customers || []).length))} title={t('admin.scopeHint')}>{(customers || []).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select> : <span className="muted small">{sc.length ? `${sc.length} customers (names need support access)` : t('admin.allCustomers')}</span>}
                   <div className="flex items-center gap-2"><button className="btn sm">{t('admin.saveScope')}</button><span className="muted small">{sc.length ? '' : t('admin.allCustomers')}</span></div>
                 </form></td></tr>); })}
@@ -63,6 +64,12 @@ export default async function TenantAdmin({ params, searchParams }: { params: Pr
               {(invites || []).map((i) => <tr key={i.id}><td>{i.email}<div className="muted small">{i.display_name}</div></td><td data-l={t('admin.role')}><span className="pill">{t(`roles.${i.role}`)}</span></td><td className="muted" data-l="Sent">{new Date(i.created_at).toLocaleDateString('en-GB')}</td><td className="muted" data-l="Expires">{new Date(i.expires_at).toLocaleDateString('en-GB')}</td><td><form action={resendInvite}><input type="hidden" name="id" value={i.id} /><button className="btn sm">Resend</button></form></td></tr>)}
               {!invites?.length && <tr><td colSpan={5} className="muted">{t('common.none')}</td></tr>}
             </tbody></table></div>
+          <div className="card">
+            <div className="flex items-baseline gap-3"><h2>Tracks</h2></div>
+            <div className="flex items-center gap-3 mt-3 small"><b>Development</b>{(tenant.settings as { tracks?: { development?: boolean } })?.tracks?.development ? <span className="pill ok">on</span> : <span className="pill">off</span>}
+              <span className="muted">Briefs, tech packs, materials and sample rounds before a PO exists, as a second track beside production. Owners and managers get it at once; tick it per person below for everyone else.</span>
+              <form action={setDevelopmentTrack} className="ml-auto"><input type="hidden" name="tenant_id" value={id} /><input type="hidden" name="on" value={(tenant.settings as { tracks?: { development?: boolean } })?.tracks?.development ? '0' : '1'} /><button className="btn sm">{(tenant.settings as { tracks?: { development?: boolean } })?.tracks?.development ? 'Switch off' : 'Switch on'}</button></form></div>
+          </div>
           <div className="card">
             <div className="flex items-baseline gap-3"><h2>Add-ons</h2></div>
             <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mt-3 small"><b>ESG &amp; compliance</b>{(tenant.settings as { addons?: { esg?: boolean } })?.addons?.esg ? <span className="pill ok">on</span> : <span className="pill">off</span>}

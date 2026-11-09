@@ -6,9 +6,11 @@ const ALLOWED = [MODEL, SMALL_MODEL];
 import { supabaseAdmin } from '@/lib/supabase/server';
 import { toolsFor, type AgentCtx, type DraftRef } from './tools';
 import { LANG_NAMES } from '@/lib/llm';
+import { streamsOf, type Track } from '@/lib/tracks';
 
 export type RunInput = {
   tenantId: string; trigger: AgentCtx['trigger'];
+  track?: Track;                     // development or production; production when omitted
   userId?: string | null; userName?: string | null; userEmail?: string | null; userLang?: string;
   role?: string | null; scope?: string[] | null;
   messages: Anthropic.Beta.BetaMessageParam[];
@@ -21,17 +23,20 @@ export type RunResult = { text: string; calls: AgentCtx['calls']; drafts: DraftR
 export async function runAgent(input: RunInput): Promise<RunResult> {
   const sb = supabaseAdmin();
   const t0 = Date.now();
-  const [{ data: tenant }, { data: agent }, { data: parties }, { data: gates }] = await Promise.all([
+  const track: Track = input.track || 'production';
+  const [{ data: tenant }, { data: agents }, { data: parties }, { data: gates }] = await Promise.all([
     sb.from('tenants').select('id, name, kind, locale, tz, currency').eq('id', input.tenantId).single(),
-    sb.from('agents').select('id, name, model, languages, prompt_overrides').eq('tenant_id', input.tenantId).eq('scope_kind', 'tenant').eq('enabled', true).limit(1).maybeSingle(),
+    sb.from('agents').select('id, name, model, languages, prompt_overrides, track').eq('tenant_id', input.tenantId).eq('scope_kind', 'tenant').eq('enabled', true).order('created_at'),
     sb.from('parties').select('id, name, short, kind, country, lang, channel_pref, tier, meta').eq('tenant_id', input.tenantId).is('archived_at', null).order('kind').order('name'),
-    sb.from('gates').select('stream, level, locked').eq('tenant_id', input.tenantId).order('stream'),
+    sb.from('gates').select('stream, level, locked').eq('tenant_id', input.tenantId).eq('track', track).order('stream'),
   ]);
   if (!tenant) throw new Error('tenant not found');
-  const ctx: AgentCtx = { tenantId: tenant.id, agentId: agent?.id || null, agentName: agent?.name || 'Mira', trigger: input.trigger, userId: input.userId || null, userName: input.userName || null, userEmail: input.userEmail || null, sourceMessageId: input.sourceMessageId || null, role: input.role || null, scope: input.scope || null, calls: [], drafts: [], nav: null };
+  // one agent per track when the company has set one up; otherwise the company agent runs both tracks
+  const agent = (agents || []).find((a) => a.track === track) || (agents || []).find((a) => a.track === 'production') || (agents || [])[0] || null;
+  const ctx: AgentCtx = { tenantId: tenant.id, agentId: agent?.id || null, agentName: agent?.name || 'Mira', track, trigger: input.trigger, userId: input.userId || null, userName: input.userName || null, userEmail: input.userEmail || null, sourceMessageId: input.sourceMessageId || null, role: input.role || null, scope: input.scope || null, calls: [], drafts: [], nav: null };
 
   const customers = (parties || []).filter((p) => ['brand', 'retailer', 'store', 'buying_office', 'trading'].includes(p.kind)).map((p) => `${(p.meta as { code?: string })?.code || p.short || p.name}=${p.name} (${p.kind}, ${p.country || '?'}, writes in ${p.lang})`).join('; ');
-  const suppliers = (parties || []).filter((p) => ['factory', 'mill', 'fibre', 'forwarder', 'carrier', 'lab', 'auditor'].includes(p.kind)).map((p) => `${(p.meta as { code?: string })?.code || p.short || p.name}=${p.name} (T${p.tier ?? '?'} ${p.kind}, ${p.country || '?'}, ${p.channel_pref || 'email'}, ${p.lang})`).join('; ');
+  const suppliers = (parties || []).filter((p) => ['factory', 'mill', 'fibre', 'forwarder', 'carrier', 'lab', 'auditor', 'sample_room', 'designer', 'trim_supplier'].includes(p.kind)).map((p) => `${(p.meta as { code?: string })?.code || p.short || p.name}=${p.name} (T${p.tier ?? '?'} ${p.kind}, ${p.country || '?'}, ${p.channel_pref || 'email'}, ${p.lang})`).join('; ');
   const gateLine = (gates || []).map((g) => `${g.stream} L${g.level}${g.locked != null ? ` (capped L${g.locked})` : ''}`).join('; ');
   const KIND: Record<string, string> = { buying_office: 'buying office', brand: 'brand', factory: 'garment factory', trading: 'trading company', retailer: 'retailer' };
   const today = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: tenant.tz || 'UTC' });
@@ -41,7 +46,9 @@ export async function runAgent(input: RunInput): Promise<RunResult> {
     { type: 'text', cache_control: { type: 'ephemeral' }, text: `You are ${ctx.agentName}, the merchandising agent on VIA Merch working for ${tenant.name}, a ${KIND[tenant.kind] || tenant.kind}.
 Customers: ${customers || 'none yet'}.
 Suppliers: ${suppliers || 'none yet'}.
-Autonomy by stream (L0 record only, L1 draft and a person sends, L2 routine messages may be approved by you, L3 act within limits): ${gateLine}.
+${track === 'development' ? `Track: DEVELOPMENT. You work on styles before a PO exists: design briefs, tech packs and specs, materials and trims, sample schedules and rounds, costing. The anchor is the style (code, season, customer), not a PO; use search_styles, get_style, get_style_file and diff_tech_pack, and pass style= on queue_draft. Streams on this track: ${streamsOf(track).join(', ')}.
+Development rules: a sample approval, approval with comments or rejection is always a person's decision; you may report a customer's stated decision as theirs, never make one. Tech pack versions count only once a person has confirmed them in the workspace. When a new version arrives, say what changed (diff_tech_pack). Translate construction notes and comments for factories faithfully, keeping POM codes, measurements, tolerances and material names exactly; keep tables as data, not prose. Reference earlier versions and rounds by number.` : `Track: PRODUCTION. You work from the PO on: the critical path, WIP, QC, logistics, claims. Streams on this track: ${streamsOf(track).join(', ')}. Styles in development are visible through search_styles and get_style when a PO refers to one.`}
+Autonomy by stream on this track (L0 record only, L1 draft and a person sends, L2 routine messages may be approved by you, L3 act within limits): ${gateLine}.
 Rules:
 - Use the tools to read the live record before answering. Never invent numbers, dates, names or PO numbers.
 - You draft; people send. queue_draft creates a draft in the approval queue; request_approval only approves it yourself on an L2+ uncapped stream. Never say a message was sent.
@@ -80,7 +87,7 @@ Rules:
   }
   const model = ALLOWED.includes(agent?.model || '') ? agent!.model : MODEL;
   const cost = costOf(model, tokensIn, tokensOut);
-  const { data: run } = await sb.from('agent_runs').insert({ tenant_id: tenant.id, agent_id: ctx.agentId, user_id: ctx.userId, trigger: input.trigger, model, input: { messages: input.messages.slice(-2) }, tools_called: ctx.calls, output: text || null, tokens_in: tokensIn, tokens_out: tokensOut, cost_usd: cost, ms: Date.now() - t0, error: error || null }).select('id').single();
+  const { data: run } = await sb.from('agent_runs').insert({ tenant_id: tenant.id, agent_id: ctx.agentId, user_id: ctx.userId, trigger: input.trigger, model, input: { track, messages: input.messages.slice(-2) }, tools_called: ctx.calls, output: text || null, tokens_in: tokensIn, tokens_out: tokensOut, cost_usd: cost, ms: Date.now() - t0, error: error || null }).select('id').single();
   await recordUsage(tenant.id, { runs: 1, tokensIn, tokensOut, cost });
   return { text, calls: ctx.calls, drafts: ctx.drafts, nav: ctx.nav, runId: run?.id || null, usage: { tokensIn, tokensOut, cost }, error };
 }

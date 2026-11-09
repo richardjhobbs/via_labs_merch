@@ -10,9 +10,12 @@ import { orderFile, orderSummary, recordOutbound } from '@/lib/threads';
 import { searchMailboxes } from '@/lib/connectors/search';
 import { esgEnabled, esgSnapshot } from '@/lib/esg';
 import { latestBrief, briefForAgent, queueBrief } from './order-agent';
+import { ALL_STREAMS, type Track } from '@/lib/tracks';
+import { styleTools } from './style-tools';
 
 export type AgentCtx = {
   tenantId: string; agentId: string | null; agentName: string;
+  track: Track;                    // development or production: streams, gates and drafts follow it
   trigger: 'chat' | 'inbound' | 'schedule' | 'partner';
   userId: string | null; userName: string | null; userEmail: string | null;
   role: string | null; scope: string[] | null;   // customers this person handles; null = all
@@ -21,19 +24,20 @@ export type AgentCtx = {
   drafts: DraftRef[];              // drafts created in this run
   nav: { screen: string; id?: string } | null;  // last navigate call, for the assistant panel
 };
-export type DraftRef = { id: string; seq: number; title: string; stream: string; gate_level: number; party: string | null; po: string | null };
+export type DraftRef = { id: string; seq: number; title: string; stream: string; gate_level: number; party: string | null; po: string | null; style?: string | null };
 
-const STREAMS = ['General enquiries', 'RFQ and quotes', 'Tech pack forwarding', 'Approvals', 'Order confirmation', 'WIP reports', 'Amendments', 'Price clarification', 'Production status', 'QC', 'Compliance and CSR', 'Logistics', 'Claims', 'Material sourcing'] as const;
+// Every stream of both tracks; the prompt tells the agent which ones belong to the track it is running in.
+const STREAMS = ALL_STREAMS as [string, ...string[]];
 
-export async function gateOf(tenantId: string, stream: string) {
-  const { data } = await supabaseAdmin().from('gates').select('level, locked').eq('tenant_id', tenantId).eq('stream', stream).maybeSingle();
+export async function gateOf(tenantId: string, track: Track, stream: string) {
+  const { data } = await supabaseAdmin().from('gates').select('level, locked').eq('tenant_id', tenantId).eq('track', track).eq('stream', stream).maybeSingle();
   return { level: data?.level ?? 1, locked: data?.locked ?? null };
 }
 
-const actorOf = (ctx: AgentCtx) => ctx.userName ? `${ctx.agentName} (for ${ctx.userName})` : ctx.agentName;
+export const actorOf = (ctx: AgentCtx) => ctx.userName ? `${ctx.agentName} (for ${ctx.userName})` : ctx.agentName;
 const d = (n: number | undefined) => (n == null ? null : isoOf(n));
 
-async function partyByRef(tenantId: string, ref: string) {
+export async function partyByRef(tenantId: string, ref: string) {
   const sb = supabaseAdmin(), r = ref.trim();
   if (/^[0-9a-f-]{36}$/i.test(r)) { const { data } = await sb.from('parties').select('id, name, short, kind, country, lang, channel_pref').eq('tenant_id', tenantId).eq('id', r).maybeSingle(); if (data) return data; }
   const { data } = await sb.from('parties').select('id, name, short, kind, country, lang, channel_pref, meta').eq('tenant_id', tenantId);
@@ -61,11 +65,11 @@ export function toolsFor(ctx: AgentCtx) {
     inputSchema: z.object({}),
     run: wrap('get_briefing', async () => {
       const [{ data: drafts }, orders] = await Promise.all([
-        sb.from('drafts').select('id, seq, priority, stream, title, impact, gate_level, created_at, orders(po), parties(name)').eq('tenant_id', T).in('status', ['queued', 'escalated']).order('priority').order('seq').limit(12),
+        sb.from('drafts').select('id, seq, priority, stream, title, impact, gate_level, created_at, orders(po), parties(name), styles(code)').eq('tenant_id', T).eq('track', ctx.track).in('status', ['queued', 'escalated']).order('priority').order('seq').limit(12),
         listOrders(T, { status: 'open', customers: ctx.scope }, sb),
       ]);
       const ex = exceptionsOf(orders);
-      return { today: isoOf(Math.floor(Date.now() / 864e5)), open_drafts: (drafts || []).map((x) => ({ id: x.id, ref: `Q-${x.seq}`, priority: x.priority, stream: x.stream, po: (x.orders as unknown as { po: string } | null)?.po, party: (x.parties as unknown as { name: string } | null)?.name, title: x.title, impact: x.impact, autonomy: `L${x.gate_level}` })), exceptions: ex.slice(0, 6).map((e) => ({ severity: e.sev, po: e.po, title: e.title, exposure_usd: e.exposure })), off_plan_pos: orders.filter((o) => o.health.state === 'red').map((o) => o.po), counts: { open_pos: orders.length, off_plan: orders.filter((o) => o.health.state !== 'green').length } };
+      return { today: isoOf(Math.floor(Date.now() / 864e5)), track: ctx.track, open_drafts: (drafts || []).map((x) => ({ id: x.id, ref: `Q-${x.seq}`, priority: x.priority, stream: x.stream, po: (x.orders as unknown as { po: string } | null)?.po, style: (x.styles as unknown as { code: string } | null)?.code, party: (x.parties as unknown as { name: string } | null)?.name, title: x.title, impact: x.impact, autonomy: `L${x.gate_level}` })), exceptions: ex.slice(0, 6).map((e) => ({ severity: e.sev, po: e.po, title: e.title, exposure_usd: e.exposure })), off_plan_pos: orders.filter((o) => o.health.state === 'red').map((o) => o.po), counts: { open_pos: orders.length, off_plan: orders.filter((o) => o.health.state !== 'green').length } };
     }),
   });
 
@@ -152,25 +156,26 @@ export function toolsFor(ctx: AgentCtx) {
     name: 'get_gates',
     description: 'Autonomy per stream: L0 record only, L1 draft and a person sends, L2 routine messages sent by the agent, L3 act within limits. Locked streams are capped.',
     inputSchema: z.object({}),
-    run: wrap('get_gates', async () => { const { data } = await sb.from('gates').select('stream, level, locked').eq('tenant_id', T).order('stream'); return data || []; }),
+    run: wrap('get_gates', async () => { const { data } = await sb.from('gates').select('stream, level, locked').eq('tenant_id', T).eq('track', ctx.track).order('stream'); return data || []; }),
   });
 
   const queue_draft = betaZodTool({
     name: 'queue_draft',
     description: 'Create an outbound message draft and put it in the approval queue. It is NOT sent. Write in the merchandiser\'s voice: short, firm, specific dates and PO numbers. If the recipient works in another language, write the message in their language and put the full English translation in body_en; when the body is English, leave body_en out.',
-    inputSchema: z.object({ stream: z.enum(STREAMS), po: z.string().optional().describe('PO number or empty'), party: z.string().describe('customer or supplier the message goes to (name or code)'), title: z.string().describe('one-line summary'), body: z.string().describe('the full message in the recipient\'s language'), body_en: z.string().optional().describe('full English translation when body is not English; omit when body is English'), lang: z.string().optional().describe('ISO code of body, e.g. zh'), impact: z.string().optional().describe('why it matters: dates, money, risk'), priority: z.number().int().min(1).max(3).optional().describe('1 urgent, 2 normal, 3 low') }),
+    inputSchema: z.object({ stream: z.enum(STREAMS), po: z.string().optional().describe('PO number or empty'), style: z.string().optional().describe('style code (development track) or empty'), party: z.string().describe('customer or supplier the message goes to (name or code)'), title: z.string().describe('one-line summary'), body: z.string().describe('the full message in the recipient\'s language'), body_en: z.string().optional().describe('full English translation when body is not English; omit when body is English'), lang: z.string().optional().describe('ISO code of body, e.g. zh'), impact: z.string().optional().describe('why it matters: dates, money, risk'), priority: z.number().int().min(1).max(3).optional().describe('1 urgent, 2 normal, 3 low') }),
     run: wrap('queue_draft', async (a) => {
       const p = await partyByRef(T, a.party);
       // an English body is its own English version; anything else needs a real translation, not a note
       const lang = a.lang || p?.lang || 'en';
       const body_en = lang === 'en' ? a.body : a.body_en && !/^same as/i.test(a.body_en.trim()) ? a.body_en : null;
       const o = a.po ? (await sb.from('orders').select('id').eq('tenant_id', T).eq('po', a.po).maybeSingle()).data : null;
-      const g = await gateOf(T, a.stream);
+      const st = a.style ? (await sb.from('styles').select('id, code').eq('tenant_id', T).ilike('code', a.style.trim()).order('created_at', { ascending: false }).limit(1).maybeSingle()).data : null;
+      const g = await gateOf(T, ctx.track, a.stream);
       const { data: contact } = p ? await sb.from('contacts').select('id').eq('party_id', p.id).order('is_primary', { ascending: false }).limit(1).maybeSingle() : { data: null };
-      const { data: dr, error } = await sb.from('drafts').insert({ tenant_id: T, agent_id: ctx.agentId, role: 'merchandiser', priority: a.priority || 2, stream: a.stream, order_id: o?.id || null, party_id: p?.id || null, contact_id: contact?.id || null, source_message_id: ctx.sourceMessageId || null, title: a.title, impact: a.impact || null, body: a.body, body_en, lang, gate_level: g.level }).select('id, seq').single();
+      const { data: dr, error } = await sb.from('drafts').insert({ tenant_id: T, agent_id: ctx.agentId, role: 'merchandiser', priority: a.priority || 2, stream: a.stream, track: ctx.track, style_id: st?.id || null, order_id: o?.id || null, party_id: p?.id || null, contact_id: contact?.id || null, source_message_id: ctx.sourceMessageId || null, title: a.title, impact: a.impact || null, body: a.body, body_en, lang, gate_level: g.level }).select('id, seq').single();
       if (error || !dr) throw new Error(error?.message || 'draft failed');
-      ctx.drafts.push({ id: dr.id, seq: dr.seq, title: a.title, stream: a.stream, gate_level: g.level, party: p?.name || null, po: a.po || null });
-      await sb.rpc('ledger_append', { p_tenant: T, p_channel: 'Draft', p_actor: actorOf(ctx), p_actor_user: ctx.userId, p_counterparty: p?.name || a.party, p_stream: a.stream, p_order: o?.id || null, p_what: `Draft Q-${dr.seq}: ${a.title}`, p_gate: `L${g.level}${g.locked != null ? ' · capped' : ''}`, p_gated: true, p_ref: { draft_id: dr.id } });
+      ctx.drafts.push({ id: dr.id, seq: dr.seq, title: a.title, stream: a.stream, gate_level: g.level, party: p?.name || null, po: a.po || null, style: st?.code || null });
+      await sb.rpc('ledger_append', { p_tenant: T, p_channel: 'Draft', p_actor: actorOf(ctx), p_actor_user: ctx.userId, p_counterparty: p?.name || a.party, p_stream: a.stream, p_order: o?.id || null, p_what: `Draft Q-${dr.seq}: ${a.title}`, p_gate: `L${g.level}${g.locked != null ? ' · capped' : ''}`, p_gated: true, p_ref: { draft_id: dr.id }, p_track: ctx.track, p_style: st?.id || null });
       return { id: dr.id, ref: `Q-${dr.seq}`, queued: true, autonomy: `L${g.level}`, note: g.level >= 2 && g.locked == null ? 'Routine stream at L2: request_approval may send it.' : 'A person must approve before it is sent.' };
     }),
   });
@@ -184,11 +189,11 @@ export function toolsFor(ctx: AgentCtx) {
       const { data: dr } = m ? await sb.from('drafts').select('*').eq('tenant_id', T).eq('seq', Number(m[1])).maybeSingle() : await sb.from('drafts').select('*').eq('tenant_id', T).eq('id', id).maybeSingle();
       if (!dr) return { error: 'No such draft' };
       if (dr.status !== 'queued') return { sent: false, status: dr.status };
-      const g = await gateOf(T, dr.stream);
+      const g = await gateOf(T, (dr.track as Track) || ctx.track, dr.stream);
       if (g.level < 2 || g.locked != null) return { sent: false, needs_person: true, ref: `Q-${dr.seq}`, autonomy: `L${g.level}`, note: 'Waiting in the approval queue for a person.' };
       await sb.from('drafts').update({ status: 'approved', decided_at: new Date().toISOString(), decision_note: `AUTO · L${g.level}` }).eq('id', dr.id);
-      await sb.rpc('ledger_append', { p_tenant: T, p_channel: 'Draft', p_actor: ctx.agentName, p_actor_user: null, p_counterparty: null, p_stream: dr.stream, p_order: dr.order_id, p_what: `Approved Q-${dr.seq} under L${g.level}: ${dr.title}`, p_gate: `AUTO · L${g.level}`, p_gated: false, p_ref: { draft_id: dr.id } });
-      const ob = await recordOutbound(T, { id: dr.id, body: dr.body, body_en: dr.body_en, lang: dr.lang, stream: dr.stream, party_id: dr.party_id, order_id: dr.order_id, source_message_id: dr.source_message_id }, ctx.agentName);
+      await sb.rpc('ledger_append', { p_tenant: T, p_channel: 'Draft', p_actor: ctx.agentName, p_actor_user: null, p_counterparty: null, p_stream: dr.stream, p_order: dr.order_id, p_what: `Approved Q-${dr.seq} under L${g.level}: ${dr.title}`, p_gate: `AUTO · L${g.level}`, p_gated: false, p_ref: { draft_id: dr.id }, p_track: dr.track || ctx.track, p_style: dr.style_id || null });
+      const ob = await recordOutbound(T, { id: dr.id, body: dr.body, body_en: dr.body_en, lang: dr.lang, stream: dr.stream, party_id: dr.party_id, order_id: dr.order_id, source_message_id: dr.source_message_id, track: dr.track, style_id: dr.style_id }, ctx.agentName);
       return { sent: false, approved: true, ref: `Q-${dr.seq}`, note: ob.messageId ? 'Approved under the gate; it goes out on the next minute if the conversation came in on a connected mailbox, otherwise a person sends it.' : 'Approved under the gate.' };
     }),
   });
@@ -242,8 +247,8 @@ export function toolsFor(ctx: AgentCtx) {
 
   const navigate = betaZodTool({
     name: 'navigate',
-    description: 'Show a screen to the person so the workspace follows the conversation: day, orders, order (with id = PO), parties, queue, ledger, agents, connections, esg (ESG and compliance). Call it alongside your answer when the person asks to see or open something.',
-    inputSchema: z.object({ screen: z.enum(['day', 'orders', 'order', 'parties', 'queue', 'ledger', 'agents', 'connections', 'esg']), id: z.string().optional().describe('PO number for screen=order') }),
+    description: 'Show a screen to the person so the workspace follows the conversation: day, orders, order (with id = PO), styles, style (with id = style id, development track), parties, queue, ledger, agents, connections, esg (ESG and compliance). Call it alongside your answer when the person asks to see or open something.',
+    inputSchema: z.object({ screen: z.enum(['day', 'orders', 'order', 'parties', 'queue', 'ledger', 'agents', 'connections', 'esg', 'styles', 'style']), id: z.string().optional().describe('PO number for screen=order; style id for screen=style') }),
     run: wrap('navigate', async (a) => { ctx.nav = { screen: a.screen, id: a.id }; return { ok: true }; }),
   });
 
@@ -307,7 +312,7 @@ export function toolsFor(ctx: AgentCtx) {
     }),
   });
 
-  const all = [get_briefing, search_orders, get_order, get_exceptions, get_party, get_messages, get_ledger, get_gates, queue_draft, request_approval, set_milestone, navigate, get_team, get_order_file, search_mailbox, get_compliance, record_compliance_value];
+  const all = [get_briefing, search_orders, get_order, get_exceptions, get_party, get_messages, get_ledger, get_gates, queue_draft, request_approval, set_milestone, navigate, get_team, get_order_file, search_mailbox, get_compliance, record_compliance_value, ...styleTools(ctx, wrap)];
   const forRole = ['owner', 'manager'].includes(ctx.role || '') || ctx.trigger !== 'chat' ? all : all.filter((t) => t.name !== 'get_team');
   // inbound runs may capture a reported date (L1 record) and draft; they never approve
   // mailbox search is for a person in chat only, on their own mailbox
