@@ -3,15 +3,15 @@
 // the style attached. A tech pack or brief is read by the model and becomes final only when a person confirms
 // it here; the original stays in the private bucket. The document is data, never instructions.
 import { redirect } from 'next/navigation';
+import { after } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { createHash } from 'crypto';
 import { getTranslations } from 'next-intl/server';
 import { requireTenant } from '@/lib/tenant';
 import { supabaseServer, supabaseAdmin } from '@/lib/supabase/server';
-import { extract, recordUsage, hasLlm, translate } from '@/lib/llm';
-import { documentContent } from '@/lib/documents';
+import { recordUsage, hasLlm, translate } from '@/lib/llm';
 import { pickedFile } from '@/lib/connectors/drive';
-import { DEV_BUCKET, MAX_RECORD_BYTES, RECORD_KINDS, TechPackSchema, normalizeTechPack, READ_TECH_PACK_SYSTEM, signedUpload, type RecordKind, type TechPack } from '@/lib/records';
+import { DEV_BUCKET, MAX_RECORD_BYTES, RECORD_KINDS, signedUpload, readRecordJob, type RecordKind, type TechPack } from '@/lib/records';
 import { STYLE_STATUSES, type StyleStatus } from '@/lib/styles';
 import { isTrack } from '@/lib/tracks';
 
@@ -77,7 +77,8 @@ export async function prepareUpload(slug: string, styleId: string, filename: str
   catch (e) { return { ok: false, error: e instanceof Error ? e.message : String(e) }; }
 }
 
-// Step 2: read the stored file, extract, and keep the result as an unconfirmed record for the person to check.
+// Step 2: keep the stored file as an unconfirmed record at once and read it after the response has gone out
+// (next/server after()): a server action that waits a minute for the model is cut off by the platform with a 502.
 export type ReadResult = { ok: true; recordId: string } | { ok: false; error: string };
 export async function readUploaded(slug: string, styleId: string, path: string, filename: string, mime: string, kindHint: string, source: 'upload' | 'drive' = 'upload', sourceRef: string | null = null): Promise<ReadResult> {
   const me = await requireTenant(slug), t = await getTranslations('styles');
@@ -89,22 +90,13 @@ export async function readUploaded(slug: string, styleId: string, path: string, 
   const buf = Buffer.from(await blob.arrayBuffer());
   if (!buf.length || buf.length > MAX_RECORD_BYTES) { await admin.storage.from(DEV_BUCKET).remove([path]); return { ok: false, error: t('tooBig') }; }
   const sha256 = createHash('sha256').update(buf).digest('hex');
-  const file = new File([buf], filename, { type: mime || 'application/octet-stream' });
-  const content = await documentContent(file);
-  let parsed: TechPack | null = null;
-  let kind: RecordKind = (RECORD_KINDS as readonly string[]).includes(kindHint) ? (kindHint as RecordKind) : 'tech_pack';
-  if (content && hasLlm()) {
-    try {
-      const { data, usage } = await extract(TechPackSchema, READ_TECH_PACK_SYSTEM, content, { maxTokens: 16000 });
-      await recordUsage(me.tenant.id, { tokensIn: usage.tokensIn, tokensOut: usage.tokensOut, cost: usage.cost });
-      if (data) { parsed = normalizeTechPack(data); if (kindHint === 'auto') kind = parsed.kind === 'other' ? 'other' : parsed.kind; }
-    } catch (e) { console.error('[styles] tech pack read failed', filename, e instanceof Error ? e.message : String(e)); }
-  }
-  if (kindHint === 'auto' && !parsed) kind = 'tech_pack';
+  const kind: RecordKind = (RECORD_KINDS as readonly string[]).includes(kindHint) ? (kindHint as RecordKind) : 'tech_pack';
+  const readable = /\.(pdf|xlsx?|xlsm|csv|png|jpe?g|webp)$/i.test(filename);
   const sb = await supabaseServer();
-  const { data: r, error } = await sb.from('records').insert({ tenant_id: me.tenant.id, track: 'development', kind, style_id: styleId, version: 0, title: parsed?.version_label ? `${filename} (${parsed.version_label})` : filename, source, source_ref: sourceRef, storage_path: path, filename: filename.slice(0, 200), mime: mime || null, bytes: buf.length, sha256, lang: parsed?.lang || null, parsed, created_by: me.user.id, created_by_name: who(me) }).select('id').single();
+  const { data: r, error } = await sb.from('records').insert({ tenant_id: me.tenant.id, track: 'development', kind, style_id: styleId, version: 0, title: filename, source, source_ref: sourceRef, storage_path: path, filename: filename.slice(0, 200), mime: mime || null, bytes: buf.length, sha256, parsed: null, read_status: readable && hasLlm() ? 'pending' : 'skipped', created_by: me.user.id, created_by_name: who(me) }).select('id').single();
   if (error || !r) return { ok: false, error: error?.message || 'failed' };
-  await ledger(me, styleId, 'Tech packs and specs', `${kind.replace('_', ' ')} received: ${filename}${parsed ? ', read, awaiting a check' : ', stored (not read)'}`, 'Logged', { record_id: r.id, sha256 });
+  await ledger(me, styleId, 'Tech packs and specs', `${kind.replace('_', ' ')} received: ${filename}${readable && hasLlm() ? ', being read' : ', stored (not read)'}`, 'Logged', { record_id: r.id, sha256 });
+  if (readable && hasLlm()) after(() => readRecordJob(r.id));
   revalidatePath(`/app/${slug}/styles/${styleId}`);
   return { ok: true, recordId: r.id };
 }

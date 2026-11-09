@@ -1447,7 +1447,7 @@
     "otherRecords": "Hồ sơ khác",
     "pendingN": "{n} cần kiểm tra",
     "readIt": "Tải lên và đọc",
-    "reading": "Đang đọc…",
+    "reading": "Agent đang đọc tệp. Trang này tự làm mới; một tech pack mất khoảng một phút.",
     "recordKind": "Loại",
     "save": "Lưu",
     "saved": "Đã lưu và ghi sổ.",
@@ -1531,6 +1531,8 @@
     "versions": "Các phiên bản",
     "viewer": "Người xem không thể thay đổi mã hàng.",
     "willBeFirst": "Bản này sẽ thành v1, phiên bản xác nhận đầu tiên của loại này trên mã hàng.",
-    "willBeVersion": "Bản này sẽ thành v{v}, thay thế v{prev}."
+    "willBeVersion": "Bản này sẽ thành v{v}, thay thế v{prev}.",
+    "readFailed": "Không đọc được tệp. Xác nhận như một bản ghi đã lưu, hoặc loại bỏ và thử lại.",
+    "readingPill": "đang đọc"
   }
 }

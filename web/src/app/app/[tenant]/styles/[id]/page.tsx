@@ -54,7 +54,7 @@ export default async function StylePage({ params, searchParams }: { params: Prom
       <div className="grid gap-4 mt-4 lg:grid-cols-[1.5fr_1fr]">
         <div className="grid gap-4">
           {!!pending.length && <div className="card" style={{ borderLeft: '3px solid #c9a24a' }}><h2>{t('awaitingCheck', { n: pending.length })}</h2><p className="muted small mt-1">{t('awaitingNote')}</p>
-            {pending.map((r) => <div key={r.id} className="small flex items-center gap-2 flex-wrap mt-2" style={{ borderTop: '1px solid var(--line2)', paddingTop: 8 }}><span className="pill warn">{t(`kinds.${r.kind}`)}</span><b>{r.filename || r.title}</b><span className="muted">{r.created_by_name} · {when(r.created_at)}</span><Link className="btn primary sm ml-auto" href={`${base}/records/${r.id}`}>{t('check')}</Link></div>)}
+            {pending.map((r) => <div key={r.id} className="small flex items-center gap-2 flex-wrap mt-2" style={{ borderTop: '1px solid var(--line2)', paddingTop: 8 }}><span className="pill warn">{t(`kinds.${r.kind}`)}</span><b>{r.filename || r.title}</b><span className="muted">{r.created_by_name} · {when(r.created_at)}</span>{r.read_status === 'pending' && <span className="pill agent">{t('readingPill')}</span>}<Link className="btn primary sm ml-auto" href={`${base}/records/${r.id}`}>{t('check')}</Link></div>)}
           </div>}
           <div className="card">
             <div className="flex items-center gap-2 flex-wrap"><h2>{t('techPack')}</h2>{latest ? <span className="pill ok">v{latest.version}{latest.parsed?.version_label ? ` · ${latest.parsed.version_label}` : ''}</span> : <span className="muted small">{t('noTechPack')}</span>}

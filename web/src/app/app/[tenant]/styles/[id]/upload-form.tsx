@@ -30,7 +30,7 @@ export function UploadForm({ tenant, styleId, live }: { tenant: string; styleId:
       const put = await fetch(link.url, { method: 'PUT', headers: { 'content-type': f.type || 'application/octet-stream', 'x-upsert': 'true' }, body: f });
       if (!put.ok) { setError(t('uploadFailed', { status: String(put.status) })); setState('idle'); return; }
       setState('reading');
-      const r = await readUploaded(tenant, styleId, link.path, f.name, f.type, kind);
+      const r = await readUploaded(tenant, styleId, link.path, f.name, f.type, kind === 'auto' ? 'tech_pack' : kind);
       if (!r.ok) { setError(r.error); setState('idle'); return; }
       router.push(`/app/${tenant}/styles/${styleId}/records/${r.recordId}`);
     } catch (err) { setError(err instanceof Error ? err.message : String(err)); setState('idle'); }
