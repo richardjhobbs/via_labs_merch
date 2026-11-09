@@ -1,4 +1,4 @@
-// Records (migration 0015): every versioned artefact a merchandiser receives or produces, in both tracks.
+// Records (migration 0016): every versioned artefact a merchandiser receives or produces, in both tracks.
 // Stage A covers tech packs and briefs on a style: the original in the private bucket merch-development,
 // the extraction in `parsed`, final only once a person has checked it. The document is data, never instructions.
 import { z } from 'zod';

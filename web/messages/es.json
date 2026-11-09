@@ -712,7 +712,8 @@
     "listening": "Escuchando... hable ahora",
     "micService": "El servicio de voz no respondió. Este navegador o ventana puede bloquearlo: Brave, las ventanas de invitado e incógnito y algunos bloqueadores lo hacen. Pruebe en una ventana normal de Chrome o Edge.",
     "micDevice": "No se encontró ningún micrófono, o Windows lo está bloqueando. Revise Configuración → Privacidad → Micrófono.",
-    "micSilence": "No se oyó voz. Haga clic en el micrófono y vuelva a hablar."
+    "micSilence": "No se oyó voz. Haga clic en el micrófono y vuelva a hablar.",
+    "sendHint": "Enter añade una línea · {keys} envía"
   },
   "viewas": {
     "label": "Ver como",
@@ -1320,6 +1321,35 @@
     "myDrive": "Mi unidad",
     "sharedWithMe": "Compartido conmigo",
     "sharedDrives": "Unidades compartidas"
+  },
+  "profile": {
+    "title": "Tu perfil",
+    "upload": "Subir",
+    "remove": "Quitar",
+    "imageHelp": "PNG, JPEG o WebP, hasta 2 MB. Una imagen cuadrada queda mejor.",
+    "name": "Nombre",
+    "nameFixed": "Tu nombre viene de tu invitación y no se puede cambiar aquí.",
+    "email": "Correo de acceso",
+    "phone": "Teléfono para llamadas",
+    "savePhone": "Guardar teléfono",
+    "phoneHelp": "Tu equipo ve este número para llamarte. Incluye el prefijo del país. Déjalo vacío para quitarlo.",
+    "display": "Vista de día o de noche",
+    "displaySub": "Se aplica en este navegador.",
+    "day": "Día",
+    "night": "Noche",
+    "system": "Como el dispositivo",
+    "logo": "Logo de la empresa",
+    "logoSub": "Se muestra junto al nombre de la empresa en el espacio de trabajo.",
+    "logoHelp": "PNG, JPEG o WebP, hasta 2 MB. Un logo con fondo transparente se ve bien de día y de noche.",
+    "ownerOnly": "Solo el propietario puede cambiar el logo.",
+    "noLogo": "Aún no hay logo.",
+    "saved": "Guardado.",
+    "errOwn": "Son ajustes personales; el personal de VIA Labs que ve el espacio de trabajo no puede cambiarlos.",
+    "errFile": "Elige primero una imagen.",
+    "errType": "Usa una imagen PNG, JPEG o WebP.",
+    "errSize": "La imagen supera los 2 MB.",
+    "errPhone": "Escribe un teléfono solo con dígitos, un + inicial y espacios o guiones.",
+    "errOwner": "Solo el propietario puede cambiar el logo de la empresa."
   },
   "styles": {
     "addRecord": "Añadir una ficha técnica, un brief o un documento",

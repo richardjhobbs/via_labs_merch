@@ -1,4 +1,4 @@
-// Styles: the development file (migration 0015). One row per style per season per customer; tech packs,
+// Styles: the development file (migration 0016). One row per style per season per customer; tech packs,
 // briefs and other records hang off it, and after handover the orders point back to it.
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { supabaseServer, supabaseAdmin } from './supabase/server';

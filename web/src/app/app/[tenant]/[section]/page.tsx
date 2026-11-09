@@ -5,18 +5,30 @@ import { requireTenant } from '@/lib/tenant';
 import { supabaseServer } from '@/lib/supabase/server';
 import { decideSupport, revokeSupport } from '../settings-actions';
 import { isActive, SUPPORT_HOURS, type SupportGrant } from '@/lib/support';
+import { cookies } from 'next/headers';
+import { Avatar, CompanyLogo } from '@/components/avatar';
+import { ThemePicker } from '../theme-picker';
+import { savePhone, saveAvatar, removeAvatar, saveLogo, removeLogo } from '../profile-actions';
 
 const SECTIONS = ['settings'] as const;
 
-export default async function Section({ params, searchParams }: { params: Promise<{ tenant: string; section: string }>; searchParams: Promise<{ saved?: string; error?: string }> }) {
+export default async function Section({ params, searchParams }: { params: Promise<{ tenant: string; section: string }>; searchParams: Promise<{ saved?: string; error?: string; psaved?: string; perr?: string }> }) {
   const { tenant: slug, section } = await params;
   if (!(SECTIONS as readonly string[]).includes(section)) notFound();
-  const { tenant, membership } = await requireTenant(slug);
-  const { saved, error } = await searchParams;
+  const { tenant, membership, memberships, user, viewingAs } = await requireTenant(slug);
+  const { saved, error, psaved, perr } = await searchParams;
   const t = await getTranslations();
   const canDecide = ['owner', 'manager'].includes(membership.role);
   const sb = await supabaseServer();
-  const { data } = await sb.from('support_access').select('*').eq('tenant_id', tenant.id).order('requested_at', { ascending: false }).limit(12);
+  const [{ data }, ck] = await Promise.all([
+    sb.from('support_access').select('*').eq('tenant_id', tenant.id).order('requested_at', { ascending: false }).limit(12),
+    cookies(),
+  ]);
+  const tv = ck.get('merch_theme')?.value, theme = tv === 'dark' || tv === 'system' ? tv : 'light';
+  // personal fields belong to the signed-in person's own membership; VIA staff walking the workspace have none
+  const mine = viewingAs ? null : memberships.find((x) => x.tenant_id === tenant.id) || null;
+  const isOwner = mine?.role === 'owner';
+  const PERR: Record<string, string> = { own: t('profile.errOwn'), file: t('profile.errFile'), type: t('profile.errType'), size: t('profile.errSize'), phone: t('profile.errPhone'), owner: t('profile.errOwner') };
   const rows = (data || []) as SupportGrant[];
   const pending = rows.filter((r) => r.status === 'requested');
   const active = rows.find((r) => isActive(r)) || null;
@@ -27,6 +39,56 @@ export default async function Section({ params, searchParams }: { params: Promis
       <h1>{t('nav.settings')}</h1>
       {saved && <div className="notice mt-3">{t('settings.decided')}</div>}
       {error && <div className="notice crit mt-3">{error === 'role' ? t('settings.onlyManagers') : error}</div>}
+
+      {psaved && <div className="notice mt-3">{t('profile.saved')}</div>}
+      {perr && <div className="notice crit mt-3">{PERR[perr] || perr}</div>}
+
+      <section id="profile" className="card mt-4">
+        <h2 style={{ fontSize: 17 }}>{t('profile.title')}</h2>
+        {mine ? <>
+          <div className="flex items-center gap-4 mt-3 flex-wrap">
+            <Avatar path={mine.avatar_path} name={mine.display_name} initials={mine.initials} size={64} />
+            <form action={saveAvatar} className="flex items-center gap-2 flex-wrap">
+              <input type="hidden" name="slug" value={slug} />
+              <input type="file" name="file" accept="image/png,image/jpeg,image/webp" required className="small" style={{ maxWidth: 230 }} />
+              <button className="btn sm">{t('profile.upload')}</button>
+            </form>
+            {mine.avatar_path && <form action={removeAvatar}><input type="hidden" name="slug" value={slug} /><button className="btn sm red">{t('profile.remove')}</button></form>}
+          </div>
+          <p className="muted small mt-2">{t('profile.imageHelp')}</p>
+          <div className="grid gap-3 mt-4 sm:grid-cols-2">
+            <label className="f"><span>{t('profile.name')}</span><input className="input" value={mine.display_name || ''} readOnly disabled /><span className="muted small mt-1" style={{ fontWeight: 400 }}>{t('profile.nameFixed')}</span></label>
+            <label className="f"><span>{t('profile.email')}</span><input className="input" value={user.email || ''} readOnly disabled /></label>
+          </div>
+          <form action={savePhone} className="grid gap-2 sm:grid-cols-[1fr_auto] items-end">
+            <input type="hidden" name="slug" value={slug} />
+            <label className="f" style={{ marginBottom: 0 }}><span>{t('profile.phone')}</span><input className="input" type="tel" name="phone" defaultValue={mine.phone || ''} placeholder="+84 90 123 4567" autoComplete="tel" maxLength={24} /></label>
+            <button className="btn primary">{t('profile.savePhone')}</button>
+          </form>
+          <p className="muted small mt-2">{t('profile.phoneHelp')}</p>
+        </> : <p className="muted small mt-2">{t('profile.errOwn')}</p>}
+      </section>
+
+      <section className="card mt-4">
+        <h2 style={{ fontSize: 17 }}>{t('profile.display')}</h2>
+        <p className="muted small mt-1">{t('profile.displaySub')}</p>
+        <ThemePicker slug={slug} current={theme} labels={{ light: t('profile.day'), dark: t('profile.night'), system: t('profile.system') }} />
+      </section>
+
+      <section className="card mt-4">
+        <h2 style={{ fontSize: 17 }}>{t('profile.logo')}</h2>
+        <p className="muted small mt-1">{t('profile.logoSub')}</p>
+        <div className="flex items-center gap-4 mt-3 flex-wrap">
+          {tenant.logo_path ? <span className="p-2" style={{ border: '1px solid var(--line)', borderRadius: 8, background: 'var(--surface)' }}><CompanyLogo path={tenant.logo_path} name={tenant.name} h={48} /></span> : <span className="muted small">{t('profile.noLogo')}</span>}
+          {isOwner && <form action={saveLogo} className="flex items-center gap-2 flex-wrap">
+            <input type="hidden" name="slug" value={slug} />
+            <input type="file" name="file" accept="image/png,image/jpeg,image/webp" required className="small" style={{ maxWidth: 230 }} />
+            <button className="btn sm">{t('profile.upload')}</button>
+          </form>}
+          {isOwner && tenant.logo_path && <form action={removeLogo}><input type="hidden" name="slug" value={slug} /><button className="btn sm red">{t('profile.remove')}</button></form>}
+        </div>
+        {isOwner ? <p className="muted small mt-2">{t('profile.logoHelp')}</p> : <p className="muted small mt-2">{t('profile.ownerOnly')}</p>}
+      </section>
 
       <section className="card mt-4">
         <h2 style={{ fontSize: 17 }}>{t('settings.support')}</h2>

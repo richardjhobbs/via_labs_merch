@@ -27,7 +27,7 @@ export default async function Requests({ searchParams }: { searchParams: Promise
           {r.tenant_id
             ? <Link href={`/admin/tenants/${r.tenant_id}`} className="btn sm">{tenant?.name || t('admin.linked')} →</Link>
             : <Link href={`/admin?from=${r.id}`} className="btn primary sm">{t('admin.createCompany')}</Link>}
-          <form action={updateRequest} className="flex items-center gap-2 ml-auto">
+          <form action={updateRequest} className="flex items-center gap-2 sm:ml-auto">
             <input type="hidden" name="id" value={r.id} />
             <select className="input" name="status" defaultValue={r.status} style={{ width: 'auto', padding: '4px 8px', fontSize: 12.5 }}><option value="new">new</option><option value="provisioned">provisioned</option><option value="declined">declined</option></select>
             <button className="btn sm">{t('common.save')}</button>

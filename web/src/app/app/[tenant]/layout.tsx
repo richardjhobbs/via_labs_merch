@@ -10,6 +10,8 @@ import { supabaseServer } from '@/lib/supabase/server';
 import { hasLlm } from '@/lib/llm';
 import { getLocale } from 'next-intl/server';
 import { ViewAs } from '@/components/view-as';
+import { Avatar, CompanyLogo } from '@/components/avatar';
+import { cookies } from 'next/headers';
 import { TrackSwitch } from '@/components/track-switch';
 import { memberTracks, currentTrack } from '@/lib/tracks';
 
@@ -17,20 +19,22 @@ export default async function TenantLayout({ children, params }: { children: Rea
   const { tenant: slug } = await params;
   const { tenant, membership, isAdmin, viewingAs } = await requireTenant(slug, { partner: true });
   const t = await getTranslations();
+  const ck = (await cookies()).get('merch_theme')?.value;
+  const theme = ck === 'dark' || ck === 'system' ? ck : 'light';
   // a partner sees the shared compliance portal only: no workspace navigation and no agent
   const navLabels = { more: t('nav.more'), menu: t('nav.menu'), close: t('assistant.close') };
   if (membership.role === 'partner') {
     const account = <>
-      <div><b>{membership.display_name || 'You'}</b></div>
+      <div className="flex items-center gap-2"><Avatar path={membership.avatar_path} name={membership.display_name} initials={membership.initials} /><b>{membership.display_name || 'You'}</b></div>
       <div className="flex items-center gap-2 mt-2"><LangSwitch compact up /><form action="/auth/signout" method="post"><button className="btn sm">{t('nav.signout')}</button></form></div>
     </>;
     const pitems = [['shared', t('nav.shared')]] as [string, string][];
     return (
-      <div className="min-h-screen md:grid md:grid-cols-[220px_minmax(0,1fr)]">
-        <MobileNav base={`/app/${slug}`} tenantName={tenant.name} sub={t('roles.partner')} items={pitems} tabs={[]} labels={navLabels}>{account}</MobileNav>
-        <aside className="rail hidden md:flex flex-col p-3 gap-1 sticky top-0 h-screen overflow-y-auto" style={{ borderRight: '1px solid var(--line)', background: '#fff' }}>
-          <div className="flex items-center gap-2 px-2 py-2 mb-2"><Logo merch h={44} /></div>
-          <div className="px-2 pb-2"><b className="small">{tenant.name}</b><div className="muted small">{t('roles.partner')}</div></div>
+      <div data-theme={theme} className="min-h-screen md:grid md:grid-cols-[220px_minmax(0,1fr)]">
+        <MobileNav base={`/app/${slug}`} tenantName={tenant.name} sub={t('roles.partner')} items={pitems} tabs={[]} labels={navLabels} brand={<CompanyLogo path={tenant.logo_path} name={tenant.name} />}>{account}</MobileNav>
+        <aside className="rail hidden md:flex flex-col p-3 gap-1 sticky top-0 h-screen overflow-y-auto" style={{ borderRight: '1px solid var(--line)', background: 'var(--surface)' }}>
+          <div className="flex items-center gap-2 px-2 py-2 mb-2"><Logo merch adaptive h={44} /></div>
+          <div className="px-2 pb-2 flex items-center gap-2"><CompanyLogo path={tenant.logo_path} name={tenant.name} /><div className="min-w-0"><b className="small">{tenant.name}</b><div className="muted small">{t('roles.partner')}</div></div></div>
           <Rail base={`/app/${slug}`} items={pitems} />
           <div className="mt-auto px-2 pt-3 small" style={{ borderTop: '1px solid var(--line2)' }}>{account}</div>
         </aside>
@@ -51,7 +55,7 @@ export default async function TenantLayout({ children, params }: { children: Rea
   const agent = (agentRows || []).find((a) => a.track === track) || (agentRows || [])[0] || null;
   const canDecide = ['owner', 'manager'].includes(membership.role);
   const { data: pendingSupport } = canDecide ? await sb.from('support_access').select('id, reason').eq('tenant_id', tenant.id).eq('status', 'requested').limit(1).maybeSingle() : { data: null };
-  const A = { title: t('assistant.title'), placeholder: t('assistant.placeholder'), send: t('assistant.send'), working: t('assistant.working'), queued: t('assistant.queued'), used: t('assistant.used'), approve: t('assistant.approve'), hold: t('assistant.hold'), reject: t('assistant.reject'), approved: t('assistant.approved'), rejected: t('assistant.rejected'), inQueue: t('assistant.inQueue'), open: t('assistant.open'), close: t('assistant.close'), clear: t('assistant.clear'), you: t('assistant.you'), noKey: t('assistant.noKey'), mic: t('assistant.mic'), micStop: t('assistant.micStop'), micDenied: t('assistant.micDenied'), listening: t('assistant.listening'), micService: t('assistant.micService'), micDevice: t('assistant.micDevice'), micSilence: t('assistant.micSilence') };
+  const A = { title: t('assistant.title'), placeholder: t('assistant.placeholder'), send: t('assistant.send'), working: t('assistant.working'), queued: t('assistant.queued'), used: t('assistant.used'), approve: t('assistant.approve'), hold: t('assistant.hold'), reject: t('assistant.reject'), approved: t('assistant.approved'), rejected: t('assistant.rejected'), inQueue: t('assistant.inQueue'), open: t('assistant.open'), close: t('assistant.close'), clear: t('assistant.clear'), you: t('assistant.you'), noKey: t('assistant.noKey'), mic: t('assistant.mic'), micStop: t('assistant.micStop'), micDenied: t('assistant.micDenied'), listening: t('assistant.listening'), micService: t('assistant.micService'), micDevice: t('assistant.micDevice'), micSilence: t('assistant.micSilence'), sendHint: t('assistant.sendHint') };
   const items = (track === 'development' ? [
     ['', t('nav.day')], ['queue', t('nav.queue')], ['styles', t('nav.styles')], ['threads', t('nav.threads')], ['parties', t('nav.parties')],
     ['ledger', t('nav.ledger')], ['agents', t('nav.agents')], ['connections', t('nav.connections')], ['settings', t('nav.settings')],
@@ -62,7 +66,7 @@ export default async function TenantLayout({ children, params }: { children: Rea
   const trackLabels = { development: t('nav.track.development'), production: t('nav.track.production') };
   const sw = tracks.length > 1 ? <TrackSwitch slug={slug} track={track} labels={trackLabels} compact /> : null;
   const account = <>
-    <div><b>{membership.display_name || 'You'}</b> <span className="muted">· {t(`roles.${membership.role}`)}</span></div>
+    <div className="flex items-center gap-2"><Avatar path={membership.avatar_path} name={membership.display_name} initials={membership.initials} /><div className="min-w-0"><b>{membership.display_name || 'You'}</b> <span className="muted">· {t(`roles.${membership.role}`)}</span></div></div>
     {isAdmin && <Link href="/admin" className="block mt-1">{t('nav.admin')}</Link>}
     {isAdmin && <ViewAs slug={slug} current={viewingAs || ''} members={(team || []).map((m) => ({ id: m.id, name: m.display_name || '?', role: t(`roles.${m.role}`) }))} label={t('viewas.label')} self={t('viewas.self')} />}
     <div className="flex items-center gap-2 mt-2"><LangSwitch compact up /><form action="/auth/signout" method="post"><button className="btn sm">{t('nav.signout')}</button></form></div>
@@ -70,11 +74,11 @@ export default async function TenantLayout({ children, params }: { children: Rea
   const tabs = [['', t('nav.short.day')], ['queue', t('nav.short.queue')], track === 'development' ? ['styles', t('nav.short.styles')] : ['orders', t('nav.short.orders')], ['threads', t('nav.short.threads')]] as [string, string][];
   const sub = tracks.length > 1 ? `${tenant.kind.replace('_', ' ')} · ${trackLabels[track]}` : tenant.kind.replace('_', ' ');
   return (
-    <div className="min-h-screen md:grid md:grid-cols-[220px_minmax(0,1fr)]">
-      <MobileNav base={`/app/${slug}`} tenantName={tenant.name} sub={sub} items={items} tabs={tabs} labels={navLabels}>{sw && <div className="pb-3">{sw}</div>}{account}</MobileNav>
-      <aside className="rail hidden md:flex flex-col p-3 gap-1 sticky top-0 h-screen overflow-y-auto" style={{ borderRight: '1px solid var(--line)', background: '#fff' }}>
-        <div className="flex items-center gap-2 px-2 py-2 mb-2"><Logo merch h={44} /></div>
-        <div className="px-2 pb-2"><b className="small">{tenant.name}</b><div className="muted small">{tenant.kind.replace('_', ' ')}</div></div>
+    <div data-theme={theme} className="min-h-screen md:grid md:grid-cols-[220px_minmax(0,1fr)]">
+      <MobileNav base={`/app/${slug}`} tenantName={tenant.name} sub={sub} items={items} tabs={tabs} labels={navLabels} brand={<CompanyLogo path={tenant.logo_path} name={tenant.name} />}>{sw && <div className="pb-3">{sw}</div>}{account}</MobileNav>
+      <aside className="rail hidden md:flex flex-col p-3 gap-1 sticky top-0 h-screen overflow-y-auto" style={{ borderRight: '1px solid var(--line)', background: 'var(--surface)' }}>
+        <div className="flex items-center gap-2 px-2 py-2 mb-2"><Logo merch adaptive h={44} /></div>
+        <div className="px-2 pb-2 flex items-center gap-2"><CompanyLogo path={tenant.logo_path} name={tenant.name} /><div className="min-w-0"><b className="small">{tenant.name}</b><div className="muted small">{tenant.kind.replace('_', ' ')}</div></div></div>
         {sw && <div className="px-2 pb-2">{sw}</div>}
         <Rail base={`/app/${slug}`} items={items} />
         <div className="mt-auto px-2 pt-3 small" style={{ borderTop: '1px solid var(--line2)' }}>{account}</div>

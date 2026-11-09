@@ -6,7 +6,7 @@ import type { Metadata } from 'next';
 import { LegalPage, type LegalSection } from '@/components/legal-page';
 
 export const metadata: Metadata = { title: 'Privacy policy · VIA Merch' };
-const UPDATED = '8 November 2026';
+const UPDATED = '9 November 2026';
 
 const S: LegalSection[] = [
   { h: 'Who we are', p: [
@@ -14,11 +14,11 @@ const S: LegalSection[] = [
     'For the data a company puts into VIA Merch, that company is the controller and VIA Labs processes it on the company\'s behalf under our agreement with it. For the data we need to run accounts and bill for the service, VIA Labs is the controller. Questions and requests: contact@getvia.xyz.',
   ] },
   { h: 'What we collect', p: [[
-    'Account data: name, work email, company, role and language of each person a company invites. Sign-in is by a one-time code or link sent to that email; we do not store passwords.',
+    'Account data: name, work email, company, role and language of each person a company invites, and, if the person adds them in Settings, a phone number their team can call and a profile picture. A company owner can add a company logo. Pictures are kept in private storage and shown only to people in that company. Sign-in is by a one-time code or link sent to that email; we do not store passwords.',
     'Company records: customers, suppliers, contacts, purchase orders, milestones, compliance records and documents that people enter, upload or import.',
     'Connected channels: messages and files from the mailboxes and services a person chooses to connect, as described in the next sections.',
     'Agent activity: the questions people ask the agent, the drafts it prepares, the approvals and rejections people make, and an append-only ledger of these actions.',
-    'Technical data: a browser-session cookie that keeps you signed in, the last time each session was active (sessions end after 2 hours idle), a cookie with your language choice, and standard server logs from our hosting provider.',
+    'Technical data: a browser-session cookie that keeps you signed in, the last time each session was active (sessions end after 2 hours idle), cookies with your language choice and your day or night view, and standard server logs from our hosting provider.',
   ]] },
   { h: 'Google user data', p: [
     'A person can connect their own Gmail mailbox, and Google Drive files, by signing in with Google. VIA Merch asks only for these permissions:',

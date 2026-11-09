@@ -712,7 +712,8 @@
     "listening": "Đang nghe... hãy nói",
     "micService": "Dịch vụ giọng nói không phản hồi. Trình duyệt hoặc cửa sổ này có thể đang chặn: Brave, cửa sổ Khách và Ẩn danh, và một số trình chặn quảng cáo. Hãy thử cửa sổ Chrome hoặc Edge thông thường.",
     "micDevice": "Không tìm thấy micrô, hoặc Windows đang chặn. Kiểm tra Cài đặt → Quyền riêng tư → Micrô.",
-    "micSilence": "Không nghe thấy giọng nói. Bấm vào micrô và nói lại."
+    "micSilence": "Không nghe thấy giọng nói. Bấm vào micrô và nói lại.",
+    "sendHint": "Enter để xuống dòng · {keys} để gửi"
   },
   "viewas": {
     "label": "Xem dưới vai trò",
@@ -1320,6 +1321,35 @@
     "myDrive": "Drive của tôi",
     "sharedWithMe": "Được chia sẻ với tôi",
     "sharedDrives": "Bộ nhớ dùng chung"
+  },
+  "profile": {
+    "title": "Hồ sơ của bạn",
+    "upload": "Tải lên",
+    "remove": "Xóa",
+    "imageHelp": "PNG, JPEG hoặc WebP, tối đa 2 MB. Ảnh vuông trông đẹp nhất.",
+    "name": "Tên",
+    "nameFixed": "Tên của bạn lấy từ lời mời và không thể đổi ở đây.",
+    "email": "Email đăng nhập",
+    "phone": "Số điện thoại để gọi",
+    "savePhone": "Lưu số điện thoại",
+    "phoneHelp": "Nhóm của bạn thấy số này để gọi cho bạn. Ghi cả mã quốc gia. Để trống để xóa.",
+    "display": "Giao diện ngày hoặc đêm",
+    "displaySub": "Áp dụng trên trình duyệt này.",
+    "day": "Ngày",
+    "night": "Đêm",
+    "system": "Theo thiết bị",
+    "logo": "Logo công ty",
+    "logoSub": "Hiển thị cạnh tên công ty trong không gian làm việc.",
+    "logoHelp": "PNG, JPEG hoặc WebP, tối đa 2 MB. Logo nền trong suốt hiển thị tốt cả ở giao diện ngày và đêm.",
+    "ownerOnly": "Chỉ chủ sở hữu mới đổi được logo.",
+    "noLogo": "Chưa có logo.",
+    "saved": "Đã lưu.",
+    "errOwn": "Đây là cài đặt cá nhân; nhân viên VIA Labs đang xem không gian làm việc không thể thay đổi.",
+    "errFile": "Hãy chọn ảnh trước.",
+    "errType": "Dùng ảnh PNG, JPEG hoặc WebP.",
+    "errSize": "Ảnh lớn hơn 2 MB.",
+    "errPhone": "Nhập số điện thoại chỉ gồm chữ số, dấu + ở đầu và khoảng trắng hoặc gạch nối.",
+    "errOwner": "Chỉ chủ sở hữu mới đổi được logo công ty."
   },
   "styles": {
     "addRecord": "Thêm tech pack, brief hoặc tài liệu",

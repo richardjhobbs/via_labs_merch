@@ -10,7 +10,7 @@ export const TRACKS = ['production', 'development'] as const;
 export type Track = (typeof TRACKS)[number];
 export const isTrack = (v: unknown): v is Track => v === 'production' || v === 'development';
 
-// Production streams (unchanged) and development streams (gates seeded in migration 0015).
+// Production streams (unchanged) and development streams (gates seeded in migration 0016).
 export const PROD_STREAMS = ['General enquiries', 'RFQ and quotes', 'Tech pack forwarding', 'Approvals', 'Order confirmation', 'WIP reports', 'Amendments', 'Price clarification', 'Production status', 'QC', 'Compliance and CSR', 'Logistics', 'Claims', 'Material sourcing'] as const;
 export const DEV_STREAMS = ['Design briefs', 'Tech packs and specs', 'Material sourcing', 'Sample schedule', 'Sample comments and approvals', 'Lab dips and strike-offs', 'Costing and quotes', 'Testing', 'General enquiries'] as const;
 export const ALL_STREAMS = [...new Set<string>([...PROD_STREAMS, ...DEV_STREAMS])] as string[];

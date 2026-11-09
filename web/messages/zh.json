@@ -712,7 +712,8 @@
     "listening": "正在聆听……请说话",
     "micService": "语音服务没有响应。此浏览器或窗口可能阻止了它：Brave、访客和无痕窗口以及部分广告拦截器会这样。请在普通的 Chrome 或 Edge 窗口中重试。",
     "micDevice": "未找到麦克风，或 Windows 阻止了它。请检查 设置 → 隐私 → 麦克风。",
-    "micSilence": "没有听到语音。请点击麦克风后再说一次。"
+    "micSilence": "没有听到语音。请点击麦克风后再说一次。",
+    "sendHint": "Enter 换行 · {keys} 发送"
   },
   "viewas": {
     "label": "查看身份",
@@ -1320,6 +1321,35 @@
     "myDrive": "我的云端硬盘",
     "sharedWithMe": "与我共享",
     "sharedDrives": "共享云端硬盘"
+  },
+  "profile": {
+    "title": "个人资料",
+    "upload": "上传",
+    "remove": "移除",
+    "imageHelp": "PNG、JPEG 或 WebP，最大 2 MB。方形图片效果最佳。",
+    "name": "姓名",
+    "nameFixed": "您的姓名来自邀请，无法在此修改。",
+    "email": "登录邮箱",
+    "phone": "通话电话号码",
+    "savePhone": "保存电话",
+    "phoneHelp": "团队成员可看到此号码以便给您打电话。请包含国家代码。留空即删除。",
+    "display": "日间或夜间视图",
+    "displaySub": "仅适用于此浏览器。",
+    "day": "日间",
+    "night": "夜间",
+    "system": "跟随设备",
+    "logo": "公司标志",
+    "logoSub": "显示在工作区中公司名称旁边。",
+    "logoHelp": "PNG、JPEG 或 WebP，最大 2 MB。透明背景的标志在日间和夜间视图中都清晰。",
+    "ownerOnly": "只有所有者可以更改标志。",
+    "noLogo": "尚无标志。",
+    "saved": "已保存。",
+    "errOwn": "这些是个人设置；查看工作区的 VIA Labs 员工无法更改。",
+    "errFile": "请先选择一张图片。",
+    "errType": "请使用 PNG、JPEG 或 WebP 图片。",
+    "errSize": "图片超过 2 MB。",
+    "errPhone": "请输入仅含数字的电话号码，可用开头的 + 以及空格或连字符。",
+    "errOwner": "只有所有者可以更改公司标志。"
   },
   "styles": {
     "addRecord": "添加工艺单、简报或文件",

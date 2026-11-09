@@ -9,7 +9,7 @@ export function PendingDraftCard({ slug, back, d, labels }: { slug: string; back
   return (
     <div className="ml-auto" style={{ maxWidth: '88%', borderLeft: '3px solid var(--highlight)', paddingLeft: 10 }}>
       <div className="small muted mb-1" style={{ textAlign: 'right' }}>{labels.waiting} · <span className="mono">Q-{d.seq}</span> · {d.stream} · L{d.gate_level}</div>
-      <div className="p-3 small" style={{ background: '#fffbf0', border: '1px dashed #e0c98a', borderRadius: 10, whiteSpace: 'pre-wrap' }}>
+      <div className="p-3 small" style={{ background: 'var(--draft-bg)', border: '1px dashed var(--draft-line)', borderRadius: 10, whiteSpace: 'pre-wrap' }}>
         <div className="font-medium mb-1">{d.title}</div>
         {d.body}
         {en && <details className="mt-2"><summary style={{ cursor: 'pointer', fontSize: 11 }}>{labels.english}</summary><div className="mt-1" style={{ whiteSpace: 'pre-wrap' }}>{d.body_en}</div></details>}

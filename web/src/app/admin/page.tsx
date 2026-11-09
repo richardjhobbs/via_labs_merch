@@ -24,9 +24,9 @@ export default async function AdminHome({ searchParams }: { searchParams: Promis
         {!!newRequests && <Link href="/admin/requests" className="notice block mt-3">{newRequests} {t('admin.requests').toLowerCase()}</Link>}
         {(addonReqs || []).map((r) => <Link key={r.id} href={`/admin/tenants/${r.tenant_id}`} className="notice warn block mt-3">ESG &amp; compliance requested by {r.requested_by_name} at {(r.tenants as unknown as { name: string } | null)?.name} · {new Date(r.requested_at).toLocaleDateString('en-GB')}</Link>)}
         <div className="card mt-4 tw" style={{ padding: 0 }}>
-          <table className="t"><thead><tr><th>{t('admin.name')}</th><th>{t('admin.kind')}</th><th>{t('admin.plan')}</th><th>{t('admin.members')}</th><th>{t('admin.pending')}</th><th>{t('admin.created')}</th></tr></thead>
+          <table className="t stack"><thead><tr><th>{t('admin.name')}</th><th>{t('admin.kind')}</th><th>{t('admin.plan')}</th><th>{t('admin.members')}</th><th>{t('admin.pending')}</th><th>{t('admin.created')}</th></tr></thead>
             <tbody>{(tenants || []).map((x) => (
-              <tr key={x.id}><td><Link href={`/admin/tenants/${x.id}`}><b>{x.name}</b></Link><div className="muted mono">{x.slug}</div></td><td>{t(`landing.kinds.${x.kind}` as never)}</td><td>{x.plan}</td><td>{(x.memberships as unknown as { count: number }[])[0]?.count ?? 0}</td><td>{(x.invites as unknown as { count: number }[])[0]?.count ?? 0}</td><td className="muted">{new Date(x.created_at).toLocaleDateString('en-GB')}</td></tr>
+              <tr key={x.id}><td><Link href={`/admin/tenants/${x.id}`}><b>{x.name}</b></Link><div className="muted mono">{x.slug}</div></td><td data-l={t('admin.kind')}>{t(`landing.kinds.${x.kind}` as never)}</td><td data-l={t('admin.plan')}>{x.plan}</td><td data-l={t('admin.members')}>{(x.memberships as unknown as { count: number }[])[0]?.count ?? 0}</td><td data-l={t('admin.pending')}>{(x.invites as unknown as { count: number }[])[0]?.count ?? 0}</td><td className="muted" data-l={t('admin.created')}>{new Date(x.created_at).toLocaleDateString('en-GB')}</td></tr>
             ))}{!tenants?.length && <tr><td colSpan={6} className="muted">{t('common.none')}</td></tr>}</tbody></table>
         </div>
       </div>

@@ -1,4 +1,4 @@
--- 0015: development merchandising as a second track (docs/development-merchandising.md, Stage A).
+-- 0016 (registered on Supabase as merch_0015_development_tracks): development merchandising as a second track (docs/development-merchandising.md, Stage A).
 -- Two tracks in one tenant: 'production' (everything built so far, backfilled here) and 'development'
 -- (briefs, tech packs, materials, sample rounds before a PO exists). Separation is at the level of
 -- streams, gates, queue, briefing, agent and navigation; storage, parties, connectors and the ledger stay

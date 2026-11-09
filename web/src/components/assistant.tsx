@@ -17,6 +17,11 @@ export function Assistant({ slug, agentName, lang, live, labels }: { slug: strin
   const [q, setQ] = useState('');
   const [pending, start] = useTransition();
   const logRef = useRef<HTMLDivElement>(null);
+  const boxRef = useRef<HTMLTextAreaElement>(null);
+  const [mac, setMac] = useState(false);
+  useEffect(() => { setMac(/Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent)); }, []);
+  // the box grows with what is typed (or dictated), up to a cap, then scrolls
+  useEffect(() => { const el = boxRef.current; if (!el) return; el.style.height = 'auto'; el.style.height = `${Math.min(el.scrollHeight, 240)}px`; el.style.overflowY = el.scrollHeight > 240 ? 'auto' : 'hidden'; }, [q, open]);
 
   // Dictation: the browser's own speech recognition (Chrome, Edge, Safari), in the interface language.
   // The button only shows where the browser supports it; Chrome sends the audio to Google to transcribe.
@@ -37,12 +42,12 @@ export function Assistant({ slug, agentName, lang, live, labels }: { slug: strin
     if (!Ctor) return;
     const rec = new Ctor();
     rec.lang = SPEECH_LANG[lang] || lang; rec.continuous = true; rec.interimResults = true;
-    const before = q.trim() ? q.trim() + ' ' : '';
+    const before = q.trim() ? q.replace(/\s+$/, '') + ' ' : '';
     let finals = '';
     rec.onresult = (e) => {
       let interim = '';
       for (let i = e.resultIndex; i < e.results.length; i++) { const r = e.results[i]; if (r.isFinal) finals += r[0].transcript; else interim += r[0].transcript; }
-      setQ((before + finals + interim).replace(/\s+/g, ' ').trimStart());
+      setQ(before + (finals + interim).replace(/\s+/g, ' ').trimStart());
     };
     rec.onerror = (e) => {
       // say what went wrong: some browsers (Brave, Guest or Incognito windows, some blockers) refuse the speech service silently
@@ -97,7 +102,7 @@ export function Assistant({ slug, agentName, lang, live, labels }: { slug: strin
     router.refresh();
   });
 
-  if (!open) return <button className="asst-fab" onClick={() => setOpen(true)} aria-label={labels.open.replace('{name}', agentName)}><span className="pill" style={{ background: '#fff', color: 'var(--accent)', border: 0 }}>{agentName.slice(0, 1)}</span>{labels.open.replace('{name}', agentName)}</button>;
+  if (!open) return <button className="asst-fab" onClick={() => setOpen(true)} aria-label={labels.open.replace('{name}', agentName)}><span className="pill" style={{ background: 'var(--on-accent)', color: 'var(--accent)', border: 0 }}>{agentName.slice(0, 1)}</span>{labels.open.replace('{name}', agentName)}</button>;
 
   return (
     <div className="asst" role="dialog" aria-label={agentName}>
@@ -134,8 +139,10 @@ export function Assistant({ slug, agentName, lang, live, labels }: { slug: strin
         {pending && <div className="msg ai muted">{labels.working}</div>}
       </div>
       {micError && <div className="small px-3" style={{ color: 'var(--crit)' }}>{micError}</div>}
-      <form onSubmit={(e) => { e.preventDefault(); endDictationForSend(); ask(q); }}>
-        <input className="input flex-1" value={q} onChange={(e) => setQ(e.target.value)} placeholder={listening ? labels.listening : labels.placeholder} disabled={!live} autoFocus />
+      <form onSubmit={(e) => { e.preventDefault(); if (!q.trim()) return; endDictationForSend(); ask(q); }}>
+        {/* Enter adds a line; Ctrl+Enter (Cmd+Enter on a Mac) or Send sends */}
+        <textarea ref={boxRef} rows={1} className="input flex-1" value={q} onChange={(e) => setQ(e.target.value)} placeholder={listening ? labels.listening : labels.placeholder} disabled={!live} autoFocus aria-describedby="asst-hint"
+          onKeyDown={(e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && !e.nativeEvent.isComposing) { e.preventDefault(); e.currentTarget.form?.requestSubmit(); } }} />
         {canSpeak && live && (
           <button type="button" className="btn" onClick={toggleDictation} aria-pressed={listening} aria-label={listening ? labels.micStop : labels.mic} title={listening ? labels.micStop : labels.mic} style={listening ? { borderColor: 'var(--crit)', color: 'var(--crit)' } : undefined}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{listening ? <rect x="7" y="7" width="10" height="10" rx="1.5" fill="currentColor" /> : <><rect x="9" y="3" width="6" height="11" rx="3" /><path d="M5 11a7 7 0 0 0 14 0M12 18v3" /></>}</svg>
@@ -143,6 +150,7 @@ export function Assistant({ slug, agentName, lang, live, labels }: { slug: strin
         )}
         <button className="btn primary" disabled={!live || !q.trim()}>{labels.send}</button>
       </form>
+      {live && <div id="asst-hint" className="muted asst-hint">{labels.sendHint.replace('{keys}', mac ? '⌘ + Enter' : 'Ctrl + Enter')}</div>}
     </div>
   );
 }

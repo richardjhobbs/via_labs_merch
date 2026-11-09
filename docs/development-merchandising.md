@@ -144,7 +144,7 @@ Design consequences:
 
 Each item is one or two Build Log phases. Stage A is the smallest version that a development desk can use; nothing in it is throwaway.
 
-**Stage A, the second track (foundation), built 9 November 2026 (migration 0015, `lib/tracks.ts`, `lib/styles.ts`, `lib/records.ts`, `app/[tenant]/styles`)**
+**Stage A, the second track (foundation), built 9 November 2026 (migration 0016, `lib/tracks.ts`, `lib/styles.ts`, `lib/records.ts`, `app/[tenant]/styles`)**
 1. Migration: `track` on gates, drafts, threads, messages, agents, ledger, alerts; `memberships.tracks`; `tenants.settings.tracks`; `styles`, `records`, bucket `merch-development`; `orders.style_id`. Backfill production. Development streams and default gates.
 2. Track switch in the workspace, per-track queue, briefing and ledger views; Styles list and style file with tech pack versions.
 3. Tech pack and brief intake: direct-to-storage upload, Drive pick, email attachment, forwarded mail; extraction to a confirmed `tech_pack` record; translation of the construction notes; version diff.
