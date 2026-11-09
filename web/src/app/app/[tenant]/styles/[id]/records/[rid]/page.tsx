@@ -7,8 +7,10 @@ import { requireTenant } from '@/lib/tenant';
 import { supabaseServer } from '@/lib/supabase/server';
 import { LANG_NAMES } from '@/lib/llm';
 import { getStyle } from '@/lib/styles';
-import { styleRecords, techPackVersions, diffTechPack, RECORD_KINDS, type RecordRow } from '@/lib/records';
+import { styleRecords, techPackVersions, costingVersions, diffTechPack, techPackOf, costingOf, RECORD_KINDS, type RecordRow } from '@/lib/records';
 import { TechPackView } from '@/components/tech-pack-view';
+import { CostingView } from '@/components/costing-view';
+import { ModelViewer } from '@/components/model-viewer';
 import { confirmRecord, discardRecord } from '../../../actions';
 
 export const maxDuration = 60;
@@ -23,13 +25,15 @@ export default async function RecordPage({ params, searchParams }: { params: Pro
   const records = await styleRecords(sb, tenant.id, id);
   const r = records.find((x) => x.id === rid) as RecordRow | undefined;
   if (!r) notFound();
-  const tps = techPackVersions(records);
+  const tps = techPackVersions(records), costs = costingVersions(records);
   // compare with the latest confirmed tech pack (for a pending one) or with the version it superseded
   const against = r.confirmed_at ? tps.find((x) => x.id === r.supersedes_id) || null : r.kind === 'tech_pack' ? tps[0] || null : null;
-  const changes = r.parsed && against?.parsed ? diffTechPack(against.parsed, r.parsed) : [];
+  const tp = techPackOf(r), cost = costingOf(r), is3d = r.kind === 'model_3d';
+  const changes = tp && against?.parsed ? diffTechPack(against.parsed, tp) : [];
+  const prevCost = r.kind === 'costing' ? (r.confirmed_at ? costs.find((x) => x.id === r.supersedes_id) : costs[0]) || null : null;
+  const versionsOfKind = r.kind === 'costing' ? costs : tps;
   const canEdit = membership.role !== 'viewer' && membership.id !== 'admin';
   const base = `/app/${slug}/styles/${id}`;
-  const tp = r.parsed;
   return (
     <div className="max-w-5xl">
       <Link href={base} className="small">← {s.code}{s.name ? ` ${s.name}` : ''}</Link>
@@ -39,12 +43,14 @@ export default async function RecordPage({ params, searchParams }: { params: Pro
       {q.saved && <div className="notice mt-3">{t('saved')}</div>}{q.error && <div className="notice crit mt-3">{q.error}</div>}
       {r.read_status === 'pending' && <><meta httpEquiv="refresh" content="6" /><div className="notice mt-3 small">{t('reading')}</div></>}
       {r.read_status === 'failed' && <div className="notice crit mt-3 small">{t('readFailed')}</div>}
-      {!r.confirmed_at && r.read_status !== 'pending' && <div className="notice mt-3 small">{tp ? t('checkIntro') : t('checkIntroNotRead')}</div>}
+      {!r.confirmed_at && r.read_status !== 'pending' && <div className="notice mt-3 small">{is3d ? t('checkIntro3d') : tp || cost ? t('checkIntro') : t('checkIntroNotRead')}</div>}
       <div className="grid gap-4 mt-4 lg:grid-cols-[1fr_360px]">
         <div className="grid gap-4">
           {!!changes.length && <div className="card" style={{ background: 'var(--accent-soft)' }}><b className="small" style={{ color: 'var(--accent)' }}>{r.confirmed_at ? t('changedSince', { v: against!.version }) : t('changesVsLatest', { v: against!.version })}</b><ul className="mt-1 grid gap-1 small" style={{ paddingLeft: 18 }}>{changes.map((c, i) => <li key={i}><span className="muted">{t(`area.${c.area}`)}:</span> {c.what}</li>)}</ul></div>}
           {against && !changes.length && tp && <div className="notice small">{t('noChanges', { v: against.version })}</div>}
-          {!tp && <div className="card"><p className="muted small">{r.read_status === 'pending' ? t('reading') : t('notRead')}</p></div>}
+          {cost && prevCost?.parsed && prevCost.parsed.price != null && cost.price != null && <div className="card small" style={{ background: 'var(--accent-soft)' }}><b style={{ color: 'var(--accent)' }}>{t('costing.vsPrevious', { v: prevCost.version })}</b> {prevCost.parsed.currency || ''} {prevCost.parsed.price} → {cost.currency || ''} {cost.price}</div>}
+          {is3d && r.storage_path && <div className="card"><ModelViewer recordId={r.id} filename={r.filename || ''} labels={{ loading: t('model.loading'), openIn: t('model.openIn', { tool: '{tool}' }), download: t('openFile') }} /></div>}
+          {!tp && !cost && !is3d && <div className="card"><p className="muted small">{r.read_status === 'pending' ? t('reading') : t('notRead')}</p></div>}
         </div>
         <div className="grid gap-4" style={{ alignContent: 'start' }}>
           {!r.confirmed_at && canEdit && r.read_status !== 'pending' && (
@@ -52,10 +58,10 @@ export default async function RecordPage({ params, searchParams }: { params: Pro
               <h2>{t('confirmTitle')}</h2>
               <label className="f"><span>{t('recordKind')}</span><select className="input" name="kind" defaultValue={r.kind}>{RECORD_KINDS.map((k) => <option key={k} value={k}>{t(`kinds.${k}`)}</option>)}</select></label>
               <label className="f"><span>{t('fTitle')}</span><input className="input" name="title" maxLength={200} defaultValue={r.title || r.filename || ''} /></label>
-              <label className="f"><span>{t('fVersionLabel')}</span><input className="input" name="version_label" maxLength={60} defaultValue={tp?.version_label || ''} placeholder="v3, Rev B, 2026-11-09" /></label>
-              <label className="f"><span>{t('fLang')}</span><select className="input" name="lang" defaultValue={tp?.lang || r.lang || 'en'}>{Object.entries(LANG_NAMES).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></label>
+              <label className="f"><span>{t('fVersionLabel')}</span><input className="input" name="version_label" maxLength={60} defaultValue={tp?.version_label || cost?.version_label || ''} placeholder="v3, Rev B, 2026-11-09" /></label>
+              <label className="f"><span>{t('fLang')}</span><select className="input" name="lang" defaultValue={tp?.lang || cost?.lang || r.lang || 'en'}>{Object.entries(LANG_NAMES).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></label>
               <label className="f"><span>{t('fNote')}</span><input className="input" name="note" maxLength={500} placeholder={t('fNoteHint')} /></label>
-              <p className="muted small">{tps.length ? t('willBeVersion', { v: (tps[0]?.version || 0) + 1, prev: tps[0]?.version || 0 }) : t('willBeFirst')}</p>
+              <p className="muted small">{versionsOfKind.length ? t('willBeVersion', { v: (versionsOfKind[0]?.version || 0) + 1, prev: versionsOfKind[0]?.version || 0 }) : t('willBeFirst')}</p>
               <div className="flex gap-2 flex-wrap"><button className="btn primary">{t('confirm')}</button><button className="btn red" formAction={discardRecord}>{t('discard')}</button></div>
             </form>
           )}
@@ -63,6 +69,7 @@ export default async function RecordPage({ params, searchParams }: { params: Pro
         </div>
       </div>
       {tp && <div className="card mt-4"><TechPackView tp={tp} lang={Object.keys(tp.translations || {})[0]} /></div>}
+      {cost && <div className="card mt-4"><CostingView c={cost} target={{ price: s.target_price, currency: s.currency }} /></div>}
     </div>
   );
 }

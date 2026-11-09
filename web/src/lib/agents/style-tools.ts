@@ -35,7 +35,7 @@ export function styleTools(ctx: AgentCtx, wrap: <I, O>(name: string, fn: (i: I) 
 
   const get_style = betaZodTool({
     name: 'get_style',
-    description: 'Development track: one style in full: the record, the latest confirmed tech pack (fabric, BOM, colourways, points of measure with tolerances, construction notes, labelling, packaging, testing), every tech pack version, and other records (briefs, photos, comments) with whether a person has confirmed them.',
+    description: 'Development track: one style in full: the record, the latest confirmed tech pack (fabric, BOM, colourways, points of measure with tolerances, construction notes, labelling, packaging, testing), every tech pack version, the latest confirmed costing (quoted price against the target, cost lines, validity), and other records (briefs, photos, 3D files, comments from the customer portal) with whether a person has confirmed them.',
     inputSchema: z.object({ style: z.string().describe('style code as the customer writes it, or the style id') }),
     run: wrap('get_style', async ({ style }) => {
       const s = await resolve(style);
@@ -44,7 +44,8 @@ export function styleTools(ctx: AgentCtx, wrap: <I, O>(name: string, fn: (i: I) 
       const b = await styleBrief(T, s.id);
       if (!b) return { error: 'not found' };
       const tp = b.techPack?.parsed || null;
-      return { ...brief(s), description: s.description, tech_pack: tp ? { version: b.techPack!.version, label: tp.version_label, date: tp.date, lang: tp.lang, fabric: tp.fabric_summary, sizes: tp.sizes, colourways: tp.colourways, bom: tp.bom, poms: tp.poms, construction: tp.construction, labelling: tp.labelling, packaging: tp.packaging, testing: tp.testing, notes: tp.notes, translations: Object.keys(tp.translations || {}) } : null, tech_pack_versions: b.techPackVersions, other_records: b.records };
+      const c = b.costing?.parsed || null;
+      return { ...brief(s), description: s.description, costing: c ? { version: b.costing!.version, label: c.version_label, supplier: c.supplier, currency: c.currency, incoterm: c.incoterm, price: c.price, target_price: s.target_price, total_cost: c.total_cost, materials_total: c.materials_total, labour_total: c.labour_total, margin_pct: c.margin_pct, quantity: c.quantity, moq: c.moq, lead_time: c.lead_time, valid_until: c.valid_until, lines: c.lines, notes: c.notes } : null, tech_pack: tp ? { version: b.techPack!.version, label: tp.version_label, date: tp.date, lang: tp.lang, fabric: tp.fabric_summary, sizes: tp.sizes, colourways: tp.colourways, bom: tp.bom, poms: tp.poms, construction: tp.construction, labelling: tp.labelling, packaging: tp.packaging, testing: tp.testing, notes: tp.notes, translations: Object.keys(tp.translations || {}) } : null, tech_pack_versions: b.techPackVersions, other_records: b.records };
     }),
   });
 
