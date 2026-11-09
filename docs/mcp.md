@@ -26,7 +26,7 @@ Write, only when the token was issued with `writes: true`:
 
 | Tool | What happens | Why it is safe |
 |---|---|---|
-| `queue_draft` | Draft lands in the queue with the stream's gate level | Never sends. The caller is `trigger: 'mcp'`, so `routeDraft` is skipped and no agent layer approves it (see section 5) |
+| `queue_draft` | Draft lands in the queue with the stream's gate level | Never sends. Under `trigger: 'mcp'` the draft is not routed through the agent layers, so no desk or manager agent can approve it (code change, section 5) |
 | `set_milestone` | Reported expected date on a milestone, ledger row | Same as the chat agent; a person can see and undo it on the order page |
 | `record_sample_event` | Sent, received or due date on a round | Never a decision |
 | `record_compliance_value` | A value on a compliance task | Append-only submission, report approval stays with a person |
@@ -84,7 +84,7 @@ Ledger actor for writes: `<client name> (for <person>)`, the same shape as `Mira
 
 ## 5. Changes to existing code
 
-- `AgentCtx.trigger` gains `'mcp'`. `queue_draft` already skips `routeDraft` unless the trigger is `inbound` or `schedule`, so MCP drafts wait for a person. Add `'mcp'` to the `agent_runs.trigger` comment and to the admin console's run filter.
+- `AgentCtx.trigger` gains `'mcp'`. `queue_draft` today routes a production draft through `routeDraft` for every trigger except `chat`, which would let a desk agent at L2 approve and send an MCP draft. Change the condition to route only `inbound` and `schedule`, so chat and MCP drafts both wait for a person. Add `'mcp'` to the `agent_runs.trigger` comment and to the admin console's run filter.
 - `toolsFor(ctx)` returns all tools; add `toolsNamed(ctx, names)` that returns the subset, so the MCP route and the `agents.tools` column (empty = all) use the same filter.
 - Profile page: a "Connected agents" card listing the person's tokens (name, client, last used, expiry, tracks, writes) with Create and Revoke. Owners and managers see every member's tokens on the Team page and can revoke them. Strings in all six `messages/*.json`.
 - Connections page: the "VIA agent channel" entry moves from `via` to `stage1` once the route works end to end with Claude Desktop, with the connect button opening the profile card. The three-layer explanation gains a line: a member's own agent reads the record through MCP and can only queue, never send.
