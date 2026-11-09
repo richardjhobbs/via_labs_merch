@@ -68,7 +68,8 @@ ${track === 'development' ? '' : `- You are the merchandising manager agent. Eve
     const runner = client.beta.messages.toolRunner({
       // Testing phase: Sonnet or Haiku only (no server-side fallback, which could route to Opus).
       model: ALLOWED.includes(agent?.model || '') ? agent!.model : MODEL,
-      max_tokens: 4096,
+      // room for thinking plus several drafts: at 4,096 the compliance pass ran out before queuing anything and repeated hourly (9 Nov)
+      max_tokens: 16000,
       output_config: { effort: 'medium' },
       system,
       tools: toolsFor(ctx),
@@ -85,6 +86,7 @@ ${track === 'development' ? '' : `- You are the merchandising manager agent. Eve
       u.input += message.usage.input_tokens; u.cacheRead += message.usage.cache_read_input_tokens || 0; u.cacheWrite += message.usage.cache_creation_input_tokens || 0; u.output += message.usage.output_tokens;
     }
     if (last?.stop_reason === 'refusal') error = 'The model declined this request.';
+    if (last?.stop_reason === 'max_tokens') error = 'Cut off at the output limit before finishing.';
     text = (last?.content || []).filter((b): b is Anthropic.Beta.BetaTextBlock => b.type === 'text').map((b) => b.text).join('\n').trim();
   } catch (e) {
     error = e instanceof Error ? e.message : String(e);
