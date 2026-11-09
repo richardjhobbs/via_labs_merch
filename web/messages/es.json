@@ -196,7 +196,8 @@
         "phone": "Llamada",
         "other": "Otro"
       }
-    }
+    },
+    "viaChat": "{app} a {to}"
   },
   "admin": {
     "title": "Administración VIA",
@@ -585,6 +586,30 @@
       "s4Title": "Las respuestas enviadas a mano se siguen",
       "s4": "Las respuestas aprobadas que salen desde su propia app de chat quedan en Para enviar a mano hasta que las marque como enviadas. A las 4 horas recibe un recordatorio; al día siguiente, su responsable.",
       "promise": "Lo que vence o ya llegó, o VIA pregunta por ello. No puede pasar desapercibido."
+    },
+    "pilot": "Piloto",
+    "wa": {
+      "done": "WhatsApp Business conectado: {account}. Configure el webhook en su app de Meta para empezar a recibir mensajes.",
+      "none": "Aún no se ha recibido ningún mensaje",
+      "webhook": "URL de callback para su app de Meta (WhatsApp, Configuración)",
+      "verifyToken": "Token de verificación",
+      "phoneId": "ID del número de teléfono",
+      "token": "Token de acceso permanente (usuario del sistema)",
+      "secret": "Secreto de la app de Meta",
+      "waba": "ID de la cuenta de WhatsApp Business (opcional)",
+      "save": "Comprobar y conectar",
+      "note": "VIA los comprueba con Meta antes de guardarlos. El token y el secreto se cifran y solo el servidor puede leerlos.",
+      "managerOnly": "Un owner o manager conecta la cuenta de la empresa.",
+      "errors": {
+        "waFields": "Introduzca el ID del número (dígitos), el token de acceso y el secreto de la app."
+      }
+    },
+    "zalo": {
+      "connect": "Conectar Zalo OA",
+      "done": "Zalo OA conectado: {account}. Los mensajes a la cuenta oficial ya entran.",
+      "errors": {
+        "notReady": "Zalo aún no está activado. VIA Labs está completando la configuración de la app de Zalo."
+      }
     }
   },
   "ledger": {

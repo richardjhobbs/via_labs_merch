@@ -4,6 +4,8 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { ReauthError, CHANNEL_COLS, type Channel, type Reply } from './mail';
 import { sendReply as gmailReply } from './google';
 import { sendReply as outlookReply } from './microsoft';
+import { sendWhatsApp } from './whatsapp';
+import { sendZalo } from './zalo';
 
 type Client = SupabaseClient<any, 'merch', any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
@@ -19,11 +21,11 @@ export async function sendPending(sb: Client, deadline: number) {
       await sb.from('messages').update({ raw: { ...raw, attempts, send: give ? 'failed' : 'pending', send_error: why.slice(0, 300) } }).eq('id', m.id);
       if (give) { out.failed++; await sb.rpc('ledger_append', { p_tenant: m.tenant_id, p_channel: 'Email', p_actor: ch?.account || 'Mailbox', p_actor_user: null, p_counterparty: raw.reply?.to || null, p_stream: m.stream, p_order: m.order_id, p_what: `Send failed: ${why.slice(0, 160)}`, p_gate: 'NOT SENT', p_gated: true, p_ref: { message_id: m.id, draft_id: raw.draft_id || null } }); }
     };
-    if (!ch || !['email_gmail', 'email_m365'].includes(ch.kind)) { await fail('the mailbox is no longer connected', true); continue; }
+    if (!ch || !['email_gmail', 'email_m365', 'whatsapp', 'zalo'].includes(ch.kind)) { await fail('the channel is no longer connected', true); continue; }
     if (ch.status !== 'connected') { await fail(`the mailbox ${ch.account} needs signing in again`, false); continue; }
     if (!raw.reply?.to) { await fail('no address to reply to', true); continue; }
     try {
-      const s = ch.kind === 'email_m365' ? await outlookReply(sb, ch as Channel, raw.reply, m.text) : await gmailReply(sb, ch as Channel, raw.reply, m.text);
+      const s = ch.kind === 'email_m365' ? await outlookReply(sb, ch as Channel, raw.reply, m.text) : ch.kind === 'whatsapp' ? await sendWhatsApp(sb, ch as Channel, raw.reply, m.text) : ch.kind === 'zalo' ? await sendZalo(sb, ch as Channel, raw.reply, m.text) : await gmailReply(sb, ch as Channel, raw.reply, m.text);
       const at = new Date().toISOString();
       await sb.from('messages').update({ sent_at: at, external_id: s.id, from_addr: ch.account, to_addr: [raw.reply.to], raw: { ...raw, send: 'sent', sent: s } }).eq('id', m.id);
       if (raw.draft_id) await sb.from('drafts').update({ status: 'sent' }).eq('id', raw.draft_id);

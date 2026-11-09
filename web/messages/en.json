@@ -196,7 +196,8 @@
         "phone": "Phone call",
         "other": "Other"
       }
-    }
+    },
+    "viaChat": "{app} to {to}"
   },
   "admin": {
     "title": "VIA admin",
@@ -585,6 +586,30 @@
       "s4Title": "Replies sent by hand are tracked",
       "s4": "Approved replies that go out from your own chat app stay under To send by hand until you mark them sent. After 4 hours you get a reminder; after a day your manager does.",
       "promise": "Anything due either came in, or VIA asks about it. It cannot slip past unnoticed."
+    },
+    "pilot": "Pilot",
+    "wa": {
+      "done": "WhatsApp Business connected: {account}. Set the webhook in your Meta app to start receiving.",
+      "none": "No message received yet",
+      "webhook": "Callback URL for your Meta app (WhatsApp, Configuration)",
+      "verifyToken": "Verify token",
+      "phoneId": "Phone number ID",
+      "token": "Permanent access token (system user)",
+      "secret": "Meta app secret",
+      "waba": "WhatsApp Business account ID (optional)",
+      "save": "Check and connect",
+      "note": "VIA checks these with Meta before saving. The token and secret are encrypted and only the server can read them.",
+      "managerOnly": "An owner or manager connects the company's account.",
+      "errors": {
+        "waFields": "Enter the Phone number ID (digits), the access token and the app secret."
+      }
+    },
+    "zalo": {
+      "connect": "Connect Zalo OA",
+      "done": "Zalo OA connected: {account}. Messages to the Official Account now come in.",
+      "errors": {
+        "notReady": "Zalo is not switched on yet. VIA Labs is completing the Zalo app setup."
+      }
     }
   },
   "ledger": {

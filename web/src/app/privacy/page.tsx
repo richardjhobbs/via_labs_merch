@@ -36,6 +36,9 @@ const S: LegalSection[] = [
   { h: 'Microsoft 365 data', p: [
     'A person can connect their own Outlook mailbox by signing in with Microsoft. VIA Merch asks to read mail, send mail and keep access while the connection stays on (offline access). Mail is handled exactly as described for Gmail above: only new mail from known customers and suppliers or one chosen folder, searches of older mail only when the person asks and without storing the results, and replies only after approval. Disconnecting deletes the stored token; you can also remove the app from your Microsoft account settings.',
   ] },
+  { h: 'Company WhatsApp and Zalo accounts', p: [
+    'A company can connect its own WhatsApp Business number (through Meta\'s WhatsApp Business Platform) or its own Zalo Official Account. These are the company\'s business channels, so every message sent to the connected number or Official Account becomes part of the company\'s order record, linked to a customer or supplier where the sender can be matched. Replies go out from the same number or Official Account only after approval. The access tokens are encrypted and readable only by our server. Personal WhatsApp, WeChat and Zalo accounts are never connected.',
+  ] },
   { h: 'Forwarded messages', p: [
     'Each member can create a personal forwarding address and forward messages to it from chat apps on their phone, such as Zalo, WeChat or WhatsApp. VIA Merch accepts mail at that address only from the member\'s own sign-in email or connected mailbox; anything else sent to it is ignored and not stored. A forwarded message becomes part of the company\'s order record, like an email from a connected mailbox. Replies to forwarded messages are sent by the member from their own app; VIA Merch does not connect to personal chat accounts.',
   ] },
@@ -51,6 +54,7 @@ const S: LegalSection[] = [
       'Anthropic, and any other model provider named in a company\'s agreement (AI processing as described above).',
       'Resend (delivery of sign-in codes, invitations and notifications by email, and receiving the messages a member forwards to their own VIA forwarding address).',
       'Google and Microsoft, when a person connects their account, to read and send the mail described above.',
+      'Meta (WhatsApp Business Platform) and VNG (Zalo), when a company connects its own WhatsApp Business number or Zalo Official Account.',
     ],
     'We may also disclose data where the law requires it, or to protect the rights and safety of our users or of VIA Labs. Dictation in the Ask box uses your browser\'s own speech recognition; in Chrome and Edge the audio goes to the browser maker to be transcribed, not to VIA Labs.',
   ] },

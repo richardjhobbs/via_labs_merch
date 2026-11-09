@@ -35,7 +35,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ prov
     const { data: existing } = await sb.from('channels').select('id, config').eq('tenant_id', me.tenant.id).eq('kind', p.kind).ilike('account', account).maybeSingle();
     const prev = (existing?.config || {}) as MailConfig;
     const config: MailConfig = { connector: p.connector, filter: prev.filter || 'known', label: prev.label || null, label_id: prev.label_id || null, ...cursor, connected_by: me.membership.display_name || me.user.email || undefined };
-    const row = { tenant_id: me.tenant.id, kind: p.kind, name: account, account, owner_user_id: me.user.id, status: 'connected', scope: p.kind === 'sheets' ? 'Open picked files only' : 'Read new mail from known senders; send after approval', auth_enc: sealAuth({ ...t, refresh_token: t.refresh_token }), config, error: null, last_sync_at: new Date().toISOString() };
+    const row = { tenant_id: me.tenant.id, kind: p.kind, name: account, account, owner_user_id: me.user.id, status: 'connected', scope: p.kind === 'sheets' ? 'Open picked files only' : p.kind === 'zalo' ? 'Messages to the Official Account; replies after approval' : 'Read new mail from known senders; send after approval', auth_enc: sealAuth({ ...t, refresh_token: t.refresh_token }), config, error: null, last_sync_at: new Date().toISOString() };
     const { error } = existing ? await sb.from('channels').update(row).eq('id', existing.id) : await sb.from('channels').insert(row);
     if (error) throw new Error(error.message);
     const who = me.membership.display_name || me.user.email || 'member';

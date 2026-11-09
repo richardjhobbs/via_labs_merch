@@ -55,7 +55,13 @@ export async function recordOutbound(tenantId: string, draft: { id: string; body
     threadId = src?.thread_id || null; kind = (src?.raw as { channel?: string })?.channel || null;
     // a reply to mail that came in through a connected mailbox (Gmail or Microsoft 365) goes back out from it
     type Src = { thread_id?: string; conversation_id?: string | null; id?: string; message_id?: string | null; references?: string; reply_to?: string | null };
-    const r = (src?.raw || {}) as { gmail?: Src; m365?: Src; subject?: string | null };
+    const r = (src?.raw || {}) as { gmail?: Src; m365?: Src; whatsapp?: { from: string; id: string }; zalo?: { user_id: string }; subject?: string | null };
+    // WhatsApp and Zalo: back to the sender on the client's own number or Official Account
+    if (src?.channel_id && (r.whatsapp || r.zalo)) {
+      const { data: ch } = await sb.from('channels').select('id, kind').eq('id', src.channel_id).maybeSingle();
+      if (ch?.kind === 'whatsapp' && r.whatsapp) { channelId = ch.id; send = { send: 'pending', reply: { to: r.whatsapp.from, subject: null, message_id: null, references: null, thread_id: r.whatsapp.from, provider_id: r.whatsapp.id } }; }
+      if (ch?.kind === 'zalo' && r.zalo) { channelId = ch.id; send = { send: 'pending', reply: { to: r.zalo.user_id, subject: null, message_id: null, references: null, thread_id: r.zalo.user_id, provider_id: null } }; }
+    }
     const g = r.gmail || r.m365;
     if (src?.channel_id && g) {
       const { data: ch } = await sb.from('channels').select('id, kind').eq('id', src.channel_id).maybeSingle();

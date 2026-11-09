@@ -62,6 +62,7 @@ export default async function Queue({ params, searchParams }: { params: Promise<
           const po = (d.orders as unknown as { po: string; customer_id: string } | null)?.po, party = d.parties as unknown as { name: string; short: string | null; channel_pref: string | null } | null, src = d.source as unknown as { sender_name: string | null; from_addr: string | null; text_en: string | null; text: string; thread_id: string | null; raw: { gmail?: { reply_to?: string | null }; m365?: { reply_to?: string | null } } | null; channel: { kind: string; account: string | null; status: string } | null } | null;
           // where an approved reply really goes: back out through the mailbox the original came in on, else a person sends it
           const box = src?.channel && ['email_gmail', 'email_m365'].includes(src.channel.kind) ? src.channel : null;
+          const chat = src?.channel && ['whatsapp', 'zalo'].includes(src.channel.kind) ? src.channel : null;
           const replyTo = (src?.raw?.gmail || src?.raw?.m365)?.reply_to || src?.from_addr || '';
           return (
             <div key={d.id} className="card" style={{ borderLeft: `3px solid ${d.priority === 1 ? 'var(--crit)' : d.priority === 2 ? '#c9a24a' : 'var(--line)'}` }}>
@@ -75,7 +76,7 @@ export default async function Queue({ params, searchParams }: { params: Promise<
               </div>
               <h2 className="mt-2" style={{ fontSize: 16 }}>{d.title}</h2>
               {d.impact && <div className="small mt-1" style={{ color: 'var(--fg2)' }}><span className="muted">{t('impact')}:</span> {d.impact}</div>}
-              <div className="small mt-1"><span className="muted">{t('to')}:</span> {party?.name || '—'} · {box ? t('viaEmail', { to: replyTo, from: box.account || '' }) : t('manual', { channel: party?.channel_pref || '—' })}</div>
+              <div className="small mt-1"><span className="muted">{t('to')}:</span> {party?.name || '—'} · {box ? t('viaEmail', { to: replyTo, from: box.account || '' }) : chat ? t('viaChat', { app: chat.kind === 'zalo' ? 'Zalo OA' : 'WhatsApp Business', to: src?.sender_name || src?.from_addr || '' }) : t('manual', { channel: party?.channel_pref || '—' })}</div>
               {src && <details className="small mt-2"><summary className="muted" style={{ cursor: 'pointer' }}>{t('source')} {src.sender_name || src.from_addr}</summary><blockquote className="mt-1 pl-3" style={{ borderLeft: '2px solid var(--line)', whiteSpace: 'pre-wrap', color: 'var(--fg2)' }}>{src.text_en || src.text}</blockquote>{src.thread_id && <Link className="small" href={`/app/${slug}/threads/${src.thread_id}`}>{t('openThread')}</Link>}</details>}
               <form action={approveDraft} className="mt-3 grid gap-2">
                 <input type="hidden" name="tenant" value={slug} /><input type="hidden" name="id" value={d.id} />

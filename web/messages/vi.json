@@ -196,7 +196,8 @@
         "phone": "Gọi điện",
         "other": "Khác"
       }
-    }
+    },
+    "viaChat": "{app} gửi {to}"
   },
   "admin": {
     "title": "Quản trị VIA",
@@ -585,6 +586,30 @@
       "s4Title": "Trả lời gửi thủ công cũng được theo dõi",
       "s4": "Các trả lời đã duyệt cần gửi từ ứng dụng chat của bạn sẽ nằm trong Cần gửi thủ công cho đến khi bạn đánh dấu đã gửi. Sau 4 giờ bạn được nhắc; sau một ngày quản lý của bạn được nhắc.",
       "promise": "Việc đến hạn hoặc đã có tin, hoặc VIA sẽ hỏi. Không thể lặng lẽ bị bỏ sót."
+    },
+    "pilot": "Thí điểm",
+    "wa": {
+      "done": "Đã kết nối WhatsApp Business: {account}. Hãy cài webhook trong ứng dụng Meta của bạn để bắt đầu nhận tin.",
+      "none": "Chưa nhận được tin nhắn nào",
+      "webhook": "Callback URL cho ứng dụng Meta của bạn (WhatsApp, Configuration)",
+      "verifyToken": "Mã xác minh",
+      "phoneId": "Phone number ID",
+      "token": "Mã truy cập vĩnh viễn (system user)",
+      "secret": "App secret của Meta",
+      "waba": "WhatsApp Business account ID (không bắt buộc)",
+      "save": "Kiểm tra và kết nối",
+      "note": "VIA kiểm tra các thông tin này với Meta trước khi lưu. Mã truy cập và app secret được mã hóa, chỉ máy chủ đọc được.",
+      "managerOnly": "Owner hoặc manager kết nối tài khoản công ty.",
+      "errors": {
+        "waFields": "Hãy nhập Phone number ID (chữ số), mã truy cập và app secret."
+      }
+    },
+    "zalo": {
+      "connect": "Kết nối Zalo OA",
+      "done": "Đã kết nối Zalo OA: {account}. Tin nhắn gửi tới Official Account sẽ được nhận vào đây.",
+      "errors": {
+        "notReady": "Zalo chưa được bật. VIA Labs đang hoàn tất thiết lập ứng dụng Zalo."
+      }
     }
   },
   "ledger": {

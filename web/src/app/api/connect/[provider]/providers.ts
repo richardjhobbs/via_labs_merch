@@ -3,10 +3,11 @@
 import * as google from '@/lib/connectors/google';
 import * as microsoft from '@/lib/connectors/microsoft';
 import { driveConfigured, driveAccount } from '@/lib/connectors/drive';
+import * as zalo from '@/lib/connectors/zalo';
 
-export type ProviderKey = 'google' | 'microsoft';
+export type ProviderKey = 'google' | 'microsoft' | 'zalo';
 type Provider = {
-  kind: 'email_gmail' | 'email_m365' | 'sheets'; connector: 'gmail' | 'm365' | 'gdrive'; label: string; scopes: string[];
+  kind: 'email_gmail' | 'email_m365' | 'sheets' | 'zalo'; connector: 'gmail' | 'm365' | 'gdrive' | 'zalo'; label: string; scopes: string[];
   ledger: string;   // what the connection does, for the ledger row
   configured: () => boolean;
   authUrl: (o: { state: string; challenge: string; redirectUri: string; loginHint?: string }) => string;
@@ -20,6 +21,9 @@ export const PROVIDERS: Record<ProviderKey, Provider> = {
     start: async (t) => { const p = await google.profile(t); return { account: p.emailAddress.toLowerCase(), cursor: { history_id: p.historyId } }; } },
   microsoft: { kind: 'email_m365', connector: 'm365', label: 'Microsoft 365', scopes: ['Mail.Read', 'Mail.Send'], ledger: 'reads new mail from {where}, sends only approved replies', configured: microsoft.microsoftConfigured, authUrl: microsoft.authUrl, exchange: microsoft.exchangeCode,
     start: async (t) => { const p = await microsoft.profile(t); return { account: p.account, cursor: { since: new Date().toISOString(), at_since: [] } }; } },
+  // the client's own Official Account authorises VIA's Zalo app; the account is the OA id (webhooks carry it)
+  zalo: { kind: 'zalo', connector: 'zalo', label: 'Zalo OA', scopes: [], ledger: 'receives messages to the Official Account, replies only after approval', configured: zalo.zaloConfigured, authUrl: zalo.authUrl, exchange: (code, verifier) => zalo.exchangeCode(code, verifier),
+    start: async (t) => { const o = await zalo.oaInfo(t); return { account: o.oa_id, cursor: { oa_name: o.name } }; } },
 };
 
 export const GOOGLE_DRIVE: Provider = { kind: 'sheets', connector: 'gdrive', label: 'Google Drive', scopes: google.DRIVE_SCOPES, ledger: 'opens only the files the person picks (drive.file)', configured: driveConfigured,

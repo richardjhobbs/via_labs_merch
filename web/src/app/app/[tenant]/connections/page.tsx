@@ -9,7 +9,8 @@ import { BrandIcon, BrandCluster, BrandRow } from '@/components/brand-icon';
 import { googleConfigured } from '@/lib/connectors/google';
 import { microsoftConfigured } from '@/lib/connectors/microsoft';
 import { driveConfigured } from '@/lib/connectors/drive';
-import { saveMailbox, disconnectMailbox, createForwardAddress } from './actions';
+import { saveMailbox, disconnectMailbox, createForwardAddress, saveWhatsApp } from './actions';
+import { zaloConfigured } from '@/lib/connectors/zalo';
 import { forwardConfigured } from '@/lib/connectors/forward';
 import { CopyButton } from '@/components/copy-button';
 
@@ -19,7 +20,7 @@ const GUIDE_ICONS: Record<string, [string, string][] | undefined> = {
   s1: [['Gmail', '/brands/gmail.svg'], ['Microsoft 365', '/brands/microsoft.svg'], ['Google Drive', '/brands/googledrive.svg'], ['WhatsApp Business', '/brands/whatsapp.svg'], ['WeCom', '/brands/wecom.png'], ['Zalo OA', '/brands/zalo.svg']],
   s2: [['Zalo', '/brands/zalo.svg'], ['WeChat', '/brands/wechat.svg'], ['WhatsApp', '/brands/whatsapp.svg'], ['Telegram', '/brands/telegram.svg']],
 };
-const GERR = ['notReady', 'support', 'viewer', 'state', 'denied', 'scopes', 'refresh', 'failed', 'label', 'forbidden', 'adminConsent', 'folder'] as const;
+const GERR = ['notReady', 'support', 'viewer', 'state', 'denied', 'scopes', 'refresh', 'failed', 'label', 'forbidden', 'adminConsent', 'folder', 'waFields'] as const;
 const M365_ERR = ['adminConsent', 'folder'];
 
 export default async function Connections({ params, searchParams }: { params: Promise<{ tenant: string }>; searchParams: Promise<Record<string, string | undefined>> }) {
@@ -43,17 +44,20 @@ export default async function Connections({ params, searchParams }: { params: Pr
   };
   const ms = sp.gp === 'microsoft';
   const gerr = GERR.find((k) => k === sp.gerror);
-  const errNs: 'gmail' | 'm365' | 'gdrive' | 'forward' = gerr && (M365_ERR.includes(gerr) || (ms && ['notReady', 'refresh'].includes(gerr))) ? 'm365' : gerr && dv && ['notReady', 'scopes'].includes(gerr) ? 'gdrive' : gerr === 'notReady' && sp.gp === 'forward' ? 'forward' : 'gmail';
+  const errNs: 'gmail' | 'm365' | 'gdrive' | 'forward' | 'zalo' | 'wa' = gerr === 'waFields' ? 'wa' : gerr && (M365_ERR.includes(gerr) || (ms && ['notReady', 'refresh'].includes(gerr))) ? 'm365' : gerr && dv && ['notReady', 'scopes'].includes(gerr) ? 'gdrive' : gerr === 'notReady' && sp.gp === 'forward' ? 'forward' : gerr === 'notReady' && sp.gp === 'zalo' ? 'zalo' : 'gmail';
   const when = (iso: string) => new Date(iso).toLocaleString('en-GB', { timeZone: tenant.tz, day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
   const groups = (Object.keys(CATEGORIES) as ConnectorCategory[]).map((cat) => ({ cat, items: CONNECTORS.filter((c) => c.category === cat) })).filter((g) => g.items.length);
-  const live = CONNECTORS.filter((c) => c.status !== 'request');
+  const live = CONNECTORS.filter((c) => c.status !== 'request' || c.pilot);
+  const was = channels.filter((c) => c.kind === 'whatsapp' && c.status !== 'off'), oas = channels.filter((c) => c.kind === 'zalo' && c.status !== 'off');
+  const isManager = membership.id !== 'admin' && ['owner', 'manager'].includes(membership.role);
+  const origin = process.env.NEXT_PUBLIC_APP_URL || 'https://merch.getvia.xyz';
 
   return (
     <div className="max-w-5xl">
       <h1>{t('title')}</h1>
       <p className="muted mt-1" style={{ maxWidth: '70ch' }}>{t('sub')}</p>
 
-      {sp.gconnected && <div className="notice mt-4">{t(ms ? 'm365.done' : dv ? 'gdrive.done' : 'gmail.done', { account: sp.gconnected })}</div>}
+      {sp.gconnected && <div className="notice mt-4">{t(ms ? 'm365.done' : dv ? 'gdrive.done' : sp.gp === 'zalo' ? 'zalo.done' : sp.gp === 'whatsapp' ? 'wa.done' : 'gmail.done', { account: sp.gconnected })}</div>}
       {sp.gsaved && <div className="notice mt-4">{t('gmail.saved')}</div>}
       {gerr && <div className="notice crit mt-4">{t(`${errNs}.errors.${gerr}` as 'gmail.errors.failed', { error: sp.gmsg || '', label: sp.glabel || '' })}</div>}
 
@@ -74,7 +78,7 @@ export default async function Connections({ params, searchParams }: { params: Pr
             <div key={c.id} className="flex gap-3 p-3" style={{ border: '1px solid var(--line)', borderRadius: 10 }}>
               {c.logos ? <BrandCluster logos={c.logos} names={c.vendor || c.name} size={36} /> : <BrandIcon name={c.name} logo={c.logo} size={36} />}
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 flex-wrap"><span className="font-medium">{c.name}</span>{c.vendor && <span className="muted small">{c.vendor}</span>}<span className={`pill ${(connected.has(c.id) || (c.id === 'forward' && myForward)) ? 'ok' : c.status === 'via' ? 'agent' : ''} ml-auto`}>{(connected.has(c.id) || (c.id === 'forward' && myForward)) ? t('connected') : STATUS_LABEL[c.status]}</span></div>
+                <div className="flex items-center gap-2 flex-wrap"><span className="font-medium">{c.name}</span>{c.vendor && <span className="muted small">{c.vendor}</span>}<span className={`pill ${(connected.has(c.id) || (c.id === 'forward' && myForward)) ? 'ok' : c.status === 'via' ? 'agent' : ''} ml-auto`}>{(connected.has(c.id) || (c.id === 'forward' && myForward)) ? t('connected') : c.pilot ? t('pilot') : STATUS_LABEL[c.status]}</span></div>
                 <div className="small mt-1" style={{ color: 'var(--fg2)' }}>{c.use}</div>
                 <details className="mt-2 small"><summary className="muted" style={{ cursor: 'pointer' }}>{t('howTo')} · {c.auth}</summary><ol className="mt-2 pl-5 grid gap-1" style={{ listStyle: 'decimal' }}>{c.steps.map((s, i) => <li key={i}>{s}</li>)}</ol>{c.docs && <a className="muted" href={c.docs} target="_blank" rel="noopener">{t('docs')}</a>}</details>
                 {c.id === 'drive' && <>
@@ -104,6 +108,46 @@ export default async function Connections({ params, searchParams }: { params: Pr
                   </div>}
                   <p className="muted small mt-2">{t('forward.note')}</p>
                   {canConnect && !myForward && (forwardConfigured() ? <form action={createForwardAddress}><input type="hidden" name="tenant" value={slug} /><button className="btn sm primary mt-2">{t('forward.create')}</button></form> : <><button className="btn sm mt-2" disabled>{t('forward.create')}</button><p className="muted small mt-1">{t('forward.notReady')}</p></>)}
+                </>}
+                {c.id === 'whatsapp' && <>
+                  {was.map((m) => { const cfg = m.config as { display?: string; verified_name?: string; verify_token?: string }; return (
+                    <div key={m.id} className="mt-3 p-2 small" style={{ border: '1px solid var(--line)', borderRadius: 8 }}>
+                      <div className="flex items-center gap-2 flex-wrap"><span className="font-medium">{cfg.display || m.account}</span><span className="muted">{cfg.verified_name}</span><span className={`pill ${m.status === 'connected' ? 'ok' : 'warn'}`}>{m.status === 'connected' ? t('connected') : t('gmail.reauth')}</span></div>
+                      <div className="muted mt-1">{m.last_sync_at ? t('gmail.checked', { time: when(m.last_sync_at) }) : t('wa.none')}</div>
+                      {m.error && <div className="mt-1" style={{ color: 'var(--crit)' }}>{m.error}</div>}
+                      {isManager && <div className="mt-2 grid gap-1">
+                        <span className="muted">{t('wa.webhook')}</span>
+                        <div className="flex items-center gap-2 flex-wrap"><span className="mono" style={{ wordBreak: 'break-all' }}>{origin}/api/webhooks/whatsapp</span><CopyButton text={`${origin}/api/webhooks/whatsapp`} label={t('forward.copy')} done={t('forward.copied')} /></div>
+                        <span className="muted">{t('wa.verifyToken')}</span>
+                        <div className="flex items-center gap-2 flex-wrap"><span className="mono">{cfg.verify_token}</span><CopyButton text={cfg.verify_token || ''} label={t('forward.copy')} done={t('forward.copied')} /></div>
+                        <form action={disconnectMailbox} className="mt-1"><input type="hidden" name="tenant" value={slug} /><input type="hidden" name="id" value={m.id} /><button className="btn sm red">{t('gmail.disconnect')}</button></form>
+                      </div>}
+                    </div>); })}
+                  {isManager && !was.some((m) => m.status === 'connected') && <form action={saveWhatsApp} className="mt-3 grid gap-2 small">
+                    <input type="hidden" name="tenant" value={slug} />
+                    <label className="grid gap-1"><span className="muted">{t('wa.phoneId')}</span><input name="phone_id" className="input" inputMode="numeric" required /></label>
+                    <label className="grid gap-1"><span className="muted">{t('wa.token')}</span><input name="token" type="password" className="input" autoComplete="off" required /></label>
+                    <label className="grid gap-1"><span className="muted">{t('wa.secret')}</span><input name="secret" type="password" className="input" autoComplete="off" required /></label>
+                    <label className="grid gap-1"><span className="muted">{t('wa.waba')}</span><input name="waba" className="input" inputMode="numeric" /></label>
+                    <div><button className="btn sm primary">{t('wa.save')}</button></div>
+                    <p className="muted">{t('wa.note')}</p>
+                  </form>}
+                  {!isManager && !was.length && <p className="muted small mt-2">{t('wa.managerOnly')}</p>}
+                </>}
+                {c.id === 'zalo' && <>
+                  {oas.map((m) => (
+                    <div key={m.id} className="mt-3 p-2 small" style={{ border: '1px solid var(--line)', borderRadius: 8 }}>
+                      <div className="flex items-center gap-2 flex-wrap"><span className="font-medium">{(m.config as { oa_name?: string }).oa_name || m.account}</span><span className={`pill ${m.status === 'connected' ? 'ok' : 'warn'}`}>{m.status === 'connected' ? t('connected') : t('gmail.reauth')}</span></div>
+                      <div className="muted mt-1">{m.last_sync_at ? t('gmail.checked', { time: when(m.last_sync_at) }) : t('wa.none')}</div>
+                      {m.error && <div className="mt-1" style={{ color: 'var(--crit)' }}>{m.error}</div>}
+                      {isManager && <div className="flex gap-2 mt-2">
+                        {m.status !== 'connected' && <a className="btn sm" href={`/api/connect/zalo?tenant=${slug}`}>{t('gmail.reconnect')}</a>}
+                        <form action={disconnectMailbox}><input type="hidden" name="tenant" value={slug} /><input type="hidden" name="id" value={m.id} /><button className="btn sm red">{t('gmail.disconnect')}</button></form>
+                      </div>}
+                    </div>
+                  ))}
+                  {isManager && !oas.some((m) => m.status === 'connected') && (zaloConfigured() ? <a className="btn sm primary mt-2" href={`/api/connect/zalo?tenant=${slug}`}>{t('zalo.connect')}</a> : <><button className="btn sm mt-2" disabled>{t('zalo.connect')}</button><p className="muted small mt-1">{t('zalo.errors.notReady')}</p></>)}
+                  {!isManager && !oas.length && <p className="muted small mt-2">{t('wa.managerOnly')}</p>}
                 </>}
                 {c.id === 'sheets' && <p className="muted small mt-2">{t('gdrive.sheetsNote')}</p>}
                 {MAIL[c.id] && (() => { const mc = MAIL[c.id], boxes = channels.filter((m) => m.kind === mc.kind && m.status !== 'off'); return <>
@@ -138,11 +182,11 @@ export default async function Connections({ params, searchParams }: { params: Pr
 
       <h2 className="mt-8" style={{ fontSize: 16 }}>{t('catalogue')}</h2>
       <p className="muted small mt-1" style={{ maxWidth: '70ch' }}>{t('catalogueNote')}</p>
-      {groups.filter((g) => g.items.some((c) => c.status === 'request')).map((g) => (
+      {groups.filter((g) => g.items.some((c) => c.status === 'request' && !c.pilot)).map((g) => (
         <div key={g.cat} className="mt-5">
           <div className="small font-medium muted" style={{ letterSpacing: '.06em', textTransform: 'uppercase', fontSize: 11 }}>{CATEGORIES[g.cat]}</div>
           <div className="grid gap-2 mt-2 md:grid-cols-2 lg:grid-cols-3">
-            {g.items.filter((c) => c.status === 'request').map((c) => (
+            {g.items.filter((c) => c.status === 'request' && !c.pilot).map((c) => (
               <details key={c.id} className="p-3" style={{ border: '1px solid var(--line)', borderRadius: 10, background: '#fff' }}>
                 <summary className="flex items-center gap-3" style={{ cursor: 'pointer', listStyle: 'none' }}>
                   <BrandIcon name={c.name} logo={c.logo} size={30} />
