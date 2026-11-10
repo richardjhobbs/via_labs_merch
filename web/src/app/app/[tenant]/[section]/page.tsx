@@ -8,12 +8,14 @@ import { isActive, SUPPORT_HOURS, type SupportGrant } from '@/lib/support';
 import { cookies } from 'next/headers';
 import { Avatar, CompanyLogo } from '@/components/avatar';
 import { ThemePicker } from '../theme-picker';
-import { savePhone, saveAvatar, removeAvatar, saveLogo, removeLogo } from '../profile-actions';
 import { revokeMcpToken } from '../mcp-actions';
 import { McpCreate } from '@/components/mcp-tokens';
 import { memberTracks } from '@/lib/tracks';
 import { canWrite as mcpCanWrite } from '@/lib/mcp/core';
 import { isLive, type McpToken } from '@/lib/mcp/tokens';
+import { savePhone, saveAvatar, removeAvatar, saveLogo, removeLogo, saveMyTz, saveHours } from '../profile-actions';
+import { hoursOf } from '@/lib/work-hours';
+import { getLocale } from 'next-intl/server';
 
 const SECTIONS = ['settings'] as const;
 
@@ -37,7 +39,13 @@ export default async function Section({ params, searchParams }: { params: Promis
   // personal fields belong to the signed-in person's own membership; VIA staff walking the workspace have none
   const mine = viewingAs ? null : memberships.find((x) => x.tenant_id === tenant.id) || null;
   const isOwner = mine?.role === 'owner';
-  const PERR: Record<string, string> = { own: t('profile.errOwn'), file: t('profile.errFile'), type: t('profile.errType'), size: t('profile.errSize'), phone: t('profile.errPhone'), owner: t('profile.errOwner') };
+  const PERR: Record<string, string> = { own: t('profile.errOwn'), file: t('profile.errFile'), type: t('profile.errType'), size: t('profile.errSize'), phone: t('profile.errPhone'), owner: t('profile.errOwner'), tz: t('hours.errTz'), hours: t('hours.errHours'), role: t('hours.errRole') };
+  const locale = await getLocale();
+  const { data: tset } = await sb.from('tenants').select('settings, tz').eq('id', tenant.id).single();
+  const wh = hoursOf((tset?.tz as string) || tenant.tz, tset?.settings);
+  const zones = (Intl as unknown as { supportedValuesOf: (k: string) => string[] }).supportedValuesOf('timeZone');
+  const dayName = (d: number) => new Intl.DateTimeFormat(locale, { weekday: 'short', timeZone: 'UTC' }).format(new Date(Date.UTC(2026, 10, 8 + d)));
+  const canHours = ['owner', 'manager'].includes(membership.role) && !viewingAs;
   const rows = (data || []) as SupportGrant[];
   const tokens = ((tokenRows || []) as McpToken[]);
   const myTokens = mine ? tokens.filter((x) => x.membership_id === mine.id) : [];
@@ -97,6 +105,12 @@ export default async function Section({ params, searchParams }: { params: Promis
             <button className="btn primary">{t('profile.savePhone')}</button>
           </form>
           <p className="muted small mt-2">{t('profile.phoneHelp')}</p>
+          <form action={saveMyTz} className="grid gap-2 sm:grid-cols-[1fr_auto] items-end mt-4">
+            <input type="hidden" name="slug" value={slug} />
+            <label className="f" style={{ margin: 0 }}><span>{t('hours.myTz')}</span><select className="input" name="tz" defaultValue={(mine as { tz?: string | null }).tz || ''}><option value="">{t('hours.companyTz', { tz: wh.tz })}</option>{zones.map((z) => <option key={z} value={z}>{z}</option>)}</select></label>
+            <button className="btn">{t('hours.save')}</button>
+          </form>
+          <p className="muted small mt-2">{t('hours.myTzHelp')}</p>
         </> : <p className="muted small mt-2">{t('profile.errOwn')}</p>}
       </section>
 
@@ -112,6 +126,21 @@ export default async function Section({ params, searchParams }: { params: Promis
           {myTokens.length ? tokenTable(myTokens, false) : <p className="muted small mt-2">{t('mcp.none')}</p>}
         </> : <p className="muted small mt-2">{t('profile.errOwn')}</p>}
         {canDecide && otherTokens.length > 0 && <><h3 className="mt-5" style={{ fontSize: 14 }}>{t('mcp.all')}</h3>{tokenTable(otherTokens, true)}</>}
+      </section>
+
+      <section id="hours" className="card mt-4">
+        <h2 style={{ fontSize: 17 }}>{t('hours.title')}</h2>
+        <p className="muted small mt-1">{t('hours.sub')}</p>
+        {canHours ? <form action={saveHours} className="grid gap-3 mt-3">
+          <input type="hidden" name="slug" value={slug} />
+          <div className="flex gap-2 flex-wrap">{[1, 2, 3, 4, 5, 6, 7].map((d) => <label key={d} className="pill" style={{ cursor: 'pointer', padding: '6px 10px' }}><input type="checkbox" name="days" value={d} defaultChecked={wh.days.includes(d)} style={{ marginRight: 6 }} />{dayName(d)}</label>)}</div>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <label className="f" style={{ margin: 0 }}><span>{t('hours.start')}</span><input className="input" type="time" name="start" defaultValue={wh.start} required /></label>
+            <label className="f" style={{ margin: 0 }}><span>{t('hours.end')}</span><input className="input" type="time" name="end" defaultValue={wh.end} required /></label>
+            <label className="f" style={{ margin: 0 }}><span>{t('hours.companyZone')}</span><select className="input" name="tz" defaultValue={wh.tz}>{zones.map((z) => <option key={z} value={z}>{z}</option>)}</select></label>
+          </div>
+          <div><button className="btn primary sm">{t('hours.save')}</button></div>
+        </form> : <p className="mt-3">{wh.days.map(dayName).join(' · ')} · {wh.start}-{wh.end} · {wh.tz}</p>}
       </section>
 
       <section className="card mt-4">

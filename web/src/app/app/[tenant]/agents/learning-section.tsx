@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { supabaseServer } from '@/lib/supabase/server';
 import { decideLesson, addDoc, deleteDoc, setCap } from './learning-actions';
+import { localDay } from '@/lib/work-hours';
 
 const CUSTOMER = ['brand', 'retailer', 'store', 'buying_office', 'trading'];
 
@@ -15,7 +16,7 @@ export async function LearningSection({ slug, tenantId, role, tz }: { slug: stri
     sb.from('knowledge_docs').select('id, title, scope, scope_id, filename, created_at, body').eq('tenant_id', tenantId).order('created_at', { ascending: false }).limit(100),
     sb.from('parties').select('id, name, kind').eq('tenant_id', tenantId).is('archived_at', null).order('name'),
     sb.from('tenants').select('settings').eq('id', tenantId).single(),
-    sb.from('usage_daily').select('cost_usd').eq('tenant_id', tenantId).eq('day', new Date().toISOString().slice(0, 10)).maybeSingle(),
+    sb.from('usage_daily').select('cost_usd').eq('tenant_id', tenantId).eq('day', localDay(new Date(), tz)).maybeSingle(),
   ]);
   const director = ['owner', 'manager'].includes(role), owner = role === 'owner';
   const name = new Map((parties || []).map((p) => [p.id as string, p.name as string]));

@@ -352,7 +352,12 @@
         "low": "niedrig"
       },
       "reportsTo": "Berichtet an {name}"
-    }
+    },
+    "importMissingCols": "Diese Datei hat keine Spalte {missing}, die wir erkennen. Ihre Spalten sind: {found}. Benennen Sie die Spalte um oder laden Sie unten die Vorlage.",
+    "importAllExist": "Nichts Neues zu importieren: {n, plural, one {diese PO ist} other {diese # POs sind}} bereits in Ihren Aufträgen und blieben unverändert:",
+    "dropTitle": "Auftragsdatei hier ablegen oder klicken, um eine zu wählen",
+    "dropSub": ".xlsx, .xls oder .csv, eine Zeile pro PO, bis 4 MB",
+    "dropChosen": "{kb} KB, bereit zum Import. Klicken, um eine andere Datei zu wählen."
   },
   "parties": {
     "title": "Kunden & Lieferanten",
@@ -906,11 +911,11 @@
       "textPh": "Regeln, Standard oder Handbuch hier einfügen",
       "save": "Speichern",
       "limit": "Tägliches Ausgabenlimit",
-      "limitSub": "Über diesem Betrag an einem Tag (UTC) pausiert die Arbeit, auf die niemand wartet, bis Mitternacht: der stündliche Durchlauf, das Morgenbriefing, Kapazitätsentscheidungen, die Compliance-Prüfung und erste Briefings. Chat, Antworten auf eingehende Nachrichten und Auftragsbriefings laufen weiter. Inhaber werden einmal per E-Mail informiert.",
+      "limitSub": "Über diesem Betrag an einem Tag (Firmenzeit) pausiert die Arbeit, auf die niemand wartet, bis Mitternacht: der stündliche Durchlauf, das Morgenbriefing, Kapazitätsentscheidungen, die Compliance-Prüfung und erste Briefings. Chat, Antworten auf eingehende Nachrichten und Auftragsbriefings laufen weiter. Inhaber werden einmal per E-Mail informiert.",
       "today": "Heute ausgegeben",
       "dailyLimit": "Tageslimit",
       "none": "keins",
-      "reached": "Das Limit ist für heute erreicht: Hintergrundarbeit pausiert bis Mitternacht UTC.",
+      "reached": "Das Limit ist für heute erreicht: Hintergrundarbeit pausiert bis Mitternacht Firmenzeit.",
       "setLimit": "Limit in USD (0 für keins)",
       "ownerOnly": "Nur ein Inhaber kann das Limit ändern.",
       "costByLayer": "Kosten je Agent und Desk im Agentenbaum",
@@ -2102,5 +2107,19 @@
     "errRole": "Betrachter und Partner können keine Tokens ausstellen.",
     "errName": "Geben Sie dem Token einen Namen.",
     "errLimit": "Höchstens {n} aktive Tokens pro Person. Widerrufen Sie zuerst eines."
+  },
+  "hours": {
+    "title": "Arbeitszeiten",
+    "sub": "Arbeitstage, Arbeitszeiten und Zeitzone der Firma. Die Hintergrundarbeit der Agenten (stündlicher Durchlauf, Kapazitätsentscheidungen, Compliance-Prüfung) läuft nur innerhalb dieser Zeiten, das Tageslimit beginnt um Mitternacht Firmenzeit, und offene Entscheidungen zählen nur Arbeitsstunden, bevor sie eine Ebene höher gehen.",
+    "start": "Beginn",
+    "end": "Ende",
+    "companyZone": "Zeitzone der Firma",
+    "save": "Speichern",
+    "myTz": "Ihre Zeitzone",
+    "companyTz": "Firmenzeit ({tz})",
+    "myTzHelp": "Ihr Morgenbriefing kommt an Arbeitstagen der Firma um 07:00 in dieser Zeitzone.",
+    "errTz": "Wählen Sie eine Zeitzone aus der Liste.",
+    "errHours": "Wählen Sie mindestens einen Tag sowie Beginn und Ende.",
+    "errRole": "Nur Inhaber und Manager können Arbeitszeiten ändern."
   }
 }

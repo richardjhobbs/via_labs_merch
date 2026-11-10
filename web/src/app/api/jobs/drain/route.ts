@@ -16,9 +16,10 @@ import { runAllAlerts } from '@/lib/alerts';
 import { nextEsgTenant, runEsgPass } from '@/lib/agents/esg-pass';
 import { updateBrief } from '@/lib/agents/order-agent';
 import { riseAll } from '@/lib/agents/desks';
-import { conflictPass, dueMorningBrief, morningBrief } from '@/lib/agents/manager';
+import { conflictPass, deliverBriefs, dueMorningBrief, morningBrief } from '@/lib/agents/manager';
 import { capState, noteCapReached, proposeLesson, type LessonJob } from '@/lib/agents/learning';
 import { capAllows, type Work } from '@/lib/agents/learning-rules';
+import { hoursOf, isWorkingTime } from '@/lib/work-hours';
 
 export const maxDuration = 55;
 const BUDGET_MS = 40_000;
@@ -32,7 +33,15 @@ export async function POST(req: NextRequest) {
   const left = () => BUDGET_MS - (Date.now() - t0);
   // the company's daily spending cap: past it, the work nobody is waiting on waits for tomorrow
   const capCache = new Map<string, Awaited<ReturnType<typeof capState>>>();
+  // background work (sweep, capacity decisions, compliance pass) runs only in the company's working hours
+  const hoursCache = new Map<string, boolean>();
+  const atWork = async (tenantId: string) => {
+    if (!hoursCache.has(tenantId)) { const { data: tn } = await sb.from('tenants').select('tz, settings').eq('id', tenantId).single(); hoursCache.set(tenantId, isWorkingTime(new Date(), hoursOf(tn?.tz as string, tn?.settings))); }
+    if (!hoursCache.get(tenantId)) done.after_hours = (done.after_hours || 0) + 1;
+    return hoursCache.get(tenantId)!;
+  };
   const capOk = async (tenantId: string, work: Work) => {
+    if (['sweep', 'conflicts', 'compliance'].includes(work) && !(await atWork(tenantId))) return false;
     if (!capCache.has(tenantId)) capCache.set(tenantId, await capState(sb, tenantId));
     const c = capCache.get(tenantId)!;
     if (capAllows(work, c.spent, c.cap)) return true;
@@ -85,6 +94,8 @@ export async function POST(req: NextRequest) {
     //     the capacity clashes across desks (at most two new decisions per company per pass)
     if (left() > 25_000) {
       try { const due = await dueMorningBrief(sb); if (due && await capOk(due, 'morning')) { await morningBrief(due); done.morning = 1; } } catch (e) { done.failed++; errors.push(`morning: ${e instanceof Error ? e.message : String(e)}`); }
+      // each person's copy at 07:00 in their own time zone (cheap: no model call)
+      try { const n = await deliverBriefs(sb, t0 + BUDGET_MS); if (n) done.briefs_sent = n; } catch (e) { done.failed++; errors.push(`deliver: ${e instanceof Error ? e.message : String(e)}`); }
     }
     if (new Date().getUTCMinutes() === 41 && left() > 22_000) {
       const { data: ts } = await sb.from('tenants').select('id');

@@ -4,8 +4,9 @@ import { supabaseServer } from '@/lib/supabase/server';
 import { listOrders, exceptionsOf } from '@/lib/orders';
 import { scopeOf, type Membership } from '@/lib/tenant';
 import { Avatar } from '@/components/avatar';
+import { localDay } from '@/lib/work-hours';
 
-export async function Team({ tenantId }: { tenantId: string }) {
+export async function Team({ tenantId, tz = 'UTC' }: { tenantId: string; tz?: string }) {
   const t = await getTranslations('day');
   const sb = await supabaseServer();
   const [{ data: members }, { data: drafts }, { data: parties }, orders, { data: usage }] = await Promise.all([
@@ -13,7 +14,7 @@ export async function Team({ tenantId }: { tenantId: string }) {
     sb.from('drafts').select('id, party_id, orders(customer_id)').eq('tenant_id', tenantId).in('status', ['queued', 'escalated']),
     sb.from('parties').select('id, name').eq('tenant_id', tenantId).is('archived_at', null),
     listOrders(tenantId, { status: 'open' }),
-    sb.from('usage_daily').select('agent_runs, messages_in, cost_usd').eq('tenant_id', tenantId).eq('day', new Date().toISOString().slice(0, 10)).maybeSingle(),
+    sb.from('usage_daily').select('agent_runs, messages_in, cost_usd').eq('tenant_id', tenantId).eq('day', localDay(new Date(), tz)).maybeSingle(),
   ]);
   const nameOf = (id: string) => parties?.find((p) => p.id === id)?.name || '?';
   const rows = ((members || []) as unknown as Membership[]).map((m) => {

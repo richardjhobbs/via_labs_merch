@@ -352,7 +352,12 @@
         "low": "bajo"
       },
       "reportsTo": "Informa a {name}"
-    }
+    },
+    "importMissingCols": "Este archivo no tiene una columna {missing} que reconozcamos. Sus columnas son: {found}. Cambia el nombre de la columna o descarga la plantilla de abajo.",
+    "importAllExist": "Nada nuevo que importar: {n, plural, one {este PO ya está} other {estos # PO ya están}} en tus pedidos, así que se dejaron como estaban:",
+    "dropTitle": "Suelta aquí tu archivo de pedidos, o haz clic para elegir uno",
+    "dropSub": ".xlsx, .xls o .csv, una fila por PO, hasta 4 MB",
+    "dropChosen": "{kb} KB, listo para importar. Haz clic para elegir otro archivo."
   },
   "parties": {
     "title": "Clientes y proveedores",
@@ -906,11 +911,11 @@
       "textPh": "Pega aquí las reglas, la norma o el manual",
       "save": "Guardar",
       "limit": "Límite de gasto diario",
-      "limitSub": "Superada esta cantidad en un día (UTC), el trabajo que nadie espera se pausa hasta medianoche: el repaso horario, el resumen matinal, las decisiones de capacidad, la revisión de cumplimiento y los primeros resúmenes. El chat, las respuestas a mensajes entrantes y las actualizaciones de los resúmenes de pedido siguen. Se avisa una vez por correo a los propietarios.",
+      "limitSub": "Superada esta cantidad en un día (hora de la empresa), el trabajo que nadie espera se pausa hasta medianoche: el repaso horario, el resumen matinal, las decisiones de capacidad, la revisión de cumplimiento y los primeros resúmenes. El chat, las respuestas a mensajes entrantes y las actualizaciones de los resúmenes de pedido siguen. Se avisa una vez por correo a los propietarios.",
       "today": "Gastado hoy",
       "dailyLimit": "Límite diario",
       "none": "ninguno",
-      "reached": "Se alcanzó el límite de hoy: el trabajo en segundo plano está en pausa hasta medianoche UTC.",
+      "reached": "Se alcanzó el límite de hoy: el trabajo en segundo plano está en pausa hasta medianoche de la empresa.",
       "setLimit": "Límite en USD (0 para ninguno)",
       "ownerOnly": "Solo un propietario puede cambiar el límite.",
       "costByLayer": "Coste por agente y mesa en el árbol de agentes",
@@ -2102,5 +2107,19 @@
     "errRole": "Los observadores y socios no pueden emitir tokens.",
     "errName": "Dé un nombre al token.",
     "errLimit": "Hasta {n} tokens activos por persona. Revoque uno primero."
+  },
+  "hours": {
+    "title": "Horario laboral",
+    "sub": "Días, horas y zona horaria de trabajo de la empresa. El trabajo en segundo plano de los agentes (el repaso horario, las decisiones de capacidad, la revisión de cumplimiento) solo corre dentro de ellos, el límite de gasto diario se reinicia a medianoche de la empresa y las decisiones pendientes cuentan solo horas laborables antes de subir de nivel.",
+    "start": "Inicio",
+    "end": "Fin",
+    "companyZone": "Zona horaria de la empresa",
+    "save": "Guardar",
+    "myTz": "Tu zona horaria",
+    "companyTz": "Hora de la empresa ({tz})",
+    "myTzHelp": "Tu resumen matinal llega a las 07:00 en esta zona horaria, los días laborables de la empresa.",
+    "errTz": "Elige una zona horaria de la lista.",
+    "errHours": "Elige al menos un día y una hora de inicio y de fin.",
+    "errRole": "Solo propietarios y gerentes pueden cambiar el horario laboral."
   }
 }

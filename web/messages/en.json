@@ -352,7 +352,12 @@
         "low": "low"
       },
       "reportsTo": "Reports to {name}"
-    }
+    },
+    "importMissingCols": "This file has no {missing} column we recognise. Its columns are: {found}. Rename the column, or download the template below.",
+    "importAllExist": "Nothing new to import: {n, plural, one {this PO is} other {these # POs are}} already in your orders, so they were left as they are:",
+    "dropTitle": "Drop your order file here, or click to choose one",
+    "dropSub": ".xlsx, .xls or .csv, one row per PO, up to 4 MB",
+    "dropChosen": "{kb} KB, ready to import. Click to choose another file."
   },
   "parties": {
     "title": "Customers & suppliers",
@@ -906,11 +911,11 @@
       "textPh": "Paste the rules, standard or manual here",
       "save": "Save",
       "limit": "Daily spending limit",
-      "limitSub": "Past this amount in a day (UTC), the work nobody is waiting on pauses until midnight: the hourly sweep, the morning brief, capacity decisions, the compliance pass and first briefs. Chat, replies to incoming messages and order brief updates carry on. Owners are emailed once.",
+      "limitSub": "Past this amount in a day (company time), the work nobody is waiting on pauses until midnight: the hourly sweep, the morning brief, capacity decisions, the compliance pass and first briefs. Chat, replies to incoming messages and order brief updates carry on. Owners are emailed once.",
       "today": "Spent today",
       "dailyLimit": "Daily limit",
       "none": "none",
-      "reached": "The limit is reached for today: background work is paused until midnight UTC.",
+      "reached": "The limit is reached for today: background work is paused until midnight company time.",
       "setLimit": "Limit in USD (0 for none)",
       "ownerOnly": "Only an owner can change the limit.",
       "costByLayer": "Cost by agent and desk on the agent tree",
@@ -2102,5 +2107,19 @@
     "errRole": "Viewers and partners cannot issue tokens.",
     "errName": "Give the token a name.",
     "errLimit": "Up to {n} active tokens per person. Revoke one first."
+  },
+  "hours": {
+    "title": "Working hours",
+    "sub": "The company's working days, hours and time zone. The agents' background work (the hourly sweep, capacity decisions, the compliance pass) runs only inside them, the daily spending limit resets at the company's midnight, and decisions left open count working hours only before they move up.",
+    "start": "Start",
+    "end": "End",
+    "companyZone": "Company time zone",
+    "save": "Save",
+    "myTz": "Your time zone",
+    "companyTz": "Company time ({tz})",
+    "myTzHelp": "Your morning brief arrives at 07:00 in this time zone, on the company's working days.",
+    "errTz": "Choose a time zone from the list.",
+    "errHours": "Choose at least one day and a start and end time.",
+    "errRole": "Only owners and managers can change working hours."
   }
 }

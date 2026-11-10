@@ -11,6 +11,7 @@ import { supabaseAdmin } from '@/lib/supabase/server';
 import { extract, recordUsage } from '@/lib/llm';
 import { brandedHtml, sendMail } from '@/lib/mail';
 import { lessonsForPrompt, type Lesson } from './learning-rules';
+import { localDay } from '@/lib/work-hours';
 
 type Client = SupabaseClient<any, 'merch', any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 const APP = process.env.NEXT_PUBLIC_APP_URL || 'https://merch.getvia.xyz';
@@ -55,27 +56,26 @@ export async function confirmedLessons(sb: Client, tenantId: string) {
 }
 
 export async function capState(sb: Client, tenantId: string) {
-  const [{ data: t }, { data: u }] = await Promise.all([
-    sb.from('tenants').select('name, slug, settings').eq('id', tenantId).single(),
-    sb.from('usage_daily').select('cost_usd').eq('tenant_id', tenantId).eq('day', new Date().toISOString().slice(0, 10)).maybeSingle(),
-  ]);
+  // usage is counted per company-local day (usage_add, migration 0026), so the limit resets at the company's midnight
+  const { data: t } = await sb.from('tenants').select('name, slug, settings, tz').eq('id', tenantId).single();
+  const { data: u } = await sb.from('usage_daily').select('cost_usd').eq('tenant_id', tenantId).eq('day', localDay(new Date(), (t?.tz as string) || 'UTC')).maybeSingle();
   const cap = Number((t?.settings as { agents?: { daily_cap_usd?: number } } | null)?.agents?.daily_cap_usd) || 0;
   const spent = Number(u?.cost_usd || 0);
-  return { cap, spent, over: cap > 0 && spent >= cap, name: t?.name as string | undefined, slug: t?.slug as string | undefined };
+  return { cap, spent, over: cap > 0 && spent >= cap, name: t?.name as string | undefined, slug: t?.slug as string | undefined, tz: (t?.tz as string) || 'UTC' };
 }
 
 // Once a day when a company first passes its cap, tell the owners what stopped and what still runs.
 export async function noteCapReached(sb: Client, tenantId: string) {
   const s = await capState(sb, tenantId);
   if (!s.over) return;
-  const key = `cap_notified:${tenantId}:${new Date().toISOString().slice(0, 10)}`;
+  const key = `cap_notified:${tenantId}:${localDay(new Date(), s.tz)}`;
   const { data: seen } = await sb.from('app_config').select('key').eq('key', key).maybeSingle();
   if (seen) return;
   await sb.from('app_config').upsert({ key, value: String(s.spent), updated_at: new Date().toISOString() });
   const admin = supabaseAdmin();
   const { data: owners } = await sb.from('memberships').select('user_id').eq('tenant_id', tenantId).eq('role', 'owner');
   const link = `${APP}/app/${s.slug}/agents`;
-  const lines = [`Today's agent spend has reached the daily limit of $${s.cap.toFixed(2)} ($${s.spent.toFixed(2)} so far).`, 'Until midnight UTC the work nobody is waiting on is paused: the hourly sweep, the morning brief, capacity decisions, the compliance pass and first briefs.', 'Chat with Mira, replies to incoming messages and order brief updates carry on. You can raise the limit on the Agents page.'];
+  const lines = [`Today's agent spend has reached the daily limit of $${s.cap.toFixed(2)} ($${s.spent.toFixed(2)} so far).`, 'Until midnight company time the work nobody is waiting on is paused: the hourly sweep, the morning brief, capacity decisions, the compliance pass and first briefs.', 'Chat with Mira, replies to incoming messages and order brief updates carry on. You can raise the limit on the Agents page.'];
   for (const o of owners || []) {
     const to = (await admin.auth.admin.getUserById(o.user_id as string)).data?.user?.email;
     if (to) await sendMail({ to, subject: `VIA Merch: daily agent limit reached at ${s.name}`, text: `${lines.join('\n')}\n\n${link}`, html: brandedHtml({ title: 'Daily agent limit reached', paragraphs: lines, cta: { label: 'Open Agents', url: link } }) }).catch(() => null);

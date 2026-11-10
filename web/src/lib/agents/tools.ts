@@ -11,6 +11,7 @@ import { searchMailboxes } from '@/lib/connectors/search';
 import { esgEnabled, esgSnapshot } from '@/lib/esg';
 import { latestBrief, briefForAgent, queueBrief } from './order-agent';
 import { routeDraft } from './desks';
+import { localDay } from '@/lib/work-hours';
 import { ALL_STREAMS, type Track } from '@/lib/tracks';
 import { styleTools } from './style-tools';
 
@@ -250,7 +251,7 @@ export function toolsFor(ctx: AgentCtx) {
         sb.from('drafts').select('id, party_id, orders(customer_id)').eq('tenant_id', T).in('status', ['queued', 'escalated']),
         sb.from('parties').select('id, name').eq('tenant_id', T),
         listOrders(T, { status: 'open' }, sb),
-        sb.from('usage_daily').select('agent_runs, messages_in, cost_usd').eq('tenant_id', T).eq('day', isoOf(Math.floor(Date.now() / 864e5))).maybeSingle(),
+        sb.from('usage_daily').select('agent_runs, messages_in, cost_usd').eq('tenant_id', T).eq('day', localDay(new Date(), (await sb.from('tenants').select('tz').eq('id', T).single()).data?.tz || 'UTC')).maybeSingle(),
       ]);
       const nameOf = (id: string) => parties?.find((p) => p.id === id)?.name || id;
       return { agent_today: usage, team: (members || []).map((m) => { const sc = ['owner', 'manager'].includes(m.role) ? null : ((m.scopes as { parties?: string[] })?.parties || null); const mine = sc?.length ? orders.filter((o) => o.customer && sc.includes(o.customer.id)) : orders; const q = (drafts || []).filter((d) => !sc?.length || (d.party_id && sc.includes(d.party_id)) || sc.includes((d.orders as unknown as { customer_id: string } | null)?.customer_id || '')); return { name: m.display_name, role: m.role, title: m.title, customers: sc?.length ? sc.map(nameOf) : 'all', open_pos: mine.length, off_plan: mine.filter((o) => o.health.state !== 'green').length, exceptions: exceptionsOf(mine).length, drafts_waiting: q.length, off_plan_pos: mine.filter((o) => o.health.state === 'red').map((o) => o.po) }; }) };
