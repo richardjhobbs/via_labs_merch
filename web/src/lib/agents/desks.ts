@@ -12,6 +12,7 @@ import { recordOutbound } from '@/lib/threads';
 import { brandedHtml, sendMail } from '@/lib/mail';
 import { decide, effectiveLevel, nextUp, type ChainLink, type Gate, type Layer } from './authority';
 import { ensureOrderAgent, parentFor } from './order-agent';
+import { hoursOf, isWorkingTime, workingMinutesBetween } from '@/lib/work-hours';
 
 type Client = SupabaseClient<any, 'merch', any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 const APP = process.env.NEXT_PUBLIC_APP_URL || 'https://merch.getvia.xyz';
@@ -88,10 +89,14 @@ export async function recordDecision(tenantId: string, draftId: string, status: 
 
 // Hourly: decisions left open past the limit move one layer up, with an email to whoever now holds them.
 export async function riseStale(sb: Client, tenantId: string) {
-  const { data: t } = await sb.from('tenants').select('name, slug, settings').eq('id', tenantId).single();
+  const { data: t } = await sb.from('tenants').select('name, slug, settings, tz').eq('id', tenantId).single();
+  // counted in the company's working hours, and moved only while someone is at work to pick it up
+  const wh = hoursOf(t?.tz as string, t?.settings);
+  if (!isWorkingTime(new Date(), wh)) return 0;
   const hours = Number((t?.settings as { agents?: { escalate_hours?: number } } | null)?.agents?.escalate_hours) || 24;
   const cutoff = new Date(Date.now() - hours * 3600e3).toISOString();
-  const { data: stale } = await sb.from('drafts').select('id, seq, title, order_id, waiting_layer').eq('tenant_id', tenantId).eq('status', 'queued').not('waiting_layer', 'is', null).lt('waiting_since', cutoff).limit(40);
+  const { data: candidates } = await sb.from('drafts').select('id, seq, title, order_id, waiting_layer, waiting_since').eq('tenant_id', tenantId).eq('status', 'queued').not('waiting_layer', 'is', null).lt('waiting_since', cutoff).limit(80);
+  const stale = (candidates || []).filter((d) => workingMinutesBetween(new Date(d.waiting_since as string), new Date(), wh) >= hours * 60).slice(0, 40);
   const mail = new Map<string, string[]>(); // user id or '*' (owners and managers) -> lines
   let risen = 0;
   for (const d of stale || []) {
@@ -101,8 +106,8 @@ export async function riseStale(sb: Client, tenantId: string) {
     if (!next || !cur) continue;
     await sb.from('drafts').update({ waiting_layer: next.layer, waiting_since: new Date().toISOString(), assignee_user_id: next.personUserId }).eq('id', d.id);
     await sb.from('agent_messages').update({ status: 'closed', closed_at: new Date().toISOString() }).eq('draft_id', d.id).eq('kind', 'escalation').eq('status', 'open');
-    await sb.from('agent_messages').insert({ tenant_id: tenantId, from_agent_id: cur.agentId, to_agent_id: next.agentId, kind: 'escalation', order_id: d.order_id, draft_id: d.id, body: { title: d.title, why: `open more than ${hours} hours`, waiting_at: next.layer, waiting_for: next.name } });
-    await sb.rpc('ledger_append', { p_tenant: tenantId, p_channel: 'Workspace', p_actor: cur.name, p_actor_user: null, p_counterparty: null, p_stream: null, p_order: d.order_id, p_what: `Q-${d.seq} open more than ${hours} hours at ${cur.name}; moved up to ${next.name}: ${d.title}`, p_gate: 'Logged', p_gated: false, p_ref: { draft_id: d.id } });
+    await sb.from('agent_messages').insert({ tenant_id: tenantId, from_agent_id: cur.agentId, to_agent_id: next.agentId, kind: 'escalation', order_id: d.order_id, draft_id: d.id, body: { title: d.title, why: `open more than ${hours} working hours`, waiting_at: next.layer, waiting_for: next.name } });
+    await sb.rpc('ledger_append', { p_tenant: tenantId, p_channel: 'Workspace', p_actor: cur.name, p_actor_user: null, p_counterparty: null, p_stream: null, p_order: d.order_id, p_what: `Q-${d.seq} open more than ${hours} working hours at ${cur.name}; moved up to ${next.name}: ${d.title}`, p_gate: 'Logged', p_gated: false, p_ref: { draft_id: d.id } });
     const key = next.personUserId || '*';
     mail.set(key, [...(mail.get(key) || []), `Q-${d.seq}: ${d.title}`]);
     risen++;
@@ -117,7 +122,7 @@ export async function riseStale(sb: Client, tenantId: string) {
         const { data: who } = await admin.auth.admin.getUserById(u);
         const to = who?.user?.email; if (!to) continue;
         const title = `${lines.length} decision${lines.length > 1 ? 's' : ''} now with you at ${t?.name}`;
-        await sendMail({ to, subject: `VIA Merch: ${title}`, text: `${lines.join('\n')}\n\nThese waited more than ${hours} hours at the layer below.\n${link}`, html: brandedHtml({ title, paragraphs: [...lines.slice(0, 12), `These waited more than ${hours} hours at the layer below.`], cta: { label: 'Open the approval queue', url: link } }) }).catch(() => null);
+        await sendMail({ to, subject: `VIA Merch: ${title}`, text: `${lines.join('\n')}\n\nThese waited more than ${hours} working hours at the layer below.\n${link}`, html: brandedHtml({ title, paragraphs: [...lines.slice(0, 12), `These waited more than ${hours} working hours at the layer below.`], cta: { label: 'Open the approval queue', url: link } }) }).catch(() => null);
       }
     }
   }
