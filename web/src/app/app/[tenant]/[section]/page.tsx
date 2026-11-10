@@ -8,6 +8,7 @@ import { isActive, SUPPORT_HOURS, type SupportGrant } from '@/lib/support';
 import { cookies } from 'next/headers';
 import { Avatar, CompanyLogo } from '@/components/avatar';
 import { ThemePicker } from '../theme-picker';
+import { TeamAdmin } from '../team-admin';
 import { revokeMcpToken } from '../mcp-actions';
 import { McpCreate } from '@/components/mcp-tokens';
 import { memberTracks } from '@/lib/tracks';
@@ -19,11 +20,11 @@ import { getLocale } from 'next-intl/server';
 
 const SECTIONS = ['settings'] as const;
 
-export default async function Section({ params, searchParams }: { params: Promise<{ tenant: string; section: string }>; searchParams: Promise<{ saved?: string; error?: string; psaved?: string; perr?: string; mcp?: string }> }) {
+export default async function Section({ params, searchParams }: { params: Promise<{ tenant: string; section: string }>; searchParams: Promise<{ saved?: string; error?: string; psaved?: string; perr?: string; mcp?: string; tsent?: string; tsaved?: string; terr?: string }> }) {
   const { tenant: slug, section } = await params;
   if (!(SECTIONS as readonly string[]).includes(section)) notFound();
   const { tenant, membership, memberships, user, viewingAs } = await requireTenant(slug);
-  const { saved, error, psaved, perr, mcp } = await searchParams;
+  const { saved, error, psaved, perr, mcp, tsent, tsaved, terr } = await searchParams;
   const t = await getTranslations();
   const canDecide = ['owner', 'manager'].includes(membership.role);
   const sb = await supabaseServer();
@@ -113,6 +114,8 @@ export default async function Section({ params, searchParams }: { params: Promis
           <p className="muted small mt-2">{t('hours.myTzHelp')}</p>
         </> : <p className="muted small mt-2">{t('profile.errOwn')}</p>}
       </section>
+
+      <TeamAdmin slug={slug} tenantId={tenant.id} role={viewingAs ? 'viewer' : membership.role} userId={viewingAs ? null : user.id} msg={{ tsent, tsaved, terr }} />
 
       <section id="agents" className="card mt-4">
         <h2 style={{ fontSize: 17 }}>{t('mcp.title')}</h2>

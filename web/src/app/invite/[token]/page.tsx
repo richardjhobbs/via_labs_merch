@@ -16,7 +16,7 @@ export default async function Invite({ params }: { params: Promise<{ token: stri
   const initials = (inv.display_name || inv.email).split(/[\s@.]+/).filter(Boolean).slice(0, 2).map((s: string) => s[0]?.toUpperCase()).join('');
   // a partner invite carries the party it speaks for; an existing workspace membership is never downgraded by one
   const { data: had } = await sb.from('memberships').select('role').eq('tenant_id', inv.tenant_id).eq('user_id', user.id).maybeSingle();
-  if (!(had && inv.role === 'partner' && had.role !== 'partner')) await sb.from('memberships').upsert({ tenant_id: inv.tenant_id, user_id: user.id, role: inv.role, display_name: inv.display_name, initials, ...(inv.role === 'partner' ? { scopes: inv.scopes || {} } : {}) }, { onConflict: 'tenant_id,user_id' });
+  if (!(had && inv.role === 'partner' && had.role !== 'partner')) await sb.from('memberships').upsert({ tenant_id: inv.tenant_id, user_id: user.id, role: inv.role, display_name: inv.display_name, initials, ...(inv.role === 'partner' || inv.scopes?.parties?.length ? { scopes: inv.scopes || {} } : {}), ...(inv.title ? { title: inv.title } : {}), ...(inv.tracks?.length ? { tracks: inv.tracks } : {}) }, { onConflict: 'tenant_id,user_id' });
   await sb.from('invites').update({ accepted_at: new Date().toISOString() }).eq('id', inv.id);
   await sb.rpc('ledger_append', { p_tenant: inv.tenant_id, p_channel: 'Console', p_actor: inv.display_name || inv.email, p_actor_user: user.id, p_counterparty: null, p_stream: 'Setup', p_order: null, p_what: `Accepted invite as ${inv.role}`, p_gate: 'Logged', p_gated: false, p_ref: {} });
   redirect(inv.role === 'partner' ? `/app/${inv.tenants.slug}/shared` : `/app/${inv.tenants.slug}`);
