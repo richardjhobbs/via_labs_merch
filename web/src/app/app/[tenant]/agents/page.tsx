@@ -6,10 +6,11 @@ import { supabaseServer } from '@/lib/supabase/server';
 import { hasLlm } from '@/lib/llm';
 import { lastPass } from '@/lib/agents/proactive';
 import { DesksSection } from './desks-section';
+import { LearningSection } from './learning-section';
 
 const TOOLS = ['get_briefing', 'search_orders', 'get_order', 'get_exceptions', 'get_party', 'get_messages', 'get_ledger', 'get_gates', 'get_team', 'queue_draft', 'request_approval', 'set_milestone', 'navigate', 'search_styles', 'get_style', 'get_style_file', 'diff_tech_pack', 'get_samples', 'record_sample_event', 'get_materials', 'get_schedule', 'get_desk_brief', 'get_company_brief'];
 
-export default async function Agents({ params, searchParams }: { params: Promise<{ tenant: string }>; searchParams: Promise<{ dsaved?: string; derr?: string }> }) {
+export default async function Agents({ params, searchParams }: { params: Promise<{ tenant: string }>; searchParams: Promise<{ dsaved?: string; derr?: string; lsaved?: string; lerr?: string }> }) {
   const { tenant: slug } = await params; const q = await searchParams;
   const { tenant, membership } = await requireTenant(slug);
   const t = await getTranslations('agents');
@@ -33,6 +34,8 @@ export default async function Agents({ params, searchParams }: { params: Promise
       {!live && <div className="notice warn mt-4">{t('noKey')}</div>}
       <div className="mt-4"><Link className="btn primary sm" href={`/app/${slug}/agents/tree`}>{t('tree.open')}</Link></div>
       {q.dsaved && <div className="notice mt-4">{t('desks.saved')}</div>}
+      {q.lsaved && <div className="notice mt-4">{t('learn.saved')}</div>}
+      {q.lerr && <div className="notice crit mt-4">{['role', 'owner', 'fields', 'size', 'type', 'doc', 'cap', 'nollm'].includes(q.lerr) ? t(`learn.err.${q.lerr}` as never) : q.lerr}</div>}
       {q.derr && <div className="notice crit mt-4">{['role', 'fields', 'person'].includes(q.derr) ? t(`desks.err.${q.derr}` as never) : q.derr}</div>}
       <div className="grid gap-6 mt-6 lg:grid-cols-[1fr_360px]">
         <div className="grid gap-6">
@@ -68,6 +71,7 @@ export default async function Agents({ params, searchParams }: { params: Promise
             <div className="mt-3"><Link className="btn sm" href={`/app/${slug}/orders`}>{t('openOrders')}</Link></div>
           </div>
           <DesksSection slug={slug} tenantId={tenant.id} role={membership.role} tz={tenant.tz} />
+          <LearningSection slug={slug} tenantId={tenant.id} role={membership.role} tz={tenant.tz} />
         </div>
         <div className="card" style={{ alignSelf: 'start' }}>
           <div className="font-medium small">{t('activity')}</div>
