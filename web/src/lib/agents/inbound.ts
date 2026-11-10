@@ -44,7 +44,7 @@ export async function processInbound(messageId: string) {
   const T = m.tenant_id as string;
   const [{ data: parties }, { data: orders }, { data: styles }, { data: tn }] = await Promise.all([
     sb.from('parties').select('id, name, short, kind, lang, channel_pref, meta').eq('tenant_id', T),
-    sb.from('orders').select('id, po').eq('tenant_id', T),
+    sb.from('orders').select('id, po, customer_id, factory_id, mill_id').eq('tenant_id', T),
     sb.from('styles').select('id, code, season, customer_id, status').eq('tenant_id', T).not('status', 'in', '("dropped")').order('created_at', { ascending: false }),
     sb.from('tenants').select('settings').eq('id', T).single(),
   ]);
@@ -58,8 +58,10 @@ export async function processInbound(messageId: string) {
   let partyId = m.party_id as string | null;
   if (!partyId && parsed?.party_hint) { const q = parsed.party_hint.toLowerCase(); partyId = (parties || []).find((p) => p.name.toLowerCase().includes(q) || (p.short || '').toLowerCase() === q)?.id || null; }
   if (!partyId && m.from_addr) { const dom = String(m.from_addr).split('@')[1]?.split('.')[0]?.toLowerCase(); if (dom && dom.length > 3) partyId = (parties || []).find((p) => p.name.toLowerCase().replace(/\s+/g, '').includes(dom))?.id || null; }
-  const po = parsed?.po_numbers.map((x) => x.replace(/^PO\s*#?/i, '').trim()).find((x) => (orders || []).some((o) => o.po === x)) || null;
-  const orderId = po ? (orders || []).find((o) => o.po === po)!.id : null;
+  // a PO number is unique per customer: when two customers share it, the sender's party decides, else no link
+  const byPo = (x: string) => { const L = (orders || []).filter((o) => o.po === x); return L.length === 1 ? L[0] : L.find((o) => !!partyId && [o.customer_id, o.factory_id, o.mill_id].includes(partyId)) || null; };
+  const po = parsed?.po_numbers.map((x) => x.replace(/^PO\s*#?/i, '').trim()).find((x) => !!byPo(x)) || null;
+  const orderId = po ? byPo(po)!.id : null;
   // which track: a matched PO is production; a matched style with no PO is development; otherwise the model's
   // reading, then the sender's default, then production. Development only when the company runs that track.
   const styleHit = devOn ? (parsed?.style_codes || []).map((x) => x.trim().toLowerCase()).map((x) => (styles || []).find((st) => st.code.toLowerCase() === x && (!partyId || !st.customer_id || st.customer_id === partyId))).find(Boolean) || null : null;

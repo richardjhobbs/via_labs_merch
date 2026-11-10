@@ -357,7 +357,9 @@
     "importAllExist": "Nada nuevo que importar: {n, plural, one {este PO ya está} other {estos # PO ya están}} en tus pedidos, así que se dejaron como estaban:",
     "dropTitle": "Suelta aquí tu archivo de pedidos, o haz clic para elegir uno",
     "dropSub": ".xlsx, .xls o .csv, una fila por PO, hasta 4 MB",
-    "dropChosen": "{kb} KB, listo para importar. Haz clic para elegir otro archivo."
+    "dropChosen": "{kb} KB, listo para importar. Haz clic para elegir otro archivo.",
+    "poShared": "El PO {po} lo usan {n} clientes. Elija el pedido.",
+    "noCustomer": "Sin cliente"
   },
   "parties": {
     "title": "Clientes y proveedores",

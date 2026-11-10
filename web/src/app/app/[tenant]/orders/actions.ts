@@ -20,11 +20,11 @@ export async function setMilestone(form: FormData) {
   if (!o || !MILESTONES.includes(key) || !/^\d{4}-\d{2}-\d{2}$/.test(date)) redirect(`/app/${slug}/orders`);
   const patch = field === 'actual' ? { actual_date: date } : { expected_date: date, actual_date: null };
   const { error } = await sb.from('milestones').update({ ...patch, updated_by: user.id }).eq('order_id', orderId).eq('key', key);
-  if (error) redirect(`/app/${slug}/orders/${encodeURIComponent(o.po)}?error=${encodeURIComponent(error.message)}`);
+  if (error) redirect(`/app/${slug}/orders/${orderId}?error=${encodeURIComponent(error.message)}`);
   await sb.rpc('ledger_append', { p_tenant: tenant.id, p_channel: 'Console', p_actor: membership.display_name || user.email, p_actor_user: user.id, p_counterparty: null, p_stream: 'Production status', p_order: orderId, p_what: `${LABELS[key]} ${field} date set to ${date}`, p_gate: 'Logged', p_gated: false, p_ref: { key, field, date } });
   await queueBrief(supabaseAdmin(), tenant.id, orderId, 'milestone');
   revalidatePath(`/app/${slug}/orders`);
-  redirect(`/app/${slug}/orders/${encodeURIComponent(o.po)}?saved=1`);
+  redirect(`/app/${slug}/orders/${orderId}?saved=1`);
 }
 
 // Import orders from a spreadsheet. Expected headers (case-insensitive):
@@ -94,9 +94,9 @@ export async function importOrders(_prev: ImportState, form: FormData): Promise<
 
 // Where the goods go (ISO country code): market compliance rules follow it.
 export async function setDestination(form: FormData) {
-  const slug = String(form.get('tenant')), id = String(form.get('order_id')), po = String(form.get('po'));
+  const slug = String(form.get('tenant')), id = String(form.get('order_id'));
   const { tenant, membership, user } = await requireTenant(slug);
-  const back = `/app/${slug}/orders/${encodeURIComponent(po)}`;
+  const back = `/app/${slug}/orders/${id}`;
   const code = String(form.get('destination') || '').trim().toUpperCase();
   if (membership.role === 'viewer' || (code && !/^[A-Z]{2}$/.test(code))) redirect(`${back}?error=${encodeURIComponent('Use a two-letter country code, e.g. DE or US.')}`);
   const sb = await supabaseServer();

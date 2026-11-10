@@ -125,8 +125,10 @@ export async function saveDocument(_prev: ReadState, form: FormData): Promise<Re
   const o = OrderFields.safeParse(Object.fromEntries(Object.keys(OrderFields.shape).map((k) => [k, form.get(k) ?? ''])));
   if (makeOrder) {
     if (!o.success || !o.data.po || !/^\d{4}-\d{2}-\d{2}$/.test(o.data.etd)) return { error: t('needOrder') };
-    const { data: dup } = await sb.from('orders').select('id').eq('tenant_id', tenant.id).eq('po', o.data.po).maybeSingle();
-    if (dup) return { error: t('dupPo', { po: o.data.po }) };
+    // a PO number is unique per customer: only the same customer (or none) clashes; a new customer cannot
+    const { data: same } = await sb.from('orders').select('id, customer_id').eq('tenant_id', tenant.id).eq('po', o.data.po);
+    const buyerUse = form.get('b_use') === 'on', buyerId = String(form.get('b_existing') || '');
+    if ((same || []).some((x) => (buyerUse ? !!buyerId && x.customer_id === buyerId : x.customer_id == null))) return { error: t('dupPo', { po: o.data.po }) };
   }
   const wantBank = form.get('save_bank') === 'on' && form.get('s_use') === 'on' && canAddBank(membership.role);
   const bank = wantBank ? bankFrom(form, 'bank_') : null;
@@ -174,7 +176,7 @@ export async function saveDocument(_prev: ReadState, form: FormData): Promise<Re
     await sb.from('milestones').insert(MILESTONES.map((k) => ({ tenant_id: tenant.id, order_id: order.id, key: k, owner_kind: OWNERS[k], plan_date: plan[k] })));
     await log(null, `Created PO ${d.po} from ${file}`, order.id);
     revalidatePath(`/app/${slug}/parties`); revalidatePath(`/app/${slug}/orders`);
-    redirect(after(`/app/${slug}/orders/${encodeURIComponent(d.po)}`));
+    redirect(after(`/app/${slug}/orders/${order.id}`));
   }
   revalidatePath(`/app/${slug}/parties`);
   redirect(after(`/app/${slug}/parties?saved=1`));

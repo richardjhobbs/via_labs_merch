@@ -357,7 +357,9 @@
     "importAllExist": "没有可导入的新内容：{n, plural, other {这 # 个 PO}}已在您的订单中，保持不变：",
     "dropTitle": "将订单文件拖到此处，或点击选择文件",
     "dropSub": ".xlsx、.xls 或 .csv，每行一个 PO，最大 4 MB",
-    "dropChosen": "{kb} KB，可以导入。点击可选择其他文件。"
+    "dropChosen": "{kb} KB，可以导入。点击可选择其他文件。",
+    "poShared": "PO {po} 被 {n} 个客户使用。请选择订单。",
+    "noCustomer": "无客户"
   },
   "parties": {
     "title": "客户与供应商",

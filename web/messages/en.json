@@ -357,7 +357,9 @@
     "importAllExist": "Nothing new to import: {n, plural, one {this PO is} other {these # POs are}} already in your orders, so they were left as they are:",
     "dropTitle": "Drop your order file here, or click to choose one",
     "dropSub": ".xlsx, .xls or .csv, one row per PO, up to 4 MB",
-    "dropChosen": "{kb} KB, ready to import. Click to choose another file."
+    "dropChosen": "{kb} KB, ready to import. Click to choose another file.",
+    "poShared": "PO {po} is used by {n} customers. Choose the order.",
+    "noCustomer": "No customer"
   },
   "parties": {
     "title": "Customers & suppliers",

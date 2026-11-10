@@ -43,7 +43,7 @@ export default async function Orders({ params, searchParams }: { params: Promise
       {/* phones: one card per order with the next open milestone, instead of a 16-column table */}
       <div className="grid gap-2 mt-4 md:hidden">
         {all.map((o) => { const next = MILESTONES.map((k) => [k, o.health.p[k]] as const).find(([, m]) => m && m.status !== 'done'); return (
-          <Link key={o.id} href={`${base}/${encodeURIComponent(o.po)}`} className="card block no-underline" style={{ color: 'inherit', padding: 12 }}>
+          <Link key={o.id} href={`${base}/${o.id}`} className="card block no-underline" style={{ color: 'inherit', padding: 12 }}>
             <div className="flex items-center gap-2"><span className="mono" style={{ color: 'var(--accent)' }}>{o.po}</span>{o.status !== 'open' && <span className="pill">{o.status}</span>}<span className="ml-auto"><HealthPill h={o.health} /></span></div>
             <div className="mt-1"><b>{o.style}</b> <span className="muted small">{o.description}</span></div>
             <div className="small muted mt-1">{o.customer?.name} · {o.factory?.short || o.factory?.name} · {o.qty?.toLocaleString('en-GB')} @ {o.fob?.toFixed(2)}</div>
@@ -54,7 +54,7 @@ export default async function Orders({ params, searchParams }: { params: Promise
       <div className="card tw mt-4 hidden md:block" style={{ padding: 0 }}>
         <table className="t"><thead><tr><th>PO</th><th>{t('style')}</th><th className="text-right">{t('qty')}</th><th className="text-right">FOB</th><th>{t('health')}</th>{MILESTONES.map((k) => <th key={k}>{LABELS[k]}</th>)}<th>{t('instore')}</th></tr></thead>
           <tbody>{all.map((o) => (
-            <tr key={o.id} className="click"><td><Link href={`${base}/${encodeURIComponent(o.po)}`} className="mono">{o.po}</Link>{o.status !== 'open' && <div><span className="pill">{o.status}</span></div>}</td>
+            <tr key={o.id} className="click"><td><Link href={`${base}/${o.id}`} className="mono">{o.po}</Link>{o.status !== 'open' && <div><span className="pill">{o.status}</span></div>}</td>
               <td><b>{o.style}</b><div className="muted small">{o.description}</div><div className="small">{o.customer?.name} <span className="muted">· {o.factory?.short || o.factory?.name}</span></div></td>
               <td className="text-right">{o.qty?.toLocaleString('en-GB')}</td><td className="text-right">{o.fob?.toFixed(2)}</td><td><HealthPill h={o.health} /></td>
               {MILESTONES.map((k) => <td key={k}>{o.health.p[k] ? <MsCell m={o.health.p[k]} /> : <span className="muted">–</span>}</td>)}

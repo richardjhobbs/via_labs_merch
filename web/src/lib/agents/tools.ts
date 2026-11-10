@@ -4,7 +4,7 @@
 import { betaZodTool } from '@anthropic-ai/sdk/helpers/beta/zod';
 import { z } from 'zod';
 import { supabaseAdmin } from '@/lib/supabase/server';
-import { listOrders, getOrder, exceptionsOf } from '@/lib/orders';
+import { listOrders, getOrderById, exceptionsOf, ordersByPo, pickOrder } from '@/lib/orders';
 import { LABELS, MILESTONES, isoOf, type MilestoneKey } from '@/lib/core/path';
 import { orderFile, orderSummary, recordOutbound } from '@/lib/threads';
 import { searchMailboxes } from '@/lib/connectors/search';
@@ -93,12 +93,17 @@ export function toolsFor(ctx: AgentCtx) {
     }),
   });
 
+  // a PO number is unique per customer; when two customers share one the tool asks which
+  const orderOf = async (po: string, customer?: string) => pickOrder(await ordersByPo(sb, T, po), po.trim(), customer);
+
   const get_order = betaZodTool({
     name: 'get_order',
     description: 'Full record for one PO: critical path with plan, forecast and status per milestone, supply chain (factory, mill, fibre), route, sizes, colours, the open exception if any, and the order agent\'s brief (open asks, commitments, risks, last contact, next action). Read the brief before the raw messages.',
-    inputSchema: z.object({ po: z.string().describe('PO number, e.g. 48812') }),
-    run: wrap('get_order', async ({ po }) => {
-      const o = await getOrder(T, po.trim(), sb);
+    inputSchema: z.object({ po: z.string().describe('PO number, e.g. 48812'), customer: z.string().optional().describe('customer name or code; needed only when two customers use the same PO number') }),
+    run: wrap('get_order', async ({ po, customer }) => {
+      const ref = await orderOf(po, customer);
+      if ('error' in ref) return ref;
+      const o = await getOrderById(T, ref.id, sb);
       if (!o) return { error: `No PO ${po} in this company` };
       const h = o.health, ex = exceptionsOf([o])[0];
       const agentBrief = briefForAgent(await latestBrief(sb, o.id));
@@ -136,10 +141,10 @@ export function toolsFor(ctx: AgentCtx) {
   const get_messages = betaZodTool({
     name: 'get_messages',
     description: 'Recent inbound and outbound messages, in the original language with the English rendering, optionally for one PO or one party.',
-    inputSchema: z.object({ po: z.string().optional(), party: z.string().optional(), limit: z.number().int().min(1).max(50).optional() }),
+    inputSchema: z.object({ po: z.string().optional(), customer: z.string().optional().describe('customer name or code; needed only when two customers use the same PO number'), party: z.string().optional(), limit: z.number().int().min(1).max(50).optional() }),
     run: wrap('get_messages', async (a) => {
       let q = sb.from('messages').select('id, direction, from_addr, sender_name, lang, text, text_en, stream, received_at, orders(po), parties(name)').eq('tenant_id', T).order('received_at', { ascending: false }).limit(a.limit || 15);
-      if (a.po) { const { data: o } = await sb.from('orders').select('id').eq('tenant_id', T).eq('po', a.po).maybeSingle(); if (o) q = q.eq('order_id', o.id); }
+      if (a.po) { const o = await orderOf(a.po, a.customer); if ('error' in o) return o; q = q.eq('order_id', o.id); }
       if (a.party) { const p = await partyByRef(T, a.party); if (p) q = q.eq('party_id', p.id); }
       const { data } = await q;
       return (data || []).map((m) => ({ id: m.id, direction: m.direction, from: m.sender_name || m.from_addr, lang: m.lang, text: m.text, text_en: m.text_en, stream: m.stream, at: m.received_at, po: (m.orders as unknown as { po: string } | null)?.po, party: (m.parties as unknown as { name: string } | null)?.name }));
@@ -149,10 +154,10 @@ export function toolsFor(ctx: AgentCtx) {
   const get_ledger = betaZodTool({
     name: 'get_ledger',
     description: 'Recent signed ledger entries (captures, drafts, approvals, rejections, autonomy changes), optionally for one PO.',
-    inputSchema: z.object({ po: z.string().optional(), limit: z.number().int().min(1).max(50).optional() }),
+    inputSchema: z.object({ po: z.string().optional(), customer: z.string().optional().describe('customer name or code; needed only when two customers use the same PO number'), limit: z.number().int().min(1).max(50).optional() }),
     run: wrap('get_ledger', async (a) => {
       let q = sb.from('ledger').select('id, at, channel, actor, counterparty, stream, what, gate, gated, orders(po)').eq('tenant_id', T).order('id', { ascending: false }).limit(a.limit || 20);
-      if (a.po) { const { data: o } = await sb.from('orders').select('id').eq('tenant_id', T).eq('po', a.po).maybeSingle(); if (o) q = q.eq('order_id', o.id); }
+      if (a.po) { const o = await orderOf(a.po, a.customer); if ('error' in o) return o; q = q.eq('order_id', o.id); }
       const { data } = await q;
       return (data || []).map((r) => ({ ...r, po: (r.orders as unknown as { po: string } | null)?.po, orders: undefined }));
     }),
@@ -168,13 +173,15 @@ export function toolsFor(ctx: AgentCtx) {
   const queue_draft = betaZodTool({
     name: 'queue_draft',
     description: 'Create an outbound message draft and put it in the approval queue. It is NOT sent. Write in the merchandiser\'s voice: short, firm, specific dates and PO numbers. If the recipient works in another language, write the message in their language and put the full English translation in body_en; when the body is English, leave body_en out.',
-    inputSchema: z.object({ stream: z.enum(STREAMS), po: z.string().optional().describe('PO number or empty'), style: z.string().optional().describe('style code (development track) or empty'), party: z.string().describe('customer or supplier the message goes to (name or code)'), title: z.string().describe('one-line summary'), body: z.string().describe('the full message in the recipient\'s language'), body_en: z.string().optional().describe('full English translation when body is not English; omit when body is English'), lang: z.string().optional().describe('ISO code of body, e.g. zh'), impact: z.string().optional().describe('why it matters: dates, money, risk'), priority: z.number().int().min(1).max(3).optional().describe('1 urgent, 2 normal, 3 low') }),
+    inputSchema: z.object({ stream: z.enum(STREAMS), po: z.string().optional().describe('PO number or empty'), customer: z.string().optional().describe('customer name or code; needed only when two customers use the same PO number'), style: z.string().optional().describe('style code (development track) or empty'), party: z.string().describe('customer or supplier the message goes to (name or code)'), title: z.string().describe('one-line summary'), body: z.string().describe('the full message in the recipient\'s language'), body_en: z.string().optional().describe('full English translation when body is not English; omit when body is English'), lang: z.string().optional().describe('ISO code of body, e.g. zh'), impact: z.string().optional().describe('why it matters: dates, money, risk'), priority: z.number().int().min(1).max(3).optional().describe('1 urgent, 2 normal, 3 low') }),
     run: wrap('queue_draft', async (a) => {
       const p = await partyByRef(T, a.party);
       // an English body is its own English version; anything else needs a real translation, not a note
       const lang = a.lang || p?.lang || 'en';
       const body_en = lang === 'en' ? a.body : a.body_en && !/^same as/i.test(a.body_en.trim()) ? a.body_en : null;
-      const o = a.po ? (await sb.from('orders').select('id').eq('tenant_id', T).eq('po', a.po).maybeSingle()).data : null;
+      const ref = a.po ? await orderOf(a.po, a.customer || (p && ['brand', 'retailer', 'store', 'buying_office', 'trading'].includes(p.kind) ? p.id : undefined)) : null;
+      if (ref && 'error' in ref) return ref;
+      const o = ref;
       const st = a.style ? (await sb.from('styles').select('id, code').eq('tenant_id', T).ilike('code', a.style.trim()).order('created_at', { ascending: false }).limit(1).maybeSingle()).data : null;
       const g = await gateOf(T, ctx.track, a.stream);
       const { data: contact } = p ? await sb.from('contacts').select('id').eq('party_id', p.id).order('is_primary', { ascending: false }).limit(1).maybeSingle() : { data: null };
@@ -214,16 +221,16 @@ export function toolsFor(ctx: AgentCtx) {
   const set_milestone = betaZodTool({
     name: 'set_milestone',
     description: 'Record a revised expected date or an actual date for a milestone of a PO, as reported by the person or a supplier. The forecast downstream recomputes. Only when a date was clearly given; never guess.',
-    inputSchema: z.object({ po: z.string(), key: z.enum(MILESTONES), field: z.enum(['expected', 'actual']), date: z.string().describe('YYYY-MM-DD'), note: z.string().optional() }),
+    inputSchema: z.object({ po: z.string(), customer: z.string().optional().describe('customer name or code; needed only when two customers use the same PO number'), key: z.enum(MILESTONES), field: z.enum(['expected', 'actual']), date: z.string().describe('YYYY-MM-DD'), note: z.string().optional() }),
     run: wrap('set_milestone', async (a) => {
       if (!/^\d{4}-\d{2}-\d{2}$/.test(a.date)) return { error: 'date must be YYYY-MM-DD' };
-      const { data: o } = await sb.from('orders').select('id').eq('tenant_id', T).eq('po', a.po).maybeSingle();
-      if (!o) return { error: `No PO ${a.po}` };
+      const o = await orderOf(a.po, a.customer);
+      if ('error' in o) return o;
       const patch = a.field === 'actual' ? { actual_date: a.date } : { expected_date: a.date, actual_date: null };
       const { error } = await sb.from('milestones').update({ ...patch, note: a.note || null, updated_by: ctx.userId }).eq('order_id', o.id).eq('key', a.key as MilestoneKey);
       if (error) throw new Error(error.message);
       await sb.rpc('ledger_append', { p_tenant: T, p_channel: channelOf(ctx), p_actor: actorOf(ctx), p_actor_user: ctx.userId, p_counterparty: null, p_stream: 'Production status', p_order: o.id, p_what: `${LABELS[a.key as MilestoneKey]} ${a.field} date set to ${a.date}${a.note ? ` (${a.note})` : ''}`, p_gate: gateTagOf(ctx), p_gated: false, p_ref: { key: a.key, field: a.field, date: a.date } });
-      const after = await getOrder(T, a.po, sb);
+      const after = await getOrderById(T, o.id, sb);
       await queueBrief(sb, T, o.id, 'milestone');
       return { ok: true, health: after?.health.state, etd_forecast: d(after?.health.p.etd?.f), etd_slip_days: after?.health.etdSlip };
     }),
@@ -232,10 +239,10 @@ export function toolsFor(ctx: AgentCtx) {
   const get_order_file = betaZodTool({
     name: 'get_order_file',
     description: 'The order file for one PO: every conversation with the factory, mill, forwarder, lab and each function at the customer (design, buying, logistics, compliance), with who said what and when, plus the cached summary. Use for "where are we with everyone on 48812", "what did the customer say about fit", "has logistics confirmed the booking".',
-    inputSchema: z.object({ po: z.string() }),
-    run: wrap('get_order_file', async ({ po }) => {
-      const { data: o } = await sb.from('orders').select('id').eq('tenant_id', T).eq('po', po.trim()).maybeSingle();
-      if (!o) return { error: `No PO ${po}` };
+    inputSchema: z.object({ po: z.string(), customer: z.string().optional().describe('customer name or code; needed only when two customers use the same PO number') }),
+    run: wrap('get_order_file', async ({ po, customer }) => {
+      const o = await orderOf(po, customer);
+      if ('error' in o) return o;
       const [file, sum] = await Promise.all([orderFile(T, o.id), orderSummary(T, o.id)]);
       return { po, summary: sum.summary, threads: file.map((t) => ({ party: t.party?.name, kind: t.party?.kind, subject: t.subject, channel: t.channel, messages: t.messages.slice(-12) })) };
     }),

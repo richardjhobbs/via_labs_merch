@@ -357,7 +357,9 @@
     "importAllExist": "Không có gì mới để nhập: {n, plural, other {# PO này}} đã có trong đơn hàng của bạn nên được giữ nguyên:",
     "dropTitle": "Thả tệp đơn hàng vào đây, hoặc bấm để chọn",
     "dropSub": ".xlsx, .xls hoặc .csv, mỗi PO một dòng, tối đa 4 MB",
-    "dropChosen": "{kb} KB, sẵn sàng nhập. Bấm để chọn tệp khác."
+    "dropChosen": "{kb} KB, sẵn sàng nhập. Bấm để chọn tệp khác.",
+    "poShared": "PO {po} được {n} khách hàng sử dụng. Hãy chọn đơn hàng.",
+    "noCustomer": "Không có khách hàng"
   },
   "parties": {
     "title": "Khách hàng & nhà cung cấp",

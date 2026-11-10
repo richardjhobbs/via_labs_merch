@@ -28,11 +28,31 @@ export async function listOrders(tenantId: string, opts: { status?: string; cust
   return rows.map((o) => ({ ...o, health: orderHealth(o.milestones) }));
 }
 
-export async function getOrder(tenantId: string, po: string, client?: Client): Promise<OrderWithHealth | null> {
+// A PO number is unique per customer, not per company (two brands can both send PO 1, migration 0028).
+export type PoMatch = { id: string; po: string; customer: { id: string; name: string; short: string | null } | null; factory: { name: string } | null };
+export async function ordersByPo(sb: Client, tenantId: string, po: string): Promise<PoMatch[]> {
+  const { data } = await sb.from('orders').select('id, po, customer:parties!orders_customer_id_fkey(id, name, short), factory:parties!orders_factory_id_fkey(name)').eq('tenant_id', tenantId).eq('po', po.trim()).limit(20);
+  return (data || []) as unknown as PoMatch[];
+}
+
+// One order from a PO and, when several customers share the number, the customer's name, code or id.
+export function pickOrder(matches: PoMatch[], po: string, customer?: string | null): { id: string } | { error: string } {
+  if (!matches.length) return { error: `No PO ${po} in this company` };
+  let L = matches;
+  const q = customer?.trim().toLowerCase();
+  if (q && L.length > 1) L = L.filter((m) => m.customer && (m.customer.id === q || m.customer.name.toLowerCase() === q || (m.customer.short || '').toLowerCase() === q || m.customer.name.toLowerCase().includes(q)));
+  if (L.length === 1) return { id: L[0].id };
+  const who = (L.length ? L : matches).map((m) => m.customer?.name || 'no customer').join(', ');
+  return { error: L.length ? `PO ${po} exists for more than one customer (${who}). Say which customer.` : `PO ${po} is not on file for ${customer}. It exists for: ${who}.` };
+}
+
+// The order page and the agent pass a PO number or an order id; a PO that several customers share returns null.
+export async function getOrder(tenantId: string, ref: string, client?: Client): Promise<OrderWithHealth | null> {
   const sb = client || await supabaseServer();
-  const { data } = await sb.from('orders').select(SELECT).eq('tenant_id', tenantId).eq('po', po).maybeSingle();
-  if (!data) return null;
-  const o = data as unknown as OrderRow;
+  if (/^[0-9a-f-]{36}$/i.test(ref)) return getOrderById(tenantId, ref, sb);
+  const { data } = await sb.from('orders').select(SELECT).eq('tenant_id', tenantId).eq('po', ref).limit(2);
+  if (!data || data.length !== 1) return null;
+  const o = data[0] as unknown as OrderRow;
   return { ...o, health: orderHealth(o.milestones) };
 }
 

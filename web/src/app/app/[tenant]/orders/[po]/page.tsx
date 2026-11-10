@@ -2,7 +2,8 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { requireTenant } from '@/lib/tenant';
-import { getOrder, exceptionsOf } from '@/lib/orders';
+import { getOrder, exceptionsOf, ordersByPo } from '@/lib/orders';
+import { supabaseServer } from '@/lib/supabase/server';
 import { LABELS, MILESTONES, isoOf } from '@/lib/core/path';
 import { OrderFile } from '@/components/order-file';
 import { MsCell, HealthPill } from '@/components/milestones';
@@ -15,8 +16,24 @@ export default async function OrderDetail({ params, searchParams }: { params: Pr
   const { tenant: slug, po } = await params; const { saved, error } = await searchParams;
   const { tenant, membership } = await requireTenant(slug);
   const t = await getTranslations('orders');
-  const o = await getOrder(tenant.id, decodeURIComponent(po));
-  if (!o) notFound();
+  const ref = decodeURIComponent(po);
+  const o = await getOrder(tenant.id, ref);
+  if (!o) {
+    // a PO number two customers share: let the person pick the order
+    const same = /^[0-9a-f-]{36}$/i.test(ref) ? [] : await ordersByPo(await supabaseServer(), tenant.id, ref);
+    if (same.length < 2) notFound();
+    return (
+      <div className="max-w-3xl">
+        <Link href={`/app/${slug}/orders`} className="small">← {t('title')}</Link>
+        <h1 className="mono mt-2">{ref}</h1>
+        <p className="muted mt-1">{t('poShared', { po: ref, n: same.length })}</p>
+        <div className="grid gap-2 mt-4">{same.map((x) => (
+          <Link key={x.id} href={`/app/${slug}/orders/${x.id}`} className="card block no-underline" style={{ color: 'inherit', padding: 12 }}>
+            <b>{x.customer?.name || t('noCustomer')}</b>{x.factory?.name && <span className="muted"> · {x.factory.name}</span>}
+          </Link>))}</div>
+      </div>
+    );
+  }
   const ex = exceptionsOf([o])[0];
   const canEdit = membership.role !== 'viewer';
   return (

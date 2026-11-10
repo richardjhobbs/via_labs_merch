@@ -357,7 +357,9 @@
     "importAllExist": "Nichts Neues zu importieren: {n, plural, one {diese PO ist} other {diese # POs sind}} bereits in Ihren Aufträgen und blieben unverändert:",
     "dropTitle": "Auftragsdatei hier ablegen oder klicken, um eine zu wählen",
     "dropSub": ".xlsx, .xls oder .csv, eine Zeile pro PO, bis 4 MB",
-    "dropChosen": "{kb} KB, bereit zum Import. Klicken, um eine andere Datei zu wählen."
+    "dropChosen": "{kb} KB, bereit zum Import. Klicken, um eine andere Datei zu wählen.",
+    "poShared": "PO {po} wird von {n} Kunden verwendet. Wählen Sie den Auftrag.",
+    "noCustomer": "Kein Kunde"
   },
   "parties": {
     "title": "Kunden & Lieferanten",
