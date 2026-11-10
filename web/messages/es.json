@@ -352,7 +352,12 @@
         "low": "bajo"
       },
       "reportsTo": "Informa a {name}"
-    }
+    },
+    "importMissingCols": "Este archivo no tiene una columna {missing} que reconozcamos. Sus columnas son: {found}. Cambia el nombre de la columna o descarga la plantilla de abajo.",
+    "importAllExist": "Nada nuevo que importar: {n, plural, one {este PO ya está} other {estos # PO ya están}} en tus pedidos, así que se dejaron como estaban:",
+    "dropTitle": "Suelta aquí tu archivo de pedidos, o haz clic para elegir uno",
+    "dropSub": ".xlsx, .xls o .csv, una fila por PO, hasta 4 MB",
+    "dropChosen": "{kb} KB, listo para importar. Haz clic para elegir otro archivo."
   },
   "parties": {
     "title": "Clientes y proveedores",

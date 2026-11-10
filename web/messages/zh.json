@@ -352,7 +352,12 @@
         "low": "低"
       },
       "reportsTo": "向 {name} 汇报"
-    }
+    },
+    "importMissingCols": "此文件没有可识别的 {missing} 列。文件中的列为：{found}。请重命名该列，或下载下方模板。",
+    "importAllExist": "没有可导入的新内容：{n, plural, other {这 # 个 PO}}已在您的订单中，保持不变：",
+    "dropTitle": "将订单文件拖到此处，或点击选择文件",
+    "dropSub": ".xlsx、.xls 或 .csv，每行一个 PO，最大 4 MB",
+    "dropChosen": "{kb} KB，可以导入。点击可选择其他文件。"
   },
   "parties": {
     "title": "客户与供应商",

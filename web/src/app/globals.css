@@ -95,6 +95,13 @@ table.t tr.click { cursor: pointer; } table.t tr.click:hover td { background: va
 .asst-hint { font-size: 11px; padding: 0 12px 8px; }
 @media (hover: none) { .asst-hint { display: none; } }
 
+/* file drop area (order import): looks like a place to put a file, not a form field */
+.drop { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center; padding: 28px 16px; border: 2px dashed var(--line); border-radius: 12px; background: var(--paper); color: var(--accent); cursor: pointer; transition: border-color .15s, background .15s; }
+.drop:hover, .drop.over { border-color: var(--accent); background: var(--accent-soft); }
+.drop.has { border-style: solid; border-color: var(--accent); }
+.drop b { color: var(--fg); }
+.drop:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+
 /* segmented control (Settings: day, night, device) */
 .seg { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 4px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); }
 .seg button { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border: 0; border-radius: 7px; background: none; color: var(--fg2); font: inherit; font-weight: 500; cursor: pointer; min-height: 36px; }
