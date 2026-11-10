@@ -9,7 +9,7 @@ import { styleRecords, techPackVersions, diffTechPack } from '@/lib/records';
 import { listSamples, listMaterials, listDevMilestones, sampleState } from '@/lib/samples';
 import { computeDevPath } from '@/lib/dev-path';
 import { isoOf } from '@/lib/core/path';
-import { actorOf } from './tools';
+import { actorOf, channelOf, gateTagOf } from './tools';
 import { partyByRef, type AgentCtx } from './tools';
 
 const brief = (s: Awaited<ReturnType<typeof listStyles>>[number]) => ({ id: s.id, code: s.code, name: s.name, season: s.season, category: s.category, status: s.status, customer: s.customer?.name, target_price: s.target_price, currency: s.currency, target_delivery: s.target_delivery, plm_ref: s.plm_ref, updated_at: s.updated_at });
@@ -100,7 +100,7 @@ export function styleTools(ctx: AgentCtx, wrap: <I, O>(name: string, fn: (i: I) 
       const patch = a.event === 'sent' ? { sent_at: a.date, courier: a.courier || null, awb: a.awb || null } : a.event === 'received' ? { received_at: a.date } : { due_at: a.date };
       const { error } = await sb.from('samples').update({ ...patch, ...(a.note ? { note: a.note.slice(0, 500) } : {}) }).eq('id', smp.id);
       if (error) throw new Error(error.message);
-      await sb.rpc('ledger_append', { p_tenant: T, p_channel: ctx.trigger === 'chat' ? 'Console' : 'Inbound', p_actor: actorOf(ctx), p_actor_user: ctx.userId, p_counterparty: null, p_stream: 'Sample schedule', p_order: null, p_what: `${smp.type} round ${smp.round} ${a.event === 'due' ? 'due date' : a.event} ${a.date}${a.courier ? ` ${a.courier} ${a.awb || ''}` : ''}${a.note ? ` (${a.note})` : ''}`, p_gate: ctx.trigger === 'chat' ? 'PERSON · chat' : 'AUTO · capture', p_gated: false, p_ref: { sample_id: smp.id, event: a.event, date: a.date }, p_track: 'development', p_style: smp.style_id });
+      await sb.rpc('ledger_append', { p_tenant: T, p_channel: channelOf(ctx), p_actor: actorOf(ctx), p_actor_user: ctx.userId, p_counterparty: null, p_stream: 'Sample schedule', p_order: null, p_what: `${smp.type} round ${smp.round} ${a.event === 'due' ? 'due date' : a.event} ${a.date}${a.courier ? ` ${a.courier} ${a.awb || ''}` : ''}${a.note ? ` (${a.note})` : ''}`, p_gate: gateTagOf(ctx), p_gated: false, p_ref: { sample_id: smp.id, event: a.event, date: a.date }, p_track: 'development', p_style: smp.style_id });
       return { ok: true, sample_id: smp.id, event: a.event, date: a.date };
     }),
   });

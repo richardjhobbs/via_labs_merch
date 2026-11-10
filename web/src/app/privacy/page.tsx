@@ -6,7 +6,7 @@ import type { Metadata } from 'next';
 import { LegalPage, type LegalSection } from '@/components/legal-page';
 
 export const metadata: Metadata = { title: 'Privacy policy · VIA Merch' };
-const UPDATED = '9 November 2026';
+const UPDATED = '10 November 2026';
 
 const S: LegalSection[] = [
   { h: 'Who we are', p: [
@@ -45,6 +45,8 @@ const S: LegalSection[] = [
   { h: 'How the AI agent uses data', p: [
     'To read a message, answer a question or prepare a draft, the agent sends the relevant part of the company\'s record to an AI model provider and receives the result. The standard provider is Anthropic (Claude). Companies based in regions where Claude is not offered may run on another provider, which is named in their agreement. We use these providers only on terms under which they do not train their models on the data we send, and we never use company data or connected-account data to train models ourselves.',
     'Nothing the agent drafts is sent without a person\'s approval, except routine message types that the company itself has set the agent to send. Prices, claims and order confirmations always need a person.',
+
+    'A member can also let an agent they run themselves, in any tool that supports the Model Context Protocol (MCP), work in the workspace through a personal token issued in Settings. That agent reads what the member can read and can place drafts and reported dates in the approval queue; it cannot send messages, approve drafts, take sample decisions or read payment details. The token is stored as a hash, expires after 90 days, can be revoked by the member or a manager, and every call is recorded in the company\'s run log.',
   ] },
   { h: 'Who we share data with', p: [
     'We do not sell personal data. We share it only with the service providers that run VIA Merch for us, under contracts that limit their use of it to providing their service:',

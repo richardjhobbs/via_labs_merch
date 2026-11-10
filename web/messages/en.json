@@ -1047,7 +1047,8 @@
     "d1": "Each company's records are isolated by database policy. Another company's people and agents cannot read them.",
     "d2": "VIA Labs staff cannot read them without the support access above. Automated processing (the agents, the critical path) runs as software, with every action on the ledger.",
     "d3": "A customer or supplier that also runs VIA Merch sees only the records you share through a gated stream.",
-    "d4": "You can export everything as xlsx, csv or json at any time, and ask for deletion when you leave."
+    "d4": "You can export everything as xlsx, csv or json at any time, and ask for deletion when you leave.",
+    "d5": "An agent you run yourself can connect through MCP with a personal token from Settings. It reads as you and can only queue; it never sends or decides."
   },
   "trust": {
     "kicker": "Confidentiality statement",
@@ -1069,6 +1070,10 @@
     "agents": {
       "title": "The agents are software, and every action is logged",
       "body": "Your agent reads your channels and works your records as software on our infrastructure. It drafts; a person at your company approves anything that commits money, stock or dates. Price clarification, claims and order confirmation can never be sent by an agent alone. Every agent action is a signed, append-only row on your ledger, which your managers can read and export."
+    },
+    "mcp": {
+      "title": "Your own agent can work here too, under the same rules",
+      "body": "A member can issue a personal token so an agent they run themselves, in any tool that speaks MCP, reads what that member can read and queues drafts and dates for a person to approve. The token is stored as a hash, expires after 90 days, can be revoked by the member or a manager, and is limited to the member's role, customers and tracks. That agent cannot send a message, approve a draft, take a sample decision or read payment details, and every call is on the run log and the ledger."
     },
     "partners": {
       "title": "A partner who also runs VIA Merch sees only what you share",
@@ -2059,5 +2064,43 @@
     "suggest": "Style {code} {name} ({season}) is in development. Link the PO to carry over its tech pack, materials and fit history.",
     "openStyle": "Open the style",
     "link": "Link to the style"
+  },
+  "mcp": {
+    "title": "Your agents",
+    "sub": "Give an agent you run yourself (Claude Desktop, Claude Code, Cowork or any MCP client) a token to work in this workspace as you. It sees what you see and can queue work for your approval. It never sends a message, approves a draft or takes a decision, and every call is logged.",
+    "server": "Server address",
+    "header": "Send the token as a bearer token: Authorization: Bearer <token>",
+    "name": "Token name",
+    "namePh": "Claude Desktop on my laptop",
+    "tracks": "Tracks",
+    "development": "Development",
+    "production": "Production",
+    "writes": "Allow queuing: drafts to the approval queue, reported dates on milestones and sample rounds, compliance values",
+    "noWrites": "Your role reads only, so a token cannot queue.",
+    "create": "Create token",
+    "shownOnce": "Copy the token now. It is shown once, expires on {when}, and can be revoked here at any time.",
+    "copy": "Copy",
+    "copied": "Copied",
+    "mine": "Your tokens",
+    "all": "Everyone's tokens",
+    "none": "No tokens yet.",
+    "colPerson": "Person",
+    "colName": "Name",
+    "colTracks": "Tracks",
+    "colAccess": "Access",
+    "colClient": "Last client",
+    "colUsed": "Last used",
+    "colExpires": "Expires",
+    "neverUsed": "never used",
+    "calls": "{n} calls",
+    "readOnly": "Read only",
+    "queues": "Reads and queues",
+    "revoked": "Revoked",
+    "expired": "Expired",
+    "revoke": "Revoke",
+    "revokedMsg": "Token revoked and written to the ledger.",
+    "errRole": "Viewers and partners cannot issue tokens.",
+    "errName": "Give the token a name.",
+    "errLimit": "Up to {n} active tokens per person. Revoke one first."
   }
 }

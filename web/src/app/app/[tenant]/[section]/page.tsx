@@ -9,20 +9,29 @@ import { cookies } from 'next/headers';
 import { Avatar, CompanyLogo } from '@/components/avatar';
 import { ThemePicker } from '../theme-picker';
 import { savePhone, saveAvatar, removeAvatar, saveLogo, removeLogo } from '../profile-actions';
+import { revokeMcpToken } from '../mcp-actions';
+import { McpCreate } from '@/components/mcp-tokens';
+import { memberTracks } from '@/lib/tracks';
+import { canWrite as mcpCanWrite } from '@/lib/mcp/core';
+import { isLive, type McpToken } from '@/lib/mcp/tokens';
 
 const SECTIONS = ['settings'] as const;
 
-export default async function Section({ params, searchParams }: { params: Promise<{ tenant: string; section: string }>; searchParams: Promise<{ saved?: string; error?: string; psaved?: string; perr?: string }> }) {
+export default async function Section({ params, searchParams }: { params: Promise<{ tenant: string; section: string }>; searchParams: Promise<{ saved?: string; error?: string; psaved?: string; perr?: string; mcp?: string }> }) {
   const { tenant: slug, section } = await params;
   if (!(SECTIONS as readonly string[]).includes(section)) notFound();
   const { tenant, membership, memberships, user, viewingAs } = await requireTenant(slug);
-  const { saved, error, psaved, perr } = await searchParams;
+  const { saved, error, psaved, perr, mcp } = await searchParams;
   const t = await getTranslations();
   const canDecide = ['owner', 'manager'].includes(membership.role);
   const sb = await supabaseServer();
-  const [{ data }, ck] = await Promise.all([
+  const [{ data }, ck, { data: tokenRows }, { data: tn }, { data: names }] = await Promise.all([
     sb.from('support_access').select('*').eq('tenant_id', tenant.id).order('requested_at', { ascending: false }).limit(12),
     cookies(),
+    // RLS: a person sees their own tokens, owners and managers see everyone's in the company
+    sb.from('mcp_tokens').select('*').eq('tenant_id', tenant.id).order('created_at', { ascending: false }).limit(60),
+    sb.from('tenants').select('settings').eq('id', tenant.id).single(),
+    sb.from('memberships').select('id, display_name').eq('tenant_id', tenant.id),
   ]);
   const tv = ck.get('merch_theme')?.value, theme = tv === 'dark' || tv === 'system' ? tv : 'light';
   // personal fields belong to the signed-in person's own membership; VIA staff walking the workspace have none
@@ -30,6 +39,28 @@ export default async function Section({ params, searchParams }: { params: Promis
   const isOwner = mine?.role === 'owner';
   const PERR: Record<string, string> = { own: t('profile.errOwn'), file: t('profile.errFile'), type: t('profile.errType'), size: t('profile.errSize'), phone: t('profile.errPhone'), owner: t('profile.errOwner') };
   const rows = (data || []) as SupportGrant[];
+  const tokens = ((tokenRows || []) as McpToken[]);
+  const myTokens = mine ? tokens.filter((x) => x.membership_id === mine.id) : [];
+  const otherTokens = canDecide ? tokens.filter((x) => !mine || x.membership_id !== mine.id) : [];
+  const nameOf = (id: string) => (names || []).find((n) => n.id === id)?.display_name || '?';
+  const mcpTracks = mine ? memberTracks(mine, tn?.settings as never) : [];
+  const mcpUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://merch.getvia.xyz'}/api/mcp`;
+  const tokenState = (x: McpToken) => x.revoked_at ? t('mcp.revoked') : !isLive(x) ? t('mcp.expired') : x.writes ? t('mcp.queues') : t('mcp.readOnly');
+  const tokenTable = (list: McpToken[], withPerson: boolean) => (
+    <table className="t stack mt-3 small"><thead><tr>{withPerson && <th>{t('mcp.colPerson')}</th>}<th>{t('mcp.colName')}</th><th>{t('mcp.colTracks')}</th><th>{t('mcp.colAccess')}</th><th>{t('mcp.colClient')}</th><th>{t('mcp.colUsed')}</th><th>{t('mcp.colExpires')}</th><th></th></tr></thead>
+      <tbody>{list.map((x) => (
+        <tr key={x.id} style={isLive(x) ? undefined : { opacity: .6 }}>
+          {withPerson && <td>{nameOf(x.membership_id)}</td>}
+          <td className="font-medium">{x.name}</td>
+          <td>{x.tracks.map((tr) => t(`mcp.${tr}` as never)).join(', ')}</td>
+          <td>{tokenState(x)}</td>
+          <td>{x.last_client || '–'}</td>
+          <td>{x.last_used_at ? `${when(x.last_used_at)} · ${t('mcp.calls', { n: x.calls })}` : t('mcp.neverUsed')}</td>
+          <td>{new Date(x.expires_at).toLocaleDateString('en-GB', { dateStyle: 'medium' })}</td>
+          <td className="text-right">{isLive(x) && <form action={revokeMcpToken}><input type="hidden" name="slug" value={slug} /><input type="hidden" name="id" value={x.id} /><button className="btn sm red">{t('mcp.revoke')}</button></form>}</td>
+        </tr>
+      ))}</tbody></table>
+  );
   const pending = rows.filter((r) => r.status === 'requested');
   const active = rows.find((r) => isActive(r)) || null;
   const when = (s: string | null) => (s ? new Date(s).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' }) : '');
@@ -67,6 +98,20 @@ export default async function Section({ params, searchParams }: { params: Promis
           </form>
           <p className="muted small mt-2">{t('profile.phoneHelp')}</p>
         </> : <p className="muted small mt-2">{t('profile.errOwn')}</p>}
+      </section>
+
+      <section id="agents" className="card mt-4">
+        <h2 style={{ fontSize: 17 }}>{t('mcp.title')}</h2>
+        <p className="muted small mt-1">{t('mcp.sub')}</p>
+        {mcp === 'revoked' && <div className="notice mt-3">{t('mcp.revokedMsg')}</div>}
+        {mcp?.startsWith('err_') && <div className="notice crit mt-3">{mcp === 'err_role' ? t('mcp.errRole') : mcp.slice(4)}</div>}
+        <div className="small mt-3" style={{ color: 'var(--fg2)' }}>{t('mcp.server')}: <code>{mcpUrl}</code><br />{t('mcp.header')}</div>
+        {mine && mine.role !== 'partner' ? <>
+          <McpCreate slug={slug} tracks={mcpTracks} canWrite={mcpCanWrite(mine.role)} labels={{ name: t('mcp.name'), namePh: t('mcp.namePh'), tracks: t('mcp.tracks'), development: t('mcp.development'), production: t('mcp.production'), writes: t('mcp.writes'), noWrites: t('mcp.noWrites'), create: t('mcp.create'), shownOnce: t('mcp.shownOnce', { when: '{when}' }), copy: t('mcp.copy'), copied: t('mcp.copied'), errRole: t('mcp.errRole'), errName: t('mcp.errName'), errLimit: t('mcp.errLimit', { n: 5 }), errOwn: t('profile.errOwn') }} />
+          <h3 className="mt-5" style={{ fontSize: 14 }}>{t('mcp.mine')}</h3>
+          {myTokens.length ? tokenTable(myTokens, false) : <p className="muted small mt-2">{t('mcp.none')}</p>}
+        </> : <p className="muted small mt-2">{t('profile.errOwn')}</p>}
+        {canDecide && otherTokens.length > 0 && <><h3 className="mt-5" style={{ fontSize: 14 }}>{t('mcp.all')}</h3>{tokenTable(otherTokens, true)}</>}
       </section>
 
       <section className="card mt-4">
@@ -125,7 +170,7 @@ export default async function Section({ params, searchParams }: { params: Promis
       <section className="card mt-4">
         <h2 style={{ fontSize: 17 }}>{t('settings.data')}</h2>
         <ul className="mt-2 grid gap-2 small" style={{ color: 'var(--fg2)' }}>
-          {(['d1', 'd2', 'd3', 'd4'] as const).map((k) => <li key={k} className="flex gap-2"><span style={{ color: 'var(--accent)' }}>→</span><span>{t(`settings.${k}`)}</span></li>)}
+          {(['d1', 'd2', 'd3', 'd4', 'd5'] as const).map((k) => <li key={k} className="flex gap-2"><span style={{ color: 'var(--accent)' }}>→</span><span>{t(`settings.${k}`)}</span></li>)}
         </ul>
         <Link href="/trust" className="btn sm mt-4" target="_blank">{t('settings.dataLink')}</Link>
       </section>

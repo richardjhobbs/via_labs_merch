@@ -1047,7 +1047,8 @@
     "d1": "Los registros de cada empresa están aislados por políticas de la base de datos. Las personas y los agentes de otra empresa no pueden leerlos.",
     "d2": "El personal de VIA Labs no puede leerlos sin el acceso de soporte indicado arriba. El procesamiento automatizado (los agentes, la ruta crítica) se ejecuta como software, con cada acción en el registro.",
     "d3": "Un cliente o proveedor que también usa VIA Merch solo ve los registros que usted comparte a través de un flujo controlado.",
-    "d4": "Puede exportarlo todo en xlsx, csv o json en cualquier momento y solicitar la eliminación cuando se vaya."
+    "d4": "Puede exportarlo todo en xlsx, csv o json en cualquier momento y solicitar la eliminación cuando se vaya.",
+    "d5": "Un agente que usted mismo opera puede conectarse por MCP con un token personal desde Ajustes. Lee como usted y solo puede poner en cola; nunca envía ni decide."
   },
   "trust": {
     "kicker": "Declaración de confidencialidad",
@@ -1069,6 +1070,10 @@
     "agents": {
       "title": "Los agentes son software y cada acción queda registrada",
       "body": "Su agente lee sus canales y trabaja sobre sus registros como software en nuestra infraestructura. Redacta; una persona de su empresa aprueba todo lo que comprometa dinero, existencias o fechas. Las aclaraciones de precio, las reclamaciones y las confirmaciones de pedido nunca las puede enviar un agente por su cuenta. Cada acción de un agente es una fila firmada, de solo anexado, en su registro, que sus responsables pueden leer y exportar."
+    },
+    "mcp": {
+      "title": "Su propio agente también puede trabajar aquí, con las mismas reglas",
+      "body": "Un miembro puede emitir un token personal para que un agente que opera por su cuenta, en cualquier herramienta compatible con MCP, lea lo que ese miembro puede leer y ponga en cola borradores y fechas para que una persona los apruebe. El token se guarda como hash, caduca a los 90 días, puede revocarlo el miembro o un gerente, y se limita al rol, los clientes y las vías del miembro. Ese agente no puede enviar un mensaje, aprobar un borrador, decidir sobre una muestra ni leer datos de pago, y cada llamada queda en el registro de ejecuciones y en el libro mayor."
     },
     "partners": {
       "title": "Un socio que también usa VIA Merch solo ve lo que usted comparte",
@@ -2059,5 +2064,43 @@
     "suggest": "El estilo {code} {name} ({season}) está en desarrollo. Vincule la PO para traer su ficha técnica, materiales e historial de fit.",
     "openStyle": "Abrir el estilo",
     "link": "Vincular al estilo"
+  },
+  "mcp": {
+    "title": "Sus agentes",
+    "sub": "Dé a un agente que usted mismo opera (Claude Desktop, Claude Code, Cowork o cualquier cliente MCP) un token para trabajar en este espacio como usted. Ve lo que usted ve y puede poner trabajo en cola para su aprobación. Nunca envía un mensaje, aprueba un borrador ni toma una decisión, y cada llamada queda registrada.",
+    "server": "Dirección del servidor",
+    "header": "Envíe el token como bearer token: Authorization: Bearer <token>",
+    "name": "Nombre del token",
+    "namePh": "Claude Desktop en mi portátil",
+    "tracks": "Vías",
+    "development": "Desarrollo",
+    "production": "Producción",
+    "writes": "Permitir poner en cola: borradores a la cola de aprobación, fechas reportadas en hitos y rondas de muestras, valores de cumplimiento",
+    "noWrites": "Su rol solo lee, así que un token no puede poner en cola.",
+    "create": "Crear token",
+    "shownOnce": "Copie el token ahora. Se muestra una sola vez, caduca el {when} y puede revocarse aquí en cualquier momento.",
+    "copy": "Copiar",
+    "copied": "Copiado",
+    "mine": "Sus tokens",
+    "all": "Tokens de todos",
+    "none": "Aún no hay tokens.",
+    "colPerson": "Persona",
+    "colName": "Nombre",
+    "colTracks": "Vías",
+    "colAccess": "Acceso",
+    "colClient": "Último cliente",
+    "colUsed": "Último uso",
+    "colExpires": "Caduca",
+    "neverUsed": "sin usar",
+    "calls": "{n} llamadas",
+    "readOnly": "Solo lectura",
+    "queues": "Lee y pone en cola",
+    "revoked": "Revocado",
+    "expired": "Caducado",
+    "revoke": "Revocar",
+    "revokedMsg": "Token revocado y anotado en el libro mayor.",
+    "errRole": "Los observadores y socios no pueden emitir tokens.",
+    "errName": "Dé un nombre al token.",
+    "errLimit": "Hasta {n} tokens activos por persona. Revoque uno primero."
   }
 }

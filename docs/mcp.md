@@ -1,6 +1,8 @@
 # VIA Merch as an MCP server: plan
 
-Founder decision, 9 November 2026: expose the workspace to a member's own agent (Claude Desktop, Cowork, Claude Code, any MCP client) through one server at `/api/mcp`. The middleware already lists `/api/mcp` as public and the catalogue already carries the "VIA agent channel" entry (vendor "MCP and A2A", status `via`), so this is the build behind two reservations, not a new direction. Where this document and the code differ, the code and CLAUDE.md are current.
+Founder decision, 9 November 2026, phase 1 built 10 November 2026 (migration 0025, `web/src/lib/mcp/`, `web/src/app/api/mcp/route.ts`, Settings → Your agents). Sections 2 to 6 describe what was built; differences from the first draft are noted in section 10.
+
+Original brief: expose the workspace to a member's own agent (Claude Desktop, Cowork, Claude Code, any MCP client) through one server at `/api/mcp`. The middleware already lists `/api/mcp` as public and the catalogue already carries the "VIA agent channel" entry (vendor "MCP and A2A", status `via`), so this is the build behind two reservations, not a new direction. Where this document and the code differ, the code and CLAUDE.md are current.
 
 ## 1. What it is and is not
 
@@ -115,3 +117,14 @@ The catalogue entry describes two VIA Merch companies exchanging WIP, status, tr
 - `request_approval` stays off MCP. The chat agent earns L2 sending by running under VIA's prompt and VIA's logging. An outside model does not.
 - Stateless JSON mode, not SSE. Hobby function limits and `sin1` pinning make a held stream the wrong shape; every MCP client in use today works in stateless mode.
 - Tools, not resources or prompts. Resources would duplicate `get_order_file` and `get_style_file`; the clients that matter call tools.
+
+## 10. As built (10 November 2026)
+
+- Token UI lives on the Settings page ("Your agents"), not the Team page: the person creates and revokes their own tokens there, and owners and managers see and revoke everyone's in a second table on the same page. Up to 5 live tokens per person.
+- The secret returns once to a client component (`components/mcp-tokens.tsx`) and is never in a URL.
+- `queue_draft` now routes through the agent layers only for `inbound` and `schedule` triggers; chat and MCP drafts wait for a person.
+- Ledger rows written through MCP tools carry channel `MCP` and gate `PERSON · mcp` (`channelOf`, `gateTagOf` in `tools.ts`). The agent name in the actor is the token's name, so a row reads `Claude Desktop (for Richard)`.
+- The adapter uses the SDK's low-level `Server` and the JSON schema `betaZodTool` already produces, so there is no second schema layer. `queue_draft` gains an optional `track` argument only for two-track tokens; every other call is placed on its track by `trackForCall`.
+- Rate limit reads the last minute of `agent_runs` for the token; `mcp_tokens.calls` and `last_used_at` are a display counter.
+- Trust page section "Your own agent can work here too", a privacy paragraph under "How the AI agent uses data", settings item d5 and the catalogue entry describe the feature; the catalogue status stays `via` until the route is proven with a live client, then moves to `stage1`.
+- Verified: typecheck, lint, 24 unit tests (token format and hash, allow list per role and track, call placement, tools/list and tools/call through the SDK client over an in-memory transport, forbidden tools refused, invalid arguments and tool errors flagged). Not yet verified: a live client against merch.getvia.xyz, which needs the deploy.

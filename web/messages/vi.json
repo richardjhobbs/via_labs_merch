@@ -1047,7 +1047,8 @@
     "d1": "Hồ sơ của mỗi công ty được tách biệt bằng chính sách cơ sở dữ liệu. Nhân sự và agent của công ty khác không thể đọc được.",
     "d2": "Nhân viên VIA Labs không thể đọc nếu không có quyền hỗ trợ nêu trên. Các xử lý tự động (agent, đường găng) chạy dưới dạng phần mềm, mọi thao tác đều được ghi vào sổ ghi.",
     "d3": "Khách hàng hoặc nhà cung cấp cũng dùng VIA Merch chỉ thấy những hồ sơ bạn chia sẻ qua một luồng có kiểm soát.",
-    "d4": "Bạn có thể xuất toàn bộ dữ liệu dưới dạng xlsx, csv hoặc json bất cứ lúc nào, và yêu cầu xóa khi ngừng sử dụng."
+    "d4": "Bạn có thể xuất toàn bộ dữ liệu dưới dạng xlsx, csv hoặc json bất cứ lúc nào, và yêu cầu xóa khi ngừng sử dụng.",
+    "d5": "Agent do chính bạn vận hành có thể kết nối qua MCP bằng token cá nhân từ Cài đặt. Nó đọc như bạn và chỉ có thể xếp hàng; không bao giờ gửi hay quyết định."
   },
   "trust": {
     "kicker": "Tuyên bố bảo mật",
@@ -1069,6 +1070,10 @@
     "agents": {
       "title": "Agent là phần mềm, và mọi thao tác đều được ghi lại",
       "body": "Agent của bạn đọc các kênh và xử lý hồ sơ của bạn dưới dạng phần mềm trên hạ tầng của chúng tôi. Agent chỉ soạn; một người trong công ty bạn duyệt mọi việc ràng buộc tiền, hàng tồn kho hoặc ngày giao. Làm rõ giá, khiếu nại và xác nhận đơn hàng không bao giờ được agent tự gửi. Mọi thao tác của agent là một dòng có chữ ký, chỉ ghi thêm, trong sổ ghi của bạn, mà quản lý của bạn có thể đọc và xuất ra."
+    },
+    "mcp": {
+      "title": "Agent của riêng bạn cũng có thể làm việc ở đây, theo cùng quy tắc",
+      "body": "Một thành viên có thể cấp token cá nhân để agent do chính họ vận hành, trong bất kỳ công cụ nào hỗ trợ MCP, đọc những gì thành viên đó được đọc và xếp bản nháp, ngày tháng vào hàng chờ một người duyệt. Token được lưu dưới dạng băm, hết hạn sau 90 ngày, có thể bị thành viên hoặc quản lý thu hồi, và giới hạn theo vai trò, khách hàng và luồng của thành viên. Agent đó không thể gửi tin nhắn, duyệt bản nháp, quyết định về mẫu hay đọc thông tin thanh toán, và mọi lượt gọi đều nằm trong nhật ký chạy và sổ cái."
     },
     "partners": {
       "title": "Đối tác cũng dùng VIA Merch chỉ thấy những gì bạn chia sẻ",
@@ -2059,5 +2064,43 @@
     "suggest": "Mã hàng {code} {name} ({season}) đang phát triển. Liên kết PO để mang theo tech pack, nguyên phụ liệu và lịch sử fit của nó.",
     "openStyle": "Mở mã hàng",
     "link": "Liên kết với mã hàng"
+  },
+  "mcp": {
+    "title": "Agent của bạn",
+    "sub": "Cấp một token cho agent do chính bạn vận hành (Claude Desktop, Claude Code, Cowork hoặc bất kỳ MCP client nào) để làm việc trong không gian này với tư cách của bạn. Nó thấy những gì bạn thấy và có thể xếp việc vào hàng chờ bạn duyệt. Nó không bao giờ gửi tin nhắn, duyệt bản nháp hay ra quyết định, và mọi lượt gọi đều được ghi lại.",
+    "server": "Địa chỉ máy chủ",
+    "header": "Gửi token dưới dạng bearer token: Authorization: Bearer <token>",
+    "name": "Tên token",
+    "namePh": "Claude Desktop trên laptop của tôi",
+    "tracks": "Luồng",
+    "development": "Phát triển",
+    "production": "Sản xuất",
+    "writes": "Cho phép xếp hàng: bản nháp vào hàng chờ duyệt, ngày báo cáo trên mốc và vòng mẫu, giá trị tuân thủ",
+    "noWrites": "Vai trò của bạn chỉ đọc, nên token không thể xếp hàng.",
+    "create": "Tạo token",
+    "shownOnce": "Hãy sao chép token ngay. Nó chỉ hiển thị một lần, hết hạn ngày {when}, và có thể thu hồi tại đây bất cứ lúc nào.",
+    "copy": "Sao chép",
+    "copied": "Đã sao chép",
+    "mine": "Token của bạn",
+    "all": "Token của mọi người",
+    "none": "Chưa có token nào.",
+    "colPerson": "Người",
+    "colName": "Tên",
+    "colTracks": "Luồng",
+    "colAccess": "Quyền",
+    "colClient": "Client gần nhất",
+    "colUsed": "Dùng gần nhất",
+    "colExpires": "Hết hạn",
+    "neverUsed": "chưa dùng",
+    "calls": "{n} lượt gọi",
+    "readOnly": "Chỉ đọc",
+    "queues": "Đọc và xếp hàng",
+    "revoked": "Đã thu hồi",
+    "expired": "Đã hết hạn",
+    "revoke": "Thu hồi",
+    "revokedMsg": "Đã thu hồi token và ghi vào sổ cái.",
+    "errRole": "Người xem và đối tác không thể cấp token.",
+    "errName": "Đặt tên cho token.",
+    "errLimit": "Tối đa {n} token đang hoạt động mỗi người. Hãy thu hồi một token trước."
   }
 }

@@ -7,7 +7,7 @@ import { LangSwitch } from '@/components/lang-switch';
 // (supabase/migrations/0006_support_access.sql, src/lib/tenant.ts, src/lib/support.ts).
 export default async function Trust() {
   const [t, tl] = await Promise.all([getTranslations('trust'), getTranslations('legal')]);
-  const sections = ['isolation', 'staff', 'support', 'agents', 'partners', 'models', 'infra', 'signin', 'yours'] as const;
+  const sections = ['isolation', 'staff', 'support', 'agents', 'mcp', 'partners', 'models', 'infra', 'signin', 'yours'] as const;
   return (
     <main className="min-h-screen" style={{ background: 'var(--paper)' }}>
       <header className="flex items-center justify-between px-6 py-4 max-w-3xl mx-auto">

@@ -1047,7 +1047,8 @@
     "d1": "Die Daten jedes Unternehmens sind durch Datenbankregeln getrennt. Personen und Agenten anderer Unternehmen können sie nicht lesen.",
     "d2": "VIA Labs kann sie ohne den obigen Support-Zugang nicht lesen. Automatische Verarbeitung (die Agenten, der kritische Pfad) läuft als Software, jede Aktion steht im Ledger.",
     "d3": "Ein Kunde oder Lieferant, der ebenfalls VIA Merch nutzt, sieht nur die Datensätze, die Sie über einen freigegebenen Stream teilen.",
-    "d4": "Sie können jederzeit alles als xlsx, csv oder json exportieren und beim Ausscheiden die Löschung verlangen."
+    "d4": "Sie können jederzeit alles als xlsx, csv oder json exportieren und beim Ausscheiden die Löschung verlangen.",
+    "d5": "Ein selbst betriebener Agent kann sich über MCP mit einem persönlichen Token aus den Einstellungen verbinden. Er liest wie Sie und kann nur einreihen; er sendet und entscheidet nie."
   },
   "trust": {
     "kicker": "Vertraulichkeitserklärung",
@@ -1069,6 +1070,10 @@
     "agents": {
       "title": "Die Agenten sind Software, jede Aktion wird protokolliert",
       "body": "Ihr Agent liest Ihre Kanäle und arbeitet an Ihren Datensätzen als Software auf unserer Infrastruktur. Er entwirft; eine Person in Ihrem Unternehmen gibt alles frei, was Geld, Ware oder Termine bindet. Preisklärung, Reklamationen und Auftragsbestätigung kann ein Agent nie allein senden. Jede Agentenaktion ist eine signierte, nur anfügbare Zeile in Ihrem Ledger, die Ihre Manager lesen und exportieren können."
+    },
+    "mcp": {
+      "title": "Auch Ihr eigener Agent kann hier arbeiten, nach denselben Regeln",
+      "body": "Ein Mitglied kann ein persönliches Token ausstellen, damit ein selbst betriebener Agent in jedem MCP-fähigen Werkzeug liest, was dieses Mitglied lesen darf, und Entwürfe und Termine zur Freigabe durch eine Person einreiht. Das Token wird als Hash gespeichert, läuft nach 90 Tagen ab, kann vom Mitglied oder einer Führungskraft widerrufen werden und ist auf Rolle, Kunden und Spuren des Mitglieds begrenzt. Dieser Agent kann keine Nachricht senden, keinen Entwurf freigeben, keine Musterentscheidung treffen und keine Zahlungsdaten lesen; jeder Aufruf steht im Laufprotokoll und im Ledger."
     },
     "partners": {
       "title": "Ein Partner mit VIA Merch sieht nur, was Sie teilen",
@@ -2059,5 +2064,43 @@
     "suggest": "Style {code} {name} ({season}) ist in Entwicklung. Verknüpfen Sie den PO, um Tech Pack, Materialien und Fit-Historie zu übernehmen.",
     "openStyle": "Style öffnen",
     "link": "Mit dem Style verknüpfen"
+  },
+  "mcp": {
+    "title": "Ihre Agenten",
+    "sub": "Geben Sie einem Agenten, den Sie selbst betreiben (Claude Desktop, Claude Code, Cowork oder ein beliebiger MCP-Client), ein Token, um in diesem Arbeitsbereich als Sie zu arbeiten. Er sieht, was Sie sehen, und kann Arbeit zu Ihrer Freigabe einreihen. Er sendet nie eine Nachricht, gibt keinen Entwurf frei und trifft keine Entscheidung; jeder Aufruf wird protokolliert.",
+    "server": "Serveradresse",
+    "header": "Senden Sie das Token als Bearer-Token: Authorization: Bearer <token>",
+    "name": "Name des Tokens",
+    "namePh": "Claude Desktop auf meinem Laptop",
+    "tracks": "Spuren",
+    "development": "Entwicklung",
+    "production": "Produktion",
+    "writes": "Einreihen erlauben: Entwürfe in die Freigabeliste, gemeldete Termine an Meilensteinen und Musterrunden, Compliance-Werte",
+    "noWrites": "Ihre Rolle liest nur, daher kann ein Token nichts einreihen.",
+    "create": "Token erstellen",
+    "shownOnce": "Kopieren Sie das Token jetzt. Es wird einmal angezeigt, läuft am {when} ab und kann hier jederzeit widerrufen werden.",
+    "copy": "Kopieren",
+    "copied": "Kopiert",
+    "mine": "Ihre Tokens",
+    "all": "Tokens aller Mitglieder",
+    "none": "Noch keine Tokens.",
+    "colPerson": "Person",
+    "colName": "Name",
+    "colTracks": "Spuren",
+    "colAccess": "Zugriff",
+    "colClient": "Letzter Client",
+    "colUsed": "Zuletzt genutzt",
+    "colExpires": "Läuft ab",
+    "neverUsed": "nie genutzt",
+    "calls": "{n} Aufrufe",
+    "readOnly": "Nur lesen",
+    "queues": "Lesen und einreihen",
+    "revoked": "Widerrufen",
+    "expired": "Abgelaufen",
+    "revoke": "Widerrufen",
+    "revokedMsg": "Token widerrufen und ins Ledger geschrieben.",
+    "errRole": "Betrachter und Partner können keine Tokens ausstellen.",
+    "errName": "Geben Sie dem Token einen Namen.",
+    "errLimit": "Höchstens {n} aktive Tokens pro Person. Widerrufen Sie zuerst eines."
   }
 }

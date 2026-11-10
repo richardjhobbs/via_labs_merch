@@ -17,7 +17,7 @@ import { styleTools } from './style-tools';
 export type AgentCtx = {
   tenantId: string; agentId: string | null; agentName: string;
   track: Track;                    // development or production: streams, gates and drafts follow it
-  trigger: 'chat' | 'inbound' | 'schedule' | 'partner';
+  trigger: 'chat' | 'inbound' | 'schedule' | 'partner' | 'mcp';   // mcp: a member's own agent through /api/mcp
   userId: string | null; userName: string | null; userEmail: string | null;
   role: string | null; scope: string[] | null;   // customers this person handles; null = all
   sourceMessageId?: string | null;
@@ -36,6 +36,9 @@ export async function gateOf(tenantId: string, track: Track, stream: string) {
 }
 
 export const actorOf = (ctx: AgentCtx) => ctx.userName ? `${ctx.agentName} (for ${ctx.userName})` : ctx.agentName;
+// Ledger channel and gate tag by who is driving: a person in chat, a person's own agent over MCP, or capture from inbound.
+export const channelOf = (ctx: AgentCtx) => ctx.trigger === 'chat' ? 'Console' : ctx.trigger === 'mcp' ? 'MCP' : 'Inbound';
+export const gateTagOf = (ctx: AgentCtx) => ctx.trigger === 'chat' ? 'PERSON · chat' : ctx.trigger === 'mcp' ? 'PERSON · mcp' : 'AUTO · capture';
 const d = (n: number | undefined) => (n == null ? null : isoOf(n));
 
 export async function partyByRef(tenantId: string, ref: string) {
@@ -178,8 +181,9 @@ export function toolsFor(ctx: AgentCtx) {
       if (error || !dr) throw new Error(error?.message || 'draft failed');
       ctx.drafts.push({ id: dr.id, seq: dr.seq, title: a.title, stream: a.stream, gate_level: g.level, party: p?.name || null, po: a.po || null, style: st?.code || null });
       await sb.rpc('ledger_append', { p_tenant: T, p_channel: 'Draft', p_actor: actorOf(ctx), p_actor_user: ctx.userId, p_counterparty: p?.name || a.party, p_stream: a.stream, p_order: o?.id || null, p_what: `Draft Q-${dr.seq}: ${a.title}`, p_gate: `L${g.level}${g.locked != null ? ' · capped' : ''}`, p_gated: true, p_ref: { draft_id: dr.id }, p_track: ctx.track, p_style: st?.id || null });
-      // inbound and scheduled drafts on a production order go through the layers: the lowest agent allowed approves, else a person decides
-      if (ctx.trigger !== 'chat' && ctx.track === 'production' && o?.id) {
+      // inbound and scheduled drafts on a production order go through the layers: the lowest agent allowed approves, else a person decides.
+      // Chat and MCP drafts never route: a person asked, so a person decides (docs/mcp.md).
+      if ((ctx.trigger === 'inbound' || ctx.trigger === 'schedule') && ctx.track === 'production' && o?.id) {
         const r = await routeDraft(T, dr.id);
         if (r.routed && 'approvedBy' in r) return { id: dr.id, ref: `Q-${dr.seq}`, queued: false, approved: true, note: `Approved by ${r.approvedBy} under L${r.level}.` };
         if (r.routed) return { id: dr.id, ref: `Q-${dr.seq}`, queued: true, autonomy: `L${g.level}`, note: `Waiting for ${r.waitingFor} to decide.` };
@@ -217,7 +221,7 @@ export function toolsFor(ctx: AgentCtx) {
       const patch = a.field === 'actual' ? { actual_date: a.date } : { expected_date: a.date, actual_date: null };
       const { error } = await sb.from('milestones').update({ ...patch, note: a.note || null, updated_by: ctx.userId }).eq('order_id', o.id).eq('key', a.key as MilestoneKey);
       if (error) throw new Error(error.message);
-      await sb.rpc('ledger_append', { p_tenant: T, p_channel: ctx.trigger === 'chat' ? 'Console' : 'Inbound', p_actor: actorOf(ctx), p_actor_user: ctx.userId, p_counterparty: null, p_stream: 'Production status', p_order: o.id, p_what: `${LABELS[a.key as MilestoneKey]} ${a.field} date set to ${a.date}${a.note ? ` (${a.note})` : ''}`, p_gate: ctx.trigger === 'chat' ? 'PERSON · chat' : 'AUTO · capture', p_gated: false, p_ref: { key: a.key, field: a.field, date: a.date } });
+      await sb.rpc('ledger_append', { p_tenant: T, p_channel: channelOf(ctx), p_actor: actorOf(ctx), p_actor_user: ctx.userId, p_counterparty: null, p_stream: 'Production status', p_order: o.id, p_what: `${LABELS[a.key as MilestoneKey]} ${a.field} date set to ${a.date}${a.note ? ` (${a.note})` : ''}`, p_gate: gateTagOf(ctx), p_gated: false, p_ref: { key: a.key, field: a.field, date: a.date } });
       const after = await getOrder(T, a.po, sb);
       await queueBrief(sb, T, o.id, 'milestone');
       return { ok: true, health: after?.health.state, etd_forecast: d(after?.health.p.etd?.f), etd_slip_days: after?.health.etdSlip };
@@ -368,7 +372,7 @@ export function toolsFor(ctx: AgentCtx) {
       if (error || !sub) throw new Error(error?.message || 'submission failed');
       await sb.from('esg_tasks').update({ status: 'submitted', latest_submission_id: sub.id }).eq('id', task.id);
       const r = task.esg_requirements as unknown as { code: string | null; title: string; unit: string | null };
-      await sb.rpc('ledger_append', { p_tenant: T, p_channel: ctx.trigger === 'chat' ? 'Console' : 'Inbound', p_actor: actorOf(ctx), p_actor_user: ctx.userId, p_counterparty: null, p_stream: 'Compliance and CSR', p_order: null, p_what: `Recorded v${version} for ${r.code ? `${r.code} ` : ''}${r.title}, ${task.period_label}: ${a.value_num != null ? `${a.value_num}${r.unit ? ` ${r.unit}` : ''}` : `"${(a.value_text || '').slice(0, 60)}"`}, awaiting a person's check`, p_gate: ctx.trigger === 'chat' ? 'PERSON · chat' : 'AUTO · capture', p_gated: false, p_ref: { esg_task: task.id, esg_submission: sub.id, message_id: ctx.sourceMessageId || null } });
+      await sb.rpc('ledger_append', { p_tenant: T, p_channel: channelOf(ctx), p_actor: actorOf(ctx), p_actor_user: ctx.userId, p_counterparty: null, p_stream: 'Compliance and CSR', p_order: null, p_what: `Recorded v${version} for ${r.code ? `${r.code} ` : ''}${r.title}, ${task.period_label}: ${a.value_num != null ? `${a.value_num}${r.unit ? ` ${r.unit}` : ''}` : `"${(a.value_text || '').slice(0, 60)}"`}, awaiting a person's check`, p_gate: gateTagOf(ctx), p_gated: false, p_ref: { esg_task: task.id, esg_submission: sub.id, message_id: ctx.sourceMessageId || null } });
       return { ok: true, version, status: 'submitted', note: 'Waiting for an owner, manager or compliance lead to accept it.' };
     }),
   });
