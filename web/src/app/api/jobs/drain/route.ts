@@ -16,7 +16,7 @@ import { runAllAlerts } from '@/lib/alerts';
 import { nextEsgTenant, runEsgPass } from '@/lib/agents/esg-pass';
 import { updateBrief } from '@/lib/agents/order-agent';
 import { riseAll } from '@/lib/agents/desks';
-import { conflictPass, dueMorningBrief, morningBrief } from '@/lib/agents/manager';
+import { conflictPass, deliverBriefs, dueMorningBrief, morningBrief } from '@/lib/agents/manager';
 import { capState, noteCapReached, proposeLesson, type LessonJob } from '@/lib/agents/learning';
 import { capAllows, type Work } from '@/lib/agents/learning-rules';
 import { hoursOf, isWorkingTime } from '@/lib/work-hours';
@@ -94,6 +94,8 @@ export async function POST(req: NextRequest) {
     //     the capacity clashes across desks (at most two new decisions per company per pass)
     if (left() > 25_000) {
       try { const due = await dueMorningBrief(sb); if (due && await capOk(due, 'morning')) { await morningBrief(due); done.morning = 1; } } catch (e) { done.failed++; errors.push(`morning: ${e instanceof Error ? e.message : String(e)}`); }
+      // each person's copy at 07:00 in their own time zone (cheap: no model call)
+      try { const n = await deliverBriefs(sb, t0 + BUDGET_MS); if (n) done.briefs_sent = n; } catch (e) { done.failed++; errors.push(`deliver: ${e instanceof Error ? e.message : String(e)}`); }
     }
     if (new Date().getUTCMinutes() === 41 && left() > 22_000) {
       const { data: ts } = await sb.from('tenants').select('id');

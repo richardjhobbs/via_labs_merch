@@ -15,6 +15,7 @@ import { today, isoOf } from '@/lib/core/path';
 import { brandedHtml, sendMail } from '@/lib/mail';
 import { capacityConflicts, defaultPriority, type Conflict, type ConflictOrder } from './manager-rules';
 import { queueBrief, type Brief } from './order-agent';
+import { hoursOf, isWorkingDay, localDay, morningDue, validTz } from '@/lib/work-hours';
 
 type Client = SupabaseClient<any, 'merch', any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 const APP = process.env.NEXT_PUBLIC_APP_URL || 'https://merch.getvia.xyz';
@@ -123,11 +124,12 @@ export type CompanyBriefT = z.infer<typeof CompanyBrief>;
 export function localHour(tz: string) { return Number(new Date().toLocaleString('en-GB', { hour: 'numeric', hour12: false, timeZone: tz || 'UTC' })); }
 const localDate = (tz: string) => new Date().toLocaleDateString('en-CA', { timeZone: tz || 'UTC' });
 
-// The company whose morning brief is due: after 07:00 company time and none written today.
+// The company whose morning brief is due: written once per company working day from 05:00 company time, so it is
+// ready before 07:00 for people up to two hours ahead; each person gets it at 07:00 their own time (deliverBriefs).
 export async function dueMorningBrief(sb: Client) {
-  const { data: tenants } = await sb.from('tenants').select('id, tz');
+  const { data: tenants } = await sb.from('tenants').select('id, tz, settings');
   for (const t of tenants || []) {
-    if (localHour(t.tz) < 7) continue;
+    if (localHour(t.tz) < 5 || !isWorkingDay(new Date(), hoursOf(t.tz, t.settings))) continue;
     const mira = await managerOf(sb, t.id); if (!mira || mira.status === 'paused') continue;
     const { data: last } = await sb.from('agent_memory').select('created_at').eq('agent_id', mira.id).order('version', { ascending: false }).limit(1).maybeSingle();
     if (last && new Date(last.created_at).toLocaleDateString('en-CA', { timeZone: t.tz || 'UTC' }) === localDate(t.tz)) continue;
@@ -172,22 +174,53 @@ export async function morningBrief(tenantId: string) {
   await sb.from('agent_runs').insert({ tenant_id: tenantId, agent_id: mira.id, trigger: 'manager', model: usage.model, input: { brief: 'morning', orders: s.orders.length }, tools_called: [], output: brief.headline, tokens_in: usage.tokensIn, tokens_out: usage.tokensOut, cost_usd: usage.cost, ms: Date.now() - t0 });
 
   // each desk's own brief for its senior merchandiser: its section of the company brief, no extra model call
-  const admin = supabaseAdmin();
-  const link = `${APP}/app/${tenant?.slug}`;
-  const emailOf = async (uid: string) => (await admin.auth.admin.getUserById(uid)).data?.user?.email || null;
   for (const d of s.desks) {
     const sec = brief.sections.find((x) => x.title.trim().toLowerCase() === String(d.name).trim().toLowerCase());
     const lines = sec?.lines || (groups.get(d.name as string) || []).slice(0, 8);
     const { data: lastD } = await sb.from('agent_memory').select('version').eq('agent_id', d.id).order('version', { ascending: false }).limit(1).maybeSingle();
     await sb.from('agent_memory').insert({ tenant_id: tenantId, agent_id: d.id, order_id: null, version: (lastD?.version || 0) + 1, brief: { headline: `${d.name}: ${lines.length} item${lines.length === 1 ? '' : 's'} this morning`, sections: [{ title: d.name, lines }], top_actions: brief.top_actions.filter((a) => a.po && (groups.get(d.name as string) || []).some((l) => l.startsWith(`PO ${a.po} `))) }, narrative: null, sources: [], reason: 'morning brief', model: SMALL_MODEL, tokens_in: 0, tokens_out: 0, cost_usd: 0 });
-    if (d.person_id && lines.length) {
-      const { data: m } = await sb.from('memberships').select('user_id').eq('id', d.person_id).maybeSingle();
-      const to = m?.user_id ? await emailOf(m.user_id as string) : null;
-      if (to) await sendMail({ to, subject: `VIA Merch: ${d.name} this morning`, text: `${lines.join('\n')}\n\n${link}`, html: brandedHtml({ title: `${d.name} this morning`, paragraphs: lines.slice(0, 10), cta: { label: 'Open My day', url: link } }) }).catch(() => null);
+  }
+  return { written: true as const };
+}
+
+// Every minute: email each person their morning brief once, at 07:00 in their own time zone (memberships.tz, else
+// the company's) on the company's working days. Owners and managers get the company brief, a desk's senior
+// merchandiser gets that desk's. Briefs older than 20 hours are not sent.
+export async function deliverBriefs(sb: Client, deadline: number) {
+  const since = new Date(Date.now() - 20 * 3600e3).toISOString();
+  const { data: fresh } = await sb.from('agent_memory').select('tenant_id, agent_id, brief, created_at').is('order_id', null).gte('created_at', since).order('created_at', { ascending: false }).limit(200);
+  if (!fresh?.length) return 0;
+  const latest = new Map<string, { tenant_id: string; brief: CompanyBriefT }>();
+  for (const m of fresh) if (!latest.has(m.agent_id as string)) latest.set(m.agent_id as string, { tenant_id: m.tenant_id as string, brief: m.brief as CompanyBriefT });
+  const tenantIds = [...new Set([...latest.values()].map((x) => x.tenant_id))];
+  const [{ data: tenants }, { data: agents }, { data: people }] = await Promise.all([
+    sb.from('tenants').select('id, name, slug, tz, settings').in('id', tenantIds),
+    sb.from('agents').select('id, tenant_id, layer, person_id, name').in('id', [...latest.keys()]),
+    sb.from('memberships').select('id, tenant_id, user_id, role, tz').in('tenant_id', tenantIds).neq('role', 'partner'),
+  ]);
+  const admin = supabaseAdmin();
+  let sent = 0;
+  for (const p of people || []) {
+    if (Date.now() > deadline - 3000) break;
+    const t = (tenants || []).find((x) => x.id === p.tenant_id); if (!t) continue;
+    const mine = (agents || []).filter((a) => a.tenant_id === p.tenant_id && (a.layer === 'manager' ? ['owner', 'manager'].includes(p.role as string) : a.layer === 'desk' && a.person_id === p.id));
+    if (!mine.length) continue;
+    const tz = validTz(p.tz as string) ? (p.tz as string) : (t.tz as string) || 'UTC';
+    if (!morningDue(new Date(), tz, hoursOf(t.tz as string, t.settings))) continue;
+    const key = `brief_sent:${p.id}:${localDay(new Date(), tz)}`;
+    const { data: done } = await sb.from('app_config').select('key').eq('key', key).maybeSingle();
+    if (done) continue;
+    await sb.from('app_config').upsert({ key, value: new Date().toISOString(), updated_at: new Date().toISOString() });
+    const to = (await admin.auth.admin.getUserById(p.user_id as string)).data?.user?.email;
+    if (!to) continue;
+    const link = `${APP}/app/${t.slug}`;
+    for (const a of mine) {
+      const b = latest.get(a.id as string)!.brief;
+      const paras = [b.headline, ...(b.top_actions || []).map((x) => `${x.po ? `PO ${x.po}: ` : ''}${x.what} (${x.who})`), ...(a.layer === 'desk' ? (b.sections?.[0]?.lines || []).slice(0, 10) : [])];
+      const title = a.layer === 'manager' ? `${a.name}'s morning brief` : `${a.name} this morning`;
+      await sendMail({ to, subject: `VIA Merch: ${title}${a.layer === 'manager' ? ` for ${t.name}` : ''}`, text: `${paras.join('\n')}\n\n${link}`, html: brandedHtml({ title, paragraphs: paras, cta: { label: 'Open My day', url: link } }) }).catch(() => null);
+      sent++;
     }
   }
-  const { data: tops } = await sb.from('memberships').select('user_id').eq('tenant_id', tenantId).in('role', ['owner', 'manager']);
-  const paras = [brief.headline, ...brief.top_actions.map((a) => `${a.po ? `PO ${a.po}: ` : ''}${a.what} (${a.who})`)];
-  for (const u of tops || []) { const to = await emailOf(u.user_id as string); if (to) await sendMail({ to, subject: `VIA Merch: Mira's morning brief for ${tenant?.name}`, text: `${paras.join('\n')}\n\n${link}`, html: brandedHtml({ title: `Mira's morning brief`, paragraphs: paras, cta: { label: 'Open My day', url: link } }) }).catch(() => null); }
-  return { written: true as const };
+  return sent;
 }
