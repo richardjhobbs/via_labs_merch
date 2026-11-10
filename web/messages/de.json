@@ -906,11 +906,11 @@
       "textPh": "Regeln, Standard oder Handbuch hier einfügen",
       "save": "Speichern",
       "limit": "Tägliches Ausgabenlimit",
-      "limitSub": "Über diesem Betrag an einem Tag (UTC) pausiert die Arbeit, auf die niemand wartet, bis Mitternacht: der stündliche Durchlauf, das Morgenbriefing, Kapazitätsentscheidungen, die Compliance-Prüfung und erste Briefings. Chat, Antworten auf eingehende Nachrichten und Auftragsbriefings laufen weiter. Inhaber werden einmal per E-Mail informiert.",
+      "limitSub": "Über diesem Betrag an einem Tag (Firmenzeit) pausiert die Arbeit, auf die niemand wartet, bis Mitternacht: der stündliche Durchlauf, das Morgenbriefing, Kapazitätsentscheidungen, die Compliance-Prüfung und erste Briefings. Chat, Antworten auf eingehende Nachrichten und Auftragsbriefings laufen weiter. Inhaber werden einmal per E-Mail informiert.",
       "today": "Heute ausgegeben",
       "dailyLimit": "Tageslimit",
       "none": "keins",
-      "reached": "Das Limit ist für heute erreicht: Hintergrundarbeit pausiert bis Mitternacht UTC.",
+      "reached": "Das Limit ist für heute erreicht: Hintergrundarbeit pausiert bis Mitternacht Firmenzeit.",
       "setLimit": "Limit in USD (0 für keins)",
       "ownerOnly": "Nur ein Inhaber kann das Limit ändern.",
       "costByLayer": "Kosten je Agent und Desk im Agentenbaum",
@@ -2059,5 +2059,19 @@
     "suggest": "Style {code} {name} ({season}) ist in Entwicklung. Verknüpfen Sie den PO, um Tech Pack, Materialien und Fit-Historie zu übernehmen.",
     "openStyle": "Style öffnen",
     "link": "Mit dem Style verknüpfen"
+  },
+  "hours": {
+    "title": "Arbeitszeiten",
+    "sub": "Arbeitstage, Arbeitszeiten und Zeitzone der Firma. Die Hintergrundarbeit der Agenten (stündlicher Durchlauf, Kapazitätsentscheidungen, Compliance-Prüfung) läuft nur innerhalb dieser Zeiten, das Tageslimit beginnt um Mitternacht Firmenzeit, und offene Entscheidungen zählen nur Arbeitsstunden, bevor sie eine Ebene höher gehen.",
+    "start": "Beginn",
+    "end": "Ende",
+    "companyZone": "Zeitzone der Firma",
+    "save": "Speichern",
+    "myTz": "Ihre Zeitzone",
+    "companyTz": "Firmenzeit ({tz})",
+    "myTzHelp": "Ihr Morgenbriefing kommt an Arbeitstagen der Firma um 07:00 in dieser Zeitzone.",
+    "errTz": "Wählen Sie eine Zeitzone aus der Liste.",
+    "errHours": "Wählen Sie mindestens einen Tag sowie Beginn und Ende.",
+    "errRole": "Nur Inhaber und Manager können Arbeitszeiten ändern."
   }
 }

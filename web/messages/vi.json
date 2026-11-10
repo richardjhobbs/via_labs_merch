@@ -906,11 +906,11 @@
       "textPh": "Dán quy định, tiêu chuẩn hoặc cẩm nang vào đây",
       "save": "Lưu",
       "limit": "Hạn mức chi tiêu hằng ngày",
-      "limitSub": "Vượt mức này trong một ngày (UTC), việc không ai đang chờ sẽ tạm dừng đến nửa đêm: lượt rà soát hằng giờ, bản tin sáng, quyết định năng lực, kiểm tra tuân thủ và tóm tắt đầu tiên. Trò chuyện, trả lời tin đến và cập nhật tóm tắt đơn hàng vẫn tiếp tục. Chủ sở hữu được gửi email một lần.",
+      "limitSub": "Vượt mức này trong một ngày (giờ công ty), việc không ai đang chờ sẽ tạm dừng đến nửa đêm: lượt rà soát hằng giờ, bản tin sáng, quyết định năng lực, kiểm tra tuân thủ và tóm tắt đầu tiên. Trò chuyện, trả lời tin đến và cập nhật tóm tắt đơn hàng vẫn tiếp tục. Chủ sở hữu được gửi email một lần.",
       "today": "Đã chi hôm nay",
       "dailyLimit": "Hạn mức ngày",
       "none": "không có",
-      "reached": "Hôm nay đã chạm hạn mức: việc chạy nền tạm dừng đến nửa đêm UTC.",
+      "reached": "Hôm nay đã chạm hạn mức: việc chạy nền tạm dừng đến nửa đêm giờ công ty.",
       "setLimit": "Hạn mức tính bằng USD (0 là không giới hạn)",
       "ownerOnly": "Chỉ chủ sở hữu mới đổi được hạn mức.",
       "costByLayer": "Chi phí theo tác tử và nhóm trên cây tác tử",
@@ -2059,5 +2059,19 @@
     "suggest": "Mã hàng {code} {name} ({season}) đang phát triển. Liên kết PO để mang theo tech pack, nguyên phụ liệu và lịch sử fit của nó.",
     "openStyle": "Mở mã hàng",
     "link": "Liên kết với mã hàng"
+  },
+  "hours": {
+    "title": "Giờ làm việc",
+    "sub": "Ngày làm việc, giờ làm việc và múi giờ của công ty. Việc chạy nền của tác tử (rà soát hằng giờ, quyết định năng lực, kiểm tra tuân thủ) chỉ chạy trong khung này, hạn mức chi tiêu ngày bắt đầu lại lúc nửa đêm giờ công ty, và quyết định còn mở chỉ tính giờ làm việc trước khi chuyển lên cấp trên.",
+    "start": "Bắt đầu",
+    "end": "Kết thúc",
+    "companyZone": "Múi giờ công ty",
+    "save": "Lưu",
+    "myTz": "Múi giờ của bạn",
+    "companyTz": "Giờ công ty ({tz})",
+    "myTzHelp": "Bản tin sáng đến lúc 07:00 theo múi giờ này, vào ngày làm việc của công ty.",
+    "errTz": "Chọn một múi giờ trong danh sách.",
+    "errHours": "Chọn ít nhất một ngày và giờ bắt đầu, kết thúc.",
+    "errRole": "Chỉ chủ sở hữu và quản lý mới đổi được giờ làm việc."
   }
 }

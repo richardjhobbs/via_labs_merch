@@ -9,6 +9,7 @@ import { randomUUID } from 'crypto';
 import { requireTenant } from '@/lib/tenant';
 import { supabaseAdmin } from '@/lib/supabase/server';
 import { MEDIA_BUCKET, MEDIA_MAX, MEDIA_TYPES } from '@/lib/media';
+import { validTz } from '@/lib/work-hours';
 
 export type Theme = 'light' | 'dark' | 'system';
 const back = (slug: string, q: string) => redirect(`/app/${slug}/settings?${q}#profile`);
@@ -120,4 +121,35 @@ export async function removeLogo(form: FormData) {
   await log(tenant.id, mine.display_name || user.email || 'owner', user.id, 'Removed the company logo', {});
   revalidatePath(`/app/${slug}`, 'layout');
   back(slug, 'psaved=1');
+}
+
+// A person's own time zone (empty = the company's): their morning brief arrives at 07:00 there.
+export async function saveMyTz(form: FormData) {
+  const slug = String(form.get('slug'));
+  const { tenant, user, mine } = await own(slug);
+  const tz = String(form.get('tz') || '').trim();
+  if (tz && !validTz(tz)) back(slug, 'perr=tz');
+  await supabaseAdmin().from('memberships').update({ tz: tz || null }).eq('id', mine.id).eq('user_id', user.id);
+  await log(tenant.id, mine.display_name || user.email || 'member', user.id, tz ? `Set their time zone to ${tz}` : 'Uses the company time zone', { membership: mine.id });
+  revalidatePath(`/app/${slug}`, 'layout');
+  back(slug, 'psaved=1');
+}
+
+// The company's working days, hours and time zone: background agent work runs inside them, the spending day starts
+// at the company's midnight and open decisions count working hours only. Owners and managers.
+export async function saveHours(form: FormData) {
+  const slug = String(form.get('slug'));
+  const { tenant, user, membership, viewingAs } = await requireTenant(slug);
+  if (!['owner', 'manager'].includes(membership.role) || viewingAs) redirect(`/app/${slug}/settings?perr=role#hours`);
+  const days = form.getAll('days').map(Number).filter((d) => Number.isInteger(d) && d >= 1 && d <= 7);
+  const start = String(form.get('start') || ''), end = String(form.get('end') || ''), tz = String(form.get('tz') || '');
+  const hhmm = /^([01]\d|2[0-3]):[0-5]\d$/;
+  if (!days.length || !hhmm.test(start) || !hhmm.test(end) || start === end || !validTz(tz)) redirect(`/app/${slug}/settings?perr=hours#hours`);
+  const sb = supabaseAdmin();
+  const { data: t } = await sb.from('tenants').select('settings').eq('id', tenant.id).single();
+  const settings = (t?.settings || {}) as Record<string, unknown>;
+  await sb.from('tenants').update({ tz, settings: { ...settings, hours: { days: [...new Set(days)].sort(), start, end } } }).eq('id', tenant.id);
+  await log(tenant.id, membership.display_name || user.email || 'member', user.id, `Working hours set to ${start}-${end}, days ${[...new Set(days)].sort().join(',')}, ${tz}`, { hours: { days, start, end, tz } });
+  revalidatePath(`/app/${slug}`, 'layout');
+  redirect(`/app/${slug}/settings?psaved=1#hours`);
 }
