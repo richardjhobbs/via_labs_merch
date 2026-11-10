@@ -4,6 +4,7 @@ import { requireTenant, scopeOf } from '@/lib/tenant';
 import { listOrders } from '@/lib/orders';
 import { LABELS, MILESTONES, isoOf } from '@/lib/core/path';
 import { MsCell, HealthPill } from '@/components/milestones';
+import { RowLink } from '@/components/row-link';
 
 export default async function Orders({ params, searchParams }: { params: Promise<{ tenant: string }>; searchParams: Promise<{ customer?: string; factory?: string; off?: string }> }) {
   const { tenant: slug } = await params; const f = await searchParams;
@@ -54,11 +55,11 @@ export default async function Orders({ params, searchParams }: { params: Promise
       <div className="card tw mt-4 hidden md:block" style={{ padding: 0 }}>
         <table className="t"><thead><tr><th>PO</th><th>{t('style')}</th><th className="text-right">{t('qty')}</th><th className="text-right">FOB</th><th>{t('health')}</th>{MILESTONES.map((k) => <th key={k}>{LABELS[k]}</th>)}<th>{t('instore')}</th></tr></thead>
           <tbody>{all.map((o) => (
-            <tr key={o.id} className="click"><td><Link href={`${base}/${o.id}`} className="mono">{o.po}</Link>{o.status !== 'open' && <div><span className="pill">{o.status}</span></div>}</td>
+            <RowLink key={o.id} href={`${base}/${o.id}`}><td><Link href={`${base}/${o.id}`} className="mono" style={{ fontWeight: 600, textDecoration: 'underline' }}>{o.po}</Link>{o.status !== 'open' && <div><span className="pill">{o.status}</span></div>}</td>
               <td><b>{o.style}</b><div className="muted small">{o.description}</div><div className="small">{o.customer?.name} <span className="muted">· {o.factory?.short || o.factory?.name}</span></div></td>
               <td className="text-right">{o.qty?.toLocaleString('en-GB')}</td><td className="text-right">{o.fob?.toFixed(2)}</td><td><HealthPill h={o.health} /></td>
               {MILESTONES.map((k) => <td key={k}>{o.health.p[k] ? <MsCell m={o.health.p[k]} /> : <span className="muted">–</span>}</td>)}
-              <td className="muted small">{o.instore_date}</td></tr>
+              <td className="muted small">{o.instore_date}</td></RowLink>
           ))}{!all.length && <tr><td colSpan={16} className="muted">{t('none')}</td></tr>}</tbody></table>
       </div>
       <p className="muted small mt-2">{t('legend')} · {isoOf(Math.floor(Date.now() / 864e5))}</p>

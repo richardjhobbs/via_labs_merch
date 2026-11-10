@@ -267,7 +267,7 @@
   },
   "orders": {
     "title": "Pedidos y T&A",
-    "sub": "La ruta crítica se calcula automáticamente: un retraso notificado desplaza todos los hitos posteriores. Haga clic en una PO para ver su ficha.",
+    "sub": "La ruta crítica se calcula automáticamente: un retraso notificado desplaza todos los hitos posteriores. Haga clic en cualquier pedido para abrir su ficha.",
     "import": "Importar hoja de cálculo",
     "live": "PO activas",
     "units": "unidades en pedido",

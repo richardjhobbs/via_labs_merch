@@ -267,7 +267,7 @@
   },
   "orders": {
     "title": "Đơn hàng & T&A",
-    "sub": "Đường găng được tính tự động: một mốc báo trễ sẽ dời mọi mốc phía sau. Bấm vào một PO để xem hồ sơ.",
+    "sub": "Đường găng được tính tự động: một mốc báo trễ sẽ dời mọi mốc phía sau. Nhấn vào bất kỳ đơn hàng nào để mở hồ sơ.",
     "import": "Nhập bảng tính",
     "live": "PO đang chạy",
     "units": "sản phẩm đã đặt",

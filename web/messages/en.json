@@ -267,7 +267,7 @@
   },
   "orders": {
     "title": "Orders & T&A",
-    "sub": "The critical path is computed: a reported slip moves every milestone downstream. Click a PO for the record.",
+    "sub": "The critical path is computed: a reported slip moves every milestone downstream. Click any order to open its record.",
     "import": "Import spreadsheet",
     "live": "live POs",
     "units": "units on order",

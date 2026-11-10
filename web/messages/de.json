@@ -267,7 +267,7 @@
   },
   "orders": {
     "title": "Aufträge & T&A",
-    "sub": "Der kritische Pfad wird berechnet: eine gemeldete Verzögerung verschiebt jeden nachfolgenden Meilenstein. Auf eine PO klicken für den Datensatz.",
+    "sub": "Der kritische Pfad wird berechnet: eine gemeldete Verzögerung verschiebt jeden nachfolgenden Meilenstein. Klicken Sie auf einen Auftrag, um seine Akte zu öffnen.",
     "import": "Tabelle importieren",
     "live": "laufende POs",
     "units": "Stück im Auftrag",
