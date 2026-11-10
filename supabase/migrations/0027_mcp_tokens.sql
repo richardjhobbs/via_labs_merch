@@ -1,3 +1,5 @@
+-- Applied to Supabase on 10 Nov 2026 under the name 0025_mcp_tokens, before 0025_lessons_library and 0026_working_hours were
+-- numbered in parallel sessions; the file is 0027 so the repo sequence stays unique.
 -- MCP server, phase 1 (docs/mcp.md): a member issues a personal token so an agent of their own (any MCP client)
 -- can read what they can see and queue gated work. Only the hash is stored; the secret is shown once.
 -- Tracks and writes are capped by the membership on issue and intersected again on every call.

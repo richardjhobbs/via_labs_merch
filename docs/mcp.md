@@ -1,6 +1,6 @@
 # VIA Merch as an MCP server: plan
 
-Founder decision, 9 November 2026, phase 1 built 10 November 2026 (migration 0025, `web/src/lib/mcp/`, `web/src/app/api/mcp/route.ts`, Settings → Your agents). Sections 2 to 6 describe what was built; differences from the first draft are noted in section 10.
+Founder decision, 9 November 2026, phase 1 built 10 November 2026 (migration 0027, applied as 0025_mcp_tokens, `web/src/lib/mcp/`, `web/src/app/api/mcp/route.ts`, Settings → Your agents). Sections 2 to 6 describe what was built; differences from the first draft are noted in section 10.
 
 Original brief: expose the workspace to a member's own agent (Claude Desktop, Cowork, Claude Code, any MCP client) through one server at `/api/mcp`. The middleware already lists `/api/mcp` as public and the catalogue already carries the "VIA agent channel" entry (vendor "MCP and A2A", status `via`), so this is the build behind two reservations, not a new direction. Where this document and the code differ, the code and CLAUDE.md are current.
 
@@ -37,7 +37,7 @@ Never on MCP, in any version: `request_approval` (at L2+ it sends), `search_mail
 
 ## 3. Token table
 
-Migration `0025_mcp_tokens.sql`, schema `merch`, RLS on.
+Migration `0027_mcp_tokens.sql` (applied under the name `0025_mcp_tokens` before two parallel sessions took 0025 and 0026), schema `merch`, RLS on.
 
 ```sql
 create table merch.mcp_tokens (
