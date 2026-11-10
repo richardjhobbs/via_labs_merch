@@ -5,6 +5,7 @@ import { anthropic, MODEL, SMALL_MODEL, costOfUsage, recordUsage } from '@/lib/l
 const ALLOWED = [MODEL, SMALL_MODEL];
 import { supabaseAdmin } from '@/lib/supabase/server';
 import { toolsFor, type AgentCtx, type DraftRef } from './tools';
+import { confirmedLessons } from './learning';
 import { LANG_NAMES } from '@/lib/llm';
 import { streamsOf, type Track } from '@/lib/tracks';
 
@@ -24,11 +25,12 @@ export async function runAgent(input: RunInput): Promise<RunResult> {
   const sb = supabaseAdmin();
   const t0 = Date.now();
   const track: Track = input.track || 'production';
-  const [{ data: tenant }, { data: agents }, { data: parties }, { data: gates }] = await Promise.all([
+  const [{ data: tenant }, { data: agents }, { data: parties }, { data: gates }, lessons] = await Promise.all([
     sb.from('tenants').select('id, name, kind, locale, tz, currency').eq('id', input.tenantId).single(),
     sb.from('agents').select('id, name, model, languages, prompt_overrides, track').eq('tenant_id', input.tenantId).eq('scope_kind', 'tenant').eq('enabled', true).order('created_at'),
     sb.from('parties').select('id, name, short, kind, country, lang, channel_pref, tier, meta').eq('tenant_id', input.tenantId).is('archived_at', null).order('kind').order('name'),
     sb.from('gates').select('stream, level, locked').eq('tenant_id', input.tenantId).eq('track', track).order('stream'),
+    confirmedLessons(sb, input.tenantId),
   ]);
   if (!tenant) throw new Error('tenant not found');
   // one agent per track when the company has set one up; otherwise the company agent runs both tracks
@@ -57,7 +59,8 @@ Rules:
 - Reply in the language the person writes in. Messages to a party in another language go in their language with an English rendering in body_en.
 - Be brief and concrete: short sentences, dates, PO numbers, ${tenant.currency || 'USD'}. One recommendation. British English. No markdown headings; at most 4 bullets.
 ${track === 'development' ? '' : `- You are the merchandising manager agent. Every open PO has an order agent that keeps its brief (get_order returns it); orders are grouped into desks run for senior merchandisers (get_desk_brief); your own morning brief and the capacity decisions you made across desks are in get_company_brief. Read the layer that holds the answer before raw records, and say which layer it came from when it helps.\n`}- VIA sits on top of the company's existing tools (email, WhatsApp, spreadsheets, ERP, PLM, portals, forwarders) and replaces none of them.
-- Costing: margin means the exporter's margin on FOB. Retail is a reference price only.${agent?.prompt_overrides ? `\n${agent.prompt_overrides}` : ''}` },
+- Costing: margin means the exporter's margin on FOB. Retail is a reference price only.
+- The company's library (playbooks, customer manuals, standards) is searchable with search_knowledge: check it when a customer's or the company's rules may apply.${lessons ? `\nLessons the team confirmed from earlier corrections (follow them unless the person you work for says otherwise):\n${lessons}` : ''}${agent?.prompt_overrides ? `\n${agent.prompt_overrides}` : ''}` },
     { type: 'text', text: `Today is ${today} (${tenant.tz}).${input.userName ? ` You are talking with ${input.userName}${input.role ? ` (${input.role})` : ''}${input.userLang ? `, whose interface language is ${LANG_NAMES[input.userLang] || input.userLang}` : ''}.${input.scope ? ` They handle these customers only: ${(parties || []).filter((p) => input.scope!.includes((p as unknown as { id?: string }).id || '')).map((p) => p.name).join(', ') || 'see tools'}; the tools are already limited to them.` : ['owner', 'manager'].includes(input.role || '') ? ' They manage the whole team: use get_team for team questions.' : ''}` : ''}${input.extraSystem ? `\n${input.extraSystem}` : ''}` },
   ];
 

@@ -327,6 +327,19 @@ export function toolsFor(ctx: AgentCtx) {
     }),
   });
 
+  // the company's library: playbooks, customer manuals and standards people added on the Agents page
+  const search_knowledge = betaZodTool({
+    name: 'search_knowledge',
+    description: 'Search the company library (playbooks, customer vendor manuals, testing and labelling standards, house rules) and return the best matching passages with their document titles. Use it before drafting when a customer\'s or the company\'s rules may apply, e.g. labelling, testing, packing, carton marks, documents.',
+    inputSchema: z.object({ query: z.string().describe('what you need to know, in plain words') }),
+    run: wrap('search_knowledge', async ({ query }) => {
+      const { data } = await supabaseAdmin().rpc('search_knowledge', { p_tenant: T, p_query: query, p_n: 5 });
+      const rows = (data || []) as { title: string; scope: string; scope_id: string | null; passage: string }[];
+      if (!rows.length) return { found: 0, note: 'Nothing in the library matches. Say so rather than guessing.' };
+      return { found: rows.length, passages: rows.map((r) => ({ document: r.title, applies_to: r.scope, text: r.passage.replace(/<\/?b>/g, '') })) };
+    }),
+  });
+
   const get_compliance = betaZodTool({
     name: 'get_compliance',
     description: 'Compliance work the company owes its lenders, customers, certifiers, auditors and authorities: ESG reporting, codes of conduct, audits and corrective actions, certificates and licences to renew, test reports and transaction certificates per PO. Open tasks with requirement, programme, period or PO, supplier, due date, owner role and state (overdue, due, upcoming, review, returned). Use for "what compliance is due", "what does the bank need this quarter", "which certificates expire soon", "is the test report in for 48812".',
@@ -360,7 +373,7 @@ export function toolsFor(ctx: AgentCtx) {
     }),
   });
 
-  const all = [get_briefing, search_orders, get_order, get_exceptions, get_party, get_messages, get_ledger, get_gates, queue_draft, request_approval, set_milestone, navigate, get_team, get_order_file, search_mailbox, get_compliance, record_compliance_value, ...(ctx.track === 'development' ? [] : [get_desk_brief, get_company_brief]), ...styleTools(ctx, wrap)];
+  const all = [get_briefing, search_orders, get_order, get_exceptions, get_party, get_messages, get_ledger, get_gates, queue_draft, request_approval, set_milestone, navigate, get_team, get_order_file, search_mailbox, get_compliance, record_compliance_value, search_knowledge, ...(ctx.track === 'development' ? [] : [get_desk_brief, get_company_brief]), ...styleTools(ctx, wrap)];
   const forRole = ['owner', 'manager'].includes(ctx.role || '') || ctx.trigger !== 'chat' ? all : all.filter((t) => t.name !== 'get_team');
   // inbound runs may capture a reported date (L1 record) and draft; they never approve
   // mailbox search is for a person in chat only, on their own mailbox
