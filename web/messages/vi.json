@@ -2228,6 +2228,8 @@
     "updatesNone": "Chưa có cập nhật nào.",
     "new": "Mới",
     "onRequest": "Có sẵn theo yêu cầu",
-    "onRequestNote": "Tính năng này chưa được bật cho công ty của bạn. Hãy bắt đầu một cuộc trò chuyện tại bàn hỗ trợ để yêu cầu."
+    "onRequestNote": "Tính năng này chưa được bật cho công ty của bạn. Hãy bắt đầu một cuộc trò chuyện tại bàn hỗ trợ để yêu cầu.",
+    "readMore": "Xem thêm",
+    "dismiss": "Bỏ qua"
   }
 }

@@ -2228,6 +2228,8 @@
     "updatesNone": "暂无更新。",
     "new": "新",
     "onRequest": "可按需开通",
-    "onRequestNote": "贵公司尚未开通此功能。请在支持台发起对话进行申请。"
+    "onRequestNote": "贵公司尚未开通此功能。请在支持台发起对话进行申请。",
+    "readMore": "查看详情",
+    "dismiss": "忽略"
   }
 }

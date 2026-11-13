@@ -7,13 +7,13 @@ import { publishUpdate, saveUpdate, withdrawUpdate } from './actions';
 
 export const maxDuration = 60;
 
-type Row = { id: string; number: number; title: string; body: string; audience: Audience; status: string; translations: Record<string, unknown>; published_at: string | null; published_by_email: string | null; proposal_id: string | null; change_proposals: { number: number } | null };
+type Row = { id: string; number: number; title: string; body: string; audience: Audience; status: string; translations: Record<string, unknown>; published_at: string | null; published_by_email: string | null; emailed_count: number | null; created_by_email: string | null; proposal_id: string | null; change_proposals: { number: number } | null };
 
 export default async function Updates({ searchParams }: { searchParams: Promise<{ saved?: string; error?: string }> }) {
   const { saved, error } = await searchParams;
   const sb = supabaseAdmin();
   const [{ data: rows }, { data: tenants }] = await Promise.all([
-    sb.from('announcements').select('id, number, title, body, audience, status, translations, published_at, published_by_email, proposal_id, change_proposals(number)').order('created_at', { ascending: false }).limit(100),
+    sb.from('announcements').select('id, number, title, body, audience, status, translations, published_at, published_by_email, emailed_count, created_by_email, proposal_id, change_proposals(number)').order('created_at', { ascending: false }).limit(100),
     sb.from('tenants').select('id, name').order('name'),
   ]);
   const list = (rows || []) as unknown as Row[];
@@ -46,7 +46,7 @@ export default async function Updates({ searchParams }: { searchParams: Promise<
   return (
     <div style={{ maxWidth: 820 }}>
       <h1>Updates</h1>
-      <p className="muted small mt-2">What people see under Updates on the support desk. Nothing is shown until you publish it.</p>
+      <p className="muted small mt-2">What people see under Updates on the support desk. Drafts are written for you when a change ships; nothing is shown or emailed until you publish it.</p>
       {saved && <div className="notice mt-3">{saved === '1' ? 'Saved.' : saved}</div>}
       {error && <div className="notice crit mt-3">{error}</div>}
       <div className="card mt-4"><h2 style={{ fontSize: 15 }} className="mb-3">New update</h2>{form()}</div>
@@ -54,7 +54,7 @@ export default async function Updates({ searchParams }: { searchParams: Promise<
       {head(`Drafts (${drafts.length})`)}
       <div className="grid gap-3 mt-3">{drafts.map((r) => (
         <div key={r.id} className="card">
-          <div className="muted small mb-2">U{r.number} · {audienceLabel(r.audience)}</div>
+          <div className="muted small mb-2">U{r.number} · {audienceLabel(r.audience)}{r.created_by_email ? ` · drafted by ${r.created_by_email}` : ''}{r.change_proposals ? ` · P${r.change_proposals.number}` : ''}</div>
           {form(r)}
           <form action={publishUpdate} className="mt-3 flex items-center gap-2"><input type="hidden" name="id" value={r.id} /><button className="btn primary sm">Publish</button><span className="muted small">Save first if you edited. Publishing translates it and shows it to: {audienceLabel(r.audience)}.</span></form>
         </div>
@@ -64,7 +64,7 @@ export default async function Updates({ searchParams }: { searchParams: Promise<
       <div className="grid gap-3 mt-3">{live.map((r) => (
         <div key={r.id} className="card">
           <div className="flex flex-wrap items-baseline gap-x-3"><span className="mono muted">U{r.number}</span><b>{r.title}</b><span className="pill">{audienceLabel(r.audience)}</span>
-            <span className="muted small ml-auto">{r.published_at ? new Date(r.published_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : ''} · {r.published_by_email} · {Object.keys(r.translations || {}).length + 1} languages</span></div>
+            <span className="muted small ml-auto">{r.published_at ? new Date(r.published_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : ''} · {r.published_by_email} · {Object.keys(r.translations || {}).length + 1} languages · {r.emailed_count ?? 0} emailed</span></div>
           <p className="small mt-2" style={{ whiteSpace: 'pre-wrap', color: 'var(--fg2)' }}>{r.body}</p>
           <div className="flex gap-2 mt-3">
             <form action={withdrawUpdate}><input type="hidden" name="id" value={r.id} /><input type="hidden" name="to" value="draft" /><button className="btn sm">Back to draft</button></form>

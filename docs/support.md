@@ -58,6 +58,17 @@ writes `plan`, `scope`, `risk_flags` and `lane` back to the row, and opens a Git
   them read (`merch.announcement_reads`). The support agent reads them with `list_updates`.
 - `merch.announcements` has no `tenant_id` (VIA Labs' own records, like `access_requests`); members never read
   it directly, `lib/helpdesk/updates.ts` filters under the service role.
+- **Who writes them:** the coding agent drafts every update for the founder's approval. The triage task
+  inserts a draft with each PR it opens (`docs/support-triage.md`), and any other session that ships a change
+  people will see adds a draft the same way. The console's Updates link shows the number of drafts waiting.
+  The founder edits if needed and publishes; nothing is shown or emailed before that.
+- **On publish:** owners and managers of every company the update is theirs for are emailed once, in their
+  language, with a link to the full text (`emailUpdate`, migration 0032; a re-publish does not email again).
+- **In the workspace:** every member, partners included, has an Updates bell in the rail (unread count, the
+  latest five headlines) and a one-line notice above the page for the newest unread headline
+  (`components/updates-bell.tsx`). Both link to the full text on the support desk, which marks it read;
+  Dismiss on the notice marks it read in place. Updates a company would only see as available on request are
+  not pushed into the workspace.
 - **Feature switches:** `tenants.settings.features`, registry in `lib/features.ts` (empty to start), switched
   per company on the console's company page ("Features" card, ledger row). To give an enhancement to some
   companies only: add a registry entry, gate the code with `hasFeature()`, announce with audience "feature".

@@ -2,6 +2,8 @@
 // VIA Labs console: write, publish and withdraw the updates shown on the support desk. Publishing is always a
 // person's action here; it translates the text into the other interface languages once and stores the result.
 import { revalidatePath } from 'next/cache';
+import { after } from 'next/server';
+import { emailUpdate } from '@/lib/helpdesk/updates';
 import { redirect } from 'next/navigation';
 import { requireAdmin } from '@/lib/tenant';
 import { supabaseAdmin } from '@/lib/supabase/server';
@@ -32,7 +34,7 @@ export async function publishUpdate(form: FormData) {
   const m = await requireAdmin();
   const id = String(form.get('id') || '');
   const sb = supabaseAdmin();
-  const { data: a } = await sb.from('announcements').select('id, title, body, status').eq('id', id).maybeSingle();
+  const { data: a } = await sb.from('announcements').select('id, title, body, status, emailed_at').eq('id', id).maybeSingle();
   if (!a || a.status === 'published') back('saved=1');
   // Title and text go through as one message so the translation keeps them consistent; the first line is the title.
   const translations: Record<string, { title: string; body: string }> = {};
@@ -48,8 +50,10 @@ export async function publishUpdate(form: FormData) {
     }));
   }
   await sb.from('announcements').update({ status: 'published', published_at: new Date().toISOString(), published_by_email: m.user.email, translations, translation_cost_usd: cost }).eq('id', id);
+  // owners and managers of the companies it is for are emailed once, after the response (a re-publish does not email again)
+  if (!a!.emailed_at) after(() => emailUpdate(id).catch(() => {}));
   revalidatePath('/admin/updates');
-  back(`saved=${encodeURIComponent(`Published in ${Object.keys(translations).length + 1} languages.`)}`);
+  back(`saved=${encodeURIComponent(`Published in ${Object.keys(translations).length + 1} languages. Owners and managers are being emailed.`)}`);
 }
 
 export async function withdrawUpdate(form: FormData) {

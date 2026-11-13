@@ -2228,6 +2228,8 @@
     "updatesNone": "Aún no hay novedades.",
     "new": "Nuevo",
     "onRequest": "Disponible a petición",
-    "onRequestNote": "Esto no está activado para su empresa. Inicie una conversación en la mesa de soporte para solicitarlo."
+    "onRequestNote": "Esto no está activado para su empresa. Inicie una conversación en la mesa de soporte para solicitarlo.",
+    "readMore": "Leer más",
+    "dismiss": "Descartar"
   }
 }

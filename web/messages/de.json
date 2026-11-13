@@ -2228,6 +2228,8 @@
     "updatesNone": "Noch keine Neuigkeiten.",
     "new": "Neu",
     "onRequest": "Auf Anfrage verfügbar",
-    "onRequestNote": "Dies ist für Ihr Unternehmen nicht freigeschaltet. Beginnen Sie eine Unterhaltung am Support-Desk, um es anzufragen."
+    "onRequestNote": "Dies ist für Ihr Unternehmen nicht freigeschaltet. Beginnen Sie eine Unterhaltung am Support-Desk, um es anzufragen.",
+    "readMore": "Mehr lesen",
+    "dismiss": "Ausblenden"
   }
 }

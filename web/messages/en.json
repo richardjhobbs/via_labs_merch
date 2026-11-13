@@ -2228,6 +2228,8 @@
     "updatesNone": "No updates yet.",
     "new": "New",
     "onRequest": "Available on request",
-    "onRequestNote": "This is not switched on for your company. Start a conversation at the support desk to ask for it."
+    "onRequestNote": "This is not switched on for your company. Start a conversation at the support desk to ask for it.",
+    "readMore": "Read more",
+    "dismiss": "Dismiss"
   }
 }
