@@ -1109,7 +1109,7 @@
     "contact": "Preguntas:",
     "desk": {
       "title": "La mesa de soporte se dirige a nosotros",
-      "body": "Una conversación que usted abre en la mesa de soporte es un mensaje para VIA Labs, por lo que nuestro personal la lee, junto con cualquier captura adjunta. El agente de soporte responde a partir de la guía del producto y solo ve su rol, sus tracks, sus complementos y el estado de sus conexiones. No puede leer sus pedidos, clientes, proveedores, conversaciones, borradores, ledger ni datos bancarios, y no puede cambiar nada en su espacio de trabajo. La apertura y el cierre de un ticket se registran en su ledger."
+      "body": "Una conversación que usted abre en la mesa de soporte es un mensaje para VIA Labs, por lo que nuestro personal la lee, junto con cualquier captura adjunta. El agente de soporte responde a partir de la guía del producto y solo ve su rol, sus tracks, sus complementos y el estado de sus conexiones. No puede leer sus pedidos, clientes, proveedores, conversaciones, borradores, ledger ni datos bancarios, y no puede cambiar nada en su espacio de trabajo. La apertura y el cierre de un ticket se registran en su ledger. El agente de soporte funciona con DeepSeek: solo se le envía el texto de la conversación, nunca una captura."
     }
   },
   "switchboard": {
@@ -2230,6 +2230,8 @@
     "onRequest": "Disponible a petición",
     "onRequestNote": "Esto no está activado para su empresa. Inicie una conversación en la mesa de soporte para solicitarlo.",
     "readMore": "Leer más",
-    "dismiss": "Descartar"
+    "dismiss": "Descartar",
+    "notifications": "Notificaciones",
+    "noNotifications": "Nada nuevo."
   }
 }

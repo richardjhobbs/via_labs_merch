@@ -19,6 +19,7 @@ export default async function AdminTicket({ params, searchParams }: { params: Pr
     sb.from('agent_runs').select('id, tools_called, cost_usd, ms, error, created_at').eq('trigger', 'support').eq('input->>ticket', id).order('created_at'),
   ]);
   if (!tk) notFound();
+  await sb.from('support_tickets').update({ via_seen_at: new Date().toISOString() }).eq('id', id);
   const ticket = tk as unknown as Ticket & { tenants: { id: string; name: string; slug: string } };
   const messages = (ms || []) as unknown as Message[];
   const when = (s: string) => new Date(s).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });

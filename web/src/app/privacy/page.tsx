@@ -6,7 +6,7 @@ import type { Metadata } from 'next';
 import { LegalPage, type LegalSection } from '@/components/legal-page';
 
 export const metadata: Metadata = { title: 'Privacy policy · VIA Merch' };
-const UPDATED = '12 November 2026';
+const UPDATED = '13 November 2026';
 
 const S: LegalSection[] = [
   { h: 'Who we are', p: [
@@ -47,7 +47,7 @@ const S: LegalSection[] = [
     'To read a message, answer a question or prepare a draft, the agent sends the relevant part of the company\'s record to an AI model provider and receives the result. The standard provider is Anthropic (Claude). Companies based in regions where Claude is not offered may run on another provider, which is named in their agreement. We use these providers only on terms under which they do not train their models on the data we send, and we never use company data or connected-account data to train models ourselves.',
     'Nothing the agent drafts is sent without a person\'s approval, except routine message types that the company itself has set the agent to send. Prices, claims and order confirmations always need a person.',
 
-    'The support desk has its own agent. It answers from our product guide and sees only your role, your tracks, your company\'s add-ons and the state of your connections; it cannot read the company\'s orders, parties, conversations, ledger or payment details. Support conversations are addressed to VIA Labs, so VIA Labs staff read them, and what you write there is sent to the same AI model provider to prepare the answer. Do not put passwords, sign-in codes or bank details in a support conversation.',
+    'The support desk has its own agent. It answers from our product guide and sees only your role, your tracks, your company\'s add-ons and the state of your connections; it cannot read the company\'s orders, parties, conversations, ledger or payment details. Support conversations are addressed to VIA Labs, so VIA Labs staff read them. To prepare the answer, the text of a support conversation is sent to DeepSeek, a model provider based in China; screenshots are not sent to it. Do not put passwords, sign-in codes or bank details in a support conversation.',
 
     'A member can also let an agent they run themselves, in any tool that supports the Model Context Protocol (MCP), work in the workspace through a personal token issued in Settings. That agent reads what the member can read and can place drafts and reported dates in the approval queue; it cannot send messages, approve drafts, take sample decisions or read payment details. The token is stored as a hash, expires after 90 days, can be revoked by the member or a manager, and every call is recorded in the company\'s run log.',
   ] },
@@ -57,6 +57,7 @@ const S: LegalSection[] = [
       'Supabase (database, sign-in and file storage, hosted in Singapore).',
       'Vercel (application hosting; our application runs in its Singapore region).',
       'Anthropic, and any other model provider named in a company\'s agreement (AI processing as described above).',
+      'DeepSeek (AI processing of support desk conversations, and of translations of messages and updates).',
       'Resend (delivery of sign-in codes, invitations and notifications by email, and receiving the messages a member forwards to their own VIA forwarding address).',
       'Google and Microsoft, when a person connects their account, to read and send the mail described above.',
       'Meta (WhatsApp Business Platform) and VNG (Zalo), when a company connects its own WhatsApp Business number or Zalo Official Account.',

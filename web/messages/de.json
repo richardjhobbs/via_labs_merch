@@ -1109,7 +1109,7 @@
     "contact": "Fragen:",
     "desk": {
       "title": "Der Support-Desk richtet sich an uns",
-      "body": "Eine Unterhaltung, die Sie am Support-Desk eröffnen, ist eine Nachricht an VIA Labs. Unsere Mitarbeitenden lesen sie, ebenso jeden angehängten Screenshot. Der Support-Agent antwortet aus dem Produktleitfaden und sieht nur Ihre Rolle, Ihre Tracks, Ihre Add-ons und den Zustand Ihrer Verbindungen. Er kann Ihre Aufträge, Kunden, Lieferanten, Unterhaltungen, Entwürfe, Ihr Ledger oder Bankdaten nicht lesen und nichts in Ihrem Arbeitsbereich ändern. Das Eröffnen und Schließen eines Tickets wird in Ihr Ledger geschrieben."
+      "body": "Eine Unterhaltung, die Sie am Support-Desk eröffnen, ist eine Nachricht an VIA Labs. Unsere Mitarbeitenden lesen sie, ebenso jeden angehängten Screenshot. Der Support-Agent antwortet aus dem Produktleitfaden und sieht nur Ihre Rolle, Ihre Tracks, Ihre Add-ons und den Zustand Ihrer Verbindungen. Er kann Ihre Aufträge, Kunden, Lieferanten, Unterhaltungen, Entwürfe, Ihr Ledger oder Bankdaten nicht lesen und nichts in Ihrem Arbeitsbereich ändern. Das Eröffnen und Schließen eines Tickets wird in Ihr Ledger geschrieben. Der Support-Agent läuft auf DeepSeek: Nur der Text der Unterhaltung wird dorthin gesendet, niemals ein Screenshot."
     }
   },
   "switchboard": {
@@ -2230,6 +2230,8 @@
     "onRequest": "Auf Anfrage verfügbar",
     "onRequestNote": "Dies ist für Ihr Unternehmen nicht freigeschaltet. Beginnen Sie eine Unterhaltung am Support-Desk, um es anzufragen.",
     "readMore": "Mehr lesen",
-    "dismiss": "Ausblenden"
+    "dismiss": "Ausblenden",
+    "notifications": "Benachrichtigungen",
+    "noNotifications": "Nichts Neues."
   }
 }
