@@ -6,7 +6,7 @@ import type { Metadata } from 'next';
 import { LegalPage, type LegalSection } from '@/components/legal-page';
 
 export const metadata: Metadata = { title: 'Privacy policy · VIA Merch' };
-const UPDATED = '10 November 2026';
+const UPDATED = '12 November 2026';
 
 const S: LegalSection[] = [
   { h: 'Who we are', p: [
@@ -18,6 +18,7 @@ const S: LegalSection[] = [
     'Company records: customers, suppliers, contacts, purchase orders, milestones, compliance records and documents that people enter, upload or import.',
     'Connected channels: messages and files from the mailboxes and services a person chooses to connect, as described in the next sections.',
     'Agent activity: the questions people ask the agent, the drafts it prepares, the approvals and rejections people make, and an append-only ledger of these actions.',
+    'Support conversations: what you write to the support desk, any screenshot you attach, your name, email address and role, and the replies of the support agent and of VIA Labs staff.',
     'Technical data: a browser-session cookie that keeps you signed in, the last time each session was active (sessions end after 2 hours idle), cookies with your language choice and your day or night view, and standard server logs from our hosting provider.',
   ]] },
   { h: 'Google user data', p: [
@@ -45,6 +46,8 @@ const S: LegalSection[] = [
   { h: 'How the AI agent uses data', p: [
     'To read a message, answer a question or prepare a draft, the agent sends the relevant part of the company\'s record to an AI model provider and receives the result. The standard provider is Anthropic (Claude). Companies based in regions where Claude is not offered may run on another provider, which is named in their agreement. We use these providers only on terms under which they do not train their models on the data we send, and we never use company data or connected-account data to train models ourselves.',
     'Nothing the agent drafts is sent without a person\'s approval, except routine message types that the company itself has set the agent to send. Prices, claims and order confirmations always need a person.',
+
+    'The support desk has its own agent. It answers from our product guide and sees only your role, your tracks, your company\'s add-ons and the state of your connections; it cannot read the company\'s orders, parties, conversations, ledger or payment details. Support conversations are addressed to VIA Labs, so VIA Labs staff read them, and what you write there is sent to the same AI model provider to prepare the answer. Do not put passwords, sign-in codes or bank details in a support conversation.',
 
     'A member can also let an agent they run themselves, in any tool that supports the Model Context Protocol (MCP), work in the workspace through a personal token issued in Settings. That agent reads what the member can read and can place drafts and reported dates in the approval queue; it cannot send messages, approve drafts, take sample decisions or read payment details. The token is stored as a hash, expires after 90 days, can be revoked by the member or a manager, and every call is recorded in the company\'s run log.',
   ] },

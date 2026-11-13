@@ -33,7 +33,8 @@
       "production": "Produce"
     },
     "samples": "Samples",
-    "materials": "Materials"
+    "materials": "Materials",
+    "help": "Help and support"
   },
   "landing": {
     "kicker": "For buying offices, brands, factories and trading companies",
@@ -245,7 +246,8 @@
     "supportActive": "Granted by {who}, until {when}. Everything you do in the workspace is on their ledger.",
     "request": "Request access",
     "reason": "Reason (the company sees this)",
-    "end": "End access now"
+    "end": "End access now",
+    "supportDesk": "Support desk"
   },
   "roles": {
     "owner": "Owner",
@@ -1103,7 +1105,11 @@
       "body": "Export your orders, parties, conversations and ledger as xlsx, csv or json at any time. When you leave, ask and we delete your company's records, and confirm in writing when it is done."
     },
     "updated": "Last updated 3 November 2026.",
-    "contact": "Questions:"
+    "contact": "Questions:",
+    "desk": {
+      "title": "The support desk is addressed to us",
+      "body": "A conversation you open at the support desk is a message to VIA Labs, so our staff read it, along with any screenshot you attach. The support agent answers from the product guide and can see only your role, your tracks, your add-ons and the state of your connections. It cannot read your orders, customers, suppliers, conversations, drafts, ledger or bank details, and it cannot change anything in your workspace. Opening and closing a ticket is written to your ledger."
+    }
   },
   "switchboard": {
     "title": "Sits on top of the tools you already use.",
@@ -2159,5 +2165,62 @@
     "name": "Name",
     "rolesHelp": "Owner and manager: everything, including the team and agent authority. Merchandiser, QC, compliance and logistics: their own work and customers, and they can approve drafts. Viewer: reads only and approves nothing.",
     "send": "Send invite"
+  },
+  "help": {
+    "title": "Support",
+    "sub": "Ask how something works, report an error, or suggest an improvement. The support agent answers at once and logs what needs VIA Labs.",
+    "newTitle": "How can we help?",
+    "newPh": "Describe the question, problem or idea. Say which page you were on and what you expected to happen.",
+    "replyPh": "Write a reply",
+    "send": "Send",
+    "working": "VIA Support is working...",
+    "attach": "Add screenshot",
+    "attachHint": "Up to 3 images, 5 MB each",
+    "remove": "Remove",
+    "mine": "Your conversations",
+    "companyAll": "Everyone at {company}",
+    "none": "No conversations yet.",
+    "back": "All conversations",
+    "by": "Opened by {name}",
+    "close": "Close conversation",
+    "closedNote": "This conversation is closed. Start a new one if you need more.",
+    "you": "You",
+    "agent": "VIA Support",
+    "staff": "VIA Labs",
+    "warn": "VIA Labs staff read support conversations. Do not paste passwords, sign-in codes or bank details.",
+    "pick": "Choose a company",
+    "workspace": "Back to the workspace",
+    "kind": {
+      "question": "Question",
+      "error": "Error",
+      "request": "Request",
+      "suggestion": "Suggestion"
+    },
+    "status": {
+      "open": "Open",
+      "answered": "Answered",
+      "with_via": "With VIA Labs",
+      "logged": "Logged",
+      "planned": "Planned",
+      "building": "In progress",
+      "shipped": "Live",
+      "declined": "Not planned",
+      "closed": "Closed"
+    },
+    "note": {
+      "with_via": "VIA Labs staff have this and will reply here and by email.",
+      "logged": "Logged with VIA Labs as a change request. Its status shows here as it moves.",
+      "planned": "VIA Labs has planned this change.",
+      "building": "VIA Labs is working on this change.",
+      "shipped": "This change is now live.",
+      "declined": "VIA Labs has decided not to make this change for now."
+    },
+    "err": {
+      "limit": "Too many messages in the last hour. Your message is saved and VIA Labs has been told.",
+      "agent": "The support agent is not available right now. Your message is saved and VIA Labs has been told.",
+      "upload": "The screenshot could not be uploaded. Try again.",
+      "closed": "This conversation is closed.",
+      "failed": "That did not go through. Try again."
+    }
   }
 }

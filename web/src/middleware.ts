@@ -11,6 +11,8 @@ const PUBLIC = [/^\/$/, /^\/login/, /^\/auth\//, /^\/invite\//, /^\/request-acce
 
 export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
+  // The support desk has its own host (support.getvia.xyz) on the same project: its front door is /support.
+  if (path === '/' && /^support\./i.test(req.headers.get('host') || '')) { const u = req.nextUrl.clone(); u.pathname = '/support'; return NextResponse.redirect(u); }
   if (PUBLIC.some((re) => re.test(path))) return NextResponse.next();
 
   let res = NextResponse.next({ request: req });
