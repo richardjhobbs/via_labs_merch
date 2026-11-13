@@ -247,7 +247,8 @@
     "request": "申请访问",
     "reason": "原因（对方公司可见）",
     "end": "立即结束访问",
-    "supportDesk": "支持台"
+    "supportDesk": "支持台",
+    "updates": "更新"
   },
   "roles": {
     "owner": "所有者",
@@ -2221,6 +2222,14 @@
       "upload": "截图上传失败，请重试。",
       "closed": "此对话已关闭。",
       "failed": "发送失败，请重试。"
-    }
+    },
+    "updates": "更新",
+    "updatesAll": "全部更新",
+    "updatesNone": "暂无更新。",
+    "new": "新",
+    "onRequest": "可按需开通",
+    "onRequestNote": "贵公司尚未开通此功能。请在支持台发起对话进行申请。",
+    "readMore": "查看详情",
+    "dismiss": "忽略"
   }
 }

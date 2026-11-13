@@ -1,5 +1,6 @@
 'use server';
 import { redirect } from 'next/navigation';
+import { featureByKey } from '@/lib/features';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { supabaseAdmin } from '@/lib/supabase/server';
@@ -161,6 +162,22 @@ export async function setAddon(form: FormData) {
   }
   revalidatePath(`/admin/tenants/${tenantId}`);
   redirect(`/admin/tenants/${tenantId}?sent=${encodeURIComponent(`add-on ${on ? 'on' : 'off'}`)}`);
+}
+
+// Feature switches (lib/features.ts): an enhancement only some companies get, switched per company.
+export async function setFeature(form: FormData) {
+  const me = await requireAdmin();
+  const tenantId = String(form.get('tenant_id')), key = String(form.get('feature')), on = form.get('on') === '1';
+  const f = featureByKey(key);
+  if (!f) redirect(`/admin/tenants/${tenantId}?error=unknown%20feature`);
+  const sb = supabaseAdmin();
+  const { data: t } = await sb.from('tenants').select('settings').eq('id', tenantId).single();
+  const settings = (t?.settings || {}) as { features?: Record<string, boolean> };
+  const { error } = await sb.from('tenants').update({ settings: { ...settings, features: { ...(settings.features || {}), [key]: on } } }).eq('id', tenantId);
+  if (error) redirect(`/admin/tenants/${tenantId}?error=${encodeURIComponent(error.message)}`);
+  await sb.rpc('ledger_append', { p_tenant: tenantId, p_channel: 'Console', p_actor: `VIA admin (${me.user.email})`, p_actor_user: me.user.id, p_counterparty: null, p_stream: 'Setup', p_order: null, p_what: `${on ? 'Switched on' : 'Switched off'} the feature: ${f!.name}`, p_gate: 'ADMIN', p_gated: true, p_ref: { feature: key } });
+  revalidatePath(`/admin/tenants/${tenantId}`);
+  redirect(`/admin/tenants/${tenantId}?sent=${encodeURIComponent(`feature ${on ? 'on' : 'off'}`)}`);
 }
 
 // The development track: a company switch in tenants.settings.tracks (docs/development-merchandising.md).

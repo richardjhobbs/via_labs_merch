@@ -247,7 +247,8 @@
     "request": "Yêu cầu quyền",
     "reason": "Lý do (công ty sẽ thấy)",
     "end": "Kết thúc quyền ngay",
-    "supportDesk": "Bàn hỗ trợ"
+    "supportDesk": "Bàn hỗ trợ",
+    "updates": "Cập nhật"
   },
   "roles": {
     "owner": "Chủ sở hữu",
@@ -2221,6 +2222,14 @@
       "upload": "Không tải được ảnh chụp màn hình. Hãy thử lại.",
       "closed": "Cuộc trò chuyện này đã đóng.",
       "failed": "Gửi không thành công. Hãy thử lại."
-    }
+    },
+    "updates": "Cập nhật",
+    "updatesAll": "Tất cả cập nhật",
+    "updatesNone": "Chưa có cập nhật nào.",
+    "new": "Mới",
+    "onRequest": "Có sẵn theo yêu cầu",
+    "onRequestNote": "Tính năng này chưa được bật cho công ty của bạn. Hãy bắt đầu một cuộc trò chuyện tại bàn hỗ trợ để yêu cầu.",
+    "readMore": "Xem thêm",
+    "dismiss": "Bỏ qua"
   }
 }

@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { FEATURES } from '@/lib/features';
+import { setFeature } from '../../actions';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { supabaseAdmin } from '@/lib/supabase/server';
@@ -78,6 +80,14 @@ export default async function TenantAdmin({ params, searchParams }: { params: Pr
               <form action={setAddon} className="ml-auto"><input type="hidden" name="tenant_id" value={id} /><input type="hidden" name="addon" value="esg" /><input type="hidden" name="on" value={(tenant.settings as { addons?: { esg?: boolean } })?.addons?.esg ? '0' : '1'} /><button className="btn sm">{(tenant.settings as { addons?: { esg?: boolean } })?.addons?.esg ? 'Switch off' : 'Switch on'}</button></form></div>
             {addonReq && <div className="notice warn small mt-3"><b>Requested by {addonReq.requested_by_name} · {when(addonReq.requested_at)}</b>{addonReq.note && <div className="mt-1">{addonReq.note}</div>}
               <form action={declineAddon} className="flex flex-wrap gap-2 mt-2 items-center"><input type="hidden" name="tenant_id" value={id} /><input type="hidden" name="id" value={addonReq.id} /><input className="input sm" name="note" placeholder="Reason (sent to them)" maxLength={500} style={{ maxWidth: 320 }} /><button className="btn sm">Decline</button><span className="muted">or Switch on above</span></form></div>}
+          </div>
+          <div className="card">
+            <div className="flex items-baseline gap-3"><h2>Features</h2></div>
+            {!FEATURES.length && <p className="muted small mt-2">No switchable features yet. An enhancement for some companies only is added to the feature list in the code, then switched on here per company.</p>}
+            {FEATURES.map((f) => { const on = !!(tenant.settings as { features?: Record<string, boolean> })?.features?.[f.key]; return (
+              <div key={f.key} className="flex flex-wrap items-center gap-x-3 gap-y-2 mt-3 small"><b>{f.name}</b>{on ? <span className="pill ok">on</span> : <span className="pill">off</span>}<span className="muted">{f.description}</span>
+                <form action={setFeature} className="ml-auto"><input type="hidden" name="tenant_id" value={id} /><input type="hidden" name="feature" value={f.key} /><input type="hidden" name="on" value={on ? '0' : '1'} /><button className="btn sm">{on ? 'Switch off' : 'Switch on'}</button></form></div>
+            ); })}
           </div>
           <div className="card tw" style={{ padding: 0 }}><div className="p-4 pb-2"><h2>Autonomy by stream</h2></div>
             <table className="t"><thead><tr><th>Stream</th><th>Level</th><th>Cap</th></tr></thead><tbody>

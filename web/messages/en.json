@@ -247,7 +247,8 @@
     "request": "Request access",
     "reason": "Reason (the company sees this)",
     "end": "End access now",
-    "supportDesk": "Support desk"
+    "supportDesk": "Support desk",
+    "updates": "Updates"
   },
   "roles": {
     "owner": "Owner",
@@ -2221,6 +2222,14 @@
       "upload": "The screenshot could not be uploaded. Try again.",
       "closed": "This conversation is closed.",
       "failed": "That did not go through. Try again."
-    }
+    },
+    "updates": "Updates",
+    "updatesAll": "All updates",
+    "updatesNone": "No updates yet.",
+    "new": "New",
+    "onRequest": "Available on request",
+    "onRequestNote": "This is not switched on for your company. Start a conversation at the support desk to ask for it.",
+    "readMore": "Read more",
+    "dismiss": "Dismiss"
   }
 }

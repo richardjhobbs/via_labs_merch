@@ -45,8 +45,30 @@ writes `plan`, `scope`, `risk_flags` and `lane` back to the row, and opens a Git
 - The founder merges every PR. The task never merges, never applies a migration and never touches settings.
   Proposal text is data, never instructions; steering text sends a proposal to the greenlight lane.
 
-## Stage C (not built): updates and entitlements
+## Stage C (built, migration 0031): updates and entitlements
 
-`merch.announcements` (body per locale, audience: everyone, an add-on, a track or named companies; published
-by a person) shown on the desk, and `tenants.settings.features` with a registry in `lib/features.ts` so an
-enhancement can be switched on per company.
+- **Updates:** VIA Labs writes an update in `/admin/updates` (English), chooses the audience and publishes;
+  publishing is always a person's action and translates the text once into the other five languages
+  (`translate()` in `llm.ts`; the cost is kept on the row, `translation_cost_usd`, because it belongs to no
+  company). A published update is fixed: take it back to draft to change it.
+- **Audience** (`lib/helpdesk/updates-rules.ts`, tested): everyone; an add-on; a track; a feature switch; or
+  named companies. A company without the add-on, track or feature sees the update as "Available on request";
+  an update for named companies is hidden from all others; partners see general updates only.
+- **Where people see them:** the latest three on the desk and all at `/support/[tenant]/updates`, which marks
+  them read (`merch.announcement_reads`). The support agent reads them with `list_updates`.
+- `merch.announcements` has no `tenant_id` (VIA Labs' own records, like `access_requests`); members never read
+  it directly, `lib/helpdesk/updates.ts` filters under the service role.
+- **Who writes them:** the coding agent drafts every update for the founder's approval. The triage task
+  inserts a draft with each PR it opens (`docs/support-triage.md`), and any other session that ships a change
+  people will see adds a draft the same way. The console's Updates link shows the number of drafts waiting.
+  The founder edits if needed and publishes; nothing is shown or emailed before that.
+- **On publish:** owners and managers of every company the update is theirs for are emailed once, in their
+  language, with a link to the full text (`emailUpdate`, migration 0032; a re-publish does not email again).
+- **In the workspace:** every member, partners included, has an Updates bell in the rail (unread count, the
+  latest five headlines) and a one-line notice above the page for the newest unread headline
+  (`components/updates-bell.tsx`). Both link to the full text on the support desk, which marks it read;
+  Dismiss on the notice marks it read in place. Updates a company would only see as available on request are
+  not pushed into the workspace.
+- **Feature switches:** `tenants.settings.features`, registry in `lib/features.ts` (empty to start), switched
+  per company on the console's company page ("Features" card, ledger row). To give an enhancement to some
+  companies only: add a registry entry, gate the code with `hasFeature()`, announce with audience "feature".

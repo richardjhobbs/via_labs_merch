@@ -247,7 +247,8 @@
     "request": "Solicitar acceso",
     "reason": "Motivo (la empresa lo ve)",
     "end": "Terminar el acceso ahora",
-    "supportDesk": "Mesa de soporte"
+    "supportDesk": "Mesa de soporte",
+    "updates": "Novedades"
   },
   "roles": {
     "owner": "Propietario",
@@ -2221,6 +2222,14 @@
       "upload": "No se pudo subir la captura. Inténtelo de nuevo.",
       "closed": "Esta conversación está cerrada.",
       "failed": "No se pudo enviar. Inténtelo de nuevo."
-    }
+    },
+    "updates": "Novedades",
+    "updatesAll": "Todas las novedades",
+    "updatesNone": "Aún no hay novedades.",
+    "new": "Nuevo",
+    "onRequest": "Disponible a petición",
+    "onRequestNote": "Esto no está activado para su empresa. Inicie una conversación en la mesa de soporte para solicitarlo.",
+    "readMore": "Leer más",
+    "dismiss": "Descartar"
   }
 }

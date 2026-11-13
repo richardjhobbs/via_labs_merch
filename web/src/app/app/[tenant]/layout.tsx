@@ -15,11 +15,20 @@ import { cookies } from 'next/headers';
 import { TrackSwitch } from '@/components/track-switch';
 import { memberTracks, currentTrack } from '@/lib/tracks';
 import { supportHref } from '@/lib/helpdesk/desk';
+import { updatesFor } from '@/lib/helpdesk/updates';
+import { UpdatesBell, UpdateNotice, type BellItem } from '@/components/updates-bell';
 
 export default async function TenantLayout({ children, params }: { children: React.ReactNode; params: Promise<{ tenant: string }> }) {
   const { tenant: slug } = await params;
-  const { tenant, membership, isAdmin, viewingAs } = await requireTenant(slug, { partner: true });
-  const t = await getTranslations();
+  const { tenant, membership, isAdmin, viewingAs, user } = await requireTenant(slug, { partner: true });
+  const [t, locale] = await Promise.all([getTranslations(), getLocale()]);
+  // updates from VIA Labs: headlines here, the full text on the support desk
+  const news: BellItem[] = (await updatesFor(tenant.id, user.id, membership.role === 'partner', locale, 5)).filter((u) => !u.locked).map((u) => ({ id: u.id, title: u.title, unread: u.unread, when: new Date(u.published_at).toLocaleDateString(locale, { day: 'numeric', month: 'short' }) }));
+  const newsHref = supportHref(`/${slug}/updates`);
+  const N = { updates: t('help.updates'), all: t('help.updatesAll'), isNew: t('help.new'), readMore: t('help.readMore'), dismiss: t('help.dismiss'), none: t('help.updatesNone') };
+  const bell = <UpdatesBell items={news} href={newsHref} labels={N} />;
+  const fresh = news.find((n) => n.unread);
+  const notice = fresh ? <UpdateNotice key={fresh.id} slug={slug} item={fresh} href={newsHref} labels={N} /> : null;
   const ck = (await cookies()).get('merch_theme')?.value;
   const theme = ck === 'dark' || ck === 'system' ? ck : 'light';
   // a partner sees the shared compliance portal only: no workspace navigation and no agent
@@ -28,6 +37,7 @@ export default async function TenantLayout({ children, params }: { children: Rea
     const account = <>
       <div className="flex items-center gap-2"><Avatar path={membership.avatar_path} name={membership.display_name} initials={membership.initials} /><b>{membership.display_name || 'You'}</b></div>
       <a href={supportHref(`/${slug}`)} className="block mt-1">{t('nav.help')}</a>
+      {bell}
       <div className="flex items-center gap-2 mt-2"><LangSwitch compact up /><form action="/auth/signout" method="post"><button className="btn sm">{t('nav.signout')}</button></form></div>
     </>;
     const pitems = [['shared', t('nav.shared')]] as [string, string][];
@@ -40,11 +50,10 @@ export default async function TenantLayout({ children, params }: { children: Rea
           <Rail base={`/app/${slug}`} items={pitems} />
           <div className="mt-auto px-2 pt-3 small" style={{ borderTop: '1px solid var(--line2)' }}>{account}</div>
         </aside>
-        <main className="p-4 md:p-6 min-w-0" style={{ background: 'var(--paper)' }}>{children}</main>
+        <main className="p-4 md:p-6 min-w-0" style={{ background: 'var(--paper)' }}>{notice}{children}</main>
       </div>
     );
   }
-  const locale = await getLocale();
   const sb = await supabaseServer();
   const [{ data: team }, { data: tn }] = await Promise.all([
     isAdmin ? sb.from('memberships').select('id, display_name, role').eq('tenant_id', tenant.id).neq('role', 'partner').order('role') : Promise.resolve({ data: null }),
@@ -70,6 +79,7 @@ export default async function TenantLayout({ children, params }: { children: Rea
   const account = <>
     <div className="flex items-center gap-2"><Avatar path={membership.avatar_path} name={membership.display_name} initials={membership.initials} /><div className="min-w-0"><b>{membership.display_name || 'You'}</b> <span className="muted">· {t(`roles.${membership.role}`)}</span></div></div>
     <a href={supportHref(`/${slug}`)} className="block mt-1">{t('nav.help')}</a>
+    {bell}
     {isAdmin && <Link href="/admin" className="block mt-1">{t('nav.admin')}</Link>}
     {isAdmin && <ViewAs slug={slug} current={viewingAs || ''} members={(team || []).map((m) => ({ id: m.id, name: m.display_name || '?', role: t(`roles.${m.role}`) }))} label={t('viewas.label')} self={t('viewas.self')} />}
     <div className="flex items-center gap-2 mt-2"><LangSwitch compact up /><form action="/auth/signout" method="post"><button className="btn sm">{t('nav.signout')}</button></form></div>
@@ -88,6 +98,7 @@ export default async function TenantLayout({ children, params }: { children: Rea
       </aside>
       <main className="app-main p-4 md:p-6 min-w-0" style={{ background: 'var(--paper)' }}>
         {pendingSupport && <Link href={`/app/${slug}/settings`} className="notice warn block mb-4 no-underline">{t('settings.pendingNotice', { reason: pendingSupport.reason })}</Link>}
+        {notice}
         {children}
       </main>
       <Assistant slug={slug} agentName={agent?.name || 'Mira'} lang={locale} live={hasLlm()} labels={A} />
