@@ -247,7 +247,8 @@
     "request": "Zugang anfragen",
     "reason": "Grund (das Unternehmen sieht ihn)",
     "end": "Zugang jetzt beenden",
-    "supportDesk": "Support-Desk"
+    "supportDesk": "Support-Desk",
+    "updates": "Neuigkeiten"
   },
   "roles": {
     "owner": "Inhaber",
@@ -2221,6 +2222,12 @@
       "upload": "Der Screenshot konnte nicht hochgeladen werden. Versuchen Sie es erneut.",
       "closed": "Diese Unterhaltung ist geschlossen.",
       "failed": "Das hat nicht funktioniert. Versuchen Sie es erneut."
-    }
+    },
+    "updates": "Neuigkeiten",
+    "updatesAll": "Alle Neuigkeiten",
+    "updatesNone": "Noch keine Neuigkeiten.",
+    "new": "Neu",
+    "onRequest": "Auf Anfrage verfügbar",
+    "onRequestNote": "Dies ist für Ihr Unternehmen nicht freigeschaltet. Beginnen Sie eine Unterhaltung am Support-Desk, um es anzufragen."
   }
 }

@@ -10,6 +10,7 @@ import { anthropic, MODEL, costOfUsage, recordUsage, LANG_NAMES } from '@/lib/ll
 import { supabaseAdmin } from '@/lib/supabase/server';
 import type { Membership } from '@/lib/tenant';
 import { HELP } from './knowledge';
+import { updatesFor } from './updates';
 import { AGENT_NAME, KINDS, MESSAGE_COLS, SUPPORT_BUCKET, ledger, notifyVia, type Message, type Ticket } from './desk';
 
 type Call = { name: string; input: unknown; ok: boolean; ms: number };
@@ -20,6 +21,7 @@ const RULES = `You are ${AGENT_NAME}, the support agent for VIA Merch, run by VI
 What you do:
 - Answer operational questions from the product guide below and, for questions about this person's own set-up, from get_workspace_status. Give the steps: which page, which button, what to expect.
 - Keep the ticket classified with set_ticket: the kind (question, error, request, suggestion) and a short title in English that says what it is about. Do this on the first reply and again if the subject changes.
+- For what is new or recently changed, use list_updates. An update marked on_request is not switched on for this company: say it is available on request and offer to pass the request to VIA Labs (hand_to_via).
 - When the answer settles it, call mark_answered.
 - When the person reports something that looks like a fault in the product, or asks for something the product does not do, first make sure you understand it: what they did, what they expected, what happened, on which page. Ask one short question if a key fact is missing. Then call file_proposal once, and tell the person it is logged with VIA Labs and that they will see its status on this ticket. One proposal per ticket; calling it again updates the same one.
 - When the matter needs a person at VIA Labs (pricing, contracts, add-ons to switch on, account or access problems you cannot explain, data deletion, anything urgent or sensitive, or the person asks for a human), call hand_to_via and say that VIA Labs staff will reply here and by email.
@@ -85,6 +87,13 @@ export async function runSupportAgent(ticket: Ticket, who: Who): Promise<{ text:
         open_alerts: { silence: count('silence'), failed_sends: count('send_failed') },
       };
     }),
+  });
+
+  const list_updates = betaZodTool({
+    name: 'list_updates',
+    description: "The updates VIA Labs has published that this company may see, newest first, in English. 'on_request' means the company does not hold the add-on, track or feature it belongs to. Use it for 'what is new', 'what changed', or when a question may be about something recently released.",
+    inputSchema: z.object({}),
+    run: wrap('list_updates', async () => (await updatesFor(T, who.userId, partner, 'en', 12)).map((x) => ({ title: x.title, text: x.body, published: x.published_at.slice(0, 10), on_request: x.locked }))),
   });
 
   const mark_answered = betaZodTool({
@@ -165,7 +174,7 @@ export async function runSupportAgent(ticket: Ticket, who: Who): Promise<{ text:
   try {
     const runner = anthropic().beta.messages.toolRunner({
       model: MODEL, max_tokens: 8000, output_config: { effort: 'medium' }, system,
-      tools: partner ? [set_ticket, mark_answered, hand_to_via, file_proposal] : [set_ticket, get_workspace_status, mark_answered, hand_to_via, file_proposal],
+      tools: partner ? [set_ticket, list_updates, mark_answered, hand_to_via, file_proposal] : [set_ticket, get_workspace_status, list_updates, mark_answered, hand_to_via, file_proposal],
       messages, max_iterations: 6, cache_control: { type: 'ephemeral' },
     });
     let last: Anthropic.Beta.BetaMessage | null = null;

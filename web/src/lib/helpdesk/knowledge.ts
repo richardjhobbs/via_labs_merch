@@ -102,6 +102,9 @@ VIA Merch gives a merchandising team (buying office, brand, factory, trading com
 - Support desk conversations are different: they are addressed to VIA Labs, so VIA Labs staff read them. Do not paste passwords, sign-in codes or bank details into a support conversation.
 - Full statements: merch.getvia.xyz/trust and merch.getvia.xyz/privacy.
 
+## Updates
+- The support desk shows Updates: what VIA Labs has released. Some updates are for every company; some belong to an add-on, a track or a feature that is switched on per company and show as "Available on request" when the company does not have it. To ask for one, start a conversation at the support desk.
+
 ## Plans and add-ons
 - The development track, ESG and compliance, and historic sync are switched on per company by VIA Labs. Pricing and contract questions go to VIA Labs staff.
 `;
