@@ -50,7 +50,7 @@ export default async function Parties({ params, searchParams }: { params: Promis
           <div className="card">
             <h2>{t('doc.title')}</h2>
             <p className="muted small mt-1 mb-3">{t('doc.linkHelp')}</p>
-            <Link className="btn" href={`/app/${slug}/parties/document`}>{t('doc.link')}</Link>
+            <Link className="btn primary" href={`/app/${slug}/parties/document`}>{t('doc.link')}</Link>
           </div>
           <form action={addParty} className="card">
             <h2 className="mb-3">{t('add')}</h2><input type="hidden" name="tenant" value={slug} />
