@@ -26,6 +26,10 @@ export const MESSAGE_COLS = 'id, ticket_id, author_kind, author_user, author_nam
 // the same pages under /support on the workspace host.
 export const supportBase = () => (process.env.NEXT_PUBLIC_SUPPORT_URL || '').replace(/\/$/, '');
 export const supportHref = (path = '') => `${supportBase()}/support${path}`;
+// Links between the workspace and the desk from inside the app: through /auth/handoff when the desk has its
+// own host, so the person is not asked for a second code (app/auth/handoff/route.ts).
+export const deskLink = (path = '') => (supportBase() ? `/auth/handoff?to=${encodeURIComponent(`/support${path}`)}` : `/support${path}`);
+export const workspaceLink = (slug: string) => (supportBase() ? `/auth/handoff?to=${encodeURIComponent(`/app/${slug}`)}` : `/app/${slug}`);
 
 // Any member of the company, partners included. VIA Labs staff use the console, not the desk.
 export async function supportMe(slug: string) {
