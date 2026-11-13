@@ -33,7 +33,8 @@
       "production": "Sản xuất"
     },
     "samples": "Mẫu",
-    "materials": "Nguyên phụ liệu"
+    "materials": "Nguyên phụ liệu",
+    "help": "Trợ giúp và hỗ trợ"
   },
   "landing": {
     "kicker": "Dành cho văn phòng mua hàng, thương hiệu, nhà máy và công ty thương mại",
@@ -245,7 +246,8 @@
     "supportActive": "Được cấp bởi {who}, đến {when}. Mọi thao tác của bạn trong không gian làm việc đều được ghi vào sổ ghi của họ.",
     "request": "Yêu cầu quyền",
     "reason": "Lý do (công ty sẽ thấy)",
-    "end": "Kết thúc quyền ngay"
+    "end": "Kết thúc quyền ngay",
+    "supportDesk": "Bàn hỗ trợ"
   },
   "roles": {
     "owner": "Chủ sở hữu",
@@ -1103,7 +1105,11 @@
       "body": "Xuất đơn hàng, đối tác, hội thoại và sổ ghi dưới dạng xlsx, csv hoặc json bất cứ lúc nào. Khi ngừng sử dụng, chỉ cần yêu cầu, chúng tôi sẽ xóa hồ sơ của công ty bạn và xác nhận bằng văn bản khi hoàn tất."
     },
     "updated": "Cập nhật lần cuối ngày 3 tháng 11 năm 2026.",
-    "contact": "Câu hỏi:"
+    "contact": "Câu hỏi:",
+    "desk": {
+      "title": "Bàn hỗ trợ là nơi gửi đến chúng tôi",
+      "body": "Cuộc trò chuyện bạn mở tại bàn hỗ trợ là tin nhắn gửi cho VIA Labs, vì vậy nhân viên của chúng tôi đọc nó cùng với mọi ảnh chụp màn hình bạn đính kèm. Tác nhân hỗ trợ trả lời dựa trên hướng dẫn sản phẩm và chỉ thấy vai trò, track, tiện ích bổ sung và trạng thái kết nối của bạn. Nó không thể đọc đơn hàng, khách hàng, nhà cung cấp, cuộc trò chuyện, bản nháp, sổ cái hay thông tin ngân hàng của bạn, và không thể thay đổi gì trong không gian làm việc của bạn. Việc mở và đóng một phiếu hỗ trợ được ghi vào sổ cái của bạn."
+    }
   },
   "switchboard": {
     "title": "Hoạt động trên nền các công cụ bạn đang dùng.",
@@ -2159,5 +2165,62 @@
     "name": "Tên",
     "rolesHelp": "Owner và manager: mọi thứ, gồm nhóm và quyền của agent. Merchandiser, QC, compliance và logistics: công việc và khách hàng của mình, và có thể duyệt bản nháp. Viewer: chỉ xem, không duyệt gì.",
     "send": "Gửi lời mời"
+  },
+  "help": {
+    "title": "Hỗ trợ",
+    "sub": "Hỏi cách sử dụng, báo lỗi hoặc đề xuất cải tiến. Tác nhân hỗ trợ trả lời ngay và ghi lại những việc cần VIA Labs xử lý.",
+    "newTitle": "Chúng tôi có thể giúp gì?",
+    "newPh": "Mô tả câu hỏi, sự cố hoặc ý tưởng. Cho biết bạn đang ở trang nào và bạn mong đợi điều gì xảy ra.",
+    "replyPh": "Viết trả lời",
+    "send": "Gửi",
+    "working": "VIA Support đang xử lý...",
+    "attach": "Thêm ảnh chụp màn hình",
+    "attachHint": "Tối đa 3 ảnh, mỗi ảnh 5 MB",
+    "remove": "Xóa",
+    "mine": "Cuộc trò chuyện của bạn",
+    "companyAll": "Mọi người tại {company}",
+    "none": "Chưa có cuộc trò chuyện nào.",
+    "back": "Tất cả cuộc trò chuyện",
+    "by": "Mở bởi {name}",
+    "close": "Đóng cuộc trò chuyện",
+    "closedNote": "Cuộc trò chuyện này đã đóng. Hãy bắt đầu cuộc mới nếu bạn cần thêm.",
+    "you": "Bạn",
+    "agent": "VIA Support",
+    "staff": "VIA Labs",
+    "warn": "Nhân viên VIA Labs đọc các cuộc trò chuyện hỗ trợ. Không dán mật khẩu, mã đăng nhập hoặc thông tin ngân hàng.",
+    "pick": "Chọn công ty",
+    "workspace": "Quay lại không gian làm việc",
+    "kind": {
+      "question": "Câu hỏi",
+      "error": "Lỗi",
+      "request": "Yêu cầu",
+      "suggestion": "Đề xuất"
+    },
+    "status": {
+      "open": "Đang mở",
+      "answered": "Đã trả lời",
+      "with_via": "VIA Labs đang xử lý",
+      "logged": "Đã ghi nhận",
+      "planned": "Đã lên kế hoạch",
+      "building": "Đang thực hiện",
+      "shipped": "Đã phát hành",
+      "declined": "Chưa lên kế hoạch",
+      "closed": "Đã đóng"
+    },
+    "note": {
+      "with_via": "Nhân viên VIA Labs đã nhận và sẽ trả lời tại đây và qua email.",
+      "logged": "Đã ghi nhận với VIA Labs dưới dạng yêu cầu thay đổi. Trạng thái sẽ hiển thị tại đây.",
+      "planned": "VIA Labs đã lên kế hoạch cho thay đổi này.",
+      "building": "VIA Labs đang thực hiện thay đổi này.",
+      "shipped": "Thay đổi này đã được phát hành.",
+      "declined": "VIA Labs quyết định chưa thực hiện thay đổi này."
+    },
+    "err": {
+      "limit": "Quá nhiều tin nhắn trong giờ qua. Tin nhắn của bạn đã được lưu và VIA Labs đã được báo.",
+      "agent": "Tác nhân hỗ trợ hiện không khả dụng. Tin nhắn của bạn đã được lưu và VIA Labs đã được báo.",
+      "upload": "Không tải được ảnh chụp màn hình. Hãy thử lại.",
+      "closed": "Cuộc trò chuyện này đã đóng.",
+      "failed": "Gửi không thành công. Hãy thử lại."
+    }
   }
 }

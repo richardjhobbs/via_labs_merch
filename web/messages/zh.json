@@ -33,7 +33,8 @@
       "production": "生产"
     },
     "samples": "样品",
-    "materials": "物料"
+    "materials": "物料",
+    "help": "帮助与支持"
   },
   "landing": {
     "kicker": "面向采购办、品牌、工厂和贸易公司",
@@ -245,7 +246,8 @@
     "supportActive": "由 {who} 授予，有效期至 {when}。您在该工作区的所有操作都会记入对方台账。",
     "request": "申请访问",
     "reason": "原因（对方公司可见）",
-    "end": "立即结束访问"
+    "end": "立即结束访问",
+    "supportDesk": "支持台"
   },
   "roles": {
     "owner": "所有者",
@@ -1103,7 +1105,11 @@
       "body": "您可以随时将订单、往来方、会话和台账导出为 xlsx、csv 或 json。离开时，只要提出要求，我们就会删除贵公司的记录，并在完成后书面确认。"
     },
     "updated": "最后更新：2026 年 11 月 3 日。",
-    "contact": "如有疑问："
+    "contact": "如有疑问：",
+    "desk": {
+      "title": "支持台的对话是发给我们的",
+      "body": "您在支持台发起的对话是发给 VIA Labs 的消息，因此我们的员工会阅读对话内容以及您附上的截图。支持智能体依据产品指南作答，只能看到您的角色、您的轨道、已开通的附加功能以及连接状态。它无法读取您的订单、客户、供应商、对话、草稿、台账或银行信息，也无法更改您工作区中的任何内容。工单的开启和关闭会写入您的台账。"
+    }
   },
   "switchboard": {
     "title": "架在您已有的工具之上。",
@@ -2159,5 +2165,62 @@
     "name": "姓名",
     "rolesHelp": "所有者和经理：全部权限，包括团队和代理权限。跟单、QC、合规和物流：各自的工作和客户，可以批准草稿。查看者：只读，不能批准。",
     "send": "发送邀请"
+  },
+  "help": {
+    "title": "支持",
+    "sub": "询问功能用法、报告错误或提出改进建议。支持智能体会立即答复，并记录需要 VIA Labs 处理的事项。",
+    "newTitle": "我们能帮您什么？",
+    "newPh": "请描述问题、故障或想法，并说明您当时所在的页面以及您预期的结果。",
+    "replyPh": "输入回复",
+    "send": "发送",
+    "working": "VIA Support 正在处理...",
+    "attach": "添加截图",
+    "attachHint": "最多 3 张图片，每张不超过 5 MB",
+    "remove": "移除",
+    "mine": "您的对话",
+    "companyAll": "{company} 的全部对话",
+    "none": "暂无对话。",
+    "back": "全部对话",
+    "by": "由 {name} 发起",
+    "close": "关闭对话",
+    "closedNote": "此对话已关闭。如需更多帮助，请发起新对话。",
+    "you": "您",
+    "agent": "VIA Support",
+    "staff": "VIA Labs",
+    "warn": "VIA Labs 员工会阅读支持对话。请勿粘贴密码、登录验证码或银行信息。",
+    "pick": "选择公司",
+    "workspace": "返回工作区",
+    "kind": {
+      "question": "问题",
+      "error": "错误",
+      "request": "需求",
+      "suggestion": "建议"
+    },
+    "status": {
+      "open": "进行中",
+      "answered": "已答复",
+      "with_via": "VIA Labs 处理中",
+      "logged": "已记录",
+      "planned": "已计划",
+      "building": "开发中",
+      "shipped": "已上线",
+      "declined": "暂不计划",
+      "closed": "已关闭"
+    },
+    "note": {
+      "with_via": "VIA Labs 员工已接手，将在此处并通过邮件回复。",
+      "logged": "已作为变更请求记录到 VIA Labs。进展状态会显示在这里。",
+      "planned": "VIA Labs 已将此变更列入计划。",
+      "building": "VIA Labs 正在处理此变更。",
+      "shipped": "此变更现已上线。",
+      "declined": "VIA Labs 决定暂不进行此变更。"
+    },
+    "err": {
+      "limit": "过去一小时内消息过多。您的消息已保存，并已通知 VIA Labs。",
+      "agent": "支持智能体暂时不可用。您的消息已保存，并已通知 VIA Labs。",
+      "upload": "截图上传失败，请重试。",
+      "closed": "此对话已关闭。",
+      "failed": "发送失败，请重试。"
+    }
   }
 }

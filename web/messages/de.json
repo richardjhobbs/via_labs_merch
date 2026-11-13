@@ -33,7 +33,8 @@
       "production": "Produzieren"
     },
     "samples": "Muster",
-    "materials": "Materialien"
+    "materials": "Materialien",
+    "help": "Hilfe und Support"
   },
   "landing": {
     "kicker": "Für Einkaufsbüros, Marken, Fabriken und Handelshäuser",
@@ -245,7 +246,8 @@
     "supportActive": "Gewährt von {who}, bis {when}. Alles, was Sie im Arbeitsbereich tun, steht in dessen Ledger.",
     "request": "Zugang anfragen",
     "reason": "Grund (das Unternehmen sieht ihn)",
-    "end": "Zugang jetzt beenden"
+    "end": "Zugang jetzt beenden",
+    "supportDesk": "Support-Desk"
   },
   "roles": {
     "owner": "Inhaber",
@@ -1103,7 +1105,11 @@
       "body": "Exportieren Sie Aufträge, Parteien, Gespräche und Ledger jederzeit als xlsx, csv oder json. Beim Ausscheiden löschen wir auf Wunsch die Daten Ihres Unternehmens und bestätigen das schriftlich."
     },
     "updated": "Stand 3. November 2026.",
-    "contact": "Fragen:"
+    "contact": "Fragen:",
+    "desk": {
+      "title": "Der Support-Desk richtet sich an uns",
+      "body": "Eine Unterhaltung, die Sie am Support-Desk eröffnen, ist eine Nachricht an VIA Labs. Unsere Mitarbeitenden lesen sie, ebenso jeden angehängten Screenshot. Der Support-Agent antwortet aus dem Produktleitfaden und sieht nur Ihre Rolle, Ihre Tracks, Ihre Add-ons und den Zustand Ihrer Verbindungen. Er kann Ihre Aufträge, Kunden, Lieferanten, Unterhaltungen, Entwürfe, Ihr Ledger oder Bankdaten nicht lesen und nichts in Ihrem Arbeitsbereich ändern. Das Eröffnen und Schließen eines Tickets wird in Ihr Ledger geschrieben."
+    }
   },
   "switchboard": {
     "title": "Setzt auf den Tools auf, die Sie schon nutzen.",
@@ -2159,5 +2165,62 @@
     "name": "Name",
     "rolesHelp": "Owner und Manager: alles, einschließlich Team und Befugnisse der Agenten. Merchandiser, QC, Compliance und Logistik: ihre eigene Arbeit und Kunden, und sie können Entwürfe freigeben. Viewer: nur lesen, gibt nichts frei.",
     "send": "Einladung senden"
+  },
+  "help": {
+    "title": "Support",
+    "sub": "Fragen Sie, wie etwas funktioniert, melden Sie einen Fehler oder schlagen Sie eine Verbesserung vor. Der Support-Agent antwortet sofort und hält fest, was VIA Labs braucht.",
+    "newTitle": "Wie können wir helfen?",
+    "newPh": "Beschreiben Sie die Frage, das Problem oder die Idee. Nennen Sie die Seite, auf der Sie waren, und was Sie erwartet haben.",
+    "replyPh": "Antwort schreiben",
+    "send": "Senden",
+    "working": "VIA Support arbeitet...",
+    "attach": "Screenshot hinzufügen",
+    "attachHint": "Bis zu 3 Bilder, je 5 MB",
+    "remove": "Entfernen",
+    "mine": "Ihre Unterhaltungen",
+    "companyAll": "Alle bei {company}",
+    "none": "Noch keine Unterhaltungen.",
+    "back": "Alle Unterhaltungen",
+    "by": "Eröffnet von {name}",
+    "close": "Unterhaltung schließen",
+    "closedNote": "Diese Unterhaltung ist geschlossen. Beginnen Sie eine neue, wenn Sie mehr brauchen.",
+    "you": "Sie",
+    "agent": "VIA Support",
+    "staff": "VIA Labs",
+    "warn": "Mitarbeitende von VIA Labs lesen Support-Unterhaltungen. Fügen Sie keine Passwörter, Anmeldecodes oder Bankdaten ein.",
+    "pick": "Unternehmen wählen",
+    "workspace": "Zurück zum Arbeitsbereich",
+    "kind": {
+      "question": "Frage",
+      "error": "Fehler",
+      "request": "Anfrage",
+      "suggestion": "Vorschlag"
+    },
+    "status": {
+      "open": "Offen",
+      "answered": "Beantwortet",
+      "with_via": "Bei VIA Labs",
+      "logged": "Erfasst",
+      "planned": "Geplant",
+      "building": "In Arbeit",
+      "shipped": "Live",
+      "declined": "Nicht geplant",
+      "closed": "Geschlossen"
+    },
+    "note": {
+      "with_via": "VIA Labs hat dies übernommen und antwortet hier und per E-Mail.",
+      "logged": "Bei VIA Labs als Änderungswunsch erfasst. Der Status wird hier angezeigt.",
+      "planned": "VIA Labs hat diese Änderung eingeplant.",
+      "building": "VIA Labs arbeitet an dieser Änderung.",
+      "shipped": "Diese Änderung ist jetzt live.",
+      "declined": "VIA Labs hat entschieden, diese Änderung vorerst nicht umzusetzen."
+    },
+    "err": {
+      "limit": "Zu viele Nachrichten in der letzten Stunde. Ihre Nachricht ist gespeichert und VIA Labs wurde informiert.",
+      "agent": "Der Support-Agent ist gerade nicht verfügbar. Ihre Nachricht ist gespeichert und VIA Labs wurde informiert.",
+      "upload": "Der Screenshot konnte nicht hochgeladen werden. Versuchen Sie es erneut.",
+      "closed": "Diese Unterhaltung ist geschlossen.",
+      "failed": "Das hat nicht funktioniert. Versuchen Sie es erneut."
+    }
   }
 }

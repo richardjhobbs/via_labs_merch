@@ -33,7 +33,8 @@
       "production": "Producción"
     },
     "samples": "Muestras",
-    "materials": "Materiales"
+    "materials": "Materiales",
+    "help": "Ayuda y soporte"
   },
   "landing": {
     "kicker": "Para oficinas de compras, marcas, fábricas y empresas comercializadoras",
@@ -245,7 +246,8 @@
     "supportActive": "Concedido por {who}, hasta {when}. Todo lo que haga en el espacio de trabajo queda en su registro.",
     "request": "Solicitar acceso",
     "reason": "Motivo (la empresa lo ve)",
-    "end": "Terminar el acceso ahora"
+    "end": "Terminar el acceso ahora",
+    "supportDesk": "Mesa de soporte"
   },
   "roles": {
     "owner": "Propietario",
@@ -1103,7 +1105,11 @@
       "body": "Exporte sus pedidos, clientes y proveedores, conversaciones y registro en xlsx, csv o json en cualquier momento. Cuando se vaya, pídalo y eliminaremos los registros de su empresa, y le confirmaremos por escrito cuando esté hecho."
     },
     "updated": "Última actualización: 3 de noviembre de 2026.",
-    "contact": "Preguntas:"
+    "contact": "Preguntas:",
+    "desk": {
+      "title": "La mesa de soporte se dirige a nosotros",
+      "body": "Una conversación que usted abre en la mesa de soporte es un mensaje para VIA Labs, por lo que nuestro personal la lee, junto con cualquier captura adjunta. El agente de soporte responde a partir de la guía del producto y solo ve su rol, sus tracks, sus complementos y el estado de sus conexiones. No puede leer sus pedidos, clientes, proveedores, conversaciones, borradores, ledger ni datos bancarios, y no puede cambiar nada en su espacio de trabajo. La apertura y el cierre de un ticket se registran en su ledger."
+    }
   },
   "switchboard": {
     "title": "Funciona sobre las herramientas que usted ya usa.",
@@ -2159,5 +2165,62 @@
     "name": "Nombre",
     "rolesHelp": "Owner y manager: todo, incluidos el equipo y la autoridad de los agentes. Merchandiser, QC, compliance y logística: su propio trabajo y clientes, y pueden aprobar borradores. Viewer: solo lectura, no aprueba nada.",
     "send": "Enviar invitación"
+  },
+  "help": {
+    "title": "Soporte",
+    "sub": "Pregunte cómo funciona algo, informe de un error o proponga una mejora. El agente de soporte responde al momento y registra lo que necesita VIA Labs.",
+    "newTitle": "¿En qué podemos ayudar?",
+    "newPh": "Describa la pregunta, el problema o la idea. Indique en qué página estaba y qué esperaba que ocurriera.",
+    "replyPh": "Escriba una respuesta",
+    "send": "Enviar",
+    "working": "VIA Support está trabajando...",
+    "attach": "Añadir captura",
+    "attachHint": "Hasta 3 imágenes, 5 MB cada una",
+    "remove": "Quitar",
+    "mine": "Sus conversaciones",
+    "companyAll": "Todos en {company}",
+    "none": "Aún no hay conversaciones.",
+    "back": "Todas las conversaciones",
+    "by": "Abierta por {name}",
+    "close": "Cerrar conversación",
+    "closedNote": "Esta conversación está cerrada. Inicie una nueva si necesita algo más.",
+    "you": "Usted",
+    "agent": "VIA Support",
+    "staff": "VIA Labs",
+    "warn": "El personal de VIA Labs lee las conversaciones de soporte. No pegue contraseñas, códigos de acceso ni datos bancarios.",
+    "pick": "Elija una empresa",
+    "workspace": "Volver al espacio de trabajo",
+    "kind": {
+      "question": "Pregunta",
+      "error": "Error",
+      "request": "Solicitud",
+      "suggestion": "Sugerencia"
+    },
+    "status": {
+      "open": "Abierta",
+      "answered": "Respondida",
+      "with_via": "Con VIA Labs",
+      "logged": "Registrada",
+      "planned": "Planificada",
+      "building": "En curso",
+      "shipped": "Activa",
+      "declined": "No planificada",
+      "closed": "Cerrada"
+    },
+    "note": {
+      "with_via": "El personal de VIA Labs lo tiene y responderá aquí y por correo.",
+      "logged": "Registrada en VIA Labs como solicitud de cambio. Su estado se muestra aquí.",
+      "planned": "VIA Labs ha planificado este cambio.",
+      "building": "VIA Labs está trabajando en este cambio.",
+      "shipped": "Este cambio ya está activo.",
+      "declined": "VIA Labs ha decidido no hacer este cambio por ahora."
+    },
+    "err": {
+      "limit": "Demasiados mensajes en la última hora. Su mensaje está guardado y VIA Labs ha sido avisado.",
+      "agent": "El agente de soporte no está disponible ahora. Su mensaje está guardado y VIA Labs ha sido avisado.",
+      "upload": "No se pudo subir la captura. Inténtelo de nuevo.",
+      "closed": "Esta conversación está cerrada.",
+      "failed": "No se pudo enviar. Inténtelo de nuevo."
+    }
   }
 }
