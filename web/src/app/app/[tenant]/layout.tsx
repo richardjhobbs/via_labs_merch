@@ -14,7 +14,7 @@ import { Avatar, CompanyLogo } from '@/components/avatar';
 import { cookies } from 'next/headers';
 import { TrackSwitch } from '@/components/track-switch';
 import { memberTracks, currentTrack } from '@/lib/tracks';
-import { supportHref } from '@/lib/helpdesk/desk';
+import { deskLink } from '@/lib/helpdesk/desk';
 import { updatesFor } from '@/lib/helpdesk/updates';
 import { UpdatesBell, UpdateNotice, type BellItem } from '@/components/updates-bell';
 
@@ -24,7 +24,7 @@ export default async function TenantLayout({ children, params }: { children: Rea
   const [t, locale] = await Promise.all([getTranslations(), getLocale()]);
   // updates from VIA Labs: headlines here, the full text on the support desk
   const news: BellItem[] = (await updatesFor(tenant.id, user.id, membership.role === 'partner', locale, 5)).filter((u) => !u.locked).map((u) => ({ id: u.id, title: u.title, unread: u.unread, when: new Date(u.published_at).toLocaleDateString(locale, { day: 'numeric', month: 'short' }) }));
-  const newsHref = supportHref(`/${slug}/updates`);
+  const newsHref = deskLink(`/${slug}/updates`);
   const N = { updates: t('help.updates'), all: t('help.updatesAll'), isNew: t('help.new'), readMore: t('help.readMore'), dismiss: t('help.dismiss'), none: t('help.updatesNone') };
   const bell = <UpdatesBell items={news} href={newsHref} labels={N} />;
   const fresh = news.find((n) => n.unread);
@@ -36,7 +36,7 @@ export default async function TenantLayout({ children, params }: { children: Rea
   if (membership.role === 'partner') {
     const account = <>
       <div className="flex items-center gap-2"><Avatar path={membership.avatar_path} name={membership.display_name} initials={membership.initials} /><b>{membership.display_name || 'You'}</b></div>
-      <a href={supportHref(`/${slug}`)} className="block mt-1">{t('nav.help')}</a>
+      <a href={deskLink(`/${slug}`)} className="block mt-1">{t('nav.help')}</a>
       {bell}
       <div className="flex items-center gap-2 mt-2"><LangSwitch compact up /><form action="/auth/signout" method="post"><button className="btn sm">{t('nav.signout')}</button></form></div>
     </>;
@@ -78,7 +78,7 @@ export default async function TenantLayout({ children, params }: { children: Rea
   const sw = tracks.length > 1 ? <TrackSwitch slug={slug} track={track} labels={trackLabels} compact /> : null;
   const account = <>
     <div className="flex items-center gap-2"><Avatar path={membership.avatar_path} name={membership.display_name} initials={membership.initials} /><div className="min-w-0"><b>{membership.display_name || 'You'}</b> <span className="muted">· {t(`roles.${membership.role}`)}</span></div></div>
-    <a href={supportHref(`/${slug}`)} className="block mt-1">{t('nav.help')}</a>
+    <a href={deskLink(`/${slug}`)} className="block mt-1">{t('nav.help')}</a>
     {bell}
     {isAdmin && <Link href="/admin" className="block mt-1">{t('nav.admin')}</Link>}
     {isAdmin && <ViewAs slug={slug} current={viewingAs || ''} members={(team || []).map((m) => ({ id: m.id, name: m.display_name || '?', role: t(`roles.${m.role}`) }))} label={t('viewas.label')} self={t('viewas.self')} />}

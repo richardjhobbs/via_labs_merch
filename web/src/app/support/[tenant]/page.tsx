@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { getTranslations, getLocale } from 'next-intl/server';
 import { supabaseServer } from '@/lib/supabase/server';
-import { supportMe, TICKET_COLS, type Ticket } from '@/lib/helpdesk/desk';
+import { supportMe, workspaceLink, TICKET_COLS, type Ticket } from '@/lib/helpdesk/desk';
 import { Composer } from '../composer';
 import { StatusPill } from '../status-pill';
 import { updatesFor } from '@/lib/helpdesk/updates';
@@ -36,7 +36,7 @@ export default async function Desk({ params, searchParams }: { params: Promise<{
       <div className="flex flex-wrap items-baseline gap-x-3">
         <h1>{t('newTitle')}</h1>
         <span className="muted small">{me.tenant.name}</span>
-        {!partner && <Link href={`/app/${slug}`} className="small ml-auto">{t('workspace')}</Link>}
+        {!partner && <a href={workspaceLink(slug)} className="small ml-auto">{t('workspace')}</a>}
       </div>
       <p className="muted small mt-2" style={{ maxWidth: '64ch' }}>{t('sub')}</p>
       <div className="card mt-4"><Composer slug={slug} page={from} /></div>

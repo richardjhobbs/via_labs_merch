@@ -12,7 +12,7 @@ VIA Merch gives a merchandising team (buying office, brand, factory, trading com
 - A session ends when the browser closes or after 2 hours idle. Then you ask for a new code.
 - Sign-in is by invitation. "No account" means the address was not invited: an owner or manager invites people under Settings, Team.
 - A code works once. If it fails, ask for a new one and use the newest email. Codes sometimes land in spam.
-- The support desk uses the same email and code, signed in separately from the workspace.
+- The support desk uses the same account. Opening "Help and support" or an update from inside the workspace signs you in to the desk without a second code; going to the desk directly asks for a code.
 
 ## Languages
 - The interface is available in English, German, Bangla, Chinese, Vietnamese and Spanish. Change it with the flag picker.

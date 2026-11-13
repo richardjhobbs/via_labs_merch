@@ -7,9 +7,11 @@ works, reports an error or suggests an improvement, and where VIA Labs decides w
 
 - **Where:** `/support` in the same app, reached from "Help and support" in the workspace rail. When the
   domain `support.getvia.xyz` is added to the Vercel project and `NEXT_PUBLIC_SUPPORT_URL` is set, the rail
-  links there and the host's front door redirects to `/support` (`src/middleware.ts`). Same email and code;
-  cookies are per host, so people sign in once more on the new host. The cookie is never widened to
-  `.getvia.xyz`. The new host must also be in Supabase Auth's redirect allow list.
+  links there and the host's front door redirects to `/support` (`src/middleware.ts`). Same email and code.
+  Cookies are per host and are never widened to `.getvia.xyz`; links between the workspace and the desk go
+  through `/auth/handoff`, which mints a single-use sign-in token for the person already signed in and hands it
+  to the other host's `/auth/callback`, so nobody is asked for a second code. Only arriving at the desk
+  directly (a bookmark, an email link) asks for one. The new host must also be in Supabase Auth's redirect allow list.
 - **Tickets:** every conversation is a `merch.support_tickets` row with its `support_messages`. A person
   reads their own; owners and managers read their company's; VIA Labs reads all, because a ticket is
   addressed to VIA Labs. All writes go through server code under the service role (`app/support/actions.ts`,
