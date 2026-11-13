@@ -84,3 +84,14 @@ export async function notifyPerson(ticket: Pick<Ticket, 'id' | 'number' | 'title
   const subject = `VIA Merch support #${ticket.number}: ${ticket.title}`;
   await sendMail({ to: ticket.opened_by_email, subject, text: `${line}\n\n${url}`, html: brandedHtml({ title: subject, paragraphs: [line], cta: { label: 'Open the conversation', url } }) }).catch(() => {});
 }
+
+// Bells. The person: their own tickets where VIA Labs replied or moved the status since they last looked.
+export async function unseenForPerson(userId: string): Promise<{ id: string; number: number; title: string; status: TicketStatus; slug: string; at: string }[]> {
+  const { data } = await supabaseAdmin().from('support_tickets').select('id, number, title, status, via_activity_at, person_seen_at, tenants(slug)').eq('opened_by', userId).not('via_activity_at', 'is', null).order('via_activity_at', { ascending: false }).limit(60);
+  return (data || []).filter((t) => !t.person_seen_at || t.via_activity_at! > t.person_seen_at).slice(0, 20).map((t) => ({ id: t.id, number: t.number, title: t.title, status: t.status as TicketStatus, slug: (t.tenants as unknown as { slug: string }).slug, at: t.via_activity_at! }));
+}
+// The console: tickets a person opened or wrote on since VIA Labs last looked.
+export async function unseenForVia(): Promise<{ id: string; number: number; title: string; status: TicketStatus; company: string; who: string | null; at: string }[]> {
+  const { data } = await supabaseAdmin().from('support_tickets').select('id, number, title, status, opened_by_name, person_activity_at, via_seen_at, tenants(name)').not('person_activity_at', 'is', null).order('person_activity_at', { ascending: false }).limit(150);
+  return (data || []).filter((t) => !t.via_seen_at || t.person_activity_at! > t.via_seen_at).slice(0, 30).map((t) => ({ id: t.id, number: t.number, title: t.title, status: t.status as TicketStatus, company: (t.tenants as unknown as { name: string } | null)?.name || '', who: t.opened_by_name, at: t.person_activity_at! }));
+}

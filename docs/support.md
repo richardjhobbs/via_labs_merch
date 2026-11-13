@@ -17,7 +17,9 @@ works, reports an error or suggests an improvement, and where VIA Labs decides w
   addressed to VIA Labs. All writes go through server code under the service role (`app/support/actions.ts`,
   `app/admin/support/actions.ts`). Screenshots (3 per message, 5 MB, images only) sit in the private bucket
   `merch-support`, served by `/api/support/file` after RLS.
-- **The agent** (`lib/helpdesk/agent.ts`, trigger `support` in `agent_runs`, Sonnet through `llm.ts`):
+- **The agent** (`lib/helpdesk/agent.ts`, trigger `support` in `agent_runs`; on DeepSeek through
+  `deepseekToolLoop` in `llm.ts` when `DEEPSEEK_API_KEY` is set, else Claude Sonnet; DeepSeek reads text only,
+  so screenshots are named to it and seen by VIA Labs staff):
   answers from `lib/helpdesk/knowledge.ts` and one tool that reads the person's own set-up (role, tracks,
   add-ons, connection state, alert counts). It has no tool that reads orders, parties, conversations, drafts,
   the ledger or bank details, and none that changes the workspace. Partners get no status tool. It writes
@@ -30,6 +32,9 @@ works, reports an error or suggests an improvement, and where VIA Labs decides w
 - **Console:** `/admin/support` lists proposals (Plan, Greenlight, Decline, Building, PR open, Shipped),
   tickets waiting for a person, and the rest; `/admin/support/[id]` is the thread with a reply box (the person
   is emailed), a status control and the agent runs with cost.
+- **Bells** (migration 0033): the desk header counts the person's tickets where VIA Labs replied or moved the
+  status since they last opened them; the console header counts tickets a person opened or wrote on since
+  VIA Labs last opened them. Opening the ticket clears it.
 - **Logging:** ticket opened and closed, handover to staff, proposal filed and every VIA Labs decision are
   ledger rows on the company's ledger (channel `Support`, stream `Setup`). Agent runs carry the ticket id.
 

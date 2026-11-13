@@ -6,7 +6,7 @@
 import type Anthropic from '@anthropic-ai/sdk';
 import { betaZodTool } from '@anthropic-ai/sdk/helpers/beta/zod';
 import { z } from 'zod';
-import { anthropic, MODEL, costOfUsage, recordUsage, LANG_NAMES } from '@/lib/llm';
+import { anthropic, MODEL, DEEPSEEK_MODEL, costOfUsage, deepseekToolLoop, hasDeepseek, recordUsage, LANG_NAMES, type LoopTool } from '@/lib/llm';
 import { supabaseAdmin } from '@/lib/supabase/server';
 import type { Membership } from '@/lib/tenant';
 import { HELP } from './knowledge';
@@ -169,12 +169,25 @@ export async function runSupportAgent(ticket: Ticket, who: Who): Promise<{ text:
     { type: 'text', text: `Today is ${new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: tenant?.tz || 'UTC' })}. You are talking with ${who.name}, ${m.role} at ${tenant?.name} (${String(tenant?.kind || '').replace('_', ' ')}), whose interface language is ${LANG_NAMES[who.lang] || who.lang}. Ticket #${ticket.number}, currently "${ticket.kind}", status ${ticket.status}.${ticket.page ? ` They came from the workspace page: ${ticket.page.slice(0, 120)}.` : ''}${partner ? ' This person is a partner (at a customer or supplier of the company): they see only "Shared with you" and you have no status tool for them.' : ''}` },
   ];
 
-  let tokensIn = 0, tokensOut = 0, text = '', error: string | undefined;
+  const tools = partner ? [set_ticket, list_updates, mark_answered, hand_to_via, file_proposal] : [set_ticket, get_workspace_status, list_updates, mark_answered, hand_to_via, file_proposal];
+  // The support agent runs on DeepSeek (founder, 13 Nov 2026) when its key is set, else on Claude Sonnet.
+  // DeepSeek reads text only, so a screenshot is named to it, not shown; VIA Labs staff see it on the ticket.
+  const onDeepseek = hasDeepseek();
+  const model = onDeepseek ? DEEPSEEK_MODEL : MODEL;
+  let tokensIn = 0, tokensOut = 0, text = '', error: string | undefined, dsCost = 0;
   const u = { input: 0, cacheRead: 0, cacheWrite: 0, output: 0 };
-  try {
+  if (onDeepseek) {
+    try {
+      const plain = thread.filter((x, i) => i >= thread.findIndex((y) => y.author_kind === 'person')).map((msg) => msg.author_kind !== 'person'
+        ? { role: 'assistant' as const, content: msg.author_kind === 'via' ? `[VIA Labs staff, ${msg.author_name || 'VIA Labs'}] ${msg.body}` : msg.body }
+        : { role: 'user' as const, content: `${msg.body}${msg.attachments?.length ? `\n(${msg.attachments.length} screenshot(s) attached. You cannot see images: ask the person to describe what the screen shows if it matters, and say VIA Labs staff can see the screenshot.)` : ''}` });
+      const r = await deepseekToolLoop({ system: system.map((b) => b.text).join('\n\n'), messages: plain, tools: tools as unknown as LoopTool[], maxIterations: 6, maxTokens: 4000 });
+      text = r.text; error = r.error; tokensIn = r.usage.tokensIn; tokensOut = r.usage.tokensOut; dsCost = r.usage.cost;
+    } catch (e) { error = e instanceof Error ? e.message : String(e); }
+  } else try {
     const runner = anthropic().beta.messages.toolRunner({
       model: MODEL, max_tokens: 8000, output_config: { effort: 'medium' }, system,
-      tools: partner ? [set_ticket, list_updates, mark_answered, hand_to_via, file_proposal] : [set_ticket, get_workspace_status, list_updates, mark_answered, hand_to_via, file_proposal],
+      tools,
       messages, max_iterations: 6, cache_control: { type: 'ephemeral' },
     });
     let last: Anthropic.Beta.BetaMessage | null = null;
@@ -190,8 +203,8 @@ export async function runSupportAgent(ticket: Ticket, who: Who): Promise<{ text:
   } catch (e) {
     error = e instanceof Error ? e.message : String(e);
   }
-  const cost = costOfUsage(MODEL, u);
-  const { data: run } = await sb.from('agent_runs').insert({ tenant_id: T, agent_id: null, user_id: who.userId, trigger: 'support', model: MODEL, input: { ticket: ticket.id, number: ticket.number, cache: { read: u.cacheRead, write: u.cacheWrite, uncached: u.input } }, tools_called: calls, output: text || null, tokens_in: tokensIn, tokens_out: tokensOut, cost_usd: cost, ms: Date.now() - t0, error: error || null }).select('id').single();
+  const cost = onDeepseek ? dsCost : costOfUsage(MODEL, u);
+  const { data: run } = await sb.from('agent_runs').insert({ tenant_id: T, agent_id: null, user_id: who.userId, trigger: 'support', model, input: { ticket: ticket.id, number: ticket.number, cache: { read: u.cacheRead, write: u.cacheWrite, uncached: u.input } }, tools_called: calls, output: text || null, tokens_in: tokensIn, tokens_out: tokensOut, cost_usd: cost, ms: Date.now() - t0, error: error || null }).select('id').single();
   await recordUsage(T, { runs: 1, tokensIn, tokensOut, cost });
   if (text) {
     await sb.from('support_messages').insert({ tenant_id: T, ticket_id: ticket.id, author_kind: 'agent', author_name: AGENT_NAME, body: text.slice(0, 8000), agent_run_id: run?.id || null });

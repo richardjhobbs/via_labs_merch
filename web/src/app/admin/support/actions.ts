@@ -21,7 +21,7 @@ export async function viaReply(form: FormData) {
   const sb = supabaseAdmin();
   const name = String(form.get('name') || '').trim().slice(0, 60) || 'VIA Labs';
   await sb.from('support_messages').insert({ tenant_id: found.ticket.tenant_id, ticket_id: id, author_kind: 'via', author_user: m.user.id, author_name: name, body });
-  await sb.from('support_tickets').update({ last_message_at: new Date().toISOString(), ...(found.ticket.status === 'open' ? { status: 'with_via' } : {}) }).eq('id', id);
+  await sb.from('support_tickets').update({ last_message_at: new Date().toISOString(), via_activity_at: new Date().toISOString(), via_seen_at: new Date().toISOString(), ...(found.ticket.status === 'open' ? { status: 'with_via' } : {}) }).eq('id', id);
   await notifyPerson(found.ticket, found.slug, `VIA Labs replied: ${body.slice(0, 500)}`);
   revalidatePath(`/admin/support/${id}`);
   redirect(`/admin/support/${id}?saved=1`);
@@ -33,7 +33,7 @@ export async function setTicketStatus(form: FormData) {
   const found = await load(id);
   if (!found || !STATUSES.includes(status)) redirect('/admin/support');
   if (status !== found.ticket.status) {
-    await supabaseAdmin().from('support_tickets').update({ status, closed_at: status === 'closed' ? new Date().toISOString() : null }).eq('id', id);
+    await supabaseAdmin().from('support_tickets').update({ status, closed_at: status === 'closed' ? new Date().toISOString() : null, via_activity_at: new Date().toISOString() }).eq('id', id);
     await ledger(found.ticket.tenant_id, 'VIA Labs', null, `Support ticket #${found.ticket.number} set to ${status.replace('_', ' ')} by VIA Labs`, { support_ticket: id });
   }
   revalidatePath('/admin/support');
@@ -57,7 +57,7 @@ export async function decideProposal(form: FormData) {
   if (p.ticket_id) {
     const found = await load(p.ticket_id);
     if (found && found.ticket.status !== shown && found.ticket.status !== 'closed') {
-      await sb.from('support_tickets').update({ status: shown }).eq('id', p.ticket_id);
+      await sb.from('support_tickets').update({ status: shown, via_activity_at: new Date().toISOString() }).eq('id', p.ticket_id);
       await notifyPerson(found.ticket, found.slug, `${LINE[shown]}${note && shown === 'declined' ? ` ${note}` : ''}`);
     }
   }

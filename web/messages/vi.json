@@ -1109,7 +1109,7 @@
     "contact": "Câu hỏi:",
     "desk": {
       "title": "Bàn hỗ trợ là nơi gửi đến chúng tôi",
-      "body": "Cuộc trò chuyện bạn mở tại bàn hỗ trợ là tin nhắn gửi cho VIA Labs, vì vậy nhân viên của chúng tôi đọc nó cùng với mọi ảnh chụp màn hình bạn đính kèm. Tác nhân hỗ trợ trả lời dựa trên hướng dẫn sản phẩm và chỉ thấy vai trò, track, tiện ích bổ sung và trạng thái kết nối của bạn. Nó không thể đọc đơn hàng, khách hàng, nhà cung cấp, cuộc trò chuyện, bản nháp, sổ cái hay thông tin ngân hàng của bạn, và không thể thay đổi gì trong không gian làm việc của bạn. Việc mở và đóng một phiếu hỗ trợ được ghi vào sổ cái của bạn."
+      "body": "Cuộc trò chuyện bạn mở tại bàn hỗ trợ là tin nhắn gửi cho VIA Labs, vì vậy nhân viên của chúng tôi đọc nó cùng với mọi ảnh chụp màn hình bạn đính kèm. Tác nhân hỗ trợ trả lời dựa trên hướng dẫn sản phẩm và chỉ thấy vai trò, track, tiện ích bổ sung và trạng thái kết nối của bạn. Nó không thể đọc đơn hàng, khách hàng, nhà cung cấp, cuộc trò chuyện, bản nháp, sổ cái hay thông tin ngân hàng của bạn, và không thể thay đổi gì trong không gian làm việc của bạn. Việc mở và đóng một phiếu hỗ trợ được ghi vào sổ cái của bạn. Tác nhân hỗ trợ chạy trên DeepSeek: chỉ nội dung văn bản của cuộc trò chuyện được gửi đến đó, không bao giờ gửi ảnh chụp màn hình."
     }
   },
   "switchboard": {
@@ -2230,6 +2230,8 @@
     "onRequest": "Có sẵn theo yêu cầu",
     "onRequestNote": "Tính năng này chưa được bật cho công ty của bạn. Hãy bắt đầu một cuộc trò chuyện tại bàn hỗ trợ để yêu cầu.",
     "readMore": "Xem thêm",
-    "dismiss": "Bỏ qua"
+    "dismiss": "Bỏ qua",
+    "notifications": "Thông báo",
+    "noNotifications": "Không có gì mới."
   }
 }

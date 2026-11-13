@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getTranslations, getLocale } from 'next-intl/server';
 import { supportMe, ticketFor } from '@/lib/helpdesk/desk';
+import { supabaseAdmin } from '@/lib/supabase/server';
 import { Composer } from '../../../composer';
 import { StatusPill } from '../../../status-pill';
 import { Thread } from '../../../thread';
@@ -16,6 +17,8 @@ export default async function TicketPage({ params, searchParams }: { params: Pro
   const found = await ticketFor(id);
   if (!found || found.ticket.tenant_id !== me.tenant.id) notFound();
   const { ticket, messages } = found;
+  // opening your own ticket clears it from your bell
+  if (ticket.opened_by === me.user.id) await supabaseAdmin().from('support_tickets').update({ person_seen_at: new Date().toISOString() }).eq('id', ticket.id);
   const [t, locale] = await Promise.all([getTranslations('help'), getLocale()]);
   const closed = ticket.status === 'closed';
   const note = ['with_via', 'logged', 'planned', 'building', 'shipped', 'declined'].includes(ticket.status) ? t(`note.${ticket.status}`) : '';

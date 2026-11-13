@@ -1109,7 +1109,7 @@
     "contact": "Questions:",
     "desk": {
       "title": "The support desk is addressed to us",
-      "body": "A conversation you open at the support desk is a message to VIA Labs, so our staff read it, along with any screenshot you attach. The support agent answers from the product guide and can see only your role, your tracks, your add-ons and the state of your connections. It cannot read your orders, customers, suppliers, conversations, drafts, ledger or bank details, and it cannot change anything in your workspace. Opening and closing a ticket is written to your ledger."
+      "body": "A conversation you open at the support desk is a message to VIA Labs, so our staff read it, along with any screenshot you attach. The support agent answers from the product guide and can see only your role, your tracks, your add-ons and the state of your connections. It cannot read your orders, customers, suppliers, conversations, drafts, ledger or bank details, and it cannot change anything in your workspace. Opening and closing a ticket is written to your ledger. The support agent runs on DeepSeek: only the text of the conversation is sent to it, never a screenshot."
     }
   },
   "switchboard": {
@@ -2230,6 +2230,8 @@
     "onRequest": "Available on request",
     "onRequestNote": "This is not switched on for your company. Start a conversation at the support desk to ask for it.",
     "readMore": "Read more",
-    "dismiss": "Dismiss"
+    "dismiss": "Dismiss",
+    "notifications": "Notifications",
+    "noNotifications": "Nothing new."
   }
 }
