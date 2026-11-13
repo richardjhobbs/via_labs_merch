@@ -48,11 +48,12 @@ export async function decideProposal(form: FormData) {
   const m = await requireAdmin();
   const id = String(form.get('id') || ''), status = String(form.get('status') || ''), note = String(form.get('note') || '').trim().slice(0, 1000);
   const lane = String(form.get('lane') || ''), pr = String(form.get('pr_url') || '').trim().slice(0, 300);
-  if (!MIRROR[status]) redirect('/admin/support');
+  if (!MIRROR[status]) redirect(`/admin/support?error=${encodeURIComponent('That decision did not come through. Try again.')}`);
   const sb = supabaseAdmin();
   const { data: p } = await sb.from('change_proposals').select('id, number, title, status, tenant_id, ticket_id').eq('id', id).maybeSingle();
   if (!p) redirect('/admin/support');
-  await sb.from('change_proposals').update({ status, decided_by_email: m.user.email, decided_at: new Date().toISOString(), ...(note ? { decision_note: note } : {}), ...(['proceed', 'greenlight'].includes(lane) ? { lane } : {}), ...(/^https:\/\/github\.com\//.test(pr) ? { pr_url: pr } : {}) }).eq('id', id);
+  const { error: failed } = await sb.from('change_proposals').update({ status, decided_by_email: m.user.email, decided_at: new Date().toISOString(), ...(note ? { decision_note: note } : {}), ...(['proceed', 'greenlight'].includes(lane) ? { lane } : {}), ...(/^https:\/\/github\.com\//.test(pr) ? { pr_url: pr } : {}) }).eq('id', id);
+  if (failed) redirect(`/admin/support?error=${encodeURIComponent(failed.message)}`);
   const shown = MIRROR[status];
   if (p.ticket_id) {
     const found = await load(p.ticket_id);

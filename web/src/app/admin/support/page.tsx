@@ -15,8 +15,8 @@ const NEXT: Record<string, [string, string][]> = {
   pr_open: [['shipped', 'Shipped'], ['declined', 'Decline']],
 };
 
-export default async function SupportDesk({ searchParams }: { searchParams: Promise<{ saved?: string; all?: string }> }) {
-  const { saved, all } = await searchParams;
+export default async function SupportDesk({ searchParams }: { searchParams: Promise<{ saved?: string; all?: string; error?: string }> }) {
+  const { saved, all, error } = await searchParams;
   const sb = supabaseAdmin();
   const [{ data: pr }, { data: tk }] = await Promise.all([
     sb.from('change_proposals').select('*, tenants(name), support_tickets(number, opened_by_name)').order('created_at', { ascending: false }).limit(200),
@@ -41,6 +41,7 @@ export default async function SupportDesk({ searchParams }: { searchParams: Prom
     <div style={{ maxWidth: 820 }}>
       <h1>Support desk</h1>
       {saved && <div className="notice mt-3">Saved.</div>}
+      {error && <div className="notice crit mt-3">{error}</div>}
 
       {head(`Change proposals (${openP.length})`)}
       <div className="grid gap-3 mt-3">
@@ -63,11 +64,16 @@ export default async function SupportDesk({ searchParams }: { searchParams: Prom
             {p.pr_url && <p className="small mt-1"><a href={p.pr_url} target="_blank" rel="noopener">{p.pr_url}</a></p>}
             {p.status === 'proposed' && !p.lane && <p className="muted small mt-2">Waiting for triage (hourly): the plan and lane appear here.</p>}
             {p.status === 'greenlit' && !p.pr_url && <p className="muted small mt-2">Greenlit: the next hourly run builds it and opens a PR.</p>}
-            <form action={decideProposal} className="flex flex-wrap items-center gap-2 mt-3">
-              <input type="hidden" name="id" value={p.id} />
-              <input className="input" name="note" placeholder="Note (shown to the person only on decline)" defaultValue={p.decision_note || ''} style={{ flex: '1 1 220px', padding: '5px 8px', fontSize: 12.5 }} />
-              {(NEXT[p.status] || []).map(([v, label]) => <button key={v} name="status" value={v} className={`btn sm ${v === 'greenlit' ? 'primary' : v === 'declined' ? 'red' : ''}`}>{label}</button>)}
-            </form>
+            <div className="flex flex-wrap items-center gap-2 mt-3">
+              {(NEXT[p.status] || []).map(([v, label]) => (
+                <form key={v} action={decideProposal} className="flex items-center gap-2">
+                  <input type="hidden" name="id" value={p.id} />
+                  <input type="hidden" name="status" value={v} />
+                  {v === 'declined' && <input className="input" name="note" placeholder="Reason (shown to the person)" style={{ width: 220, padding: '5px 8px', fontSize: 12.5 }} />}
+                  <button className={`btn sm ${v === 'greenlit' ? 'primary' : v === 'declined' ? 'red' : ''}`}>{label}</button>
+                </form>
+              ))}
+            </div>
           </div>
         ))}
       </div>
