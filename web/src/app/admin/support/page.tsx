@@ -59,7 +59,10 @@ export default async function SupportDesk({ searchParams }: { searchParams: Prom
             {p.repro && <p className="small mt-1" style={{ whiteSpace: 'pre-wrap' }}><b>Steps:</b> {p.repro}</p>}
             {p.plan && <details className="mt-2"><summary className="small" style={{ cursor: 'pointer' }}>Plan{p.scope ? ` · ${p.scope}` : ''}</summary><p className="small mt-1" style={{ whiteSpace: 'pre-wrap' }}>{p.plan}</p></details>}
             {!!p.risk_flags?.length && <div className="flex flex-wrap gap-1 mt-2">{p.risk_flags.map((f) => <span key={f} className="pill crit">{f}</span>)}</div>}
+            {p.github_issue && <p className="small mt-1"><a href={`https://github.com/richardjhobbs/via_labs_merch/issues/${p.github_issue}`} target="_blank" rel="noopener">Issue #{p.github_issue}</a></p>}
             {p.pr_url && <p className="small mt-1"><a href={p.pr_url} target="_blank" rel="noopener">{p.pr_url}</a></p>}
+            {p.status === 'proposed' && !p.lane && <p className="muted small mt-2">Waiting for triage (hourly): the plan and lane appear here.</p>}
+            {p.status === 'greenlit' && !p.pr_url && <p className="muted small mt-2">Greenlit: the next hourly run builds it and opens a PR.</p>}
             <form action={decideProposal} className="flex flex-wrap items-center gap-2 mt-3">
               <input type="hidden" name="id" value={p.id} />
               <input className="input" name="note" placeholder="Note (shown to the person only on decline)" defaultValue={p.decision_note || ''} style={{ flex: '1 1 220px', padding: '5px 8px', fontSize: 12.5 }} />
