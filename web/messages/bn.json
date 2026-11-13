@@ -2232,6 +2232,7 @@
     "readMore": "আরও পড়ুন",
     "dismiss": "বন্ধ করুন",
     "notifications": "বিজ্ঞপ্তি",
-    "noNotifications": "নতুন কিছু নেই।"
+    "noNotifications": "নতুন কিছু নেই।",
+    "uploading": "স্ক্রিনশট আপলোড হচ্ছে..."
   }
 }
