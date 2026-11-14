@@ -20,6 +20,7 @@ import { conflictPass, deliverBriefs, dueMorningBrief, morningBrief } from '@/li
 import { capState, noteCapReached, proposeLesson, type LessonJob } from '@/lib/agents/learning';
 import { capAllows, type Work } from '@/lib/agents/learning-rules';
 import { hoursOf, isWorkingTime } from '@/lib/work-hours';
+import { notifyShipped } from '@/lib/helpdesk/shipped';
 
 export const maxDuration = 55;
 const BUDGET_MS = 40_000;
@@ -48,6 +49,9 @@ export async function POST(req: NextRequest) {
     done.capped = (done.capped || 0) + 1; await noteCapReached(sb, tenantId).catch(() => null);
     return false;
   };
+
+  // support desk: a change that has gone live is announced once to the person who asked and to VIA Labs
+  try { const n = await notifyShipped(); if (n) done.shipped = n; } catch (e) { done.failed++; errors.push(`shipped: ${e instanceof Error ? e.message : String(e)}`); }
 
   // 0. connected mailboxes (Gmail, Microsoft 365): new mail in, approved replies out (about 20 s at most)
   const kinds = [...(googleConfigured() ? ['email_gmail'] : []), ...(microsoftConfigured() ? ['email_m365'] : [])];

@@ -57,7 +57,8 @@ export async function decideProposal(form: FormData) {
   const shown = MIRROR[status];
   if (p.ticket_id) {
     const found = await load(p.ticket_id);
-    if (found && found.ticket.status !== shown && found.ticket.status !== 'closed') {
+    // 'shipped' is announced by the drain (lib/helpdesk/shipped.ts), whoever shipped it
+    if (status !== 'shipped' && found && found.ticket.status !== shown && found.ticket.status !== 'closed') {
       await sb.from('support_tickets').update({ status: shown, via_activity_at: new Date().toISOString() }).eq('id', p.ticket_id);
       await notifyPerson(found.ticket, found.slug, `${LINE[shown]}${note && shown === 'declined' ? ` ${note}` : ''}`);
     }
