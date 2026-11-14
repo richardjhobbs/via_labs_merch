@@ -6,7 +6,7 @@
 import type Anthropic from '@anthropic-ai/sdk';
 import { betaZodTool } from '@anthropic-ai/sdk/helpers/beta/zod';
 import { z } from 'zod';
-import { anthropic, MODEL, DEEPSEEK_MODEL, costOfUsage, deepseekToolLoop, hasDeepseek, recordUsage, LANG_NAMES, type LoopTool } from '@/lib/llm';
+import { anthropic, MODEL, DEEPSEEK_MODEL, DEEPSEEK_VISION_MODEL, costOfUsage, deepseekToolLoop, hasDeepseek, hasLlm, recordUsage, LANG_NAMES, type DsPart, type LoopTool } from '@/lib/llm';
 import { supabaseAdmin } from '@/lib/supabase/server';
 import type { Membership } from '@/lib/tenant';
 import { HELP } from './knowledge';
@@ -170,21 +170,41 @@ export async function runSupportAgent(ticket: Ticket, who: Who): Promise<{ text:
   ];
 
   const tools = partner ? [set_ticket, list_updates, mark_answered, hand_to_via, file_proposal] : [set_ticket, get_workspace_status, list_updates, mark_answered, hand_to_via, file_proposal];
-  // The support agent runs on DeepSeek (founder, 13 Nov 2026) when its key is set, else on Claude Sonnet.
-  // DeepSeek reads text only, so a screenshot is named to it, not shown; VIA Labs staff see it on the ticket.
+  // The support agent runs on DeepSeek (founder, 13 Nov 2026) when its key is set. Screenshots on the newest
+  // message go to DeepSeek's image-reading model; if that call fails, the same conversation is retried as
+  // text on the chat model with the screenshot named, and only if DeepSeek fails altogether does Claude answer.
   const onDeepseek = hasDeepseek();
-  const model = onDeepseek ? DEEPSEEK_MODEL : MODEL;
+  let model = onDeepseek ? DEEPSEEK_MODEL : MODEL;
   let tokensIn = 0, tokensOut = 0, text = '', error: string | undefined, dsCost = 0;
   const u = { input: 0, cacheRead: 0, cacheWrite: 0, output: 0 };
+  let useClaude = !onDeepseek;
   if (onDeepseek) {
-    try {
-      const plain = thread.filter((x, i) => i >= thread.findIndex((y) => y.author_kind === 'person')).map((msg) => msg.author_kind !== 'person'
-        ? { role: 'assistant' as const, content: msg.author_kind === 'via' ? `[VIA Labs staff, ${msg.author_name || 'VIA Labs'}] ${msg.body}` : msg.body }
-        : { role: 'user' as const, content: `${msg.body}${msg.attachments?.length ? `\n(${msg.attachments.length} screenshot(s) attached. You cannot see images: ask the person to describe what the screen shows if it matters, and say VIA Labs staff can see the screenshot.)` : ''}` });
-      const r = await deepseekToolLoop({ system: system.map((b) => b.text).join('\n\n'), messages: plain, tools: tools as unknown as LoopTool[], maxIterations: 6, maxTokens: 4000 });
-      text = r.text; error = r.error; tokensIn = r.usage.tokensIn; tokensOut = r.usage.tokensOut; dsCost = r.usage.cost;
-    } catch (e) { error = e instanceof Error ? e.message : String(e); }
-  } else try {
+    const from = thread.findIndex((y) => y.author_kind === 'person');
+    const convo = thread.filter((_, i) => i >= from);
+    const shots: DsPart[] = [];
+    for (const a of lastPerson?.attachments || []) {
+      const mime = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'].find((x) => x === a.mime);
+      const { data: blob } = mime ? await sb.storage.from(SUPPORT_BUCKET).download(a.path) : { data: null };
+      if (blob && mime) shots.push({ type: 'image_url', image_url: { url: `data:${mime};base64,${Buffer.from(await blob.arrayBuffer()).toString('base64')}` } });
+    }
+    const build = (withImages: boolean) => convo.map((msg) => {
+      if (msg.author_kind !== 'person') return { role: 'assistant' as const, content: msg.author_kind === 'via' ? `[VIA Labs staff, ${msg.author_name || 'VIA Labs'}] ${msg.body}` : msg.body };
+      const n = msg.attachments?.length || 0;
+      if (withImages && msg.id === lastPerson?.id && shots.length) return { role: 'user' as const, content: [{ type: 'text', text: msg.body } as DsPart, ...shots] };
+      return { role: 'user' as const, content: `${msg.body}${n ? (msg.id === lastPerson?.id ? `\n(${n} screenshot(s) attached, which you cannot see in this reply: ask the person to describe what the screen shows if it matters, and say VIA Labs staff can see the screenshot.)` : `\n(${n} screenshot(s) attached earlier)`) : ''}` };
+    });
+    const sys = system.map((b) => b.text).join('\n\n');
+    const attempt = async (m: string, withImages: boolean) => {
+      try {
+        const r = await deepseekToolLoop({ system: sys, messages: build(withImages), tools: tools as unknown as LoopTool[], model: m, maxIterations: 6, maxTokens: 4000 });
+        tokensIn += r.usage.tokensIn; tokensOut += r.usage.tokensOut; dsCost += r.usage.cost; model = m; text = r.text; error = r.error;
+      } catch (e) { error = e instanceof Error ? e.message : String(e); }
+    };
+    if (shots.length) await attempt(DEEPSEEK_VISION_MODEL, true);
+    if (!text) await attempt(DEEPSEEK_MODEL, false);
+    if (!text && hasLlm()) { useClaude = true; model = MODEL; calls.push({ name: 'fallback_to_claude', input: { reason: error || 'no reply from DeepSeek' }, ok: true, ms: 0 }); error = undefined; }
+  }
+  if (useClaude) try {
     const runner = anthropic().beta.messages.toolRunner({
       model: MODEL, max_tokens: 8000, output_config: { effort: 'medium' }, system,
       tools,
@@ -203,7 +223,7 @@ export async function runSupportAgent(ticket: Ticket, who: Who): Promise<{ text:
   } catch (e) {
     error = e instanceof Error ? e.message : String(e);
   }
-  const cost = onDeepseek ? dsCost : costOfUsage(MODEL, u);
+  const cost = dsCost + (useClaude ? costOfUsage(MODEL, u) : 0);
   const { data: run } = await sb.from('agent_runs').insert({ tenant_id: T, agent_id: null, user_id: who.userId, trigger: 'support', model, input: { ticket: ticket.id, number: ticket.number, cache: { read: u.cacheRead, write: u.cacheWrite, uncached: u.input } }, tools_called: calls, output: text || null, tokens_in: tokensIn, tokens_out: tokensOut, cost_usd: cost, ms: Date.now() - t0, error: error || null }).select('id').single();
   await recordUsage(T, { runs: 1, tokensIn, tokensOut, cost });
   if (text) {
