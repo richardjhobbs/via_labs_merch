@@ -3,6 +3,7 @@
 // on who shipped it. Each proposal is claimed first, so two drains cannot both send.
 import { supabaseAdmin } from '@/lib/supabase/server';
 import { TICKET_COLS, ledger, notifyPerson, notifyVia, type Ticket } from './desk';
+import { LOCALES } from '@/i18n/locales';
 
 export async function notifyShipped(): Promise<number> {
   const sb = supabaseAdmin();
@@ -18,7 +19,12 @@ export async function notifyShipped(): Promise<number> {
         const ticket = tk as unknown as Ticket & { tenants: { slug: string; name: string } };
         who = `${ticket.tenants.name} · ${ticket.opened_by_name || ''}`;
         if (ticket.status !== 'closed') await sb.from('support_tickets').update({ status: 'shipped', via_activity_at: new Date().toISOString() }).eq('id', ticket.id);
-        await notifyPerson(ticket, ticket.tenants.slug, `The change you asked for is now live: ${p.title}. Refresh the page to see it. If it is not what you expected, reply on this conversation.`);
+        // said in the conversation itself, in the person's language, so it is there when they open the ticket
+        const l = (LOCALES as readonly string[]).includes(ticket.locale || '') ? (ticket.locale as string) : 'en';
+        const line = ((await import(`../../../messages/${l}.json`)).default as { help: { liveMessage: string } }).help.liveMessage.replace('{title}', p.title);
+        await sb.from('support_messages').insert({ tenant_id: ticket.tenant_id, ticket_id: ticket.id, author_kind: 'via', author_name: null, body: line });
+        await sb.from('support_tickets').update({ last_message_at: new Date().toISOString() }).eq('id', ticket.id);
+        await notifyPerson(ticket, ticket.tenants.slug, line);
       }
     }
     await ledger(p.tenant_id, 'VIA Labs', null, `Change proposal #${p.number} (${p.title}) is live`, { change_proposal: p.id });

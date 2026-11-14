@@ -2233,6 +2233,7 @@
     "dismiss": "Ausblenden",
     "notifications": "Benachrichtigungen",
     "noNotifications": "Nichts Neues.",
-    "uploading": "Screenshot wird hochgeladen..."
+    "uploading": "Screenshot wird hochgeladen...",
+    "liveMessage": "Die von Ihnen gewünschte Änderung ist jetzt live: {title}. Laden Sie die Seite neu, um sie zu sehen. Wenn sie nicht Ihren Erwartungen entspricht, antworten Sie hier."
   }
 }

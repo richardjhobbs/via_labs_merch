@@ -2233,6 +2233,7 @@
     "dismiss": "Bỏ qua",
     "notifications": "Thông báo",
     "noNotifications": "Không có gì mới.",
-    "uploading": "Đang tải ảnh chụp màn hình lên..."
+    "uploading": "Đang tải ảnh chụp màn hình lên...",
+    "liveMessage": "Thay đổi bạn yêu cầu đã được phát hành: {title}. Hãy tải lại trang để xem. Nếu chưa đúng như bạn mong đợi, hãy trả lời tại đây."
   }
 }

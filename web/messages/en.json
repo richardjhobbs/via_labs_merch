@@ -2233,6 +2233,7 @@
     "dismiss": "Dismiss",
     "notifications": "Notifications",
     "noNotifications": "Nothing new.",
-    "uploading": "Uploading screenshot..."
+    "uploading": "Uploading screenshot...",
+    "liveMessage": "The change you asked for is now live: {title}. Refresh the page to see it. If it is not what you expected, reply here."
   }
 }

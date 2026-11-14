@@ -2233,6 +2233,7 @@
     "dismiss": "忽略",
     "notifications": "通知",
     "noNotifications": "暂无新消息。",
-    "uploading": "正在上传截图..."
+    "uploading": "正在上传截图...",
+    "liveMessage": "您请求的更改现已上线：{title}。请刷新页面查看。如果与您的预期不符，请在此回复。"
   }
 }
