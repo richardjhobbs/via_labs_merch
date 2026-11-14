@@ -2232,6 +2232,7 @@
     "readMore": "Leer más",
     "dismiss": "Descartar",
     "notifications": "Notificaciones",
-    "noNotifications": "Nada nuevo."
+    "noNotifications": "Nada nuevo.",
+    "uploading": "Subiendo captura..."
   }
 }

@@ -2232,6 +2232,7 @@
     "readMore": "Read more",
     "dismiss": "Dismiss",
     "notifications": "Notifications",
-    "noNotifications": "Nothing new."
+    "noNotifications": "Nothing new.",
+    "uploading": "Uploading screenshot..."
   }
 }

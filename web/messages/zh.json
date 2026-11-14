@@ -2232,6 +2232,7 @@
     "readMore": "查看详情",
     "dismiss": "忽略",
     "notifications": "通知",
-    "noNotifications": "暂无新消息。"
+    "noNotifications": "暂无新消息。",
+    "uploading": "正在上传截图..."
   }
 }
