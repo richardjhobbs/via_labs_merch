@@ -1,6 +1,8 @@
 // The agent's own work, without anyone asking: a scheduled pass over the record that queues a
 // draft for every exception and every due milestone that has none yet. Runs from the minute
 // tick (at most once an hour per company) and right after sample data is loaded.
+import { SAMPLE_WORLDS } from '@/lib/sample/worlds';
+import type { World } from '@/lib/testers';
 import { supabaseAdmin } from '@/lib/supabase/server';
 import { listOrders, exceptionsOf } from '@/lib/orders';
 import { LABELS, isoOf, today } from '@/lib/core/path';
@@ -82,19 +84,12 @@ ${fresh.slice(0, MAX_ITEMS).map((i, n) => { const b = briefForAgent(latest.get(i
 }
 
 // Sample inbound traffic so a freshly loaded company already has messages flowing through the pipeline.
-export async function seedSampleInbound(tenantId: string) {
+export async function seedSampleInbound(tenantId: string, world: World = 'buying_office') {
   const sb = supabaseAdmin();
-  const orders = await listOrders(tenantId, { status: 'open' }, sb);
-  const { data: parties } = await sb.from('parties').select('id, name, kind, meta').eq('tenant_id', tenantId).is('archived_at', null);
+  const { data: parties } = await sb.from('parties').select('id, meta').eq('tenant_id', tenantId).is('archived_at', null);
   const byCode = (c: string) => parties?.find((p) => (p.meta as { code?: string })?.code === c);
-  const poOf = (factoryCode: string, not?: string[]) => orders.find((o) => (o.factory as { id: string } | null)?.id === byCode(factoryCode)?.id && !(not || []).includes(o.po))?.po;
-  const hx = byCode('HX'), nl = byCode('NL'), da = byCode('DA');
-  const apexPo = poOf('DA');
-  const msgs = [
-    hx && { channelKind: 'wecom', from: 'chen@huaxin.example', senderName: 'Ms Chen', partyId: hx.id, subject: null, text: `48812 面料延期，永利说11月4日交货。我们11月6日开始裁剪，PP样品11月10日寄出。请确认唛头和尺码比例。` },
-    nl && { channelKind: 'email', from: 'hannah@northline.example', senderName: 'Hannah Price', partyId: nl.id, subject: 'SS27 WIP + 48830 fit comments', text: `Hi, could you send the WIP for all our SS27 POs by Monday, in our sheet format as usual? Fit comments for 48830 are attached - we need the revised fit sample back by 5 Nov or the in-store date is at risk. Thanks, Hannah` },
-    da && apexPo && { channelKind: 'whatsapp', from: '+8801700000000', senderName: 'Mr Hasan', partyId: da.id, subject: null, text: `Dear sir, for ${apexPo} please confirm carton marking and shipping mark by tomorrow, cartons arriving Thursday. Also fabric for ${apexPo} received today, inline inspection can be booked. Regards Hasan` },
-  ].filter(Boolean) as { channelKind: string; from: string; senderName: string; partyId: string; subject: string | null; text: string }[];
+  const msgs = SAMPLE_WORLDS[world].inbound.map((m) => { const p = byCode(m.party); return p ? { channelKind: m.channelKind, from: m.from, senderName: m.senderName, partyId: p.id as string, subject: m.subject, text: m.text } : null; })
+    .filter(Boolean) as { channelKind: string; from: string; senderName: string; partyId: string; subject: string | null; text: string }[];
   let n = 0;
   for (const m of msgs) { await ingestInbound({ tenantId, ...m, raw: { sample: true } }); n++; }
   await sb.rpc('q_send', { p_queue: 'merch_agent_runs', p_msg: { type: 'proactive', tenant_id: tenantId } });

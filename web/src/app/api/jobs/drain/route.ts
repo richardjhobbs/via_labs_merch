@@ -20,6 +20,7 @@ import { conflictPass, deliverBriefs, dueMorningBrief, morningBrief } from '@/li
 import { capState, noteCapReached, proposeLesson, type LessonJob } from '@/lib/agents/learning';
 import { capAllows, type Work } from '@/lib/agents/learning-rules';
 import { hoursOf, isWorkingTime } from '@/lib/work-hours';
+import { isQuiet } from '@/lib/testers';
 
 export const maxDuration = 55;
 const BUDGET_MS = 40_000;
@@ -98,8 +99,9 @@ export async function POST(req: NextRequest) {
       try { const n = await deliverBriefs(sb, t0 + BUDGET_MS); if (n) done.briefs_sent = n; } catch (e) { done.failed++; errors.push(`deliver: ${e instanceof Error ? e.message : String(e)}`); }
     }
     if (new Date().getUTCMinutes() === 41 && left() > 22_000) {
-      const { data: ts } = await sb.from('tenants').select('id');
-      for (const tn of ts || []) { if (left() < 18_000) break; try { if (!(await capOk(tn.id, 'conflicts'))) continue; const r = await conflictPass(tn.id); if ('decided' in r) done.conflicts = (done.conflicts || 0) + (r.decided || 0); } catch (e) { done.failed++; errors.push(`conflicts: ${e instanceof Error ? e.message : String(e)}`); } }
+      const { data: ts } = await sb.from('tenants').select('id, settings');
+      // practice companies and frozen templates get no background passes
+      for (const tn of (ts || []).filter((x) => !isQuiet(x.settings))) { if (left() < 18_000) break; try { if (!(await capOk(tn.id, 'conflicts'))) continue; const r = await conflictPass(tn.id); if ('decided' in r) done.conflicts = (done.conflicts || 0) + (r.decided || 0); } catch (e) { done.failed++; errors.push(`conflicts: ${e instanceof Error ? e.message : String(e)}`); } }
     }
     // 2c. first briefs: open orders whose agent has no memory yet, two a minute while budget allows
     if (left() > 22_000) {
@@ -111,9 +113,9 @@ export async function POST(req: NextRequest) {
     }
     // 3. hourly pass for the company that has waited longest
     if (left() > 25_000 && done.proactive === 0) {
-      const { data: tenants } = await sb.from('tenants').select('id').order('created_at');
+      const { data: tenants } = await sb.from('tenants').select('id, settings').order('created_at');
       let pick: string | null = null, oldest = -1;
-      for (const t of tenants || []) {
+      for (const t of (tenants || []).filter((x) => !isQuiet(x.settings))) {
         const lp = await lastPass(t.id); const age = lp ? Date.now() - Date.parse(lp) : Number.MAX_SAFE_INTEGER;
         if (age > 60 * 60_000 && age > oldest) { pick = t.id; oldest = age; }
       }

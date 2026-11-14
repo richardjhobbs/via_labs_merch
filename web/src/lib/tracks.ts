@@ -16,6 +16,8 @@ export const DEV_STREAMS = ['Design briefs', 'Tech packs and specs', 'Material s
 export const ALL_STREAMS = [...new Set<string>([...PROD_STREAMS, ...DEV_STREAMS])] as string[];
 // Default gates for a new company's development track: sample decisions and price never leave a person's hands.
 export const DEV_GATES: [string, number, number | null][] = [['Design briefs', 1, null], ['Tech packs and specs', 1, null], ['Material sourcing', 1, null], ['Sample schedule', 1, null], ['Sample comments and approvals', 1, 1], ['Lab dips and strike-offs', 1, null], ['Costing and quotes', 1, 1], ['Testing', 1, null], ['General enquiries', 1, null]];
+// Default autonomy per production stream for a new company: price, claims and order confirmation are locked at L1.
+export const PROD_GATES: [string, number, number | null][] = [['General enquiries', 2, null], ['RFQ and quotes', 1, null], ['Tech pack forwarding', 2, null], ['Approvals', 2, null], ['Order confirmation', 1, 1], ['WIP reports', 1, null], ['Amendments', 1, null], ['Price clarification', 1, 1], ['Production status', 1, null], ['QC', 2, null], ['Compliance and CSR', 2, null], ['Logistics', 1, null], ['Claims', 1, 1], ['Material sourcing', 0, null]];
 export const streamsOf = (track: Track) => (track === 'development' ? DEV_STREAMS : PROD_STREAMS) as readonly string[];
 
 type Settings = { tracks?: { development?: boolean } } | null | undefined;

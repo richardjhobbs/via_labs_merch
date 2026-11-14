@@ -248,7 +248,8 @@
     "reason": "Motivo (la empresa lo ve)",
     "end": "Terminar el acceso ahora",
     "supportDesk": "Mesa de soporte",
-    "updates": "Novedades"
+    "updates": "Novedades",
+    "testers": "Probadores"
   },
   "roles": {
     "owner": "Propietario",
@@ -2233,5 +2234,109 @@
     "dismiss": "Descartar",
     "notifications": "Notificaciones",
     "noNotifications": "Nada nuevo."
+  },
+  "sandbox": {
+    "title": "Empresa de práctica.",
+    "body": "Todo aquí es inventado y no se envía nada a nadie. Pruebe lo que quiera.",
+    "workAs": "Trabajar como",
+    "change": "Cambiar",
+    "companies": "Otras empresas",
+    "noOutside": "Esta es una empresa de práctica: no puede invitar a personas ni conectarse con nada externo.",
+    "cap": "El agente ha alcanzado el límite de hoy para una empresa de práctica. Vuelve a estar disponible mañana; todo lo demás sigue funcionando."
+  },
+  "try": {
+    "title": "Pruebe VIA Merch en una empresa de práctica",
+    "lead": "Le han invitado a probar VIA Merch: agentes que trabajan junto a los equipos de merchandising, producción y desarrollo de producto. Entre en una empresa inventada, haga el trabajo un rato y díganos qué le parece.",
+    "p1": "Tres empresas de práctica: una marca, una oficina de compras y un fabricante, cada una con pedidos en curso, proveedores, conversaciones y un agente trabajando.",
+    "p2": "Su copia es privada. Ningún otro probador puede verle a usted, su empresa ni lo que haga en ella.",
+    "p3": "Nada es real y nada se envía: apruebe, rechace, cambie fechas, pregunte al agente, rompa cosas.",
+    "p4": "Un botón de comentarios en cada página: escriba, dicte o grabe una nota de voz.",
+    "legal": "Guardamos su nombre, correo y comentarios para realizar esta prueba y mejorar el producto.",
+    "privacy": "Privacidad",
+    "closedTitle": "Por invitación",
+    "closedBody": "Esta prueba está abierta a quienes tienen un enlace de invitación. Si recibió uno, ábralo de nuevo.",
+    "haveAccess": "Ya me he unido",
+    "name": "Su nombre",
+    "email": "Correo electrónico",
+    "company": "Empresa (opcional)",
+    "trade": "Dónde trabaja",
+    "trades": {
+      "brand": "Marca o minorista",
+      "buying_office": "Oficina de compras o agente",
+      "factory": "Fabricante",
+      "trading": "Empresa comercializadora",
+      "other": "Otra cosa"
+    },
+    "join": "Enviar mi código de acceso",
+    "code": "Código de acceso",
+    "verify": "Empezar",
+    "resend": "Enviar un código nuevo",
+    "sentTo": "Código enviado a {email}. Escríbalo aquí.",
+    "errForm": "Revise su nombre y correo.",
+    "errClosed": "La prueba no está abierta en este momento.",
+    "errCode": "Este enlace no es válido. Abra el enlace de invitación que recibió.",
+    "errFull": "Por ahora todas las plazas están ocupadas.",
+    "errFailed": "No ha funcionado. Inténtelo de nuevo en un minuto.",
+    "errOtp": "Ese código no ha funcionado. Cada código sirve una vez; pida uno nuevo.",
+    "consent": "No hay contraseña. Cada vez inicia sesión con un código enviado a este correo.",
+    "startTitle": "Le damos la bienvenida, {name}",
+    "startLead": "Elija la empresa más parecida a su trabajo, o pruebe las tres. Cada una es su copia privada, con fechas contadas desde hoy.",
+    "notReady": "Esta empresa todavía se está preparando. Pruebe otra o vuelva en un rato.",
+    "worlds": {
+      "brand": {
+        "kind": "Marca",
+        "name": "Northline",
+        "blurb": "Una marca de outdoor que compra directamente a fábricas de cinco países. Usted lleva la producción de la temporada: reclamar muestras, mantener las fechas de entrega, informar a las tiendas."
+      },
+      "buying_office": {
+        "kind": "Oficina de compras",
+        "name": "Meridian Sourcing",
+        "blurb": "Una oficina de sourcing en Hong Kong con cinco marcas cliente y diecisiete proveedores. Usted está entre clientes y fábricas en 38 pedidos en curso."
+      },
+      "factory": {
+        "kind": "Fabricante",
+        "name": "Hai Phong Garment",
+        "blurb": "Un fabricante de prendas de abrigo en Vietnam con cuatro clientes, dos plantas y un subcontratista. Usted responde a los compradores, reclama a tejedurías y fornituras y embarca a tiempo."
+      }
+    },
+    "continue": "Continuar",
+    "open": "Abrir",
+    "soon": "Próximamente",
+    "again": "Empezar de cero",
+    "againHint": "Aparta su copia y le da una nueva.",
+    "howTitle": "Cómo probar",
+    "how1": "Empiece en Mi día: muestra lo que el agente ha preparado y lo que le necesita a usted.",
+    "how2": "Abra la cola de aprobación y decida algunos borradores. No se envía nada a nadie.",
+    "how3": "Abra un pedido y lea su expediente: la ruta crítica, las conversaciones, el resumen.",
+    "how4": "Pregunte lo que quiera al agente en el panel de abajo a la derecha, escribiendo o con la voz.",
+    "how5": "Use el botón Comentarios en cualquier página cuando algo esté bien, confunda, falte o esté roto."
+  },
+  "feedback": {
+    "open": "Comentarios",
+    "title": "Cuénteselo a VIA Labs",
+    "intro": "¿Qué funcionó, qué le confundió, qué falta? Solo VIA Labs lee esto.",
+    "placeholder": "Escriba aquí, o dicte",
+    "send": "Enviar",
+    "sending": "Enviando",
+    "thanks": "Gracias. Ha llegado a VIA Labs.",
+    "another": "Añadir otro",
+    "close": "Cerrar",
+    "failed": "No se pudo enviar. Inténtelo de nuevo.",
+    "dictate": "Dictar",
+    "stop": "Parar",
+    "listening": "Escuchando. Hable y luego pulse Parar.",
+    "record": "Grabar una nota de voz",
+    "recording": "Grabando, hasta dos minutos.",
+    "recorded": "Nota de voz lista:",
+    "discard": "Descartar",
+    "micDenied": "El micrófono está bloqueado para este sitio. Permítalo en el navegador e inténtelo de nuevo.",
+    "micService": "El dictado no está disponible en este navegador. Grabe una nota de voz o escriba.",
+    "page": "Página",
+    "moods": {
+      "good": "Funciona bien",
+      "confusing": "Confuso",
+      "missing": "Falta algo",
+      "broken": "No funciona"
+    }
   }
 }

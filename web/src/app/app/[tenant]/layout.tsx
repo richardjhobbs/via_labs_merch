@@ -17,6 +17,10 @@ import { memberTracks, currentTrack } from '@/lib/tracks';
 import { deskLink } from '@/lib/helpdesk/desk';
 import { updatesFor } from '@/lib/helpdesk/updates';
 import { UpdatesBell, UpdateNotice, type BellItem } from '@/components/updates-bell';
+import { isSandbox, PERSONAS } from '@/lib/testers';
+import { FeedbackButton } from '@/components/feedback';
+import { feedbackLabels } from '@/components/feedback-labels';
+import { setPersona } from '@/app/try/actions';
 
 export default async function TenantLayout({ children, params }: { children: React.ReactNode; params: Promise<{ tenant: string }> }) {
   const { tenant: slug } = await params;
@@ -66,7 +70,20 @@ export default async function TenantLayout({ children, params }: { children: Rea
   const agent = (agentRows || []).find((a) => a.track === track) || (agentRows || [])[0] || null;
   const canDecide = ['owner', 'manager'].includes(membership.role);
   const { data: pendingSupport } = canDecide ? await sb.from('support_access').select('id, reason').eq('tenant_id', tenant.id).eq('status', 'requested').limit(1).maybeSingle() : { data: null };
-  const A = { title: t('assistant.title'), placeholder: t('assistant.placeholder'), send: t('assistant.send'), working: t('assistant.working'), queued: t('assistant.queued'), used: t('assistant.used'), approve: t('assistant.approve'), hold: t('assistant.hold'), reject: t('assistant.reject'), approved: t('assistant.approved'), rejected: t('assistant.rejected'), inQueue: t('assistant.inQueue'), open: t('assistant.open'), close: t('assistant.close'), clear: t('assistant.clear'), you: t('assistant.you'), noKey: t('assistant.noKey'), mic: t('assistant.mic'), micStop: t('assistant.micStop'), micDenied: t('assistant.micDenied'), listening: t('assistant.listening'), micService: t('assistant.micService'), micDevice: t('assistant.micDevice'), micSilence: t('assistant.micSilence'), sendHint: t('assistant.sendHint') };
+  const A = { title: t('assistant.title'), placeholder: t('assistant.placeholder'), send: t('assistant.send'), working: t('assistant.working'), queued: t('assistant.queued'), used: t('assistant.used'), approve: t('assistant.approve'), hold: t('assistant.hold'), reject: t('assistant.reject'), approved: t('assistant.approved'), rejected: t('assistant.rejected'), inQueue: t('assistant.inQueue'), open: t('assistant.open'), close: t('assistant.close'), clear: t('assistant.clear'), you: t('assistant.you'), noKey: t('assistant.noKey'), mic: t('assistant.mic'), micStop: t('assistant.micStop'), micDenied: t('assistant.micDenied'), listening: t('assistant.listening'), micService: t('assistant.micService'), micDevice: t('assistant.micDevice'), micSilence: t('assistant.micSilence'), sendHint: t('assistant.sendHint'), cap: t('sandbox.cap') };
+  // a tester's own practice company: say so, let them work as any role, and take feedback on every page
+  const practice = isSandbox(tn?.settings) && membership.id !== 'admin' && !viewingAs;
+  const practiceBar = practice ? (
+    <div className="notice mb-4 flex flex-wrap items-center gap-x-3 gap-y-2">
+      <span style={{ flex: '1 1 260px' }}><b>{t('sandbox.title')}</b> {t('sandbox.body')}</span>
+      <form action={setPersona} className="flex items-center gap-1"><input type="hidden" name="tenant" value={slug} />
+        <label className="small" htmlFor="persona">{t('sandbox.workAs')}</label>
+        <select id="persona" name="role" className="input sm" defaultValue={membership.role} key={membership.role}>{PERSONAS.map((r) => <option key={r} value={r}>{t(`roles.${r}`)}</option>)}</select>
+        <button className="btn sm">{t('sandbox.change')}</button>
+      </form>
+      <Link className="btn sm" href="/try/start">{t('sandbox.companies')}</Link>
+    </div>
+  ) : null;
   const items = (track === 'development' ? [
     ['', t('nav.day')], ['queue', t('nav.queue')], ['styles', t('nav.styles')], ['samples', t('nav.samples')], ['materials', t('nav.materials')], ['threads', t('nav.threads')], ['parties', t('nav.parties')],
     ['ledger', t('nav.ledger')], ['agents', t('nav.agents')], ['connections', t('nav.connections')], ['settings', t('nav.settings')],
@@ -98,10 +115,12 @@ export default async function TenantLayout({ children, params }: { children: Rea
       </aside>
       <main className="app-main p-4 md:p-6 min-w-0" style={{ background: 'var(--paper)' }}>
         {pendingSupport && <Link href={`/app/${slug}/settings`} className="notice warn block mb-4 no-underline">{t('settings.pendingNotice', { reason: pendingSupport.reason })}</Link>}
+        {practiceBar}
         {notice}
         {children}
       </main>
       <Assistant slug={slug} agentName={agent?.name || 'Mira'} lang={locale} live={hasLlm()} labels={A} />
+      {practice && <FeedbackButton slug={slug} track={track} locale={locale} labels={feedbackLabels(t)} />}
     </div>
   );
 }

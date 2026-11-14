@@ -248,7 +248,8 @@
     "reason": "Reason (the company sees this)",
     "end": "End access now",
     "supportDesk": "Support desk",
-    "updates": "Updates"
+    "updates": "Updates",
+    "testers": "Testers"
   },
   "roles": {
     "owner": "Owner",
@@ -2233,5 +2234,109 @@
     "dismiss": "Dismiss",
     "notifications": "Notifications",
     "noNotifications": "Nothing new."
+  },
+  "sandbox": {
+    "title": "Practice company.",
+    "body": "Everything here is made up and nothing is sent to anyone. Try anything.",
+    "workAs": "Work as",
+    "change": "Change",
+    "companies": "Other companies",
+    "noOutside": "This is a practice company: it cannot invite people or connect to anything outside.",
+    "cap": "The agent has reached today's limit for a practice company. It is available again tomorrow; everything else still works."
+  },
+  "try": {
+    "title": "Try VIA Merch in a practice company",
+    "lead": "You have been invited to test VIA Merch: agents that work alongside merchandising, production and product development teams. Step into a made-up company, do the job for a while, and tell us what you think.",
+    "p1": "Three practice companies: a brand, a buying office and a manufacturer, each with live orders, suppliers, conversations and an agent at work.",
+    "p2": "Your copy is private. No other tester can see you, your company or anything you do in it.",
+    "p3": "Nothing is real and nothing is sent: approve, reject, change dates, ask the agent, break things.",
+    "p4": "A feedback button on every page: type, dictate or record a voice note.",
+    "legal": "We keep your name, email and feedback to run this test and improve the product.",
+    "privacy": "Privacy",
+    "closedTitle": "By invitation",
+    "closedBody": "This test is open to people with an invitation link. If you were sent one, open that link again.",
+    "haveAccess": "I have already joined",
+    "name": "Your name",
+    "email": "Email",
+    "company": "Company (optional)",
+    "trade": "Where you work",
+    "trades": {
+      "brand": "Brand or retailer",
+      "buying_office": "Buying office or agent",
+      "factory": "Manufacturer",
+      "trading": "Trading company",
+      "other": "Something else"
+    },
+    "join": "Send my sign-in code",
+    "code": "Sign-in code",
+    "verify": "Start",
+    "resend": "Send a new code",
+    "sentTo": "Code sent to {email}. Type it here.",
+    "errForm": "Check your name and email.",
+    "errClosed": "The test is not open at the moment.",
+    "errCode": "This link is not valid. Open the invitation link you were sent.",
+    "errFull": "All places are taken for now.",
+    "errFailed": "That did not work. Try again in a minute.",
+    "errOtp": "That code did not work. Each code works once; ask for a new one.",
+    "consent": "There is no password. You sign in with a code sent to this email each time.",
+    "startTitle": "Welcome, {name}",
+    "startLead": "Pick the company closest to your own work, or try all three. Each one is your own private copy, with dates set from today.",
+    "notReady": "This company is still being prepared. Try another one, or come back shortly.",
+    "worlds": {
+      "brand": {
+        "kind": "Brand",
+        "name": "Northline",
+        "blurb": "An outdoor brand buying direct from factories in five countries. You run production for the season: chase samples, hold delivery dates, keep stores informed."
+      },
+      "buying_office": {
+        "kind": "Buying office",
+        "name": "Meridian Sourcing",
+        "blurb": "A sourcing office in Hong Kong with five client brands and seventeen suppliers. You sit between customers and factories on 38 live orders."
+      },
+      "factory": {
+        "kind": "Manufacturer",
+        "name": "Hai Phong Garment",
+        "blurb": "An outerwear manufacturer in Vietnam with four customers, two plants and a subcontractor. You answer buyers, chase mills and trims, and ship on time."
+      }
+    },
+    "continue": "Continue",
+    "open": "Open",
+    "soon": "Coming soon",
+    "again": "Start again from fresh",
+    "againHint": "Sets your copy aside and gives you a new one.",
+    "howTitle": "How to test",
+    "how1": "Start on My day: it shows what the agent prepared and what needs you.",
+    "how2": "Open the approval queue and decide a few drafts. Nothing is sent to anyone.",
+    "how3": "Open an order and read its file: the critical path, the conversations, the brief.",
+    "how4": "Ask the agent anything in the panel at the bottom right, by typing or by voice.",
+    "how5": "Use the Feedback button on any page whenever something is good, confusing, missing or broken."
+  },
+  "feedback": {
+    "open": "Feedback",
+    "title": "Tell VIA Labs",
+    "intro": "What worked, what confused you, what is missing? Only VIA Labs reads this.",
+    "placeholder": "Type here, or dictate",
+    "send": "Send",
+    "sending": "Sending",
+    "thanks": "Thank you. That has gone to VIA Labs.",
+    "another": "Add another",
+    "close": "Close",
+    "failed": "That could not be sent. Try again.",
+    "dictate": "Dictate",
+    "stop": "Stop",
+    "listening": "Listening. Speak, then press Stop.",
+    "record": "Record a voice note",
+    "recording": "Recording, up to two minutes.",
+    "recorded": "Voice note ready:",
+    "discard": "Discard",
+    "micDenied": "The microphone is blocked for this site. Allow it in the browser and try again.",
+    "micService": "Dictation is not available in this browser. Record a voice note or type instead.",
+    "page": "Page",
+    "moods": {
+      "good": "Works well",
+      "confusing": "Confusing",
+      "missing": "Something missing",
+      "broken": "Broken"
+    }
   }
 }

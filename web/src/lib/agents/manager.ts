@@ -6,6 +6,7 @@
 //   by this pass; any message to a factory still goes through the drafts and the gates.
 // - morningBrief: once a day after 07:00 company time, Mira writes the company brief from the desks' and
 //   orders' memory for the owners and managers, and each desk gets its own brief for its senior merchandiser.
+import { isQuiet } from '@/lib/testers';
 import { z } from 'zod';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { supabaseAdmin } from '@/lib/supabase/server';
@@ -129,6 +130,7 @@ const localDate = (tz: string) => new Date().toLocaleDateString('en-CA', { timeZ
 export async function dueMorningBrief(sb: Client) {
   const { data: tenants } = await sb.from('tenants').select('id, tz, settings');
   for (const t of tenants || []) {
+    if (isQuiet(t.settings)) continue; // practice companies and frozen templates: no morning brief
     if (localHour(t.tz) < 5 || !isWorkingDay(new Date(), hoursOf(t.tz, t.settings))) continue;
     const mira = await managerOf(sb, t.id); if (!mira || mira.status === 'paused') continue;
     const { data: last } = await sb.from('agent_memory').select('created_at').eq('agent_id', mira.id).order('version', { ascending: false }).limit(1).maybeSingle();

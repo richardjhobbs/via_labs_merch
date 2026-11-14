@@ -79,6 +79,9 @@ table.t tr.click { cursor: pointer; } table.t tr.click:hover td { background: va
 .notice.crit { background: var(--crit-bg); color: var(--crit); }
 
 /* assistant panel */
+.fb-fab { position: fixed; left: 20px; bottom: 20px; z-index: 40; display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px; border-radius: 999px; background: var(--surface); color: var(--fg); font-weight: 600; font-size: 13.5px; box-shadow: 0 6px 20px rgba(20,24,22,.16); border: 1px solid var(--line); cursor: pointer; }
+.fb { position: fixed; left: 20px; bottom: 20px; z-index: 41; width: min(380px, calc(100vw - 32px)); max-height: calc(100vh - 40px); overflow-y: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 16px 48px rgba(20,24,22,.18); padding: 14px; }
+@media (max-width: 767px) { .fb-fab { left: 12px; bottom: 76px; } .fb { left: 12px; bottom: 76px; } }
 .asst-fab { position: fixed; right: 20px; bottom: 20px; z-index: 40; display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 999px; background: var(--accent); color: var(--on-accent); font-weight: 600; font-size: 14px; box-shadow: 0 6px 20px rgba(10,74,58,.25); border: 0; cursor: pointer; }
 .asst { position: fixed; right: 20px; bottom: 20px; z-index: 40; width: min(420px, calc(100vw - 32px)); height: min(640px, calc(100vh - 40px)); display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 16px 48px rgba(20,24,22,.18); overflow: hidden; }
 .asst .hd { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--line); }

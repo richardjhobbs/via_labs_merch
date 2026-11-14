@@ -3,10 +3,13 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { requireMe } from '@/lib/tenant';
+import { testerOf } from '@/lib/testers';
 
 export default async function AppHome() {
   const m = await requireMe();
   if (m.memberships.length === 1 && !m.isAdmin) redirect(`/app/${m.memberships[0].tenants.slug}`);
+  // a tester with no practice company open yet goes to the chooser
+  if (m.memberships.length === 0 && !m.isAdmin && (await testerOf(m.user.id))) redirect('/try/start');
   const t = await getTranslations();
   return (
     <main className="min-h-screen p-6" style={{ background: 'var(--paper)' }}>

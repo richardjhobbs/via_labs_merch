@@ -248,7 +248,8 @@
     "reason": "Grund (das Unternehmen sieht ihn)",
     "end": "Zugang jetzt beenden",
     "supportDesk": "Support-Desk",
-    "updates": "Neuigkeiten"
+    "updates": "Neuigkeiten",
+    "testers": "Tester"
   },
   "roles": {
     "owner": "Inhaber",
@@ -2233,5 +2234,109 @@
     "dismiss": "Ausblenden",
     "notifications": "Benachrichtigungen",
     "noNotifications": "Nichts Neues."
+  },
+  "sandbox": {
+    "title": "Übungsfirma.",
+    "body": "Alles hier ist erfunden, und nichts wird an jemanden gesendet. Probieren Sie alles aus.",
+    "workAs": "Arbeiten als",
+    "change": "Ändern",
+    "companies": "Andere Firmen",
+    "noOutside": "Dies ist eine Übungsfirma: Sie kann niemanden einladen und sich mit nichts außerhalb verbinden.",
+    "cap": "Der Agent hat das heutige Limit für eine Übungsfirma erreicht. Morgen ist er wieder verfügbar; alles andere funktioniert weiter."
+  },
+  "try": {
+    "title": "VIA Merch in einer Übungsfirma testen",
+    "lead": "Sie sind eingeladen, VIA Merch zu testen: Agenten, die mit Merchandising, Produktion und Produktentwicklung zusammenarbeiten. Übernehmen Sie eine Rolle in einer erfundenen Firma, arbeiten Sie eine Weile darin und sagen Sie uns Ihre Meinung.",
+    "p1": "Drei Übungsfirmen: eine Marke, ein Einkaufsbüro und ein Hersteller, jeweils mit laufenden Aufträgen, Lieferanten, Gesprächen und einem Agenten bei der Arbeit.",
+    "p2": "Ihre Kopie ist privat. Kein anderer Tester sieht Sie, Ihre Firma oder was Sie darin tun.",
+    "p3": "Nichts ist echt, und nichts wird gesendet: freigeben, ablehnen, Termine ändern, den Agenten fragen, Dinge kaputt machen.",
+    "p4": "Auf jeder Seite ein Feedback-Knopf: tippen, diktieren oder eine Sprachnotiz aufnehmen.",
+    "legal": "Wir speichern Ihren Namen, Ihre E-Mail-Adresse und Ihr Feedback, um diesen Test durchzuführen und das Produkt zu verbessern.",
+    "privacy": "Datenschutz",
+    "closedTitle": "Nur mit Einladung",
+    "closedBody": "Dieser Test steht Personen mit einem Einladungslink offen. Wenn Sie einen erhalten haben, öffnen Sie ihn bitte erneut.",
+    "haveAccess": "Ich bin bereits dabei",
+    "name": "Ihr Name",
+    "email": "E-Mail",
+    "company": "Firma (optional)",
+    "trade": "Wo Sie arbeiten",
+    "trades": {
+      "brand": "Marke oder Händler",
+      "buying_office": "Einkaufsbüro oder Agent",
+      "factory": "Hersteller",
+      "trading": "Handelsunternehmen",
+      "other": "Etwas anderes"
+    },
+    "join": "Anmeldecode senden",
+    "code": "Anmeldecode",
+    "verify": "Starten",
+    "resend": "Neuen Code senden",
+    "sentTo": "Code an {email} gesendet. Geben Sie ihn hier ein.",
+    "errForm": "Bitte Namen und E-Mail prüfen.",
+    "errClosed": "Der Test ist im Moment nicht geöffnet.",
+    "errCode": "Dieser Link ist nicht gültig. Öffnen Sie den Einladungslink, den Sie erhalten haben.",
+    "errFull": "Derzeit sind alle Plätze vergeben.",
+    "errFailed": "Das hat nicht geklappt. Versuchen Sie es in einer Minute erneut.",
+    "errOtp": "Dieser Code hat nicht funktioniert. Jeder Code gilt einmal; fordern Sie einen neuen an.",
+    "consent": "Es gibt kein Passwort. Sie melden sich jedes Mal mit einem Code an, der an diese E-Mail-Adresse gesendet wird.",
+    "startTitle": "Willkommen, {name}",
+    "startLead": "Wählen Sie die Firma, die Ihrer eigenen Arbeit am nächsten kommt, oder probieren Sie alle drei. Jede ist Ihre eigene private Kopie, mit Terminen ab heute.",
+    "notReady": "Diese Firma wird noch vorbereitet. Probieren Sie eine andere oder kommen Sie in Kürze wieder.",
+    "worlds": {
+      "brand": {
+        "kind": "Marke",
+        "name": "Northline",
+        "blurb": "Eine Outdoor-Marke, die direkt bei Fabriken in fünf Ländern einkauft. Sie steuern die Produktion der Saison: Muster nachfassen, Liefertermine halten, die Filialen informieren."
+      },
+      "buying_office": {
+        "kind": "Einkaufsbüro",
+        "name": "Meridian Sourcing",
+        "blurb": "Ein Sourcing-Büro in Hongkong mit fünf Kundenmarken und siebzehn Lieferanten. Sie stehen bei 38 laufenden Aufträgen zwischen Kunden und Fabriken."
+      },
+      "factory": {
+        "kind": "Hersteller",
+        "name": "Hai Phong Garment",
+        "blurb": "Ein Oberbekleidungshersteller in Vietnam mit vier Kunden, zwei Werken und einem Subunternehmer. Sie antworten Einkäufern, fassen bei Webereien und Zutaten nach und liefern pünktlich."
+      }
+    },
+    "continue": "Weiter",
+    "open": "Öffnen",
+    "soon": "Demnächst",
+    "again": "Ganz neu beginnen",
+    "againHint": "Legt Ihre Kopie beiseite und gibt Ihnen eine neue.",
+    "howTitle": "So testen Sie",
+    "how1": "Beginnen Sie bei Mein Tag: dort steht, was der Agent vorbereitet hat und was Sie braucht.",
+    "how2": "Öffnen Sie die Freigabeliste und entscheiden Sie einige Entwürfe. Es wird nichts an jemanden gesendet.",
+    "how3": "Öffnen Sie einen Auftrag und lesen Sie seine Akte: den kritischen Pfad, die Gespräche, das Briefing.",
+    "how4": "Fragen Sie den Agenten im Feld unten rechts, per Tastatur oder per Sprache.",
+    "how5": "Nutzen Sie den Feedback-Knopf auf jeder Seite, wenn etwas gut, verwirrend, fehlend oder defekt ist."
+  },
+  "feedback": {
+    "open": "Feedback",
+    "title": "An VIA Labs",
+    "intro": "Was hat funktioniert, was war verwirrend, was fehlt? Nur VIA Labs liest das.",
+    "placeholder": "Hier tippen oder diktieren",
+    "send": "Senden",
+    "sending": "Wird gesendet",
+    "thanks": "Danke. Das ist bei VIA Labs angekommen.",
+    "another": "Noch etwas hinzufügen",
+    "close": "Schließen",
+    "failed": "Das konnte nicht gesendet werden. Bitte erneut versuchen.",
+    "dictate": "Diktieren",
+    "stop": "Stopp",
+    "listening": "Hört zu. Sprechen Sie, dann Stopp drücken.",
+    "record": "Sprachnotiz aufnehmen",
+    "recording": "Aufnahme läuft, bis zu zwei Minuten.",
+    "recorded": "Sprachnotiz bereit:",
+    "discard": "Verwerfen",
+    "micDenied": "Das Mikrofon ist für diese Seite gesperrt. Erlauben Sie es im Browser und versuchen Sie es erneut.",
+    "micService": "Diktieren ist in diesem Browser nicht verfügbar. Nehmen Sie eine Sprachnotiz auf oder tippen Sie.",
+    "page": "Seite",
+    "moods": {
+      "good": "Funktioniert gut",
+      "confusing": "Verwirrend",
+      "missing": "Etwas fehlt",
+      "broken": "Defekt"
+    }
   }
 }

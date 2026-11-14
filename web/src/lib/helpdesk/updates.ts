@@ -1,5 +1,6 @@
 // Updates on the support desk: what VIA Labs published, filtered to what this company may see.
 // Members never read merch.announcements directly; this runs under the service role after supportMe().
+import { isQuiet } from '@/lib/testers';
 import { supabaseAdmin } from '@/lib/supabase/server';
 import type { TenantSettings } from '@/lib/features';
 import { visibility, type Audience } from './updates-rules';
@@ -48,7 +49,7 @@ export async function emailUpdate(id: string): Promise<number> {
   const tr = (a.translations || {}) as Record<string, { title?: string; body?: string }>;
   let sent = 0;
   for (const t of tenants || []) {
-    if (visibility(a.audience as Audience, t.id, t.settings as TenantSettings) !== 'yes') continue;
+    if (isQuiet(t.settings) || visibility(a.audience as Audience, t.id, t.settings as TenantSettings) !== 'yes') continue;
     for (const m of (leads || []).filter((x) => x.tenant_id === t.id && x.user_id)) {
       const to = (await sb.auth.admin.getUserById(m.user_id as string)).data?.user?.email;
       if (!to) continue;

@@ -8,6 +8,7 @@
 // Each alert is raised once per key, emailed to the person responsible (the order's owner, or whoever approved
 // the reply), escalated by email to owners and managers after 24 hours, and resolved by itself when the gap
 // closes: a message from the party, a milestone update, the reply sent, the order closed.
+import { isQuiet } from '@/lib/testers';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { listOrders } from '@/lib/orders';
 import { LABELS, isoOf, dayOf, today, type MilestoneKey } from '@/lib/core/path';
@@ -138,7 +139,8 @@ function lineOf(a: { kind: string; detail: unknown; due_date: string | null }) {
 
 // Hourly, for every company, within the drain's time budget.
 export async function runAllAlerts(sb: Client, deadline: number) {
-  const { data: tenants } = await sb.from('tenants').select('id');
+  const { data: all } = await sb.from('tenants').select('id, settings');
+  const tenants = (all || []).filter((x) => !isQuiet(x.settings)); // not practice companies or frozen templates
   const total = { raised: 0, resolved: 0, notified: 0, escalated: 0 };
   for (const t of tenants || []) {
     if (Date.now() > deadline - 6000) break;

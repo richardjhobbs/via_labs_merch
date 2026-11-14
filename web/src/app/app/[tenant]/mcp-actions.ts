@@ -14,6 +14,7 @@ export async function issueMcpToken(slug: string, form: FormData): Promise<Issue
   const { tenant, memberships, user, viewingAs } = await requireTenant(slug);
   const mine = memberships.find((x) => x.tenant_id === tenant.id);
   if (!mine || viewingAs) return { error: 'own' };
+  if ((tenant.settings as { sandbox?: boolean } | null)?.sandbox) return { error: 'practice' };
   const sb = await supabaseServer();
   const { data: tn } = await sb.from('tenants').select('settings').eq('id', tenant.id).single();
   const r = await issueToken(

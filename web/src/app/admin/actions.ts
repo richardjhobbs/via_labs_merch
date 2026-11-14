@@ -10,14 +10,14 @@ import { inviteUser, mailInvite } from '@/lib/invites';
 import { loadSample } from '@/lib/sample/load';
 import { loadSampleThreads } from '@/lib/sample/threads-load';
 import { SUPPORT_HOURS } from '@/lib/support';
-import { DEV_GATES, isTrack } from '@/lib/tracks';
+import { DEV_GATES, PROD_GATES, isTrack } from '@/lib/tracks';
 
 const Tenant = z.object({ name: z.string().min(2).max(80), slug: z.string().regex(/^[a-z0-9-]{3,40}$/), kind: z.enum(['buying_office', 'brand', 'factory', 'trading', 'retailer']), plan: z.enum(['retainer', 'trial', 'per_user']), locale: z.string().max(5), tz: z.string().max(60), owner_email: z.string().email() });
 const ROLES = ['owner', 'manager', 'merchandiser', 'qc', 'compliance', 'logistics', 'viewer'] as const;
 
 // Default autonomy per stream for a new tenant (from the demo): price, claims and
 // order confirmation are locked at L1 so the agent can never send those alone.
-const GATES: [string, number, number | null][] = [['General enquiries', 2, null], ['RFQ and quotes', 1, null], ['Tech pack forwarding', 2, null], ['Approvals', 2, null], ['Order confirmation', 1, 1], ['WIP reports', 1, null], ['Amendments', 1, null], ['Price clarification', 1, 1], ['Production status', 1, null], ['QC', 2, null], ['Compliance and CSR', 2, null], ['Logistics', 1, null], ['Claims', 1, 1], ['Material sourcing', 0, null]];
+const GATES = PROD_GATES;
 
 export async function createTenant(form: FormData) {
   const me = await requireAdmin();

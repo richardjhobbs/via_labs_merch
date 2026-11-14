@@ -57,6 +57,7 @@ export async function createForwardAddress(form: FormData) {
   const slug = String(form.get('tenant'));
   const me = await requireTenant(slug);
   if (me.membership.id === 'admin' || me.membership.role === 'viewer') return back(slug, 'gerror=viewer');
+  if ((me.tenant.settings as { sandbox?: boolean } | null)?.sandbox) return back(slug, 'gerror=forbidden'); // a practice company connects to nothing outside
   if (!forwardConfigured()) return back(slug, 'gerror=notReady&gp=forward');
   const sb = supabaseAdmin();
   await sb.from('channels').update({ status: 'off' }).eq('tenant_id', me.tenant.id).eq('owner_user_id', me.user.id).eq('kind', 'email_inbound').eq('status', 'connected');
@@ -74,7 +75,7 @@ export async function createForwardAddress(form: FormData) {
 export async function saveWhatsApp(form: FormData) {
   const slug = String(form.get('tenant'));
   const me = await requireTenant(slug);
-  if (me.membership.id === 'admin' || !['owner', 'manager'].includes(me.membership.role)) return back(slug, 'gerror=forbidden');
+  if (me.membership.id === 'admin' || !['owner', 'manager'].includes(me.membership.role) || (me.tenant.settings as { sandbox?: boolean } | null)?.sandbox) return back(slug, 'gerror=forbidden');
   const phoneId = String(form.get('phone_id') || '').trim(), token = String(form.get('token') || '').trim(), secret = String(form.get('secret') || '').trim(), waba = String(form.get('waba') || '').trim() || null;
   if (!/^\d{6,30}$/.test(phoneId) || token.length < 20 || secret.length < 16) return back(slug, 'gerror=waFields&gp=whatsapp');
   let info: { display: string; verified_name: string };
@@ -95,7 +96,7 @@ export async function saveWhatsApp(form: FormData) {
 export async function saveDelogue(form: FormData) {
   const slug = String(form.get('tenant'));
   const me = await requireTenant(slug);
-  if (me.membership.id === 'admin' || !['owner', 'manager'].includes(me.membership.role)) return back(slug, 'gerror=forbidden');
+  if (me.membership.id === 'admin' || !['owner', 'manager'].includes(me.membership.role) || (me.tenant.settings as { sandbox?: boolean } | null)?.sandbox) return back(slug, 'gerror=forbidden');
   const token = String(form.get('token') || '').trim().replace(/^bearer\s+/i, ''), customer = String(form.get('customer_id') || '');
   if (token.length < 16) return back(slug, 'gerror=plmFields&gp=delogue');
   let info: { brand: string | null; sample: string | null };

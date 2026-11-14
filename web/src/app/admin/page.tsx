@@ -14,7 +14,8 @@ export default async function AdminHome({ searchParams }: { searchParams: Promis
   // ?from=<access request id>: prefill the form from the request; createTenant then marks it provisioned.
   const { data: req } = /^[0-9a-f-]{36}$/i.test(from || '') ? await sb.from('access_requests').select('id, company, kind, name, email').eq('id', from!).maybeSingle() : { data: null };
   const pre = req ? { name: req.company, slug: slugify(req.company), kind: req.kind || 'buying_office', email: req.email } : null;
-  const { data: tenants } = await sb.from('tenants').select('id, slug, name, kind, plan, created_at, memberships(count), invites(count)').order('created_at', { ascending: false });
+  const { data: allTenants } = await sb.from('tenants').select('id, slug, name, kind, plan, created_at, settings, memberships(count), invites(count)').order('created_at', { ascending: false });
+  const tenants = (allTenants || []).filter((x) => !(x.settings as { sandbox?: boolean } | null)?.sandbox); // testers' practice companies are listed under Testers
   const { count: newRequests } = await sb.from('access_requests').select('id', { count: 'exact', head: true }).eq('status', 'new');
   const { data: addonReqs } = await sb.from('addon_requests').select('id, tenant_id, requested_by_name, requested_at, tenants(name)').eq('status', 'requested').order('requested_at');
   return (

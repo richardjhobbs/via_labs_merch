@@ -18,6 +18,7 @@ const S: LegalSection[] = [
     'Company records: customers, suppliers, contacts, purchase orders, milestones, compliance records and documents that people enter, upload or import.',
     'Connected channels: messages and files from the mailboxes and services a person chooses to connect, as described in the next sections.',
     'Agent activity: the questions people ask the agent, the drafts it prepares, the approvals and rejections people make, and an append-only ledger of these actions.',
+    'Tester programme: if you join by invitation to try VIA Merch in a practice company, your name, email address, company and line of work, what you do in your own practice company, and the feedback you send us, which can be typed, dictated or a recorded voice note of up to two minutes. Practice companies hold made-up data only, each tester has a private copy that no other tester can see, and nothing in one is sent to anyone. Recordings are stored privately and heard only by VIA Labs.',
     'Support conversations: what you write to the support desk, any screenshot you attach, your name, email address and role, and the replies of the support agent and of VIA Labs staff.',
     'Technical data: a browser-session cookie that keeps you signed in, the last time each session was active (sessions end after 2 hours idle), cookies with your language choice and your day or night view, and standard server logs from our hosting provider.',
   ]] },

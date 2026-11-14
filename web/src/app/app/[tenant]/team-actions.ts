@@ -10,6 +10,12 @@ import { supabaseAdmin } from '@/lib/supabase/server';
 import { inviteUser, mailInvite } from '@/lib/invites';
 import { assignable, canEdit, canRemove, canSetRole, isTeamRole, managesTeam } from '@/lib/team';
 import { isTrack, tenantTracks } from '@/lib/tracks';
+import { getTranslations } from 'next-intl/server';
+
+// A tester's practice company invites nobody: no email leaves it.
+async function noInvites(slug: string, settings: unknown) {
+  if ((settings as { sandbox?: boolean } | null)?.sandbox) back(slug, 'terr=' + encodeURIComponent((await getTranslations('sandbox'))('noOutside')));
+}
 
 const back = (slug: string, q: string): never => redirect(`/app/${slug}/settings?${q}#team`);
 
@@ -36,6 +42,7 @@ async function cleanAccess(form: FormData, tenantId: string, companyTracks: stri
 export async function inviteTeam(form: FormData) {
   const slug = String(form.get('slug'));
   const { tenant, user, membership, sb, companyTracks, actor } = await ctx(slug);
+  await noInvites(slug, tenant.settings);
   const email = String(form.get('email') || '').trim().toLowerCase(), role = String(form.get('role') || '');
   const name = String(form.get('name') || '').trim().slice(0, 80) || null, title = String(form.get('title') || '').trim().slice(0, 80) || null;
   if (!z.string().email().safeParse(email).success) back(slug, 'terr=email');
@@ -84,6 +91,7 @@ export async function removeMember(form: FormData) {
 export async function resendTeamInvite(form: FormData) {
   const slug = String(form.get('slug')), id = String(form.get('id'));
   const { tenant, membership, sb, actor } = await ctx(slug);
+  await noInvites(slug, tenant.settings);
   const { data: inv } = await sb.from('invites').select('id, email, role, token').eq('id', id).eq('tenant_id', tenant.id).is('accepted_at', null).neq('role', 'partner').maybeSingle();
   if (!inv || !assignable(membership.role).includes(inv.role)) back(slug, 'terr=missing');
   await sb.from('invites').update({ expires_at: new Date(Date.now() + 14 * 864e5).toISOString() }).eq('id', id);

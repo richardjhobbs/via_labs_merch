@@ -10,6 +10,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ prov
   const slug = req.nextUrl.searchParams.get('tenant') || '';
   const me = await requireTenant(slug);
   const back = (q: string) => NextResponse.redirect(new URL(`/app/${slug}/connections?${q}`, req.nextUrl.origin));
+  if ((me.tenant.settings as { sandbox?: boolean } | null)?.sandbox) return back('gerror=forbidden');
   const want = req.nextUrl.searchParams.get('want') === 'drive' ? 'drive' : null;
   const p = providerOf(provider, want);
   if (!p) return back('gerror=failed');

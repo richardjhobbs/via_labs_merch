@@ -248,7 +248,8 @@
     "reason": "Lý do (công ty sẽ thấy)",
     "end": "Kết thúc quyền ngay",
     "supportDesk": "Bàn hỗ trợ",
-    "updates": "Cập nhật"
+    "updates": "Cập nhật",
+    "testers": "Người thử nghiệm"
   },
   "roles": {
     "owner": "Chủ sở hữu",
@@ -2233,5 +2234,109 @@
     "dismiss": "Bỏ qua",
     "notifications": "Thông báo",
     "noNotifications": "Không có gì mới."
+  },
+  "sandbox": {
+    "title": "Công ty thực hành.",
+    "body": "Mọi thứ ở đây đều là giả định và không có gì được gửi cho ai. Hãy thử bất cứ điều gì.",
+    "workAs": "Làm việc với vai trò",
+    "change": "Đổi",
+    "companies": "Các công ty khác",
+    "noOutside": "Đây là công ty thực hành: không thể mời người khác hoặc kết nối với bất cứ thứ gì bên ngoài.",
+    "cap": "Trợ lý đã đạt giới hạn hôm nay của công ty thực hành. Ngày mai sẽ dùng lại được; mọi thứ khác vẫn hoạt động."
+  },
+  "try": {
+    "title": "Dùng thử VIA Merch trong một công ty thực hành",
+    "lead": "Bạn được mời thử nghiệm VIA Merch: các trợ lý làm việc cùng đội merchandising, sản xuất và phát triển sản phẩm. Hãy bước vào một công ty giả định, làm việc một lúc và cho chúng tôi biết bạn nghĩ gì.",
+    "p1": "Ba công ty thực hành: một thương hiệu, một văn phòng mua hàng và một nhà sản xuất, mỗi công ty có đơn hàng đang chạy, nhà cung cấp, trao đổi và một trợ lý đang làm việc.",
+    "p2": "Bản sao của bạn là riêng tư. Không người thử nghiệm nào khác thấy được bạn, công ty của bạn hay việc bạn làm trong đó.",
+    "p3": "Không có gì là thật và không có gì được gửi đi: duyệt, từ chối, đổi ngày, hỏi trợ lý, cứ thử thoải mái.",
+    "p4": "Nút góp ý trên mọi trang: gõ, đọc cho máy chép hoặc ghi âm lời nhắn.",
+    "legal": "Chúng tôi lưu tên, email và góp ý của bạn để thực hiện đợt thử nghiệm này và cải thiện sản phẩm.",
+    "privacy": "Quyền riêng tư",
+    "closedTitle": "Chỉ theo lời mời",
+    "closedBody": "Đợt thử nghiệm này dành cho người có đường link mời. Nếu bạn đã nhận được, hãy mở lại đường link đó.",
+    "haveAccess": "Tôi đã tham gia rồi",
+    "name": "Tên của bạn",
+    "email": "Email",
+    "company": "Công ty (không bắt buộc)",
+    "trade": "Bạn làm việc ở đâu",
+    "trades": {
+      "brand": "Thương hiệu hoặc nhà bán lẻ",
+      "buying_office": "Văn phòng mua hàng hoặc đại lý",
+      "factory": "Nhà sản xuất",
+      "trading": "Công ty thương mại",
+      "other": "Khác"
+    },
+    "join": "Gửi mã đăng nhập cho tôi",
+    "code": "Mã đăng nhập",
+    "verify": "Bắt đầu",
+    "resend": "Gửi mã mới",
+    "sentTo": "Đã gửi mã tới {email}. Nhập mã tại đây.",
+    "errForm": "Vui lòng kiểm tra tên và email.",
+    "errClosed": "Đợt thử nghiệm hiện chưa mở.",
+    "errCode": "Đường link này không hợp lệ. Hãy mở đường link mời bạn đã nhận.",
+    "errFull": "Hiện đã hết chỗ.",
+    "errFailed": "Chưa thực hiện được. Hãy thử lại sau một phút.",
+    "errOtp": "Mã không đúng. Mỗi mã chỉ dùng một lần; hãy yêu cầu mã mới.",
+    "consent": "Không có mật khẩu. Mỗi lần đăng nhập bạn dùng mã được gửi tới email này.",
+    "startTitle": "Chào mừng, {name}",
+    "startLead": "Chọn công ty gần với công việc của bạn nhất, hoặc thử cả ba. Mỗi công ty là bản sao riêng của bạn, với ngày tháng tính từ hôm nay.",
+    "notReady": "Công ty này vẫn đang được chuẩn bị. Hãy thử công ty khác hoặc quay lại sau ít phút.",
+    "worlds": {
+      "brand": {
+        "kind": "Thương hiệu",
+        "name": "Northline",
+        "blurb": "Một thương hiệu đồ dã ngoại mua trực tiếp từ các nhà máy ở năm quốc gia. Bạn điều hành sản xuất của mùa: đôn đốc mẫu, giữ ngày giao hàng, cập nhật cho cửa hàng."
+      },
+      "buying_office": {
+        "kind": "Văn phòng mua hàng",
+        "name": "Meridian Sourcing",
+        "blurb": "Một văn phòng sourcing tại Hồng Kông với năm thương hiệu khách hàng và mười bảy nhà cung cấp. Bạn đứng giữa khách hàng và nhà máy trên 38 đơn hàng đang chạy."
+      },
+      "factory": {
+        "kind": "Nhà sản xuất",
+        "name": "Hai Phong Garment",
+        "blurb": "Một nhà sản xuất áo khoác tại Việt Nam với bốn khách hàng, hai nhà máy và một đơn vị gia công. Bạn trả lời người mua, đôn đốc nhà máy vải và phụ liệu, và giao hàng đúng hạn."
+      }
+    },
+    "continue": "Tiếp tục",
+    "open": "Mở",
+    "soon": "Sắp có",
+    "again": "Bắt đầu lại từ đầu",
+    "againHint": "Cất bản sao hiện tại và cấp cho bạn một bản mới.",
+    "howTitle": "Cách thử nghiệm",
+    "how1": "Bắt đầu ở Ngày của tôi: nơi cho thấy trợ lý đã chuẩn bị gì và việc gì cần bạn.",
+    "how2": "Mở hàng chờ duyệt và quyết định vài bản nháp. Không có gì được gửi cho ai.",
+    "how3": "Mở một đơn hàng và đọc hồ sơ: đường găng, các trao đổi, bản tóm tắt.",
+    "how4": "Hỏi trợ lý bất cứ điều gì ở khung phía dưới bên phải, bằng cách gõ hoặc bằng giọng nói.",
+    "how5": "Dùng nút Góp ý trên bất kỳ trang nào khi thấy điều gì tốt, khó hiểu, còn thiếu hoặc bị lỗi."
+  },
+  "feedback": {
+    "open": "Góp ý",
+    "title": "Nói với VIA Labs",
+    "intro": "Điều gì ổn, điều gì khó hiểu, còn thiếu gì? Chỉ VIA Labs đọc nội dung này.",
+    "placeholder": "Gõ tại đây, hoặc đọc cho máy chép",
+    "send": "Gửi",
+    "sending": "Đang gửi",
+    "thanks": "Cảm ơn bạn. Góp ý đã tới VIA Labs.",
+    "another": "Thêm góp ý khác",
+    "close": "Đóng",
+    "failed": "Không gửi được. Hãy thử lại.",
+    "dictate": "Đọc chép",
+    "stop": "Dừng",
+    "listening": "Đang nghe. Hãy nói, rồi bấm Dừng.",
+    "record": "Ghi âm lời nhắn",
+    "recording": "Đang ghi âm, tối đa hai phút.",
+    "recorded": "Lời nhắn đã sẵn sàng:",
+    "discard": "Bỏ",
+    "micDenied": "Micro đang bị chặn với trang này. Hãy cho phép trong trình duyệt rồi thử lại.",
+    "micService": "Trình duyệt này không hỗ trợ đọc chép. Hãy ghi âm lời nhắn hoặc gõ.",
+    "page": "Trang",
+    "moods": {
+      "good": "Hoạt động tốt",
+      "confusing": "Khó hiểu",
+      "missing": "Còn thiếu",
+      "broken": "Bị lỗi"
+    }
   }
 }

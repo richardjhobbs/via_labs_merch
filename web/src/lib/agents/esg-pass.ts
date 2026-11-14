@@ -5,6 +5,7 @@
 //   3. where a supplier holds the figure (a mill's water use, a laundry's chemical inventory), have the agent
 //      queue a request to that supplier in its own language. It is a draft on the Compliance and CSR stream,
 //      so the gate decides; nothing goes out unapproved.
+import { isQuiet } from '@/lib/testers';
 import { supabaseAdmin } from '@/lib/supabase/server';
 import { sendMail, brandedHtml } from '@/lib/mail';
 import { hasLlm } from '@/lib/llm';
@@ -25,7 +26,7 @@ export async function nextEsgTenant() {
   const sb = supabaseAdmin();
   const { data: tenants } = await sb.from('tenants').select('id, settings');
   let pick: string | null = null, oldest = -1;
-  for (const t of (tenants || []).filter((x) => esgEnabled(x.settings))) {
+  for (const t of (tenants || []).filter((x) => esgEnabled(x.settings) && !isQuiet(x.settings))) {
     const lp = await lastEsgPass(t.id); const age = lp ? Date.now() - Date.parse(lp) : Number.MAX_SAFE_INTEGER;
     if (age > 60 * 60_000 && age > oldest) { pick = t.id; oldest = age; }
   }

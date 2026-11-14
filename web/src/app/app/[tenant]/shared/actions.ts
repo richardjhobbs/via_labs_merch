@@ -24,6 +24,7 @@ export async function invitePartner(form: FormData) {
   const t = await getTranslations('partners');
   const path = `/app/${slug}/parties/${partyId}`;
   if (!['owner', 'manager'].includes(membership.role)) back(path, { error: t('onlyManagers') });
+  if ((tenant.settings as { sandbox?: boolean } | null)?.sandbox) back(path, { error: (await getTranslations('sandbox'))('noOutside') }); // no email leaves a practice company
   const email = String(form.get('email') || '').trim().toLowerCase(), name = String(form.get('name') || '').trim().slice(0, 80) || null;
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) back(path, { error: t('badEmail') });
   const sb = await supabaseServer();

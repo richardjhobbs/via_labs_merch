@@ -8,6 +8,9 @@ import { decideDraft } from '@/lib/drafts';
 import type { DraftRef } from '@/lib/agents/tools';
 import { supabaseServer } from '@/lib/supabase/server';
 import { memberTracks, currentTrack } from '@/lib/tracks';
+import { isSandbox } from '@/lib/testers';
+import { capState } from '@/lib/agents/learning';
+import { supabaseAdmin } from '@/lib/supabase/server';
 
 export type ChatTurn = { role: 'user' | 'assistant'; text: string };
 export type AskResult = { text: string; calls: { name: string; ok: boolean; ms: number }[]; drafts: DraftRef[]; nav: { screen: string; id?: string } | null; error?: string };
@@ -15,6 +18,8 @@ export type AskResult = { text: string; calls: { name: string; ok: boolean; ms: 
 export async function askAgent(slug: string, history: ChatTurn[], question: string, lang: string, page: string): Promise<AskResult> {
   const { tenant, membership, user } = await requireTenant(slug);
   if (!hasLlm()) return { text: '', calls: [], drafts: [], nav: null, error: 'ANTHROPIC_API_KEY is not set in the Vercel project.' };
+  // a practice company has a small daily allowance; past it the agent rests until tomorrow
+  if (isSandbox(tenant.settings) && (await capState(supabaseAdmin(), tenant.id)).over) return { text: '', calls: [], drafts: [], nav: null, error: 'sandbox_cap' };
   const messages = [...history.slice(-12).map((h) => ({ role: h.role, content: h.text })), { role: 'user' as const, content: question }];
   const sb = await supabaseServer();
   const { data: tn } = await sb.from('tenants').select('settings').eq('id', tenant.id).single();

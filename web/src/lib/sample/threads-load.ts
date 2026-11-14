@@ -2,9 +2,12 @@
 // sample threads already exist. Re-parents any inbound sample messages into the matching file.
 import { supabaseAdmin } from '@/lib/supabase/server';
 import { isoOf, today } from '@/lib/core/path';
-import { SAMPLE_THREADS, SAMPLE_EXTRA_PARTIES, SAMPLE_CONTACTS } from './threads';
+import { SAMPLE_WORLDS } from './worlds';
+import type { World } from '@/lib/testers';
 
-export async function loadSampleThreads(tenantId: string, byEmail: string) {
+export async function loadSampleThreads(tenantId: string, byEmail: string, world: World = 'buying_office') {
+  const W = SAMPLE_WORLDS[world];
+  const SAMPLE_THREADS = W.threads, SAMPLE_EXTRA_PARTIES = W.extras, SAMPLE_CONTACTS = W.contacts;
   const sb = supabaseAdmin();
   const { count } = await sb.from('messages').select('id', { count: 'exact', head: true }).eq('tenant_id', tenantId).contains('raw', { sample_thread: true });
   if (count) return { ok: false, error: 'Sample conversations are already loaded.' };
@@ -35,7 +38,7 @@ export async function loadSampleThreads(tenantId: string, byEmail: string) {
     const last = th.msgs.reduce((a, m) => Math.max(a, m.d), -999);
     const { data: t } = await sb.from('threads').insert({ tenant_id: tenantId, party_id: partyId, order_id: orderId, kind: th.kind, subject: th.subject, last_message_at: new Date((T + last) * 864e5 + 9 * 3600e3).toISOString() }).select('id').single();
     if (!t) continue; threads++;
-    const rows = th.msgs.map((m, i) => ({ tenant_id: tenantId, thread_id: t.id, direction: m.dir, party_id: partyId, order_id: orderId, contact_id: m.dir === 'in' ? contacts?.find((c) => c.party_id === partyId && c.name === m.from)?.id || null : null, sender_name: m.from, from_addr: m.dir === 'out' ? 'merch@meridian.example' : null, lang: m.dir === 'out' && m.en ? th.lang : m.dir === 'in' ? th.lang : 'en', text: m.text, text_en: m.en || m.text, stream: m.stream || null, received_at: new Date((T + m.d) * 864e5 + (9 + i) * 3600e3).toISOString(), sent_at: m.dir === 'out' ? new Date((T + m.d) * 864e5 + (9 + i) * 3600e3).toISOString() : null, processed_at: new Date((T + m.d) * 864e5 + (9 + i) * 3600e3 + 60e3).toISOString(), raw: { channel: th.kind, sample_thread: true } }));
+    const rows = th.msgs.map((m, i) => ({ tenant_id: tenantId, thread_id: t.id, direction: m.dir, party_id: partyId, order_id: orderId, contact_id: m.dir === 'in' ? contacts?.find((c) => c.party_id === partyId && c.name === m.from)?.id || null : null, sender_name: m.from, from_addr: m.dir === 'out' ? W.fromAddr : null, lang: m.dir === 'out' && m.en ? th.lang : m.dir === 'in' ? th.lang : 'en', text: m.text, text_en: m.en || m.text, stream: m.stream || null, received_at: new Date((T + m.d) * 864e5 + (9 + i) * 3600e3).toISOString(), sent_at: m.dir === 'out' ? new Date((T + m.d) * 864e5 + (9 + i) * 3600e3).toISOString() : null, processed_at: new Date((T + m.d) * 864e5 + (9 + i) * 3600e3 + 60e3).toISOString(), raw: { channel: th.kind, sample_thread: true } }));
     const { error } = await sb.from('messages').insert(rows);
     if (!error) messages += rows.length;
   }
