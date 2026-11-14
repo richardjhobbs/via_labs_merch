@@ -1,6 +1,6 @@
 # Tester programme
 
-Founder, 14 Nov 2026. An open invitation to people in production, merchandising, product development, sourcing, manufacturing and brands to try VIA Merch and say what they think. Migration 0034, `web/src/lib/testers.ts`, `web/src/app/try`, `web/src/app/admin/testers`, `web/src/components/feedback.tsx`, `web/src/lib/sample/worlds.ts`.
+Founder, 14 Nov 2026. An open invitation to people in production, merchandising, product development, sourcing, manufacturing and brands to try VIA Merch and say what they think. Migration 0035, `web/src/lib/testers.ts`, `web/src/app/try`, `web/src/app/admin/testers`, `web/src/components/feedback.tsx`, `web/src/lib/sample/worlds.ts`.
 
 ## What a tester gets
 

@@ -1,4 +1,4 @@
-// The open tester programme (docs/testers.md, migration 0034). People the founder invites try VIA Merch in
+// The open tester programme (docs/testers.md, migration 0035). People the founder invites try VIA Merch in
 // practice companies. A practice company is a private copy of a frozen template (one per kind of business),
 // made for one tester by merch.sandbox_clone, so no tester ever sees another tester or what they did.
 // Nothing leaves a practice company: no channels, no invitations, no tokens, no email to anyone but the tester.

@@ -1,4 +1,4 @@
--- 0034: open tester programme (docs/testers.md).
+-- 0035: open tester programme (docs/testers.md).
 -- People the founder invites try VIA Merch in practice companies. Each tester gets a private copy
 -- of a frozen practice company (brand, buying office, manufacturer), so no tester sees another
 -- tester or anything another tester does. Feedback (typed, dictated or recorded) goes to VIA Labs.
