@@ -14,21 +14,25 @@ import { Avatar, CompanyLogo } from '@/components/avatar';
 import { cookies } from 'next/headers';
 import { TrackSwitch } from '@/components/track-switch';
 import { memberTracks, currentTrack } from '@/lib/tracks';
-import { deskLink } from '@/lib/helpdesk/desk';
+import { deskLink, unseenForPerson } from '@/lib/helpdesk/desk';
 import { updatesFor } from '@/lib/helpdesk/updates';
-import { UpdatesBell, UpdateNotice, type BellItem } from '@/components/updates-bell';
+import { UpdatesBell, UpdateNotice, TicketNotice, type BellItem } from '@/components/updates-bell';
 
 export default async function TenantLayout({ children, params }: { children: React.ReactNode; params: Promise<{ tenant: string }> }) {
   const { tenant: slug } = await params;
   const { tenant, membership, isAdmin, viewingAs, user } = await requireTenant(slug, { partner: true });
   const [t, locale] = await Promise.all([getTranslations(), getLocale()]);
   // updates from VIA Labs: headlines here, the full text on the support desk
-  const news: BellItem[] = (await updatesFor(tenant.id, user.id, membership.role === 'partner', locale, 5)).filter((u) => !u.locked).map((u) => ({ id: u.id, title: u.title, unread: u.unread, when: new Date(u.published_at).toLocaleDateString(locale, { day: 'numeric', month: 'short' }) }));
+  const [ups, replies] = await Promise.all([updatesFor(tenant.id, user.id, membership.role === 'partner', locale, 5), unseenForPerson(user.id)]);
+  const day = (d: string) => new Date(d).toLocaleDateString(locale, { day: 'numeric', month: 'short' });
+  // the person's own support tickets that VIA Labs answered or completed since they last looked, then updates
+  const mine: BellItem[] = replies.filter((x) => x.slug === slug).map((x) => ({ id: x.id, title: `#${x.number} ${x.title}`, unread: true, when: day(x.at), href: deskLink(`/${slug}/t/${x.id}`), tag: t(`help.status.${x.status}`) }));
+  const news: BellItem[] = [...mine, ...ups.filter((u) => !u.locked).map((u) => ({ id: u.id, title: u.title, unread: u.unread, when: day(u.published_at) }))];
   const newsHref = deskLink(`/${slug}/updates`);
   const N = { updates: t('help.updates'), all: t('help.updatesAll'), isNew: t('help.new'), readMore: t('help.readMore'), dismiss: t('help.dismiss'), none: t('help.updatesNone') };
   const bell = <UpdatesBell items={news} href={newsHref} labels={N} />;
-  const fresh = news.find((n) => n.unread);
-  const notice = fresh ? <UpdateNotice key={fresh.id} slug={slug} item={fresh} href={newsHref} labels={N} /> : null;
+  const fresh = news.find((n) => n.unread && !n.tag);
+  const notice = <>{mine.slice(0, 2).map((x) => <TicketNotice key={x.id} slug={slug} item={x} labels={N} />)}{fresh ? <UpdateNotice key={fresh.id} slug={slug} item={fresh} href={newsHref} labels={N} /> : null}</>;
   const ck = (await cookies()).get('merch_theme')?.value;
   const theme = ck === 'dark' || ck === 'system' ? ck : 'light';
   // a partner sees the shared compliance portal only: no workspace navigation and no agent

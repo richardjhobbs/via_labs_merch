@@ -2233,6 +2233,7 @@
     "dismiss": "Descartar",
     "notifications": "Notificaciones",
     "noNotifications": "Nada nuevo.",
-    "uploading": "Subiendo captura..."
+    "uploading": "Subiendo captura...",
+    "liveMessage": "El cambio que solicitó ya está activo: {title}. Actualice la página para verlo. Si no es lo que esperaba, responda aquí."
   }
 }
