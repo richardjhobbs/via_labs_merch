@@ -9,7 +9,7 @@ import { supabaseAdmin } from '@/lib/supabase/server';
 export const MODEL = 'claude-sonnet-5-5';
 export const SMALL_MODEL = 'claude-haiku-5-5';
 // USD per million tokens [in, out]
-const PRICE: Record<string, [number, number]> = { 'claude-sonnet-5-5': [2, 10], 'claude-haiku-5-5': [0.1, 0.5], 'deepseek-chat': [0.28, 0.42] };
+const PRICE: Record<string, [number, number]> = { 'claude-sonnet-5-5': [2, 10], 'claude-haiku-5-5': [0.1, 0.5], 'deepseek-chat': [0.28, 0.42], 'deepseek-flash': [0.28, 0.42] };  // deepseek-flash: price not confirmed from DeepSeek's page (13 Nov 2026), booked at the deepseek-chat rate
 
 export function hasLlm() { return !!process.env.ANTHROPIC_API_KEY; }
 
@@ -66,26 +66,30 @@ export const LANG_NAMES: Record<string, string> = { en: 'English', de: 'German',
 
 // DeepSeek with tools, for agents that run on it (the support desk): the same runnable tools the Claude tool
 // runner takes (name, description, input_schema, parse, run), driven through OpenAI-compatible tool calling.
-// Text only: DeepSeek's chat model does not read images.
+// Message content is text, or text and image parts for a model that reads images (DEEPSEEK_VISION_MODEL).
 export const DEEPSEEK_MODEL = 'deepseek-chat';
+// DeepSeek's model that reads images as well as text (image_url content parts). Used where a screenshot matters.
+export const DEEPSEEK_VISION_MODEL = 'deepseek-flash';
+export type DsPart = { type: 'text'; text: string } | { type: 'image_url'; image_url: { url: string } };
 export function hasDeepseek() { return !!process.env.DEEPSEEK_API_KEY; }
 export type LoopTool = { name: string; description?: string; input_schema: unknown; parse: (args: unknown) => unknown; run: (args: never) => unknown };
-type DsMessage = { role: 'system' | 'user' | 'assistant' | 'tool'; content: string | null; tool_calls?: { id: string; type: 'function'; function: { name: string; arguments: string } }[]; tool_call_id?: string };
+type DsMessage = { role: 'system' | 'user' | 'assistant' | 'tool'; content: string | DsPart[] | null; tool_calls?: { id: string; type: 'function'; function: { name: string; arguments: string } }[]; tool_call_id?: string };
 
-export async function deepseekToolLoop(opts: { system: string; messages: { role: 'user' | 'assistant'; content: string }[]; tools: LoopTool[]; maxIterations?: number; maxTokens?: number }): Promise<{ text: string; usage: Usage; error?: string }> {
+export async function deepseekToolLoop(opts: { system: string; messages: { role: 'user' | 'assistant'; content: string | DsPart[] }[]; tools: LoopTool[]; model?: string; maxIterations?: number; maxTokens?: number }): Promise<{ text: string; usage: Usage; error?: string }> {
   const msgs: DsMessage[] = [{ role: 'system', content: opts.system }, ...opts.messages];
   const tools = opts.tools.map((t) => ({ type: 'function' as const, function: { name: t.name, description: t.description || '', parameters: t.input_schema } }));
   let tokensIn = 0, tokensOut = 0, text = '', error: string | undefined;
-  const usage = () => ({ model: DEEPSEEK_MODEL, tokensIn, tokensOut, cost: costOf(DEEPSEEK_MODEL, tokensIn, tokensOut) });
+  const model = opts.model || DEEPSEEK_MODEL;
+  const usage = () => ({ model, tokensIn, tokensOut, cost: costOf(model, tokensIn, tokensOut) });
   for (let i = 0; i < (opts.maxIterations || 6); i++) {
-    const res = await fetch('https://api.deepseek.com/chat/completions', { method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${process.env.DEEPSEEK_API_KEY}` }, body: JSON.stringify({ model: DEEPSEEK_MODEL, messages: msgs, tools, temperature: 0.3, max_tokens: opts.maxTokens || 4000 }) });
+    const res = await fetch('https://api.deepseek.com/chat/completions', { method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${process.env.DEEPSEEK_API_KEY}` }, body: JSON.stringify({ model, messages: msgs, tools, temperature: 0.3, max_tokens: opts.maxTokens || 4000 }) });
     if (!res.ok) { error = `deepseek ${res.status} ${(await res.text()).slice(0, 200)}`; break; }
     const j = await res.json() as { choices: { message: DsMessage; finish_reason: string }[]; usage?: { prompt_tokens: number; completion_tokens: number } };
     tokensIn += j.usage?.prompt_tokens || 0; tokensOut += j.usage?.completion_tokens || 0;
     const m = j.choices[0]?.message;
     if (!m) { error = 'deepseek returned no message'; break; }
-    if (!m.tool_calls?.length) { text = (m.content || '').trim(); if (j.choices[0].finish_reason === 'length') error = 'Cut off at the output limit before finishing.'; break; }
-    msgs.push({ role: 'assistant', content: m.content || '', tool_calls: m.tool_calls });
+    if (!m.tool_calls?.length) { text = (typeof m.content === 'string' ? m.content : '').trim(); if (j.choices[0].finish_reason === 'length') error = 'Cut off at the output limit before finishing.'; break; }
+    msgs.push({ role: 'assistant', content: typeof m.content === 'string' ? m.content : '', tool_calls: m.tool_calls });
     for (const c of m.tool_calls) {
       const t = opts.tools.find((x) => x.name === c.function.name);
       let out: string;

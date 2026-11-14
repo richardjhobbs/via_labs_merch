@@ -18,8 +18,9 @@ works, reports an error or suggests an improvement, and where VIA Labs decides w
   `app/admin/support/actions.ts`). Screenshots (3 per message, 5 MB, images only) sit in the private bucket
   `merch-support`, served by `/api/support/file` after RLS.
 - **The agent** (`lib/helpdesk/agent.ts`, trigger `support` in `agent_runs`; on DeepSeek through
-  `deepseekToolLoop` in `llm.ts` when `DEEPSEEK_API_KEY` is set, else Claude Sonnet; DeepSeek reads text only,
-  so screenshots are named to it and seen by VIA Labs staff):
+  `deepseekToolLoop` in `llm.ts` when `DEEPSEEK_API_KEY` is set, else Claude Sonnet; a screenshot on the
+  newest message goes to `deepseek-flash`, which reads images, with a text-only retry on `deepseek-chat` and
+  Claude as the last fallback, recorded in the run's tool list as `fallback_to_claude`):
   answers from `lib/helpdesk/knowledge.ts` and one tool that reads the person's own set-up (role, tracks,
   add-ons, connection state, alert counts). It has no tool that reads orders, parties, conversations, drafts,
   the ledger or bank details, and none that changes the workspace. Partners get no status tool. It writes
