@@ -63,7 +63,7 @@ export default async function SupportDesk({ searchParams }: { searchParams: Prom
             {p.github_issue && <p className="small mt-1"><a href={`https://github.com/richardjhobbs/via_labs_merch/issues/${p.github_issue}`} target="_blank" rel="noopener">Issue #{p.github_issue}</a></p>}
             {p.pr_url && <p className="small mt-1"><a href={p.pr_url} target="_blank" rel="noopener">{p.pr_url}</a></p>}
             {p.status === 'proposed' && !p.lane && <p className="muted small mt-2">Waiting for triage (hourly): the plan and lane appear here.</p>}
-            {p.status === 'greenlit' && !p.pr_url && <p className="muted small mt-2">Greenlit: the next hourly run builds it and opens a PR.</p>}
+            {p.status === 'greenlit' && !p.pr_url && <p className="muted small mt-2">Greenlit: the next hourly run builds it, merges it and deploys it, then tells you and the person who asked.</p>}
             <div className="flex flex-wrap items-center gap-2 mt-3">
               {(NEXT[p.status] || []).map(([v, label]) => (
                 <form key={v} action={decideProposal} className="flex items-center gap-2">
