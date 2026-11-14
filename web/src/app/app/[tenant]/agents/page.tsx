@@ -28,7 +28,7 @@ export default async function Agents({ params, searchParams }: { params: Promise
   const live = hasLlm();
   const TRIG: Record<string, string> = { chat: t('trigChat'), inbound: t('trigInbound'), schedule: t('trigSchedule'), partner: t('trigPartner'), brief: t('trigBrief'), manager: t('trigManager') };
   return (
-    <div className="max-w-6xl">
+    <div className="max-w-6xl pb-20">
       <h1>{t('title')}</h1>
       <p className="muted mt-1" style={{ maxWidth: '70ch' }}>{t('sub')}</p>
       {!live && <div className="notice warn mt-4">{t('noKey')}</div>}
@@ -37,8 +37,8 @@ export default async function Agents({ params, searchParams }: { params: Promise
       {q.lsaved && <div className="notice mt-4">{t('learn.saved')}</div>}
       {q.lerr && <div className="notice crit mt-4">{['role', 'owner', 'fields', 'size', 'type', 'doc', 'cap', 'nollm'].includes(q.lerr) ? t(`learn.err.${q.lerr}` as never) : q.lerr}</div>}
       {q.derr && <div className="notice crit mt-4">{['role', 'fields', 'person'].includes(q.derr) ? t(`desks.err.${q.derr}` as never) : q.derr}</div>}
-      <div className="grid gap-6 mt-6 lg:grid-cols-[1fr_360px]">
-        <div className="grid gap-6">
+      <div className="grid gap-6 mt-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="grid gap-6 min-w-0">
           {(agents || []).map((a) => (
             <div key={a.id} className="card">
               <div className="flex items-center gap-3"><span className="pill agent" style={{ fontSize: 14, padding: '4px 10px' }}>{a.name.slice(0, 1)}</span><div><div className="font-medium" style={{ fontSize: 16 }}>{a.name}</div><div className="muted small">{a.scope_kind === 'tenant' ? t('opsAgent', { company: tenant.name }) : a.scope_kind === 'party' ? (a.parties as unknown as { name: string } | null)?.name : a.scope_stream}</div></div>{!a.enabled && <span className="pill ml-auto">off</span>}</div>
@@ -73,14 +73,14 @@ export default async function Agents({ params, searchParams }: { params: Promise
           <DesksSection slug={slug} tenantId={tenant.id} role={membership.role} tz={tenant.tz} />
           <LearningSection slug={slug} tenantId={tenant.id} role={membership.role} tz={tenant.tz} />
         </div>
-        <div className="card" style={{ alignSelf: 'start' }}>
+        <div className="card min-w-0" style={{ alignSelf: 'start' }}>
           <div className="font-medium small">{t('activity')}</div>
           {!runs?.length && <div className="muted small mt-2">{t('noRuns')}</div>}
           <div className="mt-2 grid gap-2">
             {(runs || []).map((r) => (
-              <div key={r.id} className="small" style={{ borderTop: '1px solid var(--line2)', paddingTop: 8 }}>
-                <div className="flex items-center gap-2"><span className="pill agent">{TRIG[r.trigger] || r.trigger}</span><span className="muted">{new Date(r.created_at).toLocaleString('en-GB', { timeZone: tenant.tz, day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</span><span className="muted ml-auto">{(r.tools_called as unknown[]).length} {t('toolsShort')} · {((r.ms || 0) / 1000).toFixed(1)}s · ${Number(r.cost_usd).toFixed(3)}</span></div>
-                {r.error ? <div className="mt-1" style={{ color: 'var(--crit)' }}>{r.error}</div> : r.output && <div className="mt-1 muted" style={{ whiteSpace: 'pre-wrap', maxHeight: 72, overflow: 'hidden' }}>{r.output.slice(0, 220)}{r.output.length > 220 ? '…' : ''}</div>}
+              <div key={r.id} className="small min-w-0" style={{ borderTop: '1px solid var(--line2)', paddingTop: 8 }}>
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1"><span className="pill agent">{TRIG[r.trigger] || r.trigger}</span><span className="muted">{new Date(r.created_at).toLocaleString('en-GB', { timeZone: tenant.tz, day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</span><span className="muted ml-auto">{(r.tools_called as unknown[]).length} {t('toolsShort')} · {((r.ms || 0) / 1000).toFixed(1)}s · ${Number(r.cost_usd).toFixed(3)}</span></div>
+                {r.error ? <div className="mt-1" style={{ color: 'var(--crit)', overflowWrap: 'anywhere' }}>{r.error}</div> : r.output && <div className="mt-1 muted" style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', maxHeight: 72, overflow: 'hidden' }}>{r.output.slice(0, 220)}{r.output.length > 220 ? '…' : ''}</div>}
               </div>
             ))}
           </div>
