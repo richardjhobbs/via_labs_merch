@@ -59,7 +59,10 @@ writes `plan`, `scope`, `risk_flags` and `lane` back to the row, and opens a Git
   it; the founder greenlights or declines; `lib/helpdesk/fire.ts` then calls the API trigger of the scheduled
   task "VIA Merch support triage (on Greenlight)", which wakes the triage session. Its token is pasted into the
   console card "Build agent link" (kept in `merch.app_config`, service role only; `TRIAGE_FIRE_TOKEN` in Vercel
-  overrides it); saving tests it. Without it the console says the build has not started.
+  overrides it); saving tests it. Without it the console says the build has not started. Each fire starts a
+  fresh session, so the task itself carries the repository `richardjhobbs/via_labs_merch` and the Supabase
+  connector (Advanced settings in its Edit dialog); without them the run stops at step 1. Verified 15 Nov 2026:
+  a fire ran the step 1 query and answered "idle".
 - The task stops at the open PR and flags `needs the founder` when a greenlit change needs a migration, an env
   var, a dependency, or touches sign-in, RLS, roles, gates, the ledger, bank accounts, connectors, agent
   prompts and tools, pricing or the legal pages. It never applies a migration and never touches settings.
