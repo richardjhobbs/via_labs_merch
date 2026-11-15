@@ -52,9 +52,10 @@ writes `plan`, `scope`, `risk_flags` and `lane` back to the row, and opens a Git
   14 Nov 2026): the next run builds it, merges its own PR once every check passed, sees the production
   deployment READY and sets `status = 'shipped'`. The minute drain (`lib/helpdesk/shipped.ts`, migration 0034)
   then tells the person who asked (ticket status, bell, email) and emails VIA Labs, once.
-- **Start within three minutes:** a small watcher session ("VIA Merch greenlight watch", on Haiku) is woken
-  every three minutes by twenty scheduled tasks. Each tick runs one count of proposals greenlit or filed in the
-  last 200 seconds and, if there are any, fires the triage task. The hourly run remains as the safety net.
+- **Start within five minutes:** a small watcher session ("VIA Merch greenlight watch", on Haiku) is woken
+  every five minutes by twelve scheduled tasks ("Merch greenlight watch :02" to ":57"). Each tick runs one
+  count of proposals greenlit or filed in the last 420 seconds (the overlap covers a late tick) and, if there
+  are any, fires the triage task. The hourly run remains as the safety net. A tick costs about USD 0.025.
   `lib/helpdesk/fire.ts` can also call the triage task's API trigger at once (`TRIAGE_FIRE_URL`,
   `TRIAGE_FIRE_TOKEN`); it is not configured and nothing depends on it.
 - The task stops at the open PR and flags `needs the founder` when a greenlit change needs a migration, an env
