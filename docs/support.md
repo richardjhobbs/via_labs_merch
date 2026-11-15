@@ -41,7 +41,8 @@ works, reports an error or suggests an improvement, and where VIA Labs decides w
 
 ## Stage B (built): handover to the coding agent
 
-An hourly Claude Code scheduled task, "VIA Merch support triage", follows `docs/support-triage.md`. It reads
+A Claude Code scheduled task with no schedule, "VIA Merch support triage (on Greenlight)", follows
+`docs/support-triage.md` when the Greenlight click fires it. It reads
 new rows of `merch.change_proposals` straight from the database (no GitHub token in the app), reads the code,
 writes `plan`, `scope`, `risk_flags` and `lane` back to the row, and opens a GitHub issue labelled
 `support-proposal`. The console shows the plan and lane.
@@ -52,10 +53,12 @@ writes `plan`, `scope`, `risk_flags` and `lane` back to the row, and opens a Git
   14 Nov 2026): the next run builds it, merges its own PR once every check passed, sees the production
   deployment READY and sets `status = 'shipped'`. The minute drain (`lib/helpdesk/shipped.ts`, migration 0034)
   then tells the person who asked (ticket status, bell, email) and emails VIA Labs, once.
-- **When the build starts:** at the triage task's next hourly run. A polling watcher (a Haiku session woken
-  every few minutes) was built and removed on 15 Nov 2026: it cost about USD 7 a day idle, which the founder
-  rejected. Do not rebuild a poller. The no-idle-cost route is the triage task's API trigger, called by
-  `lib/helpdesk/fire.ts` on Greenlight (`TRIAGE_FIRE_URL`, `TRIAGE_FIRE_TOKEN`); it is not configured.
+- **What starts the build:** the Greenlight click, and nothing else (founder, 15 Nov 2026). There is no
+  schedule and no polling: an hourly run and a five-minute watcher were both built and removed as a waste of
+  tokens, and are not to be rebuilt. When a proposal is filed, VIA Labs is emailed and the console bell shows
+  it; the founder greenlights or declines; `lib/helpdesk/fire.ts` then calls the API trigger of the scheduled
+  task "VIA Merch support triage (on Greenlight)" with `TRIAGE_FIRE_TOKEN`, which wakes the triage session.
+  Without the token the console says the build has not started.
 - The task stops at the open PR and flags `needs the founder` when a greenlit change needs a migration, an env
   var, a dependency, or touches sign-in, RLS, roles, gates, the ledger, bank accounts, connectors, agent
   prompts and tools, pricing or the legal pages. It never applies a migration and never touches settings.
