@@ -12,7 +12,7 @@ import { LOCALES } from '@/i18n/locales';
 const STOP_FLAGS = ['needs the founder', 'checks failed', 'deploy failed'];
 export async function confirmDeployed(): Promise<number> {
   if (process.env.VERCEL_ENV !== 'production') return 0;
-  const sha = process.env.VERCEL_GIT_COMMIT_SHA || '';
+  const sha = process.env.MERCH_BUILD_SHA || process.env.VERCEL_GIT_COMMIT_SHA || '';
   const builtAt = process.env.MERCH_BUILD_AT || '';
   const sb = supabaseAdmin();
   const { data: rows } = await sb.from('change_proposals').select('id, merged_sha, risk_flags, updated_at, plan').eq('status', 'pr_open').not('merged_sha', 'is', null).limit(10);

@@ -34,7 +34,8 @@ export default async function Ledger({ params, searchParams }: { params: Promise
         <div className="kpi"><div className="n">{tot.cost.toFixed(2)}</div><div className="l">{t('cost')} · 14d</div></div>
       </div>
 
-      <div className="split mt-6" style={{ '--side': '360px' } as React.CSSProperties}>
+      {/* The ledger takes the full width and the autonomy card sits below it (P4): side by side, the What column was cut off. */}
+      <div className="mt-6">
         <div className="card tw" style={{ padding: 0 }}>
           <table className="t stack"><thead><tr><th>{t('when')}</th><th>{t('who')}</th><th>{t('stream')}</th><th>{track === 'development' ? t('style') : t('po')}</th><th>{t('what')}</th><th>{t('gate')}</th></tr></thead><tbody>
             {(rows || []).map((r) => { const po = (r.orders as unknown as { po: string } | null)?.po, st = r.styles as unknown as { id: string; code: string } | null; return (
@@ -44,11 +45,11 @@ export default async function Ledger({ params, searchParams }: { params: Promise
                 <td className="small muted" data-l={t('stream')}>{r.stream}</td>
                 <td className="small" data-l={po || st ? t('po') : undefined}>{po ? <Link href={`/app/${slug}/orders/${encodeURIComponent(po)}`}>{po}</Link> : st ? <Link href={`/app/${slug}/styles/${st.id}`}>{st.code}</Link> : ''}</td>
                 <td className="small" style={{ overflowWrap: 'anywhere' }}>{r.what}</td>
-                <td data-l={t('gate')}><span className={`pill ${r.gated ? (r.gate?.startsWith('APPROVED') || r.gate?.startsWith('ADMIN') ? 'ok' : r.gate?.startsWith('REJECTED') ? 'crit' : 'warn') : r.gate?.startsWith('AUTO') ? 'agent' : ''}`}>{r.gate}</span></td>
+                <td data-l={t('gate')} style={{ whiteSpace: 'nowrap' }}><span className={`pill ${r.gated ? (r.gate?.startsWith('APPROVED') || r.gate?.startsWith('ADMIN') ? 'ok' : r.gate?.startsWith('REJECTED') ? 'crit' : 'warn') : r.gate?.startsWith('AUTO') ? 'agent' : ''}`}>{r.gate}</span></td>
               </tr>); })}
           </tbody></table>
         </div>
-        <div>
+        <div className="mt-6" style={{ maxWidth: 560 }}>
           <div className="card">
             <h2 style={{ fontSize: 15 }}>{t('gates')}</h2>
             <p className="muted small mt-1">{t('gateNote')}</p>

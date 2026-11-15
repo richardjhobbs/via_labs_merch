@@ -42,6 +42,17 @@ first. Database: Supabase project `jiimjfqkeuvveculyill`, schema `merch`, table 
    - Branch `support/p<number>-<slug>` from the latest `main`.
    - Make the change exactly as planned. A changed UI string lands in all six `messages/*.json`. A change to
      anything `web/src/lib/helpdesk/knowledge.ts` states updates that file too.
+   - When the person suggested a specific change (for example "move the section"), make that change. Do not
+     substitute a cleverer one that keeps the problem at some screen width (P4: the first fix kept the panel
+     beside the ledger on desktop and the column was still cut off).
+   - **See it fixed before the PR** for anything visible. Copy the changed markup into a temporary page under
+     `web/src/app/legal/zz-check/page.tsx` (`/legal` is public, so no sign-in or database is needed) with
+     realistic content (long text, the rows from the report), run
+     `NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:1 NEXT_PUBLIC_SUPABASE_ANON_KEY=x npx next dev -p 3999`, and with
+     Playwright load it at 1440, 1100 and 390 px wide. Measure the reported symptom (for clipping: every
+     scrolling container has `scrollWidth <= clientWidth` and no text sits outside its card) and look at the
+     screenshots. The symptom must be gone at all three widths, or no PR. Delete the temporary page before
+     committing and put the measurements in the PR body.
    - In `web/`: `npx tsc --noEmit`, `npx eslint` on the changed files, `npm test`, `npx next build`. All pass,
      or no PR: write what failed into `plan`, set lane `greenlight`, flag `checks failed`.
    - Open a PR to `main`, title `P<number>: <title>`, body: what and why, how it was checked, `Closes #<issue>`.

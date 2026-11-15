@@ -7,7 +7,7 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   // When this build started: lib/helpdesk/shipped.ts treats a merge recorded before it as included in the build.
-  env: { MERCH_BUILD_AT: new Date().toISOString() },
+  env: { MERCH_BUILD_AT: new Date().toISOString(), MERCH_BUILD_SHA: process.env.VERCEL_GIT_COMMIT_SHA || '' },
   experimental: { serverActions: { bodySizeLimit: '4.4mb' } },
   headers: async () => [{ source: '/(.*)', headers: [
     { key: 'X-Frame-Options', value: 'DENY' },
