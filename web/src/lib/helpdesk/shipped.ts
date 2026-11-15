@@ -5,7 +5,31 @@ import { supabaseAdmin } from '@/lib/supabase/server';
 import { TICKET_COLS, ledger, notifyPerson, notifyVia, type Ticket } from './desk';
 import { LOCALES } from '@/i18n/locales';
 
+// A merged proposal (status 'pr_open', merged_sha set, no stop flag) is live once the production deployment
+// running this code contains it: either it was built from that very commit, or its build started after the
+// merge was recorded (a production build of main includes every merge before it). The build session cannot
+// see Vercel, so the app confirms the deploy itself.
+const STOP_FLAGS = ['needs the founder', 'checks failed', 'deploy failed'];
+export async function confirmDeployed(): Promise<number> {
+  if (process.env.VERCEL_ENV !== 'production') return 0;
+  const sha = process.env.MERCH_BUILD_SHA || process.env.VERCEL_GIT_COMMIT_SHA || '';
+  const builtAt = process.env.MERCH_BUILD_AT || '';
+  const sb = supabaseAdmin();
+  const { data: rows } = await sb.from('change_proposals').select('id, merged_sha, risk_flags, updated_at, plan').eq('status', 'pr_open').not('merged_sha', 'is', null).limit(10);
+  let n = 0;
+  for (const p of rows || []) {
+    if ((p.risk_flags || []).some((f: string) => STOP_FLAGS.includes(f))) continue;
+    const live = (sha && p.merged_sha === sha) || (builtAt && builtAt > new Date(p.updated_at).toISOString());
+    if (!live) continue;
+    const note = `Live in production (deployment ${sha.slice(0, 7) || 'unknown'}), confirmed by the app.`;
+    const { data: done } = await sb.from('change_proposals').update({ status: 'shipped', plan: p.plan ? `${p.plan}\n\n${note}` : note }).eq('id', p.id).eq('status', 'pr_open').select('id');
+    if (done?.length) n++;
+  }
+  return n;
+}
+
 export async function notifyShipped(): Promise<number> {
+  await confirmDeployed();
   const sb = supabaseAdmin();
   const { data: rows } = await sb.from('change_proposals').select('id, number, title, tenant_id, ticket_id, pr_url').eq('status', 'shipped').is('shipped_notified_at', null).limit(5);
   let n = 0;

@@ -42,6 +42,17 @@ first. Database: Supabase project `jiimjfqkeuvveculyill`, schema `merch`, table 
    - Branch `support/p<number>-<slug>` from the latest `main`.
    - Make the change exactly as planned. A changed UI string lands in all six `messages/*.json`. A change to
      anything `web/src/lib/helpdesk/knowledge.ts` states updates that file too.
+   - When the person suggested a specific change (for example "move the section"), make that change. Do not
+     substitute a cleverer one that keeps the problem at some screen width (P4: the first fix kept the panel
+     beside the ledger on desktop and the column was still cut off).
+   - **See it fixed before the PR** for anything visible. Copy the changed markup into a temporary page under
+     `web/src/app/legal/zz-check/page.tsx` (`/legal` is public, so no sign-in or database is needed) with
+     realistic content (long text, the rows from the report), run
+     `NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:1 NEXT_PUBLIC_SUPABASE_ANON_KEY=x npx next dev -p 3999`, and with
+     Playwright load it at 1440, 1100 and 390 px wide. Measure the reported symptom (for clipping: every
+     scrolling container has `scrollWidth <= clientWidth` and no text sits outside its card) and look at the
+     screenshots. The symptom must be gone at all three widths, or no PR. Delete the temporary page before
+     committing and put the measurements in the PR body.
    - In `web/`: `npx tsc --noEmit`, `npx eslint` on the changed files, `npm test`, `npx next build`. All pass,
      or no PR: write what failed into `plan`, set lane `greenlight`, flag `checks failed`.
    - Open a PR to `main`, title `P<number>: <title>`, body: what and why, how it was checked, `Closes #<issue>`.
@@ -73,13 +84,12 @@ Only for a row that was `greenlit` when the run started, after its PR is open an
 2. Wait for the PR's Vercel checks (commit statuses on the PR head) to finish. Any failure: fix it once if the
    cause is in your diff, otherwise stop as in 1 with flag `checks failed`.
 3. Merge the PR into `main` with a merge commit. Note the merge commit sha.
-4. Confirm it is live: the production deployment of the project `via-labs-merch-sanj` for that sha is READY
-   (Vercel tool `list_deployments` with the sha, or the commit status "Vercel – via-labs-merch-sanj" on the
-   merge commit). Check a few times over up to 10 minutes. If it ends in ERROR, production stays on the
-   previous deployment: set `status = 'pr_open'`, flag `deploy failed`, report, and do not retry or revert.
-5. `update merch.change_proposals set status = 'shipped', merged_sha = … where id = …;`
-   The app then tells the person who asked (ticket status, bell, email) and emails VIA Labs; do not send
-   anything yourself. The draft update from step 3 stays a draft for the founder to publish.
+4. Record the merge at once: `update merch.change_proposals set merged_sha = '<sha>' where id = …;` (status
+   stays `pr_open`, no stop flag). That is the end of your part. The app confirms the deploy itself: the minute
+   drain on production sets `status = 'shipped'` once the live deployment contains the merge, then tells the
+   person who asked (ticket status, bell, email) and emails VIA Labs. Do not check Vercel, wait for the deploy,
+   flag the row for the founder because you cannot see Vercel, or send anything yourself. The draft update from
+   step 3 stays a draft for the founder to publish.
 
 A proceed-lane proposal that was not greenlit stops at its PR, marked **Safe to merge**, as before.
 
