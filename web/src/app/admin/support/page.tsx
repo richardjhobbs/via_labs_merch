@@ -3,7 +3,8 @@
 import Link from 'next/link';
 import { supabaseAdmin } from '@/lib/supabase/server';
 import { TICKET_COLS, DONE, type Ticket } from '@/lib/helpdesk/desk';
-import { decideProposal } from './actions';
+import { decideProposal, saveTriageToken, testTriageLink } from './actions';
+import { triageLink } from '@/lib/helpdesk/fire';
 
 type Proposal = { id: string; number: number; kind: string; title: string; problem: string; affected: string | null; suggested: string | null; repro: string | null; status: string; lane: string | null; scope: string | null; plan: string | null; risk_flags: string[]; github_issue: number | null; pr_url: string | null; decided_by_email: string | null; decision_note: string | null; created_at: string; ticket_id: string | null; tenants: { name: string } | null; support_tickets: { number: number; opened_by_name: string | null } | null };
 const OPEN_P = ['proposed', 'planned', 'greenlit', 'building', 'pr_open'];
@@ -18,9 +19,10 @@ const NEXT: Record<string, [string, string][]> = {
 export default async function SupportDesk({ searchParams }: { searchParams: Promise<{ saved?: string; all?: string; error?: string }> }) {
   const { saved, all, error } = await searchParams;
   const sb = supabaseAdmin();
-  const [{ data: pr }, { data: tk }] = await Promise.all([
+  const [{ data: pr }, { data: tk }, link] = await Promise.all([
     sb.from('change_proposals').select('*, tenants(name), support_tickets(number, opened_by_name)').order('created_at', { ascending: false }).limit(200),
     sb.from('support_tickets').select(`${TICKET_COLS}, tenants(name)`).order('last_message_at', { ascending: false }).limit(300),
+    triageLink(),
   ]);
   const proposals = (pr || []) as unknown as Proposal[];
   const tickets = (tk || []) as unknown as (Ticket & { tenants: { name: string } | null })[];
@@ -42,6 +44,27 @@ export default async function SupportDesk({ searchParams }: { searchParams: Prom
       <h1>Support desk</h1>
       {saved && <div className="notice mt-3">{saved === '1' ? 'Saved.' : saved}</div>}
       {error && <div className="notice crit mt-3">{error}</div>}
+
+      <div className="card mt-4">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <b>Build agent link</b>
+          {link.connected ? <span className="pill ok">connected</span> : <span className="pill crit">not connected</span>}
+          <span className="muted small">{link.connected ? 'Greenlight starts the build at once.' : 'Greenlight is recorded but nothing is built until this is connected.'}</span>
+          {link.connected && <form action={testTriageLink} className="ml-auto"><button className="btn sm">Test</button></form>}
+        </div>
+        {link.source !== 'env' && <details className="mt-2" open={!link.connected}>
+          <summary className="small" style={{ cursor: 'pointer' }}>{link.connected ? 'Replace the token' : 'Connect'}</summary>
+          <ol className="small mt-2" style={{ paddingLeft: 18, listStyle: 'decimal', color: 'var(--fg2)' }}>
+            <li>Open <a href="https://claude.ai/code/routines" target="_blank" rel="noopener">claude.ai/code/routines</a> and click <b>VIA Merch support triage (on Greenlight)</b>.</li>
+            <li>Open its menu, choose <b>Edit</b>. In the <b>Trigger</b> row click <b>+</b>, choose <b>API</b>, then <b>Generate token</b>.</li>
+            <li>Copy the token (it is shown once) and paste it here. Saving tests the link straight away.</li>
+          </ol>
+          <form action={saveTriageToken} className="flex flex-wrap gap-2 mt-2">
+            <input className="input" name="token" type="password" autoComplete="off" required placeholder="sk-ant-..." style={{ flex: '1 1 260px', padding: '5px 8px', fontSize: 12.5 }} />
+            <button className="btn primary sm">Save and test</button>
+          </form>
+        </details>}
+      </div>
 
       {head(`Change proposals (${openP.length})`)}
       <div className="grid gap-3 mt-3">
