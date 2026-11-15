@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { requireAdmin } from '@/lib/tenant';
 import { supabaseAdmin } from '@/lib/supabase/server';
-import { fireTriage } from '@/lib/helpdesk/fire';
+import { fireTriage, TOKEN_KEY } from '@/lib/helpdesk/fire';
 import { STATUSES, TICKET_COLS, ledger, notifyPerson, type Ticket, type TicketStatus } from '@/lib/helpdesk/desk';
 
 async function load(id: string) {
@@ -72,4 +72,23 @@ export async function decideProposal(form: FormData) {
     redirect(`/admin/support?saved=${encodeURIComponent(f.fired ? `P${p.number} greenlit. The build has started; you will be told when it is live.` : `P${p.number} greenlit and recorded, but the build has NOT started: the link to the build agent failed (${f.reason}).`)}`);
   }
   redirect('/admin/support?saved=1');
+}
+
+// The build agent link: the token of the triage task's API trigger, pasted here by VIA Labs. Stored service
+// role only in merch.app_config; never shown again after saving.
+export async function saveTriageToken(form: FormData) {
+  await requireAdmin();
+  const tok = String(form.get('token') || '').trim();
+  if (!/^sk-ant-[A-Za-z0-9_-]{20,300}$/.test(tok)) redirect(`/admin/support?error=${encodeURIComponent('That does not look like the token from the Claude app (it starts with sk-ant-).')}`);
+  const { error } = await supabaseAdmin().from('app_config').upsert({ key: TOKEN_KEY, value: tok, updated_at: new Date().toISOString() }, { onConflict: 'key' });
+  if (error) redirect(`/admin/support?error=${encodeURIComponent(error.message)}`);
+  const f = await fireTriage('Link test from the VIA Merch console. Check for work as usual.');
+  revalidatePath('/admin/support');
+  redirect(`/admin/support?saved=${encodeURIComponent(f.fired ? 'Build agent link saved and tested: it answered. Greenlight now starts the build at once.' : `Saved, but the test failed: ${f.reason}`)}`);
+}
+
+export async function testTriageLink() {
+  await requireAdmin();
+  const f = await fireTriage('Link test from the VIA Merch console. Check for work as usual.');
+  redirect(f.fired ? `/admin/support?saved=${encodeURIComponent('Build agent link works.')}` : `/admin/support?error=${encodeURIComponent(`Build agent link failed: ${f.reason}`)}`);
 }

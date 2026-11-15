@@ -57,8 +57,9 @@ writes `plan`, `scope`, `risk_flags` and `lane` back to the row, and opens a Git
   schedule and no polling: an hourly run and a five-minute watcher were both built and removed as a waste of
   tokens, and are not to be rebuilt. When a proposal is filed, VIA Labs is emailed and the console bell shows
   it; the founder greenlights or declines; `lib/helpdesk/fire.ts` then calls the API trigger of the scheduled
-  task "VIA Merch support triage (on Greenlight)" with `TRIAGE_FIRE_TOKEN`, which wakes the triage session.
-  Without the token the console says the build has not started.
+  task "VIA Merch support triage (on Greenlight)", which wakes the triage session. Its token is pasted into the
+  console card "Build agent link" (kept in `merch.app_config`, service role only; `TRIAGE_FIRE_TOKEN` in Vercel
+  overrides it); saving tests it. Without it the console says the build has not started.
 - The task stops at the open PR and flags `needs the founder` when a greenlit change needs a migration, an env
   var, a dependency, or touches sign-in, RLS, roles, gates, the ledger, bank accounts, connectors, agent
   prompts and tools, pricing or the legal pages. It never applies a migration and never touches settings.
