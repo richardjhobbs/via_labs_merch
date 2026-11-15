@@ -52,9 +52,11 @@ writes `plan`, `scope`, `risk_flags` and `lane` back to the row, and opens a Git
   14 Nov 2026): the next run builds it, merges its own PR once every check passed, sees the production
   deployment READY and sets `status = 'shipped'`. The minute drain (`lib/helpdesk/shipped.ts`, migration 0034)
   then tells the person who asked (ticket status, bell, email) and emails VIA Labs, once.
-- **Instant start:** pressing Greenlight calls the task's API trigger (`lib/helpdesk/fire.ts`,
-  `TRIAGE_FIRE_URL` and `TRIAGE_FIRE_TOKEN` in Vercel), so the build starts at once; the console says whether
-  it started. With the variables unset, or if the call fails, the hourly run picks the proposal up.
+- **Start within three minutes:** a small watcher session ("VIA Merch greenlight watch", on Haiku) is woken
+  every three minutes by twenty scheduled tasks. Each tick runs one count of proposals greenlit or filed in the
+  last 200 seconds and, if there are any, fires the triage task. The hourly run remains as the safety net.
+  `lib/helpdesk/fire.ts` can also call the triage task's API trigger at once (`TRIAGE_FIRE_URL`,
+  `TRIAGE_FIRE_TOKEN`); it is not configured and nothing depends on it.
 - The task stops at the open PR and flags `needs the founder` when a greenlit change needs a migration, an env
   var, a dependency, or touches sign-in, RLS, roles, gates, the ledger, bank accounts, connectors, agent
   prompts and tools, pricing or the legal pages. It never applies a migration and never touches settings.
