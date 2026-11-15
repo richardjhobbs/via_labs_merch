@@ -52,12 +52,10 @@ writes `plan`, `scope`, `risk_flags` and `lane` back to the row, and opens a Git
   14 Nov 2026): the next run builds it, merges its own PR once every check passed, sees the production
   deployment READY and sets `status = 'shipped'`. The minute drain (`lib/helpdesk/shipped.ts`, migration 0034)
   then tells the person who asked (ticket status, bell, email) and emails VIA Labs, once.
-- **Start within five minutes:** a small watcher session ("VIA Merch greenlight watch", on Haiku) is woken
-  every five minutes by twelve scheduled tasks ("Merch greenlight watch :02" to ":57"). Each tick runs one
-  count of proposals greenlit or filed in the last 420 seconds (the overlap covers a late tick) and, if there
-  are any, fires the triage task. The hourly run remains as the safety net. A tick costs about USD 0.025.
-  `lib/helpdesk/fire.ts` can also call the triage task's API trigger at once (`TRIAGE_FIRE_URL`,
-  `TRIAGE_FIRE_TOKEN`); it is not configured and nothing depends on it.
+- **When the build starts:** at the triage task's next hourly run. A polling watcher (a Haiku session woken
+  every few minutes) was built and removed on 15 Nov 2026: it cost about USD 7 a day idle, which the founder
+  rejected. Do not rebuild a poller. The no-idle-cost route is the triage task's API trigger, called by
+  `lib/helpdesk/fire.ts` on Greenlight (`TRIAGE_FIRE_URL`, `TRIAGE_FIRE_TOKEN`); it is not configured.
 - The task stops at the open PR and flags `needs the founder` when a greenlit change needs a migration, an env
   var, a dependency, or touches sign-in, RLS, roles, gates, the ledger, bank accounts, connectors, agent
   prompts and tools, pricing or the legal pages. It never applies a migration and never touches settings.
