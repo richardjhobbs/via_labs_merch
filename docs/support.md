@@ -52,6 +52,9 @@ writes `plan`, `scope`, `risk_flags` and `lane` back to the row, and opens a Git
   14 Nov 2026): the next run builds it, merges its own PR once every check passed, sees the production
   deployment READY and sets `status = 'shipped'`. The minute drain (`lib/helpdesk/shipped.ts`, migration 0034)
   then tells the person who asked (ticket status, bell, email) and emails VIA Labs, once.
+- **Instant start:** pressing Greenlight calls the task's API trigger (`lib/helpdesk/fire.ts`,
+  `TRIAGE_FIRE_URL` and `TRIAGE_FIRE_TOKEN` in Vercel), so the build starts at once; the console says whether
+  it started. With the variables unset, or if the call fails, the hourly run picks the proposal up.
 - The task stops at the open PR and flags `needs the founder` when a greenlit change needs a migration, an env
   var, a dependency, or touches sign-in, RLS, roles, gates, the ledger, bank accounts, connectors, agent
   prompts and tools, pricing or the legal pages. It never applies a migration and never touches settings.
