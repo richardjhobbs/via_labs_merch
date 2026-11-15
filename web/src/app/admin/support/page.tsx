@@ -40,7 +40,7 @@ export default async function SupportDesk({ searchParams }: { searchParams: Prom
   return (
     <div style={{ maxWidth: 820 }}>
       <h1>Support desk</h1>
-      {saved && <div className="notice mt-3">Saved.</div>}
+      {saved && <div className="notice mt-3">{saved === '1' ? 'Saved.' : saved}</div>}
       {error && <div className="notice crit mt-3">{error}</div>}
 
       {head(`Change proposals (${openP.length})`)}
@@ -63,7 +63,7 @@ export default async function SupportDesk({ searchParams }: { searchParams: Prom
             {p.github_issue && <p className="small mt-1"><a href={`https://github.com/richardjhobbs/via_labs_merch/issues/${p.github_issue}`} target="_blank" rel="noopener">Issue #{p.github_issue}</a></p>}
             {p.pr_url && <p className="small mt-1"><a href={p.pr_url} target="_blank" rel="noopener">{p.pr_url}</a></p>}
             {p.status === 'proposed' && !p.lane && <p className="muted small mt-2">Waiting for triage (hourly): the plan and lane appear here.</p>}
-            {p.status === 'greenlit' && !p.pr_url && <p className="muted small mt-2">Greenlit: the next hourly run builds it, merges it and deploys it, then tells you and the person who asked.</p>}
+            {p.status === 'greenlit' && !p.pr_url && <p className="muted small mt-2">Greenlit: being built, merged and deployed. You and the person who asked are told when it is live.</p>}
             <div className="flex flex-wrap items-center gap-2 mt-3">
               {(NEXT[p.status] || []).map(([v, label]) => (
                 <form key={v} action={decideProposal} className="flex items-center gap-2">

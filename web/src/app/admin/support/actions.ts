@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { requireAdmin } from '@/lib/tenant';
 import { supabaseAdmin } from '@/lib/supabase/server';
+import { fireTriage } from '@/lib/helpdesk/fire';
 import { STATUSES, TICKET_COLS, ledger, notifyPerson, type Ticket, type TicketStatus } from '@/lib/helpdesk/desk';
 
 async function load(id: string) {
@@ -65,5 +66,10 @@ export async function decideProposal(form: FormData) {
   }
   await ledger(p.tenant_id, 'VIA Labs', null, `Change proposal #${p.number} (${p.title}) set to ${status.replace('_', ' ')} by VIA Labs`, { change_proposal: p.id });
   revalidatePath('/admin/support');
+  // greenlight is the instruction to build and deploy: start the triage task now, not at the next hourly run
+  if (status === 'greenlit') {
+    const f = await fireTriage();
+    redirect(`/admin/support?saved=${encodeURIComponent(f.fired ? `P${p.number} greenlit. The build has started; you will be told when it is live.` : `P${p.number} greenlit. The build starts at the next hourly run (instant start: ${f.reason}).`)}`);
+  }
   redirect('/admin/support?saved=1');
 }
