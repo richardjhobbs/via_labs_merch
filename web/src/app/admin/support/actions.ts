@@ -66,11 +66,11 @@ export async function decideProposal(form: FormData) {
   }
   await ledger(p.tenant_id, 'VIA Labs', null, `Change proposal #${p.number} (${p.title}) set to ${status.replace('_', ' ')} by VIA Labs`, { change_proposal: p.id });
   revalidatePath('/admin/support');
-  // greenlight is the instruction to build and deploy. A watcher session checks every five minutes and starts
-  // the triage task (docs/support.md); the API trigger below starts it at once where it is configured.
+  // greenlight is the instruction to build and deploy. The triage task picks it up on its hourly run; the API
+  // trigger below starts it at once where it is configured (docs/support.md).
   if (status === 'greenlit') {
     const f = await fireTriage();
-    redirect(`/admin/support?saved=${encodeURIComponent(f.fired ? `P${p.number} greenlit. The build has started; you will be told when it is live.` : `P${p.number} greenlit. The build starts within about five minutes; you will be told when it is live.`)}`);
+    redirect(`/admin/support?saved=${encodeURIComponent(f.fired ? `P${p.number} greenlit. The build has started; you will be told when it is live.` : `P${p.number} greenlit. The build starts at the next hourly run; you will be told when it is live.`)}`);
   }
   redirect('/admin/support?saved=1');
 }
