@@ -6,6 +6,8 @@ const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // When this build started: lib/helpdesk/shipped.ts treats a merge recorded before it as included in the build.
+  env: { MERCH_BUILD_AT: new Date().toISOString() },
   experimental: { serverActions: { bodySizeLimit: '4.4mb' } },
   headers: async () => [{ source: '/(.*)', headers: [
     { key: 'X-Frame-Options', value: 'DENY' },

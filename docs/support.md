@@ -50,9 +50,9 @@ writes `plan`, `scope`, `risk_flags` and `lane` back to the row, and opens a Git
 - **Proceed lane** (simple and global; the full test is in the runbook): the same run builds it on a branch
   `support/p<number>-…` and opens a PR marked "Safe to merge".
 - **Greenlight lane:** waits. Greenlight in `/admin/support` is the instruction to build and deploy (founder,
-  14 Nov 2026): the next run builds it, merges its own PR once every check passed, sees the production
-  deployment READY and sets `status = 'shipped'`. The minute drain (`lib/helpdesk/shipped.ts`, migration 0034)
-  then tells the person who asked (ticket status, bell, email) and emails VIA Labs, once.
+  14 Nov 2026): the next run builds it, merges its own PR once every check passed and records the merge
+  sha. The minute drain on production (`confirmDeployed` in `lib/helpdesk/shipped.ts`, migration 0034) sets
+  `status = 'shipped'` once the live deployment contains that merge (same sha, or built after it), then tells the person who asked (ticket status, bell, email) and emails VIA Labs, once.
 - **What starts the build:** the Greenlight click, and nothing else (founder, 15 Nov 2026). There is no
   schedule and no polling: an hourly run and a five-minute watcher were both built and removed as a waste of
   tokens, and are not to be rebuilt. When a proposal is filed, VIA Labs is emailed and the console bell shows
