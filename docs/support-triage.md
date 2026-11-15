@@ -73,13 +73,12 @@ Only for a row that was `greenlit` when the run started, after its PR is open an
 2. Wait for the PR's Vercel checks (commit statuses on the PR head) to finish. Any failure: fix it once if the
    cause is in your diff, otherwise stop as in 1 with flag `checks failed`.
 3. Merge the PR into `main` with a merge commit. Note the merge commit sha.
-4. Confirm it is live: the production deployment of the project `via-labs-merch-sanj` for that sha is READY
-   (Vercel tool `list_deployments` with the sha, or the commit status "Vercel – via-labs-merch-sanj" on the
-   merge commit). Check a few times over up to 10 minutes. If it ends in ERROR, production stays on the
-   previous deployment: set `status = 'pr_open'`, flag `deploy failed`, report, and do not retry or revert.
-5. `update merch.change_proposals set status = 'shipped', merged_sha = … where id = …;`
-   The app then tells the person who asked (ticket status, bell, email) and emails VIA Labs; do not send
-   anything yourself. The draft update from step 3 stays a draft for the founder to publish.
+4. Record the merge at once: `update merch.change_proposals set merged_sha = '<sha>' where id = …;` (status
+   stays `pr_open`, no stop flag). That is the end of your part. The app confirms the deploy itself: the minute
+   drain on production sets `status = 'shipped'` once the live deployment contains the merge, then tells the
+   person who asked (ticket status, bell, email) and emails VIA Labs. Do not check Vercel, wait for the deploy,
+   flag the row for the founder because you cannot see Vercel, or send anything yourself. The draft update from
+   step 3 stays a draft for the founder to publish.
 
 A proceed-lane proposal that was not greenlit stops at its PR, marked **Safe to merge**, as before.
 
