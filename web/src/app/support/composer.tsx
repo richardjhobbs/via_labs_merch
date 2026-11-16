@@ -1,5 +1,5 @@
 'use client';
-// The message box of the support desk: text plus up to three screenshots, which go straight from the
+// The message box of the support desk (one "working" indicator: the reply bubble above the box): text plus up to three screenshots, which go straight from the
 // browser to the private bucket by a one-time link. A screenshot can be chosen, pasted into the box or dropped
 // on it; all three take the same path and limits. Without ticketId it starts a new conversation.
 import { useRef, useState, useTransition } from 'react';
@@ -94,8 +94,8 @@ export function Composer({ slug, ticketId, page = '' }: { slug: string; ticketId
       <div className="flex flex-wrap items-center gap-2 mt-3">
         <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple hidden onChange={(e) => addFiles(e.target.files)} />
         <button type="button" className="btn sm" disabled={pending || uploading || shots.length >= 3} onClick={() => fileRef.current?.click()}>{t('attach')}</button>
-        <span className="muted small flex items-center gap-2" role="status" aria-live="polite">{uploading ? <><span className="spinner" aria-hidden />{t('uploading')}</> : pending ? <><span className="spinner" aria-hidden />{t('working')}</> : t('attachHint')}</span>
-        <button className="btn primary ml-auto" disabled={pending || uploading || !text.trim()}>{pending && <span className="spinner" aria-hidden style={{ borderColor: 'rgba(255,255,255,.4)', borderTopColor: '#fff' }} />}{t('send')}</button>
+        <span className="muted small flex items-center gap-2" role="status" aria-live="polite">{uploading ? <><span className="spinner" aria-hidden />{t('uploading')}</> : pending ? null : t('attachHint')}</span>
+        <button className="btn primary ml-auto" disabled={pending || uploading || !text.trim()}>{t('send')}</button>
       </div>
     </form>
   );
