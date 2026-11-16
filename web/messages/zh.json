@@ -2176,7 +2176,7 @@
     "send": "发送",
     "working": "VIA Support 正在处理...",
     "attach": "添加截图",
-    "attachHint": "最多 3 张图片，每张不超过 5 MB",
+    "attachHint": "可粘贴或添加最多 3 张图片，每张不超过 5 MB",
     "remove": "移除",
     "mine": "您的对话",
     "companyAll": "{company} 的全部对话",

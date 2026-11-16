@@ -13,6 +13,7 @@ VIA Merch gives a merchandising team (buying office, brand, factory, trading com
 - Sign-in is by invitation. "No account" means the address was not invited: an owner or manager invites people under Settings, Team.
 - A code works once. If it fails, ask for a new one and use the newest email. Codes sometimes land in spam.
 - The support desk uses the same account. Opening "Help and support" or an update from inside the workspace signs you in to the desk without a second code and opens it in a new browser tab, so the workspace page stays open while you wait for a reply; going to the desk directly asks for a code.
+- To show the support desk a screenshot, paste it into the message box (Ctrl+V or Cmd+V), drop it on the box, or use Add screenshot. Up to 3 images per message (PNG, JPEG, WebP or GIF), 5 MB each.
 
 ## Languages
 - The interface is available in English, German, Bangla, Chinese, Vietnamese and Spanish. Change it with the flag picker.

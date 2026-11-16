@@ -1,6 +1,7 @@
 'use client';
 // The message box of the support desk: text plus up to three screenshots, which go straight from the
-// browser to the private bucket by a one-time link. Without ticketId it starts a new conversation.
+// browser to the private bucket by a one-time link. A screenshot can be chosen, pasted into the box or dropped
+// on it; all three take the same path and limits. Without ticketId it starts a new conversation.
 import { useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -20,8 +21,8 @@ export function Composer({ slug, ticketId, page = '' }: { slug: string; ticketId
   const [sentText, setSentText] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
 
-  async function addFiles(list: FileList | null) {
-    if (!list) return;
+  async function addFiles(list: FileList | File[] | null) {
+    if (!list || !list.length || uploading) return;
     setErr(''); setUploading(true);
     for (const f of Array.from(list).slice(0, 3 - shots.length)) {
       if (f.size > MAX || !/^image\/(png|jpeg|webp|gif)$/.test(f.type)) { setErr(t('attachHint')); continue; }
@@ -33,6 +34,37 @@ export function Composer({ slug, ticketId, page = '' }: { slug: string; ticketId
     }
     setUploading(false);
     if (fileRef.current) fileRef.current.value = '';
+  }
+
+  // A pasted screenshot arrives as a clipboard file with the browser's generic name (image.png), so it is
+  // renamed to something a person can tell apart. Pasting text is left to the browser.
+  function imagesOf(items: DataTransferItemList | undefined, named: boolean): File[] {
+    const out: File[] = [];
+    for (const it of Array.from(items ?? [])) {
+      if (it.kind !== 'file' || !it.type.startsWith('image/')) continue;
+      const f = it.getAsFile(); if (!f) continue;
+      if (named && f.name && f.name !== 'image.png') { out.push(f); continue; }
+      const ext = f.type.split('/')[1]?.replace('jpeg', 'jpg') || 'png';
+      const stamp = new Date().toISOString().slice(0, 19).replace(/[-:]/g, '').replace('T', '-');
+      out.push(new File([f], `screenshot-${stamp}${out.length ? `-${out.length + 1}` : ''}.${ext}`, { type: f.type }));
+    }
+    return out;
+  }
+
+  function onPaste(e: React.ClipboardEvent<HTMLTextAreaElement>) {
+    const files = imagesOf(e.clipboardData?.items, false);
+    if (!files.length) return;
+    e.preventDefault();
+    if (shots.length >= 3 || uploading) { setErr(t('attachHint')); return; }
+    void addFiles(files);
+  }
+
+  function onDrop(e: React.DragEvent<HTMLTextAreaElement>) {
+    const files = imagesOf(e.dataTransfer?.items, true);
+    if (!files.length) return;
+    e.preventDefault();
+    if (shots.length >= 3 || uploading) { setErr(t('attachHint')); return; }
+    void addFiles(files);
   }
 
   function send(e: React.FormEvent) {
@@ -56,7 +88,7 @@ export function Composer({ slug, ticketId, page = '' }: { slug: string; ticketId
           <div style={{ justifySelf: 'start', padding: '10px 13px', borderRadius: 10, background: 'var(--surface)', border: '1px solid var(--line)' }} className="flex items-center gap-2 small"><span className="typing" aria-hidden><i /><i /><i /></span><span className="muted">{t('working')}</span></div>
         </div>
       )}
-      <textarea className="input" rows={ticketId ? 3 : 5} maxLength={8000} required placeholder={ticketId ? t('replyPh') : t('newPh')} value={text} onChange={(e) => setText(e.target.value)} disabled={pending} />
+      <textarea className="input" rows={ticketId ? 3 : 5} maxLength={8000} required placeholder={ticketId ? t('replyPh') : t('newPh')} value={text} onChange={(e) => setText(e.target.value)} onPaste={onPaste} onDrop={onDrop} disabled={pending} />
       {!!shots.length && <div className="flex flex-wrap gap-2 mt-2">{shots.map((s) => <span key={s.path} className="pill">{s.name.slice(0, 28)} <button type="button" aria-label={t('remove')} onClick={() => setShots((x) => x.filter((y) => y.path !== s.path))} style={{ border: 0, background: 'none', cursor: 'pointer', color: 'inherit' }}>×</button></span>)}</div>}
       {err && <div className="notice crit mt-2">{err}</div>}
       <div className="flex flex-wrap items-center gap-2 mt-3">
