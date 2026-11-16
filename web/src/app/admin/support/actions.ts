@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation';
 import { requireAdmin } from '@/lib/tenant';
 import { supabaseAdmin } from '@/lib/supabase/server';
 import { fireTriage, TOKEN_KEY } from '@/lib/helpdesk/fire';
-import { STATUSES, TICKET_COLS, ledger, notifyPerson, type Ticket, type TicketStatus } from '@/lib/helpdesk/desk';
+import { STATUSES, TICKET_COLS, ledger, notifyPerson, tellPerson, type Ticket, type TicketStatus } from '@/lib/helpdesk/desk';
 
 async function load(id: string) {
   const { data } = await supabaseAdmin().from('support_tickets').select(`${TICKET_COLS}, tenants(slug)`).eq('id', id).maybeSingle();
@@ -41,35 +41,31 @@ export async function setTicketStatus(form: FormData) {
   redirect(`/admin/support/${id}?saved=1`);
 }
 
-// proposal status → what the person sees on the ticket
-const MIRROR: Record<string, TicketStatus> = { planned: 'planned', greenlit: 'planned', building: 'building', pr_open: 'building', shipped: 'shipped', declined: 'declined' };
-const LINE: Record<string, string> = { planned: 'VIA Labs has planned this change.', building: 'VIA Labs is working on this change.', shipped: 'This change is now live.', declined: 'VIA Labs has decided not to make this change for now.' };
-
+// The decisions on a change proposal (docs/support.md). Greenlight is the instruction to build and deploy: it
+// tells the person it is approved and starts the build at once. Decline tells the person, with the reason.
+// Build again restarts a greenlit build that stopped before merging. There is no manual "shipped": the app
+// says a change is live only once production runs it (lib/helpdesk/shipped.ts).
 export async function decideProposal(form: FormData) {
   const m = await requireAdmin();
-  const id = String(form.get('id') || ''), status = String(form.get('status') || ''), note = String(form.get('note') || '').trim().slice(0, 1000);
-  const lane = String(form.get('lane') || ''), pr = String(form.get('pr_url') || '').trim().slice(0, 300);
-  if (!MIRROR[status]) redirect(`/admin/support?error=${encodeURIComponent('That decision did not come through. Try again.')}`);
+  const id = String(form.get('id') || ''), action = String(form.get('status') || ''), note = String(form.get('note') || '').trim().slice(0, 1000);
+  if (!['greenlit', 'declined', 'rebuild'].includes(action)) redirect(`/admin/support?error=${encodeURIComponent('That decision did not come through. Try again.')}`);
   const sb = supabaseAdmin();
-  const { data: p } = await sb.from('change_proposals').select('id, number, title, status, tenant_id, ticket_id').eq('id', id).maybeSingle();
+  const { data: p } = await sb.from('change_proposals').select('id, number, title, status, tenant_id, ticket_id, merged_sha').eq('id', id).maybeSingle();
   if (!p) redirect('/admin/support');
-  const { error: failed } = await sb.from('change_proposals').update({ status, decided_by_email: m.user.email, decided_at: new Date().toISOString(), ...(note ? { decision_note: note } : {}), ...(['proceed', 'greenlight'].includes(lane) ? { lane } : {}), ...(/^https:\/\/github\.com\//.test(pr) ? { pr_url: pr } : {}) }).eq('id', id);
+  if (['shipped', 'declined'].includes(p.status)) redirect(`/admin/support?error=${encodeURIComponent(`P${p.number} is already ${p.status}.`)}`);
+  if (p.merged_sha && action !== 'declined') redirect(`/admin/support?error=${encodeURIComponent(`P${p.number} is already merged; it goes live with the next production deployment.`)}`);
+  const now = new Date().toISOString();
+  const status = action === 'declined' ? 'declined' : 'greenlit';
+  const { error: failed } = await sb.from('change_proposals').update({ status, decided_by_email: m.user.email, decided_at: now, stuck_reason: null, stuck_notified_at: null, ...(action === 'rebuild' ? { risk_flags: [] } : {}), ...(note ? { decision_note: note } : {}) }).eq('id', id);
   if (failed) redirect(`/admin/support?error=${encodeURIComponent(failed.message)}`);
-  const shown = MIRROR[status];
-  if (p.ticket_id) {
-    const found = await load(p.ticket_id);
-    // 'shipped' is announced by the drain (lib/helpdesk/shipped.ts), whoever shipped it
-    if (status !== 'shipped' && found && found.ticket.status !== shown && found.ticket.status !== 'closed') {
-      await sb.from('support_tickets').update({ status: shown, via_activity_at: new Date().toISOString() }).eq('id', p.ticket_id);
-      await notifyPerson(found.ticket, found.slug, `${LINE[shown]}${note && shown === 'declined' ? ` ${note}` : ''}`);
-    }
-  }
-  await ledger(p.tenant_id, 'VIA Labs', null, `Change proposal #${p.number} (${p.title}) set to ${status.replace('_', ' ')} by VIA Labs`, { change_proposal: p.id });
+  if (p.ticket_id && action === 'greenlit') await tellPerson(p.ticket_id, 'approvedMessage', { title: p.title }, 'building');
+  if (p.ticket_id && action === 'declined') await tellPerson(p.ticket_id, 'declinedMessage', { title: p.title, reason: note ? ` ${note}` : '' }, 'declined');
+  await ledger(p.tenant_id, 'VIA Labs', null, `Change proposal #${p.number} (${p.title}) ${action === 'declined' ? 'declined' : action === 'rebuild' ? 'sent to be built again' : 'greenlit'} by VIA Labs`, { change_proposal: p.id });
   revalidatePath('/admin/support');
-  // greenlight is the instruction to build and deploy, and the only thing that starts the triage task
   if (status === 'greenlit') {
-    const f = await fireTriage();
-    redirect(`/admin/support?saved=${encodeURIComponent(f.fired ? `P${p.number} greenlit. The build has started; you will be told when it is live.` : `P${p.number} greenlit and recorded, but the build has NOT started: the link to the build agent failed (${f.reason}).`)}`);
+    const f = await fireTriage(`P${p.number} was greenlit.`);
+    if (!f.fired) await sb.from('change_proposals').update({ stuck_reason: `The build agent link failed: ${f.reason}` }).eq('id', id);
+    redirect(f.fired ? `/admin/support?saved=${encodeURIComponent(`P${p.number} greenlit. The build has started; you and the person who asked are told when it is live, or you are told if it gets stuck.`)}` : `/admin/support?error=${encodeURIComponent(`P${p.number} greenlit and recorded, but the build has NOT started: the link to the build agent failed (${f.reason}). Fix the link below, then press Build again.`)}`);
   }
   redirect('/admin/support?saved=1');
 }

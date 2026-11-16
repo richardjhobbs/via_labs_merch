@@ -2212,7 +2212,7 @@
       "with_via": "El personal de VIA Labs lo tiene y responderá aquí y por correo.",
       "logged": "Registrada en VIA Labs como solicitud de cambio. Su estado se muestra aquí.",
       "planned": "VIA Labs ha planificado este cambio.",
-      "building": "VIA Labs está trabajando en este cambio.",
+      "building": "Aprobado. VIA Labs está desarrollando este cambio; recibirá un mensaje aquí cuando esté activo.",
       "shipped": "Este cambio ya está activo.",
       "declined": "VIA Labs ha decidido no hacer este cambio por ahora."
     },
@@ -2234,6 +2234,8 @@
     "notifications": "Notificaciones",
     "noNotifications": "Nada nuevo.",
     "uploading": "Subiendo captura...",
-    "liveMessage": "El cambio que solicitó ya está activo: {title}. Actualice la página para verlo. Si no es lo que esperaba, responda aquí."
+    "liveMessage": "El cambio que solicitó ya está activo: {title}. Actualice la página para verlo. Si no es lo que esperaba, responda aquí.",
+    "approvedMessage": "Buenas noticias: VIA Labs ha aprobado este cambio ({title}) y lo está desarrollando ahora. Recibirá un mensaje aquí en cuanto esté activo.",
+    "declinedMessage": "VIA Labs ha decidido no hacer este cambio ({title}) por ahora.{reason} Si quiere añadir algo, responda aquí."
   }
 }

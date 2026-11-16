@@ -95,3 +95,22 @@ export async function unseenForVia(): Promise<{ id: string; number: number; titl
   const { data } = await supabaseAdmin().from('support_tickets').select('id, number, title, status, opened_by_name, person_activity_at, via_seen_at, tenants(name)').not('person_activity_at', 'is', null).order('person_activity_at', { ascending: false }).limit(150);
   return (data || []).filter((t) => !t.via_seen_at || t.person_activity_at! > t.via_seen_at).slice(0, 30).map((t) => ({ id: t.id, number: t.number, title: t.title, status: t.status as TicketStatus, company: (t.tenants as unknown as { name: string } | null)?.name || '', who: t.opened_by_name, at: t.person_activity_at! }));
 }
+
+// Tell the person who opened a ticket something about their request: the line goes into the conversation in
+// the ticket's language (so it is there when they open it, and their bell and workspace notice light up), the
+// ticket status moves, and they get the same line by email. Used for approved, declined and live.
+export async function tellPerson(ticketId: string, key: 'approvedMessage' | 'declinedMessage' | 'liveMessage', vars: Record<string, string>, status?: TicketStatus) {
+  const sb = supabaseAdmin();
+  const { data } = await sb.from('support_tickets').select(`${TICKET_COLS}, tenants(slug)`).eq('id', ticketId).maybeSingle();
+  if (!data) return;
+  const ticket = data as unknown as Ticket & { tenants: { slug: string } };
+  if (ticket.status === 'closed') return;
+  const { LOCALES } = await import('@/i18n/locales');
+  const l = (LOCALES as readonly string[]).includes(ticket.locale || '') ? (ticket.locale as string) : 'en';
+  const help = ((await import(`../../../messages/${l}.json`)).default as { help: Record<string, string> }).help;
+  const line = Object.entries(vars).reduce((s, [k, v]) => s.replace(`{${k}}`, v), help[key]).trim();
+  const now = new Date().toISOString();
+  await sb.from('support_messages').insert({ tenant_id: ticket.tenant_id, ticket_id: ticket.id, author_kind: 'via', author_name: null, body: line });
+  await sb.from('support_tickets').update({ ...(status ? { status } : {}), via_activity_at: now, last_message_at: now }).eq('id', ticket.id);
+  await notifyPerson(ticket, ticket.tenants.slug, line);
+}

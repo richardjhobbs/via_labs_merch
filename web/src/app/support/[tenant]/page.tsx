@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { getTranslations, getLocale } from 'next-intl/server';
 import { supabaseServer } from '@/lib/supabase/server';
-import { supportMe, workspaceLink, TICKET_COLS, type Ticket } from '@/lib/helpdesk/desk';
+import { supportMe, TICKET_COLS, type Ticket } from '@/lib/helpdesk/desk';
 import { Composer } from '../composer';
 import { StatusPill } from '../status-pill';
 import { updatesFor } from '@/lib/helpdesk/updates';
@@ -22,7 +22,6 @@ export default async function Desk({ params, searchParams }: { params: Promise<{
   const tickets = (data || []) as Ticket[];
   const mine = tickets.filter((x) => x.opened_by === me.user.id);
   const others = tickets.filter((x) => x.opened_by !== me.user.id);
-  const partner = me.membership.role === 'partner';
   const row = (x: Ticket, who: boolean) => (
     <Link key={x.id} href={`/support/${slug}/t/${x.id}`} className="card flex flex-wrap items-center gap-x-3 gap-y-1 no-underline" style={{ color: 'inherit', padding: '12px 14px' }}>
       <span className="mono muted">#{x.number}</span>
@@ -36,7 +35,6 @@ export default async function Desk({ params, searchParams }: { params: Promise<{
       <div className="flex flex-wrap items-baseline gap-x-3">
         <h1>{t('newTitle')}</h1>
         <span className="muted small">{me.tenant.name}</span>
-        {!partner && <a href={workspaceLink(slug)} className="small ml-auto">{t('workspace')}</a>}
       </div>
       <p className="muted small mt-2" style={{ maxWidth: '64ch' }}>{t('sub')}</p>
       <div className="card mt-4"><Composer slug={slug} page={from} /></div>

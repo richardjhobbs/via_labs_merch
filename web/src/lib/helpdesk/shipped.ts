@@ -1,15 +1,14 @@
-// A change proposal that has gone live: tell the person who asked and VIA Labs, once. The triage task (or a
-// person in the console) sets status 'shipped'; the minute drain calls this, so the notice does not depend
-// on who shipped it. Each proposal is claimed first, so two drains cannot both send.
+// A change proposal that has gone live: tell the person who asked and VIA Labs, once. Only confirmDeployed()
+// below sets status 'shipped' (there is no manual "shipped" button), so "now live" is never said before
+// production runs the merge. Each proposal is claimed first, so two drains cannot both send.
 import { supabaseAdmin } from '@/lib/supabase/server';
-import { TICKET_COLS, ledger, notifyPerson, notifyVia, type Ticket } from './desk';
-import { LOCALES } from '@/i18n/locales';
+import { ledger, notifyVia, tellPerson } from './desk';
+import { STOP_FLAGS } from './stuck-rules';
 
 // A merged proposal (status 'pr_open', merged_sha set, no stop flag) is live once the production deployment
 // running this code contains it: either it was built from that very commit, or its build started after the
 // merge was recorded (a production build of main includes every merge before it). The build session cannot
 // see Vercel, so the app confirms the deploy itself.
-const STOP_FLAGS = ['needs the founder', 'checks failed', 'deploy failed'];
 export async function confirmDeployed(): Promise<number> {
   if (process.env.VERCEL_ENV !== 'production') return 0;
   const sha = process.env.MERCH_BUILD_SHA || process.env.VERCEL_GIT_COMMIT_SHA || '';
@@ -22,7 +21,7 @@ export async function confirmDeployed(): Promise<number> {
     const live = (sha && p.merged_sha === sha) || (builtAt && builtAt > new Date(p.updated_at).toISOString());
     if (!live) continue;
     const note = `Live in production (deployment ${sha.slice(0, 7) || 'unknown'}), confirmed by the app.`;
-    const { data: done } = await sb.from('change_proposals').update({ status: 'shipped', plan: p.plan ? `${p.plan}\n\n${note}` : note }).eq('id', p.id).eq('status', 'pr_open').select('id');
+    const { data: done } = await sb.from('change_proposals').update({ status: 'shipped', stuck_reason: null, plan: p.plan ? `${p.plan}\n\n${note}` : note }).eq('id', p.id).eq('status', 'pr_open').select('id');
     if (done?.length) n++;
   }
   return n;
@@ -38,21 +37,13 @@ export async function notifyShipped(): Promise<number> {
     if (!claimed?.length) continue;
     let who = '';
     if (p.ticket_id) {
-      const { data: tk } = await sb.from('support_tickets').select(`${TICKET_COLS}, tenants(slug, name)`).eq('id', p.ticket_id).maybeSingle();
-      if (tk) {
-        const ticket = tk as unknown as Ticket & { tenants: { slug: string; name: string } };
-        who = `${ticket.tenants.name} · ${ticket.opened_by_name || ''}`;
-        if (ticket.status !== 'closed') await sb.from('support_tickets').update({ status: 'shipped', via_activity_at: new Date().toISOString() }).eq('id', ticket.id);
-        // said in the conversation itself, in the person's language, so it is there when they open the ticket
-        const l = (LOCALES as readonly string[]).includes(ticket.locale || '') ? (ticket.locale as string) : 'en';
-        const line = ((await import(`../../../messages/${l}.json`)).default as { help: { liveMessage: string } }).help.liveMessage.replace('{title}', p.title);
-        await sb.from('support_messages').insert({ tenant_id: ticket.tenant_id, ticket_id: ticket.id, author_kind: 'via', author_name: null, body: line });
-        await sb.from('support_tickets').update({ last_message_at: new Date().toISOString() }).eq('id', ticket.id);
-        await notifyPerson(ticket, ticket.tenants.slug, line);
-      }
+      const { data: tk } = await sb.from('support_tickets').select('opened_by_name, tenants(name)').eq('id', p.ticket_id).maybeSingle();
+      if (tk) who = `${(tk.tenants as unknown as { name: string }).name} · ${tk.opened_by_name || ''}`;
+      await tellPerson(p.ticket_id, 'liveMessage', { title: p.title }, 'shipped');
     }
     await ledger(p.tenant_id, 'VIA Labs', null, `Change proposal #${p.number} (${p.title}) is live`, { change_proposal: p.id });
-    await notifyVia(`P${p.number} is live: ${p.title}`, [who || 'No ticket linked', 'Built, merged and deployed after your greenlight. The person who asked has been told.', ...(p.pr_url ? [p.pr_url] : [])], '/admin/support');
+    const { data: draft } = await sb.from('announcements').select('id').eq('proposal_id', p.id).eq('status', 'draft').limit(1).maybeSingle();
+    await notifyVia(`P${p.number} is live: ${p.title}`, [who || 'No ticket linked', 'Built, checked, merged and running in production after your Greenlight. The person who asked has been told in their conversation, on their bell and by email.', ...(draft ? ['An update about it is waiting for you to publish in the console, under Updates.'] : []), ...(p.pr_url ? [p.pr_url] : [])], draft ? '/admin/updates' : '/admin/support');
     n++;
   }
   return n;
