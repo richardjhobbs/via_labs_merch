@@ -103,7 +103,9 @@ VIA Merch gives a merchandising team (buying office, brand, factory, trading com
 - Full statements: merch.getvia.xyz/trust and merch.getvia.xyz/privacy.
 
 ## Following a request
-- When VIA Labs replies on one of your support conversations, or a change you asked for goes live, you see it in three places: a notice above the page in the workspace, the bell on the support desk, and an email. The conversation itself carries the message.
+- A change you ask for is logged with VIA Labs. When VIA Labs approves it, the conversation says so and it is built straight away; when it is live, the conversation says that too. If VIA Labs decides not to make it, the conversation gives the reason.
+- Each of these, and any reply from VIA Labs staff, shows in three places: a notice above the page in the workspace, the bell on the support desk, and an email. The conversation itself carries the message.
+- "Back to the workspace" at the top of every support page returns to VIA Merch without a second code.
 
 ## Updates
 - In the workspace, the Updates bell in the side rail shows the latest headlines and how many are unread, and a new update appears as a one-line notice above the page. Both open the full text on the support desk. Owners and managers also receive each update by email.

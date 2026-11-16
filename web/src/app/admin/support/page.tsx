@@ -6,14 +6,21 @@ import { TICKET_COLS, DONE, type Ticket } from '@/lib/helpdesk/desk';
 import { decideProposal, saveTriageToken, testTriageLink } from './actions';
 import { triageLink } from '@/lib/helpdesk/fire';
 
-type Proposal = { id: string; number: number; kind: string; title: string; problem: string; affected: string | null; suggested: string | null; repro: string | null; status: string; lane: string | null; scope: string | null; plan: string | null; risk_flags: string[]; github_issue: number | null; pr_url: string | null; decided_by_email: string | null; decision_note: string | null; created_at: string; ticket_id: string | null; tenants: { name: string } | null; support_tickets: { number: number; opened_by_name: string | null } | null };
+type Proposal = { merged_sha: string | null; stuck_reason: string | null; id: string; number: number; kind: string; title: string; problem: string; affected: string | null; suggested: string | null; repro: string | null; status: string; lane: string | null; scope: string | null; plan: string | null; risk_flags: string[]; github_issue: number | null; pr_url: string | null; decided_by_email: string | null; decision_note: string | null; created_at: string; ticket_id: string | null; tenants: { name: string } | null; support_tickets: { number: number; opened_by_name: string | null } | null };
 const OPEN_P = ['proposed', 'planned', 'greenlit', 'building', 'pr_open'];
-const NEXT: Record<string, [string, string][]> = {
-  proposed: [['planned', 'Plan it'], ['greenlit', 'Greenlight'], ['declined', 'Decline']],
-  planned: [['greenlit', 'Greenlight'], ['declined', 'Decline']],
-  greenlit: [['building', 'Building'], ['declined', 'Decline']],
-  building: [['pr_open', 'PR open'], ['shipped', 'Shipped']],
-  pr_open: [['shipped', 'Shipped'], ['declined', 'Decline']],
+// What the founder can do with each open proposal (actions.ts decideProposal). No manual "shipped": the app
+// says a change is live only when production runs it.
+const actionsFor = (p: Proposal): [string, string][] => {
+  if (p.merged_sha) return [];
+  if (['proposed', 'planned'].includes(p.status) && !p.decided_by_email) return [['greenlit', 'Greenlight: build and deploy'], ['declined', 'Decline']];
+  return p.stuck_reason || (p.risk_flags || []).length ? [['rebuild', 'Build again'], ['declined', 'Decline']] : [['declined', 'Decline']];
+};
+const stage = (p: Proposal) => {
+  if (p.merged_sha) return `Merged as ${p.merged_sha.slice(0, 7)}: goes live with the production deployment, then you and the person who asked are told.`;
+  if (p.status === 'pr_open') return 'Pull request open.';
+  if (p.status === 'building') return 'Being built.';
+  if (p.status === 'greenlit') return 'Greenlit: the build agent is starting.';
+  return 'Waiting for your decision. Greenlight builds, checks, merges and deploys it with no further step.';
 };
 
 export default async function SupportDesk({ searchParams }: { searchParams: Promise<{ saved?: string; all?: string; error?: string }> }) {
@@ -74,7 +81,7 @@ export default async function SupportDesk({ searchParams }: { searchParams: Prom
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
               <span className="mono muted">P{p.number}</span><b style={{ fontSize: 15 }}>{p.title}</b>
               <span className="pill">{p.kind}</span><span className="pill agent">{p.status.replace('_', ' ')}</span>
-              {p.lane && <span className={`pill ${p.lane === 'proceed' ? 'ok' : 'warn'}`}>{p.lane === 'proceed' ? 'safe to proceed' : 'needs greenlight'}</span>}
+              
               <span className="muted small ml-auto">{p.tenants?.name}{p.support_tickets ? <> · <Link href={`/admin/support/${p.ticket_id}`}>#{p.support_tickets.number} {p.support_tickets.opened_by_name}</Link></> : null} · {day(p.created_at)}</span>
             </div>
             <p className="small mt-2" style={{ whiteSpace: 'pre-wrap', color: 'var(--fg2)' }}>{p.problem}</p>
@@ -85,15 +92,15 @@ export default async function SupportDesk({ searchParams }: { searchParams: Prom
             {!!p.risk_flags?.length && <div className="flex flex-wrap gap-1 mt-2">{p.risk_flags.map((f) => <span key={f} className="pill crit">{f}</span>)}</div>}
             {p.github_issue && <p className="small mt-1"><a href={`https://github.com/richardjhobbs/via_labs_merch/issues/${p.github_issue}`} target="_blank" rel="noopener">Issue #{p.github_issue}</a></p>}
             {p.pr_url && <p className="small mt-1"><a href={p.pr_url} target="_blank" rel="noopener">{p.pr_url}</a></p>}
-            {p.status === 'proposed' && !p.lane && <p className="muted small mt-2">Waiting for triage (hourly): the plan and lane appear here.</p>}
-            {p.status === 'greenlit' && !p.pr_url && <p className="muted small mt-2">Greenlit: being built, merged and deployed. You and the person who asked are told when it is live.</p>}
+            <p className="muted small mt-2">{stage(p)}</p>
+            {p.stuck_reason && <div className="notice crit mt-2 small">{p.stuck_reason}{p.merged_sha ? <> <a href="https://vercel.com/richard-entrepotasis-projects/via-labs-merch-sanj/deployments" target="_blank" rel="noopener">Open the deployments in Vercel</a>.</> : ' Deal with the cause, then press Build again.'}</div>}
             <div className="flex flex-wrap items-center gap-2 mt-3">
-              {(NEXT[p.status] || []).map(([v, label]) => (
+              {actionsFor(p).map(([v, label]) => (
                 <form key={v} action={decideProposal} className="flex items-center gap-2">
                   <input type="hidden" name="id" value={p.id} />
                   <input type="hidden" name="status" value={v} />
                   {v === 'declined' && <input className="input" name="note" placeholder="Reason (shown to the person)" style={{ width: 220, padding: '5px 8px', fontSize: 12.5 }} />}
-                  <button className={`btn sm ${v === 'greenlit' ? 'primary' : v === 'declined' ? 'red' : ''}`}>{label}</button>
+                  <button className={`btn sm ${v === 'greenlit' || v === 'rebuild' ? 'primary' : v === 'declined' ? 'red' : ''}`}>{label}</button>
                 </form>
               ))}
             </div>

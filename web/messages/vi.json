@@ -2212,7 +2212,7 @@
       "with_via": "Nhân viên VIA Labs đã nhận và sẽ trả lời tại đây và qua email.",
       "logged": "Đã ghi nhận với VIA Labs dưới dạng yêu cầu thay đổi. Trạng thái sẽ hiển thị tại đây.",
       "planned": "VIA Labs đã lên kế hoạch cho thay đổi này.",
-      "building": "VIA Labs đang thực hiện thay đổi này.",
+      "building": "Đã duyệt. VIA Labs đang thực hiện thay đổi này; bạn sẽ nhận được tin nhắn tại đây khi nó được đưa vào hoạt động.",
       "shipped": "Thay đổi này đã được phát hành.",
       "declined": "VIA Labs quyết định chưa thực hiện thay đổi này."
     },
@@ -2234,6 +2234,8 @@
     "notifications": "Thông báo",
     "noNotifications": "Không có gì mới.",
     "uploading": "Đang tải ảnh chụp màn hình lên...",
-    "liveMessage": "Thay đổi bạn yêu cầu đã được phát hành: {title}. Hãy tải lại trang để xem. Nếu chưa đúng như bạn mong đợi, hãy trả lời tại đây."
+    "liveMessage": "Thay đổi bạn yêu cầu đã được phát hành: {title}. Hãy tải lại trang để xem. Nếu chưa đúng như bạn mong đợi, hãy trả lời tại đây.",
+    "approvedMessage": "Tin vui: VIA Labs đã duyệt thay đổi này ({title}) và đang thực hiện. Bạn sẽ nhận được tin nhắn tại đây ngay khi thay đổi được đưa vào hoạt động.",
+    "declinedMessage": "VIA Labs quyết định tạm thời chưa thực hiện thay đổi này ({title}).{reason} Nếu bạn muốn bổ sung, hãy trả lời tại đây."
   }
 }

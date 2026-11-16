@@ -2212,7 +2212,7 @@
       "with_via": "VIA Labs hat dies übernommen und antwortet hier und per E-Mail.",
       "logged": "Bei VIA Labs als Änderungswunsch erfasst. Der Status wird hier angezeigt.",
       "planned": "VIA Labs hat diese Änderung eingeplant.",
-      "building": "VIA Labs arbeitet an dieser Änderung.",
+      "building": "Freigegeben. VIA Labs setzt diese Änderung jetzt um; sobald sie live ist, erhalten Sie hier eine Nachricht.",
       "shipped": "Diese Änderung ist jetzt live.",
       "declined": "VIA Labs hat entschieden, diese Änderung vorerst nicht umzusetzen."
     },
@@ -2234,6 +2234,8 @@
     "notifications": "Benachrichtigungen",
     "noNotifications": "Nichts Neues.",
     "uploading": "Screenshot wird hochgeladen...",
-    "liveMessage": "Die von Ihnen gewünschte Änderung ist jetzt live: {title}. Laden Sie die Seite neu, um sie zu sehen. Wenn sie nicht Ihren Erwartungen entspricht, antworten Sie hier."
+    "liveMessage": "Die von Ihnen gewünschte Änderung ist jetzt live: {title}. Laden Sie die Seite neu, um sie zu sehen. Wenn sie nicht Ihren Erwartungen entspricht, antworten Sie hier.",
+    "approvedMessage": "Gute Nachricht: VIA Labs hat diese Änderung ({title}) freigegeben und setzt sie jetzt um. Sobald sie live ist, erhalten Sie hier eine Nachricht.",
+    "declinedMessage": "VIA Labs hat entschieden, diese Änderung ({title}) vorerst nicht umzusetzen.{reason} Wenn Sie etwas ergänzen möchten, antworten Sie hier."
   }
 }

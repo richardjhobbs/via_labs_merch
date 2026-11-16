@@ -2212,7 +2212,7 @@
       "with_via": "VIA Labs staff have this and will reply here and by email.",
       "logged": "Logged with VIA Labs as a change request. Its status shows here as it moves.",
       "planned": "VIA Labs has planned this change.",
-      "building": "VIA Labs is working on this change.",
+      "building": "Approved. VIA Labs is building this change now; you will get a message here when it is live.",
       "shipped": "This change is now live.",
       "declined": "VIA Labs has decided not to make this change for now."
     },
@@ -2234,6 +2234,8 @@
     "notifications": "Notifications",
     "noNotifications": "Nothing new.",
     "uploading": "Uploading screenshot...",
-    "liveMessage": "The change you asked for is now live: {title}. Refresh the page to see it. If it is not what you expected, reply here."
+    "liveMessage": "The change you asked for is now live: {title}. Refresh the page to see it. If it is not what you expected, reply here.",
+    "approvedMessage": "Good news: VIA Labs has approved this change ({title}) and is building it now. You will get a message here as soon as it is live.",
+    "declinedMessage": "VIA Labs has decided not to make this change ({title}) for now.{reason} If you have more to add, reply here."
   }
 }
