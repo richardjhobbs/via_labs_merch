@@ -14,6 +14,7 @@ import { routeDraft } from './desks';
 import { localDay } from '@/lib/work-hours';
 import { ALL_STREAMS, type Track } from '@/lib/tracks';
 import { styleTools } from './style-tools';
+import type { Masker } from '@/lib/private-members-core';
 
 export type AgentCtx = {
   tenantId: string; agentId: string | null; agentName: string;
@@ -25,6 +26,7 @@ export type AgentCtx = {
   calls: { name: string; input: unknown; ok: boolean; ms: number }[];
   drafts: DraftRef[];              // drafts created in this run
   nav: { screen: string; id?: string } | null;  // last navigate call, for the assistant panel
+  mask?: Masker | null;            // private member lists: other members' names read "A colleague" (lib/private-members.ts)
 };
 export type DraftRef = { id: string; seq: number; title: string; stream: string; gate_level: number; party: string | null; po: string | null; style?: string | null };
 
@@ -60,7 +62,7 @@ export function toolsFor(ctx: AgentCtx) {
   const T = ctx.tenantId;
   const wrap = <I, O>(name: string, fn: (i: I) => Promise<O>) => async (i: I) => {
     const t0 = Date.now();
-    try { const r = await fn(i); ctx.calls.push({ name, input: i, ok: true, ms: Date.now() - t0 }); return JSON.stringify(r); }
+    try { const r = await fn(i); ctx.calls.push({ name, input: i, ok: true, ms: Date.now() - t0 }); const out = JSON.stringify(r); return ctx.mask ? ctx.mask(out) : out; }
     catch (e) { ctx.calls.push({ name, input: i, ok: false, ms: Date.now() - t0 }); return JSON.stringify({ error: e instanceof Error ? e.message : String(e) }); }
   };
 
@@ -386,7 +388,7 @@ export function toolsFor(ctx: AgentCtx) {
   });
 
   const all = [get_briefing, search_orders, get_order, get_exceptions, get_party, get_messages, get_ledger, get_gates, queue_draft, request_approval, set_milestone, navigate, get_team, get_order_file, search_mailbox, get_compliance, record_compliance_value, search_knowledge, ...(ctx.track === 'development' ? [] : [get_desk_brief, get_company_brief]), ...styleTools(ctx, wrap)];
-  const forRole = ['owner', 'manager'].includes(ctx.role || '') || ctx.trigger !== 'chat' ? all : all.filter((t) => t.name !== 'get_team');
+  const forRole = (['owner', 'manager'].includes(ctx.role || '') || ctx.trigger !== 'chat') && !ctx.mask ? all : all.filter((t) => t.name !== 'get_team');
   // inbound runs may capture a reported date (L1 record) and draft; they never approve
   // mailbox search is for a person in chat only, on their own mailbox
   const forTrigger = ctx.trigger === 'chat' && ctx.userId ? forRole : forRole.filter((t) => t.name !== 'search_mailbox');

@@ -5,6 +5,7 @@ import { anthropic, MODEL, SMALL_MODEL, costOfUsage, recordUsage } from '@/lib/l
 const ALLOWED = [MODEL, SMALL_MODEL];
 import { supabaseAdmin } from '@/lib/supabase/server';
 import { toolsFor, type AgentCtx, type DraftRef } from './tools';
+import { maskerFor } from '@/lib/private-members';
 import { confirmedLessons } from './learning';
 import { LANG_NAMES } from '@/lib/llm';
 import { streamsOf, type Track } from '@/lib/tracks';
@@ -35,7 +36,7 @@ export async function runAgent(input: RunInput): Promise<RunResult> {
   if (!tenant) throw new Error('tenant not found');
   // one agent per track when the company has set one up; otherwise the company agent runs both tracks
   const agent = (agents || []).find((a) => a.track === track) || (agents || []).find((a) => a.track === 'production') || (agents || [])[0] || null;
-  const ctx: AgentCtx = { tenantId: tenant.id, agentId: agent?.id || null, agentName: agent?.name || 'Mira', track, trigger: input.trigger, userId: input.userId || null, userName: input.userName || null, userEmail: input.userEmail || null, sourceMessageId: input.sourceMessageId || null, role: input.role || null, scope: input.scope || null, calls: [], drafts: [], nav: null };
+  const ctx: AgentCtx = { tenantId: tenant.id, agentId: agent?.id || null, agentName: agent?.name || 'Mira', track, trigger: input.trigger, userId: input.userId || null, userName: input.userName || null, userEmail: input.userEmail || null, sourceMessageId: input.sourceMessageId || null, role: input.role || null, scope: input.scope || null, calls: [], drafts: [], nav: null, mask: input.userId && (input.trigger === 'chat' || input.trigger === 'mcp') ? await maskerFor(tenant.id, input.userId) : null };
 
   const customers = (parties || []).filter((p) => ['brand', 'retailer', 'store', 'buying_office', 'trading'].includes(p.kind)).map((p) => `${(p.meta as { code?: string })?.code || p.short || p.name}=${p.name} (${p.kind}, ${p.country || '?'}, writes in ${p.lang})`).join('; ');
   const suppliers = (parties || []).filter((p) => ['factory', 'mill', 'fibre', 'forwarder', 'carrier', 'lab', 'auditor', 'sample_room', 'designer', 'trim_supplier'].includes(p.kind)).map((p) => `${(p.meta as { code?: string })?.code || p.short || p.name}=${p.name} (T${p.tier ?? '?'} ${p.kind}, ${p.country || '?'}, ${p.channel_pref || 'email'}, ${p.lang})`).join('; ');
@@ -61,7 +62,7 @@ Rules:
 ${track === 'development' ? '' : `- You are the merchandising manager agent. Every open PO has an order agent that keeps its brief (get_order returns it); orders are grouped into desks run for senior merchandisers (get_desk_brief); your own morning brief and the capacity decisions you made across desks are in get_company_brief. Read the layer that holds the answer before raw records, and say which layer it came from when it helps.\n`}- VIA sits on top of the company's existing tools (email, WhatsApp, spreadsheets, ERP, PLM, portals, forwarders) and replaces none of them.
 - Costing: margin means the exporter's margin on FOB. Retail is a reference price only.
 - The company's library (playbooks, customer manuals, standards) is searchable with search_knowledge: check it when a customer's or the company's rules may apply.${lessons ? `\nLessons the team confirmed from earlier corrections (follow them unless the person you work for says otherwise):\n${lessons}` : ''}${agent?.prompt_overrides ? `\n${agent.prompt_overrides}` : ''}` },
-    { type: 'text', text: `Today is ${today} (${tenant.tz}).${input.userName ? ` You are talking with ${input.userName}${input.role ? ` (${input.role})` : ''}${input.userLang ? `, whose interface language is ${LANG_NAMES[input.userLang] || input.userLang}` : ''}.${input.scope ? ` They handle these customers only: ${(parties || []).filter((p) => input.scope!.includes((p as unknown as { id?: string }).id || '')).map((p) => p.name).join(', ') || 'see tools'}; the tools are already limited to them.` : ['owner', 'manager'].includes(input.role || '') ? ' They manage the whole team: use get_team for team questions.' : ''}` : ''}${input.extraSystem ? `\n${input.extraSystem}` : ''}` },
+    { type: 'text', text: `Today is ${today} (${tenant.tz}).${input.userName ? ` You are talking with ${input.userName}${input.role ? ` (${input.role})` : ''}${input.userLang ? `, whose interface language is ${LANG_NAMES[input.userLang] || input.userLang}` : ''}.${input.scope ? ` They handle these customers only: ${(parties || []).filter((p) => input.scope!.includes((p as unknown as { id?: string }).id || '')).map((p) => p.name).join(', ') || 'see tools'}; the tools are already limited to them.` : ['owner', 'manager'].includes(input.role || '') && !ctx.mask ? ' They manage the whole team: use get_team for team questions.' : ''}${ctx.mask ? ' This company keeps its member list private: never name, list or count other members; call anyone else on the team "a colleague".' : ''}` : ''}${input.extraSystem ? `\n${input.extraSystem}` : ''}` },
   ];
 
   const client = anthropic();
