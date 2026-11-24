@@ -1,4 +1,4 @@
-// Private member lists (founder, 24 Nov 2026; migration 0030). With tenants.settings.private_members on, only
+// Private member lists (founder, 24 Nov 2026; migration 0038). With tenants.settings.private_members on, only
 // owners (and VIA Labs under support access) see who else is on the account. Everyone else, managers included,
 // sees only themselves: the database returns only their own membership, invite and token rows, the team pages
 // and pickers are hidden, and other members' names in any text the app or the agent shows them read "A colleague".
