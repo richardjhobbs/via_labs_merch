@@ -10,12 +10,14 @@ import { supabaseAdmin } from '@/lib/supabase/server';
 import { inviteUser, mailInvite } from '@/lib/invites';
 import { assignable, canEdit, canRemove, canSetRole, isTeamRole, managesTeam } from '@/lib/team';
 import { isTrack, tenantTracks } from '@/lib/tracks';
+import { seesTeam, tenantSettings } from '@/lib/private-members';
 
 const back = (slug: string, q: string): never => redirect(`/app/${slug}/settings?${q}#team`);
 
 async function ctx(slug: string) {
   const c = await requireTenant(slug);
   if (!managesTeam(c.membership.role) || c.viewingAs) back(slug, 'terr=role');
+  if (!seesTeam(c.membership.role, await tenantSettings(c.tenant.id), c.membership.id)) back(slug, 'terr=role'); // private member lists: owners only
   const sb = supabaseAdmin();
   const [{ data: tn }, { count }] = await Promise.all([
     sb.from('tenants').select('settings').eq('id', c.tenant.id).single(),

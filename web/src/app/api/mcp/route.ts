@@ -6,6 +6,7 @@ import { supabaseAdmin } from '@/lib/supabase/server';
 import { toolsFor, type AgentCtx } from '@/lib/agents/tools';
 import type { Track } from '@/lib/tracks';
 import { allowedTools } from '@/lib/mcp/core';
+import { maskerFor } from '@/lib/private-members';
 import { authenticate, overLimit, touch } from '@/lib/mcp/tokens';
 import { buildServer, type McpTool } from '@/lib/mcp/server';
 
@@ -22,14 +23,15 @@ export async function POST(req: Request) {
 
   const sb = supabaseAdmin();
   const calls: AgentCtx['calls'] = [];
-  const ctxFor = (track: Track): AgentCtx => ({ tenantId: a.tenant.id, agentId: null, agentName: a.token.name, track, trigger: 'mcp', userId: a.member.user_id, userName: a.member.display_name || 'member', userEmail: null, role: a.member.role, scope: a.scope, calls, drafts: [], nav: null });
+  const mask = await maskerFor(a.tenant.id, a.member.user_id);
+  const ctxFor = (track: Track): AgentCtx => ({ tenantId: a.tenant.id, agentId: null, agentName: a.token.name, track, trigger: 'mcp', userId: a.member.user_id, userName: a.member.display_name || 'member', userEmail: null, role: a.member.role, scope: a.scope, calls, drafts: [], nav: null, mask });
   const cache = new Map<Track, McpTool[]>();
   const toolsOn = (track: Track) => { let t = cache.get(track); if (!t) { t = toolsFor(ctxFor(track)) as unknown as McpTool[]; cache.set(track, t); } return t; };
 
   let client: string | null = null;
   const server = buildServer({
     tracks: a.tracks,
-    allowed: allowedTools({ role: a.member.role, tracks: a.tracks, writes: a.writes, esg: a.esg }),
+    allowed: allowedTools({ role: a.member.role, tracks: a.tracks, writes: a.writes, esg: a.esg }).filter((t) => !mask || t !== 'get_team'),
     toolsFor: toolsOn,
     onInitialized: (c) => { client = c; },
     onCall: (r) => { void sb.from('agent_runs').insert({ tenant_id: a.tenant.id, agent_id: null, user_id: a.member.user_id, trigger: 'mcp', model: a.token.last_client || a.token.name, input: { token: a.token.id, track: r.track, tool: r.tool, args: r.args }, tools_called: calls, output: r.output.slice(0, 4000), ms: r.ms, error: r.ok ? null : 'tool error' }).then(() => {}, () => {}); },

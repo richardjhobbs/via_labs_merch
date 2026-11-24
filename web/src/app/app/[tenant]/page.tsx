@@ -1,5 +1,6 @@
 // My day: the approval queue and the numbers that matter for this person.
 import Link from 'next/link';
+import { seesTeam, tenantSettings } from '@/lib/private-members';
 import { chaseAlert, dismissAlert } from './alert-actions';
 import { getTranslations } from 'next-intl/server';
 import { requireTenant, scopeOf } from '@/lib/tenant';
@@ -112,7 +113,7 @@ export default async function MyDay({ params, searchParams }: { params: Promise<
       {!!off.length && <div className="card mt-4 tw" style={{ padding: 0 }}><div className="p-4 pb-2"><h2>{t('offplanTitle')}</h2></div><table className="t stack"><thead><tr><th>PO</th><th>{t('style')}</th><th>{t('customer')}</th><th>{t('factory')}</th><th>{t('health')}</th></tr></thead><tbody>
         {off.slice(0, 10).map((o) => <tr key={o.id}><td><Link className="mono" href={`/app/${slug}/orders/${o.id}`}>{o.po}</Link> <span className="md:hidden"><HealthPill h={o.health} /></span></td><td>{o.style} <span className="muted small">{o.description}</span></td><td data-l={t('customer')}>{o.customer?.name}</td><td data-l={t('factory')}>{o.factory?.short || o.factory?.name}</td><td className="hidden md:table-cell"><HealthPill h={o.health} /></td></tr>)}
       </tbody></table></div>}
-      {manager && <Team tenantId={tenant.id} tz={tenant.tz} />}
+      {manager && seesTeam(membership.role, await tenantSettings(tenant.id), membership.id) && <Team tenantId={tenant.id} tz={tenant.tz} />}
       {!orders.length && <div className="notice mt-4">{t('noOrders')} <Link href={`/app/${slug}/orders/import`}>{t('importLink')}</Link></div>}
     </div>
   );

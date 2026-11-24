@@ -7,12 +7,14 @@ import { supabaseAdmin } from '@/lib/supabase/server';
 import { Avatar } from '@/components/avatar';
 import { tenantTracks } from '@/lib/tracks';
 import { assignable, canEdit, canRemove, managesTeam } from '@/lib/team';
+import { seesTeam, tenantSettings } from '@/lib/private-members';
 import { inviteTeam, updateMember, removeMember, resendTeamInvite, cancelTeamInvite } from './team-actions';
 
 type Member = { id: string; user_id: string; role: string; display_name: string | null; initials: string | null; title: string | null; scopes: { parties?: string[] } | null; tracks: string[] | null; avatar_path: string | null };
 
 export async function TeamAdmin({ slug, tenantId, role, userId, msg }: { slug: string; tenantId: string; role: string; userId: string | null; msg: { tsent?: string; tsaved?: string; terr?: string } }) {
   if (!managesTeam(role) || !userId) return null;
+  if (!seesTeam(role, await tenantSettings(tenantId))) return null; // private member lists: owners only
   const t = await getTranslations();
   const sb = supabaseAdmin();
   const [{ data: members }, { data: invites }, { data: parties }, { data: tn }] = await Promise.all([
